@@ -531,9 +531,9 @@ export default function AdminDashboard() {
            <Tabs value={statFilter} onValueChange={(value) => setStatFilter(value as StatFilter)}>
             <TabsList className="border-2 border-foreground/30 dark:border-foreground/30">
                 <TabsTrigger value="today">Today</TabsTrigger>
-                <TabsTrigger value="week">This Week</TabsTrigger>
-                <TabsTrigger value="month">This Month</TabsTrigger>
-                <TabsTrigger value="year">This Year</TabsTrigger>
+                <TabsTrigger value="week">Week</TabsTrigger>
+                <TabsTrigger value="month">Month</TabsTrigger>
+                <TabsTrigger value="year">Year</TabsTrigger>
             </TabsList>
            </Tabs>
        </div>
