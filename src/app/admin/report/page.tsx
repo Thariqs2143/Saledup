@@ -879,7 +879,7 @@ export default function ReportsPage() {
                  <Tabs defaultValue="attendance" className="w-full">
                     <TabsList className="h-auto items-center justify-center rounded-md p-1 grid w-full grid-cols-3 bg-primary text-primary-foreground">
                         <TabsTrigger value="attendance" className="data-[state=active]:bg-background data-[state=active]:text-foreground">
-                            <span>Attendance<br/>Report</span>
+                             <span>Attendance<br/>Report</span>
                         </TabsTrigger>
                         <TabsTrigger value="muster" className="data-[state=active]:bg-background data-[state=active]:text-foreground">
                             <span>Muster<br/>Roll</span>
@@ -985,8 +985,7 @@ export default function ReportsPage() {
                             </SheetContent>
                         </Sheet>
                     </div>
-
-                    <TabsContent value="attendance" className="mt-6">
+                     <TabsContent value="attendance" className="mt-6">
                         <AttendanceReportTab allBranches={allBranches} selectedBranch={selectedBranch} authUser={authUser} date={date} selectedEmployeeId={selectedEmployeeId} selectedStatus={selectedStatus} employees={employees} />
                     </TabsContent>
                     <TabsContent value="muster" className="mt-6">
