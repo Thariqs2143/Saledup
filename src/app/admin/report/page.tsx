@@ -187,32 +187,30 @@ const AttendanceReportTab = ({ allBranches, selectedBranch, authUser, date, sele
 
     return (
         <div className="space-y-6">
-            <Card className="border-2 border-foreground transition-all duration-300 ease-out hover:shadow-lg hover:border-primary">
-                <CardHeader>
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                        <div>
-                            <CardTitle>Report Results</CardTitle>
-                            <CardDescription>Found {filteredRecords.length} record(s) matching your criteria.</CardDescription>
-                        </div>
-                         {isProTier ? (
-                            <div className="flex gap-2 w-full sm:w-auto">
-                                <Button className="w-full bg-green-600 hover:bg-green-700" onClick={handleExportCSV} disabled={exporting || filteredRecords.length === 0}>{exporting ? <Loader2 className="animate-spin" /> : <Download />}Export CSV</Button>
-                                <Button className="w-full bg-red-600 hover:bg-red-700" onClick={handleExportPDF} disabled={exporting || filteredRecords.length === 0}>{exporting ? <Loader2 className="animate-spin" /> : <Download />}Export PDF</Button>
-                            </div>
-                         ) : (
-                             <div className="w-full sm:w-auto text-sm text-muted-foreground border p-2 rounded-md flex items-center gap-2">
-                                <Lock className="h-4 w-4" />
-                                <div>
-                                    Export is a Pro feature.
-                                    <Link href="/admin/subscription" className="font-bold text-primary underline ml-1">Upgrade</Link>
-                                </div>
-                            </div>
-                         )}
+            <div className="space-y-4">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h3 className="text-xl font-bold">Report Results</h3>
+                        <p className="text-sm text-muted-foreground">Found {filteredRecords.length} record(s) matching your criteria.</p>
                     </div>
-                </CardHeader>
-                <CardContent>
+                     {isProTier ? (
+                        <div className="flex gap-2 w-full sm:w-auto">
+                            <Button className="w-full bg-green-600 hover:bg-green-700" onClick={handleExportCSV} disabled={exporting || filteredRecords.length === 0}>{exporting ? <Loader2 className="animate-spin" /> : <Download />}Export CSV</Button>
+                            <Button className="w-full bg-red-600 hover:bg-red-700" onClick={handleExportPDF} disabled={exporting || filteredRecords.length === 0}>{exporting ? <Loader2 className="animate-spin" /> : <Download />}Export PDF</Button>
+                        </div>
+                     ) : (
+                         <div className="w-full sm:w-auto text-sm text-muted-foreground border p-2 rounded-md flex items-center gap-2">
+                            <Lock className="h-4 w-4" />
+                            <div>
+                                Export is a Pro feature.
+                                <Link href="/admin/subscription" className="font-bold text-primary underline ml-1">Upgrade</Link>
+                            </div>
+                        </div>
+                     )}
+                </div>
+                <div>
                     {loading ? <div className="flex items-center justify-center h-48"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
-                        : filteredRecords.length === 0 ? <div className="h-24 text-center flex flex-col items-center justify-center text-muted-foreground"><FileText className="h-8 w-8 mb-2" /><p>No records found.</p></div>
+                        : filteredRecords.length === 0 ? <div className="h-24 text-center flex flex-col items-center justify-center text-muted-foreground border-2 border-dashed rounded-lg"><FileText className="h-8 w-8 mb-2" /><p>No records found.</p></div>
                             : (
                                 <>
                                     <div className="grid gap-4 md:hidden">
@@ -229,7 +227,7 @@ const AttendanceReportTab = ({ allBranches, selectedBranch, authUser, date, sele
                                             </Card>
                                         ))}
                                     </div>
-                                    <div className="hidden md:block rounded-lg border">
+                                    <div className="hidden md:block rounded-lg border-2 border-foreground">
                                         <Table>
                                             <TableHeader>
                                                 <TableRow>
@@ -247,8 +245,8 @@ const AttendanceReportTab = ({ allBranches, selectedBranch, authUser, date, sele
                                     </div>
                                 </>
                             )}
-                </CardContent>
-            </Card>
+                </div>
+            </div>
         </div>
     );
 };
@@ -1110,13 +1108,16 @@ export default function ReportsPage() {
             <Tabs defaultValue="attendance" className="w-full">
                 <TabsList className="grid w-full grid-cols-3 h-auto">
                     <TabsTrigger value="attendance" className="h-full py-2">
-                      <span>Attendance<br className="md:hidden" /> Report</span>
+                      <span className="md:hidden"><br /></span>
+                      <span>Attendance<span className="hidden md:inline"> Report</span></span>
                     </TabsTrigger>
                      <TabsTrigger value="muster" className="h-full py-2">
-                       <span>Muster<br className="md:hidden" /> Roll</span>
+                       <span className="md:hidden"><br /></span>
+                       <span>Muster<span className="hidden md:inline"> Roll</span></span>
                      </TabsTrigger>
                     <TabsTrigger value="payroll" className="h-full py-2" disabled={selectedBranch.id === 'all'}>
-                       <span>Payroll<br className="md:hidden" /> Report</span>
+                       <span className="md:hidden"><br /></span>
+                       <span>Payroll<span className="hidden md:inline"> Report</span></span>
                     </TabsTrigger>
                 </TabsList>
                 <TabsContent value="attendance" className="mt-6">
@@ -1148,3 +1149,4 @@ export default function ReportsPage() {
     
 
     
+
