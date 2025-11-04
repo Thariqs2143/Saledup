@@ -214,21 +214,19 @@ const QrGeneratorCard = () => {
     return (
         <Card className="w-full transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
             <CardHeader>
-                <div className="flex justify-between items-center">
-                    <div>
-                        <CardTitle>QR Code Generator</CardTitle>
-                        <CardDescription>
-                            {qrMode === 'permanent' ? 'Print and place this in your store for employees.' : 'This refreshes to prevent misuse. Display on a tablet.'}
-                        </CardDescription>
-                    </div>
-                     <div className="flex items-center space-x-2">
-                        <Label htmlFor="qr-mode-switch" className={cn("font-semibold", qrMode === 'dynamic' && 'text-primary')}>
-                            Use Dynamic QR
-                        </Label>
-                        <Switch id="qr-mode-switch" checked={qrMode === 'dynamic'} onCheckedChange={(checked) => setQrMode(checked ? 'dynamic' : 'permanent')}/>
-                    </div>
-                </div>
+                <CardTitle>QR Code Generator</CardTitle>
+                <CardDescription>
+                    {qrMode === 'permanent' ? 'Print and place this in your store for employees.' : 'This refreshes to prevent misuse. Display on a tablet.'}
+                </CardDescription>
             </CardHeader>
+            <CardContent>
+                <div className="flex items-center space-x-2">
+                    <Switch id="qr-mode-switch" checked={qrMode === 'dynamic'} onCheckedChange={(checked) => setQrMode(checked ? 'dynamic' : 'permanent')}/>
+                    <Label htmlFor="qr-mode-switch" className={cn("font-semibold", qrMode === 'dynamic' && 'text-primary')}>
+                        Use Dynamic QR
+                    </Label>
+                </div>
+            </CardContent>
             {renderQrContent()}
         </Card>
     )
