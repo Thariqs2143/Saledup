@@ -197,12 +197,10 @@ const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds }: { allBran
                                     <AvatarFallback>{employee.fallback}</AvatarFallback>
                                 </Avatar>
                                 <div className="flex-1 space-y-1 min-w-0">
-                                    <div className="flex items-center justify-between gap-2">
-                                        <p className="font-bold text-lg break-words">{employee.name}</p>
-                                    </div>
+                                    <p className="font-bold text-lg truncate">{employee.name}</p>
                                      <div className="flex items-center gap-2 font-semibold text-primary">
                                         <Briefcase className="h-4 w-4 shrink-0" />
-                                        <span>{employee.role}</span>
+                                        <span className="truncate">{employee.role}</span>
                                     </div>
                                 </div>
                             </div>
@@ -210,7 +208,7 @@ const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds }: { allBran
                                 {selectedBranchId === 'all' && employee.shopName && (
                                 <div className="flex items-center gap-2 font-semibold">
                                     <Building className="h-4 w-4 shrink-0 text-foreground" />
-                                    <span>{employee.shopName}</span>
+                                    <span className="truncate">{employee.shopName}</span>
                                 </div>
                                 )}
                             </div>
