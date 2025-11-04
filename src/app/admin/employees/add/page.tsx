@@ -265,7 +265,7 @@ export default function AddEmployeePage() {
                                         <IndianFlagIcon />
                                         <span className="ml-2 text-sm font-medium text-muted-foreground">+91</span>
                                     </div>
-                                    <Input id="phone" name="phone" type="tel" inputMode="numeric" placeholder="1234567890" required className="flex-1" pattern="\d{10}" title="Phone number must be 10 digits" maxLength={10} />
+                                    <Input id="phone" name="phone" type="tel" inputMode="numeric" placeholder="10-digit mobile number" required className="flex-1" pattern="\d{10}" title="Phone number must be 10 digits" maxLength={10} />
                                 </div>
                             </div>
                             <div className="space-y-2 md:col-span-2">

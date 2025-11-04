@@ -119,7 +119,7 @@ export default function LoginPage() {
                                 id="phone" 
                                 type="tel" 
                                 inputMode="numeric" 
-                                placeholder="Enter Phone Number" 
+                                placeholder="Enter 10-digit mobile number" 
                                 required 
                                 className="flex-1 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent" 
                                 value={phone} 

@@ -151,7 +151,7 @@ export default function SuperAdminLoginPage() {
                         <IndianFlagIcon />
                         <span className="ml-2 text-sm font-medium text-muted-foreground">+91</span>
                     </div>
-                    <Input id="phone" type="tel" required className="flex-1" value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))} />
+                    <Input id="phone" type="tel" placeholder="10-digit mobile number" required className="flex-1" value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))} />
                 </div>
             </div>
             <Button type="submit" className="w-full !mt-8" disabled={loading}>

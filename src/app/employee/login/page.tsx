@@ -186,7 +186,7 @@ export default function EmployeeLoginPage() {
                                     <IndianFlagIcon />
                                     <span className="ml-2 text-sm font-medium text-muted-foreground">+91</span>
                                 </div>
-                                <Input id="phone" name="phone" type="tel" inputMode="numeric" placeholder="1234567890" required className="flex-1" value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))} maxLength={10} pattern="\d{10}" title="Please enter a 10-digit phone number" />
+                                <Input id="phone" name="phone" type="tel" inputMode="numeric" placeholder="10-digit mobile number" required className="flex-1" value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))} maxLength={10} pattern="\d{10}" title="Please enter a 10-digit phone number" />
                             </div>
                         </div>
                         <Button type="submit" className="w-full !mt-8" disabled={loading}>
