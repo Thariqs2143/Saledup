@@ -5,11 +5,11 @@ import { useState, useEffect, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from 'next/image';
-import { CheckCircle, Expand, QrCode, Loader2, History, Download, X, UserPlus, Calendar as CalendarIcon, Save, Clock4, ShieldCheck, RefreshCw } from 'lucide-react';
+import { CheckCircle, Expand, QrCode, Loader2, History, Download, X, UserPlus, Calendar as CalendarIcon, Save, Clock4, ShieldCheck, RefreshCw, Activity } from 'lucide-react';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
-import { doc, getDoc, addDoc, collection, onSnapshot, query, orderBy, Timestamp, where, getDocs, setDoc } from 'firebase/firestore';
+import { doc, getDoc, addDoc, collection, onSnapshot, query, orderBy, Timestamp, where, getDocs, setDoc, limit } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
-import { format, setHours, setMinutes, setSeconds } from 'date-fns';
+import { format, setHours, setMinutes, setSeconds, formatDistanceToNow } from 'date-fns';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { User } from '../employees/page';
 import { useToast } from "@/hooks/use-toast";
@@ -23,6 +23,18 @@ import { onAuthStateChanged, type User as AuthUser } from 'firebase/auth';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+
+
+type ActivityRecord = {
+    id: string;
+    userName: string;
+    checkInTime: Timestamp;
+    checkOutTime?: Timestamp;
+    status: 'On-time' | 'Late' | 'Manual' | 'Absent' | 'Half-day';
+    userFallback?: string;
+    userImageUrl?: string;
+};
 
 
 const PermanentQrTab = () => {
@@ -465,6 +477,97 @@ const QrCodeTabs = () => {
     );
 }
 
+const RecentActivity = () => {
+    const [activities, setActivities] = useState<ActivityRecord[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+    const [allEmployees, setAllEmployees] = useState<User[]>([]);
+
+    useEffect(() => {
+        const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                setAuthUser(user);
+                
+                // Fetch all employees once to map their details
+                const employeesRef = collection(db, 'shops', user.uid, 'employees');
+                const empSnapshot = await getDocs(employeesRef);
+                const employeesData = empSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as User));
+                setAllEmployees(employeesData);
+
+            } else {
+                setLoading(false);
+            }
+        });
+        return () => unsubscribeAuth();
+    }, []);
+
+    useEffect(() => {
+        if (!authUser || allEmployees.length === 0) return;
+
+        setLoading(true);
+        const attendanceRef = collection(db, 'shops', authUser.uid, 'attendance');
+        const q = query(attendanceRef, orderBy('checkInTime', 'desc'), limit(5));
+
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const fetchedActivities = snapshot.docs.map(doc => {
+                const data = doc.data() as ActivityRecord;
+                const employee = allEmployees.find(e => e.id === data.userId);
+                return {
+                    ...data,
+                    id: doc.id,
+                    userFallback: employee?.fallback,
+                    userImageUrl: employee?.imageUrl
+                };
+            });
+            setActivities(fetchedActivities);
+            setLoading(false);
+        });
+
+        return () => unsubscribe();
+    }, [authUser, allEmployees]);
+
+    return (
+         <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                    <Activity className="h-5 w-5" />
+                    Recent Activity
+                </CardTitle>
+                <CardDescription>A live log of the most recent attendance scans.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                {loading ? (
+                    <div className="flex items-center justify-center p-8">
+                        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                    </div>
+                ) : activities.length > 0 ? (
+                    <div className="space-y-4">
+                        {activities.map((item) => (
+                            <div key={item.id} className="flex items-start gap-4">
+                                <Avatar className="h-9 w-9 border">
+                                    <AvatarImage src={item.userImageUrl} />
+                                    <AvatarFallback>{item.userFallback || '?'}</AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1 text-sm">
+                                    <p>
+                                        <span className="font-semibold">{item.userName}</span>
+                                        {item.checkOutTime ? ' checked out.' : ` checked in (${item.status}).`}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">
+                                        {formatDistanceToNow(item.checkOutTime?.toDate() || item.checkInTime.toDate(), { addSuffix: true })}
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <p className="text-sm text-muted-foreground text-center py-4">No attendance activity yet.</p>
+                )}
+            </CardContent>
+        </Card>
+    )
+}
+
 
 export default function GenerateAndEntryPage() {
   return (
@@ -476,10 +579,13 @@ export default function GenerateAndEntryPage() {
         <Tabs defaultValue="generate" className="w-full">
             <TabsList className="grid w-full grid-cols-2 md:max-w-md">
                 <TabsTrigger value="generate">QR Code</TabsTrigger>
-                <TabsTrigger value="manual" id="manual-entry-trigger">Manual Entry</TabsTrigger>
+                <TabsTrigger value="manual">Manual Entry</TabsTrigger>
             </TabsList>
             <TabsContent value="generate" className="mt-6">
-                <QrCodeTabs />
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <QrCodeTabs />
+                    <RecentActivity />
+                </div>
             </TabsContent>
             <TabsContent value="manual" className="mt-6">
                 <ManualEntryTab />
@@ -488,6 +594,8 @@ export default function GenerateAndEntryPage() {
     </div>
   );
 }
+
+    
 
     
 
