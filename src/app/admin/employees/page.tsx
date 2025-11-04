@@ -101,7 +101,6 @@ const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds }: { allBran
              } as User
         });
         
-        // If "All Branches" is selected, filter out the admin role to prevent duplicate keys
         const finalEmployeeList = isAllBranches 
             ? employeeList.filter(emp => emp.role !== 'Admin') 
             : employeeList;
@@ -112,7 +111,7 @@ const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds }: { allBran
         finalEmployeeList.forEach(employee => {
             if (employee.id && employee.joinDate) {
               try {
-                dates[employee.id] = new Date(employee.joinDate).toLocaleDateString();
+                dates[employee.id] = new Date(employee.joinDate).toLocaleDateString('en-IN');
               } catch (e) {
                 console.error("Invalid date for employee", employee.id, employee.joinDate);
                 dates[employee.id] = 'Invalid Date';
@@ -189,35 +188,27 @@ const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds }: { allBran
           ): (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredEmployees.map((employee) => (
-                    <Card key={employee.id} className="group flex flex-col transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-1 border-2 border-foreground/10 hover:border-primary">
-                        <CardContent className="pt-6 flex-1">
-                            <div className="flex items-start gap-4">
-                                <Avatar className="h-14 w-14 border-2 border-primary/20 shrink-0">
-                                    <AvatarImage src={employee.imageUrl} alt={employee.name} />
-                                    <AvatarFallback>{employee.fallback}</AvatarFallback>
-                                </Avatar>
-                                <div className="flex-1 space-y-1 min-w-0">
-                                    <p className="font-bold text-lg truncate">{employee.name}</p>
-                                     <div className="flex items-center gap-2 font-semibold text-primary">
-                                        <Briefcase className="h-4 w-4 shrink-0" />
-                                        <span className="truncate">{employee.role}</span>
-                                    </div>
+                    <Card key={employee.id} className="group flex flex-col transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/10 hover:border-primary">
+                        <CardContent className="p-4 flex-1">
+                            <div className="flex items-start justify-between gap-4 mb-4">
+                                <div className="flex items-center gap-4">
+                                    <Avatar className="h-12 w-12 border-2 border-primary/20 shrink-0">
+                                        <AvatarImage src={employee.imageUrl} alt={employee.name} />
+                                        <AvatarFallback>{employee.fallback}</AvatarFallback>
+                                    </Avatar>
+                                    <p className="font-bold text-lg">{employee.name}</p>
                                 </div>
+                                <Badge variant={getStatusVariant(employee.status)}>{employee.status}</Badge>
                             </div>
-                            <div className="mt-4 space-y-2 text-sm text-muted-foreground">
-                                {selectedBranchId === 'all' && employee.shopName && (
-                                <div className="flex items-center gap-2 font-semibold">
-                                    <Building className="h-4 w-4 shrink-0 text-foreground" />
-                                    <span className="truncate">{employee.shopName}</span>
-                                </div>
-                                )}
+                            <div className="space-y-2 text-sm text-muted-foreground">
+                                {employee.email && <div className="flex items-center gap-2"><Mail className="h-4 w-4 shrink-0" /><span>{employee.email}</span></div>}
+                                {employee.phone && <div className="flex items-center gap-2"><Phone className="h-4 w-4 shrink-0" /><span>{employee.phone}</span></div>}
+                                {employee.role && <div className="flex items-center gap-2"><Briefcase className="h-4 w-4 shrink-0" /><span>{employee.role}</span></div>}
+                                {formattedDates[employee.id!] && <div className="flex items-center gap-2"><Calendar className="h-4 w-4 shrink-0" /><span>Joined: {formattedDates[employee.id!]}</span></div>}
                             </div>
                         </CardContent>
-                        <CardContent className="border-t pt-4 flex flex-col sm:flex-row justify-between items-center gap-2">
-                            <Badge variant={getStatusVariant(employee.status)} className="shrink-0">
-                                {employee.status}
-                            </Badge>
-                             <Button size="lg" className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white mt-2 sm:mt-0" onClick={() => handleViewProfile(employee)}>
+                        <CardContent className="p-4 border-t">
+                             <Button size="lg" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground" onClick={() => handleViewProfile(employee)}>
                                 <Eye className="mr-2 h-4 w-4"/>
                                 View Profile
                             </Button>
@@ -482,3 +473,5 @@ export default function ManageEmployeesPage() {
     </div>
   );
 }
+
+    
