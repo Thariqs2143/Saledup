@@ -82,55 +82,16 @@ type MusterData = {
     dailyStatus: { [day: number]: 'P' | 'A' | 'H' | 'L' }; // Present, Absent, Half-day, Leave
 }
 
-const AttendanceReportTab = ({ allBranches, selectedBranch, authUser }: { allBranches: ShopData[], selectedBranch: ShopData, authUser: AuthUser }) => {
-    const [employees, setEmployees] = useState<User[]>([]);
+const AttendanceReportTab = ({ allBranches, selectedBranch, authUser, date, selectedEmployeeId, selectedStatus, employees }: { allBranches: ShopData[], selectedBranch: ShopData, authUser: AuthUser, date?: DateRange, selectedEmployeeId: string, selectedStatus: string, employees: User[] }) => {
     const [records, setRecords] = useState<AttendanceRecord[]>([]);
     const [filteredRecords, setFilteredRecords] = useState<AttendanceRecord[]>([]);
     const [loading, setLoading] = useState(false);
     const [exporting, setExporting] = useState(false);
     const { toast } = useToast();
-    const [date, setDate] = useState<DateRange | undefined>(undefined);
-    const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>('all');
-    const [selectedStatus, setSelectedStatus] = useState<string>('all');
     
     const isProTier = selectedBranch.subscriptionPlan === 'Pro' || selectedBranch.subscriptionPlan === 'Business' || selectedBranch.subscriptionPlan === 'Enterprise';
     const isAllBranches = selectedBranch.id === 'all';
     const allBranchIds = useMemo(() => allBranches.filter(b => b.id !== 'all').map(b => b.id), [allBranches]);
-
-    useEffect(() => {
-        setDate({ from: subDays(new Date(), 7), to: new Date() });
-    }, []);
-
-    useEffect(() => {
-        if (!authUser) return;
-        
-        const fetchEmployees = async () => {
-            const targetShopIds = isAllBranches ? allBranchIds : [selectedBranch.id];
-            if (targetShopIds.length === 0 && !isAllBranches) {
-                 setEmployees([]);
-                 return;
-            }
-             if (isAllBranches && allBranchIds.length === 0) {
-                // This handles the edge case where "All Branches" is selected but no branches have been created yet.
-                const ownerAsOnlyBranchId = [authUser.uid]; // The owner's first shop has their UID as the ID.
-                targetShopIds.push(...ownerAsOnlyBranchId);
-            }
-
-            const q = isAllBranches
-                ? query(collectionGroup(db, 'employees'), where('shopId', 'in', targetShopIds))
-                : query(collection(db, 'shops', selectedBranch.id, 'employees'));
-
-            const querySnapshot = await getDocs(q);
-            const employeeList = querySnapshot.docs
-                .map(doc => ({ id: doc.id, ...doc.data() } as User))
-                .filter(emp => emp.role !== 'Admin');
-            
-            const uniqueEmployees = Array.from(new Map(employeeList.map(emp => [emp.id, emp])).values());
-
-            setEmployees(uniqueEmployees);
-        };
-        fetchEmployees();
-    }, [authUser, selectedBranch, isAllBranches, allBranchIds]);
 
     const handleFetchReport = useCallback(async () => {
         if (!date?.from || !authUser) return;
@@ -226,60 +187,6 @@ const AttendanceReportTab = ({ allBranches, selectedBranch, authUser }: { allBra
 
     return (
         <div className="space-y-6">
-             <Sheet>
-                <SheetTrigger asChild>
-                    <Button variant="outline" className="w-full md:w-auto">
-                        <Filter className="mr-2 h-4 w-4" />
-                        Filter Report
-                    </Button>
-                </SheetTrigger>
-                <SheetContent>
-                    <SheetHeader>
-                        <SheetTitle>Report Filters</SheetTitle>
-                    </SheetHeader>
-                    <div className="py-8 space-y-6">
-                        <div className="space-y-2">
-                            <Label>Date Range</Label>
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                    <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}>
-                                        <CalendarIcon className="mr-2 h-4 w-4" />
-                                        {date?.from ? (date.to ? `${format(date.from, "LLL dd, y")} - ${format(date.to, "LLL dd, y")}` : format(date.from, "LLL dd, y")) : <span>Pick a date</span>}
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0" align="start">
-                                    <Calendar initialFocus mode="range" defaultMonth={date?.from} selected={date} onSelect={setDate} numberOfMonths={1}/>
-                                </PopoverContent>
-                            </Popover>
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="employee">Employee</Label>
-                            <Select onValueChange={setSelectedEmployeeId} value={selectedEmployeeId}>
-                                <SelectTrigger id="employee"><SelectValue placeholder="All Employees" /></SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Employees</SelectItem>
-                                    {employees.map(emp => <SelectItem key={emp.id} value={emp.id!}>{emp.name}</SelectItem>)}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="status">Status</Label>
-                            <Select onValueChange={setSelectedStatus} value={selectedStatus}>
-                                <SelectTrigger id="status"><SelectValue placeholder="All Statuses" /></SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Statuses</SelectItem>
-                                    <SelectItem value="On-time">On-time</SelectItem>
-                                    <SelectItem value="Late">Late</SelectItem>
-                                    <SelectItem value="Absent">Absent</SelectItem>
-                                    <SelectItem value="Manual">Manual</SelectItem>
-                                    <SelectItem value="Half-day">Half-day</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </div>
-                </SheetContent>
-            </Sheet>
-
             <Card>
                 <CardHeader>
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -992,6 +899,20 @@ export default function ReportsPage() {
     const [openBranchSelector, setOpenBranchSelector] = useState(false);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    
+    // State for filters, lifted up
+    const [employees, setEmployees] = useState<User[]>([]);
+    const [date, setDate] = useState<DateRange | undefined>(undefined);
+    const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>('all');
+    const [selectedStatus, setSelectedStatus] = useState<string>('all');
+
+    useEffect(() => {
+        setDate({ from: subDays(new Date(), 7), to: new Date() });
+    }, []);
+    
+    const isAllBranches = useMemo(() => selectedBranch?.id === 'all', [selectedBranch]);
+    const allBranchIds = useMemo(() => allBranches.filter(b => b.id !== 'all').map(b => b.id), [allBranches]);
+
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -1027,6 +948,33 @@ export default function ReportsPage() {
         return () => unsubscribe();
     }, [router, selectedBranch]);
     
+    useEffect(() => {
+        if (!authUser || !selectedBranch) return;
+        
+        const fetchEmployees = async () => {
+            const targetShopIds = isAllBranches ? allBranchIds : [selectedBranch.id];
+            if (targetShopIds.length === 0 && !isAllBranches) {
+                 setEmployees([]);
+                 return;
+            }
+             if (isAllBranches && allBranchIds.length === 0) {
+                targetShopIds.push(authUser.uid);
+            }
+
+            const q = query(collectionGroup(db, 'employees'), where('shopId', 'in', targetShopIds));
+
+            const querySnapshot = await getDocs(q);
+            const employeeList = querySnapshot.docs
+                .map(doc => ({ id: doc.id, ...doc.data() } as User))
+                .filter(emp => emp.role !== 'Admin');
+            
+            const uniqueEmployees = Array.from(new Map(employeeList.map(emp => [emp.id, emp])).values());
+
+            setEmployees(uniqueEmployees);
+        };
+        fetchEmployees();
+    }, [authUser, selectedBranch, isAllBranches, allBranchIds]);
+    
     const filteredBranches = useMemo(() => {
         return allBranches.filter(branch => branch.shopName?.toLowerCase().includes(searchTerm.toLowerCase()));
     }, [allBranches, searchTerm]);
@@ -1057,7 +1005,8 @@ export default function ReportsPage() {
             
             <Card>
                 <CardHeader>
-                    <CardTitle>Branch Selection</CardTitle>
+                    <CardTitle>Branch & Filters</CardTitle>
+                    <CardDescription>Select a branch and apply filters to generate reports.</CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col md:flex-row items-center gap-4">
                     <Popover open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
@@ -1100,6 +1049,60 @@ export default function ReportsPage() {
                             </Command>
                         </PopoverContent>
                     </Popover>
+                    
+                    <Sheet>
+                        <SheetTrigger asChild>
+                            <Button variant="outline" className="w-full md:w-auto">
+                                <Filter className="mr-2 h-4 w-4" />
+                                Filter Report
+                            </Button>
+                        </SheetTrigger>
+                        <SheetContent>
+                            <SheetHeader>
+                                <SheetTitle>Report Filters</SheetTitle>
+                            </SheetHeader>
+                            <div className="py-8 space-y-6">
+                                <div className="space-y-2">
+                                    <Label>Date Range</Label>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}>
+                                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                                {date?.from ? (date.to ? `${format(date.from, "LLL dd, y")} - ${format(date.to, "LLL dd, y")}` : format(date.from, "LLL dd, y")) : <span>Pick a date</span>}
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0" align="start">
+                                            <Calendar initialFocus mode="range" defaultMonth={date?.from} selected={date} onSelect={setDate} numberOfMonths={1}/>
+                                        </PopoverContent>
+                                    </Popover>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="employee">Employee</Label>
+                                    <Select onValueChange={setSelectedEmployeeId} value={selectedEmployeeId}>
+                                        <SelectTrigger id="employee"><SelectValue placeholder="All Employees" /></SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">All Employees</SelectItem>
+                                            {employees.map(emp => <SelectItem key={emp.id} value={emp.id!}>{emp.name}</SelectItem>)}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="status">Status</Label>
+                                    <Select onValueChange={setSelectedStatus} value={selectedStatus}>
+                                        <SelectTrigger id="status"><SelectValue placeholder="All Statuses" /></SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">All Statuses</SelectItem>
+                                            <SelectItem value="On-time">On-time</SelectItem>
+                                            <SelectItem value="Late">Late</SelectItem>
+                                            <SelectItem value="Absent">Absent</SelectItem>
+                                            <SelectItem value="Manual">Manual</SelectItem>
+                                            <SelectItem value="Half-day">Half-day</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+                        </SheetContent>
+                    </Sheet>
                 </CardContent>
             </Card>
 
@@ -1120,7 +1123,7 @@ export default function ReportsPage() {
                     </TabsTrigger>
                 </TabsList>
                 <TabsContent value="attendance" className="mt-6">
-                    <AttendanceReportTab allBranches={allBranches} selectedBranch={selectedBranch} authUser={authUser} />
+                    <AttendanceReportTab allBranches={allBranches} selectedBranch={selectedBranch} authUser={authUser} date={date} selectedEmployeeId={selectedEmployeeId} selectedStatus={selectedStatus} employees={employees} />
                 </TabsContent>
                 <TabsContent value="muster" className="mt-6">
                     {selectedBranch.id === 'all' ? (
