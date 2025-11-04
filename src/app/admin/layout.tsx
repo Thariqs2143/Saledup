@@ -14,7 +14,7 @@ import { onAuthStateChanged, type User as AuthUser } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import type { User as AppUser } from './employees/page';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
 const adminNavItems: NavItem[] = [
   { href: '/admin', label: 'Home', iconName: 'LayoutDashboard' },
@@ -108,6 +108,7 @@ export default function AdminLayout({ children }: PropsWithChildren) {
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="sm:max-w-xs p-0">
+               <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
                <AdminNav navItems={adminNavItems} profile={profile} isDesktop={false} />
             </SheetContent>
           </Sheet>
