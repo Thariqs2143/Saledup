@@ -747,25 +747,25 @@ export default function AdminDashboard() {
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-4">
                 <Link href="/admin/employees/add">
-                    <Card className="h-full flex flex-col items-center justify-center p-4 gap-2 transition-all hover:shadow-md hover:border-primary border">
+                    <Card className="h-full flex flex-col items-center justify-center p-4 gap-2 transition-all hover:shadow-md hover:border-primary border-2 border-foreground">
                         <UserPlus className="h-6 w-6 text-primary"/>
                         <span className="text-center text-sm font-medium">Invite Employee</span>
                     </Card>
                 </Link>
                  <Link href="/admin/generate-qr#manual-entry">
-                    <Card className="h-full flex flex-col items-center justify-center p-4 gap-2 transition-all hover:shadow-md hover:border-primary border">
+                    <Card className="h-full flex flex-col items-center justify-center p-4 gap-2 transition-all hover:shadow-md hover:border-primary border-2 border-foreground">
                         <QrCode className="h-6 w-6 text-primary"/>
                         <span className="text-center text-sm font-medium">Manual Entry</span>
                     </Card>
                 </Link>
                  <Link href="/admin/employees">
-                     <Card className="h-full flex flex-col items-center justify-center p-4 gap-2 transition-all hover:shadow-md hover:border-primary border">
+                     <Card className="h-full flex flex-col items-center justify-center p-4 gap-2 transition-all hover:shadow-md hover:border-primary border-2 border-foreground">
                         <Users className="h-6 w-6 text-primary"/>
                         <span className="text-center text-sm font-medium">View Staff</span>
                     </Card>
                 </Link>
                  <Link href="/admin/report">
-                     <Card className="h-full flex flex-col items-center justify-center p-4 gap-2 transition-all hover:shadow-md hover:border-primary border">
+                     <Card className="h-full flex flex-col items-center justify-center p-4 gap-2 transition-all hover:shadow-md hover:border-primary border-2 border-foreground">
                         <BarChart3 className="h-6 w-6 text-primary"/>
                         <span className="text-center text-sm font-medium">Full Reports</span>
                     </Card>
