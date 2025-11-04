@@ -33,32 +33,30 @@ export default function AdminLoginPage() {
     const recaptchaContainerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-      const phoneFromQuery = searchParams.get('phone');
-      if (!phoneFromQuery) {
-        router.push('/login');
-        return;
-      }
-      setPhone(phoneFromQuery);
-    
-      const setupRecaptcha = () => {
-        if (!window.recaptchaVerifier && recaptchaContainerRef.current) {
-          const verifier = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
-            'size': 'invisible',
-            'callback': () => {},
-          });
-          window.recaptchaVerifier = verifier;
-          handleGetOtp(phoneFromQuery, verifier);
-        } else if (window.recaptchaVerifier) {
-          handleGetOtp(phoneFromQuery, window.recaptchaVerifier);
+        const phoneFromQuery = searchParams.get('phone');
+        if (!phoneFromQuery) {
+            router.push('/login');
+            return;
         }
-      };
+        setPhone(phoneFromQuery);
 
-      if (document.readyState === 'complete') {
-        setupRecaptcha();
-      } else {
-        window.addEventListener('load', setupRecaptcha);
-        return () => window.removeEventListener('load', setupRecaptcha);
-      }
+        const setupRecaptcha = () => {
+            if (!window.recaptchaVerifier && recaptchaContainerRef.current) {
+                const verifier = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
+                    'size': 'invisible',
+                    'callback': () => {},
+                });
+                window.recaptchaVerifier = verifier;
+                handleGetOtp(phoneFromQuery, verifier);
+            } else if (window.recaptchaVerifier) {
+                handleGetOtp(phoneFromQuery, window.recaptchaVerifier);
+            }
+        };
+
+        // Delay setup slightly to ensure DOM is fully ready, especially on mobile.
+        const timeoutId = setTimeout(setupRecaptcha, 100);
+
+        return () => clearTimeout(timeoutId);
     }, [searchParams, router]);
 
 
@@ -95,6 +93,14 @@ export default function AdminLoginPage() {
         
         const phoneLookupRef = doc(db, "employee_phone_to_shop_lookup", phoneNumber);
         const phoneLookupSnap = await getDoc(phoneLookupRef);
+        
+        if (phoneLookupSnap.exists() && phoneLookupSnap.data()?.isNewUser) {
+             localStorage.setItem('adminUID', user.uid);
+             localStorage.setItem('adminPhone', phoneNumber);
+             toast({ title: "Welcome!", description: "Please complete your shop profile." });
+             router.push('/admin/complete-profile');
+             return;
+        }
         
         if (!phoneLookupSnap.exists() || !phoneLookupSnap.data()?.isAdmin) {
              toast({ title: "Access Denied", description: "User is not registered as a shop owner.", variant: "destructive" });
@@ -194,14 +200,14 @@ export default function AdminLoginPage() {
       </div>
 
        {/* RIGHT SIDE - Form Section */}
-      <div className="flex flex-col items-center justify-center px-4 md:px-12 py-10 md:py-12">
+      <div className="flex flex-col items-center justify-center py-12 md:py-0 px-4 md:px-12">
            {/* TOP IMAGE for Mobile */}
             <div className="md:hidden w-full h-[40vh] relative mb-8">
                 <Image
                 src="https://res.cloudinary.com/dnkghymx5/image/upload/v1762241011/Generated_Image_November_04_2025_-_12_50PM_1_hslend.png"
                 alt="Attendry illustration"
                 fill
-                className="object-contain"
+                className="object-cover"
                 priority
                 />
             </div>

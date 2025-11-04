@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, writeBatch } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
@@ -48,7 +48,12 @@ export default function LoginPage() {
              return;
         }
       } else {
-        router.push(`/admin/signup?phone=${phone}`);
+        // This is a new user, create a temporary marker and proceed to OTP
+        const batch = writeBatch(db);
+        const newDocRef = doc(db, 'employee_phone_to_shop_lookup', phoneNumber);
+        batch.set(newDocRef, { isNewUser: true });
+        await batch.commit();
+        router.push(`/admin/login?phone=${phone}`);
       }
 
     } catch (error) {
@@ -76,14 +81,14 @@ export default function LoginPage() {
       </div>
 
       {/* RIGHT SIDE - Form Section */}
-      <div className="flex flex-col items-center justify-center px-4 md:px-12 py-10 md:py-12">
+      <div className="flex flex-col items-center justify-center py-12 md:py-0 px-4 md:px-12">
         {/* TOP IMAGE for Mobile */}
         <div className="md:hidden w-full h-[40vh] relative mb-8">
             <Image
             src="https://res.cloudinary.com/dnkghymx5/image/upload/v1762241011/Generated_Image_November_04_2025_-_12_50PM_1_hslend.png"
             alt="Attendry illustration"
             fill
-            className="object-contain"
+            className="object-cover"
             priority
             />
         </div>
