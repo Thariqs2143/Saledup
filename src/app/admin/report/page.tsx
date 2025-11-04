@@ -650,16 +650,6 @@ const PayrollReportTab = ({ shopData, authUser }: { shopData: ShopData, authUser
     );
 };
 
-const getStatusClass = (status: 'P' | 'A' | 'H' | 'L') => {
-    switch(status) {
-        case 'P': return 'bg-green-100 text-green-800';
-        case 'A': return 'bg-red-100 text-red-800';
-        case 'H': return 'bg-yellow-100 text-yellow-800';
-        case 'L': return 'bg-blue-100 text-blue-800';
-        default: return '';
-    }
-};
-
 const MusterRollTab = ({ authUser }: { authUser: AuthUser }) => {
     const [musterData, setMusterData] = useState<MusterData[]>([]);
     const [daysInMonth, setDaysInMonth] = useState<Date[]>([]);
@@ -798,14 +788,14 @@ const MusterRollTab = ({ authUser }: { authUser: AuthUser }) => {
                     <CardTitle>Generate Muster Roll</CardTitle>
                     <CardDescription>Select a month to generate a classic attendance muster grid for all active employees.</CardDescription>
                 </CardHeader>
-                 <CardContent className="flex flex-col sm:flex-row items-center gap-4">
-                     <div className="space-y-2">
+                 <CardContent className="flex flex-col gap-4">
+                     <div className="space-y-2 w-full">
                         <Label>Select Year</Label>
                         <Select
                             value={String(selectedDate.getFullYear())}
                             onValueChange={(year) => setSelectedDate(setYear(selectedDate, parseInt(year)))}
                         >
-                            <SelectTrigger className="w-[180px]">
+                            <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Select Year" />
                             </SelectTrigger>
                             <SelectContent>
@@ -817,13 +807,13 @@ const MusterRollTab = ({ authUser }: { authUser: AuthUser }) => {
                             </SelectContent>
                         </Select>
                     </div>
-                    <div className="space-y-2">
+                    <div className="space-y-2 w-full">
                         <Label>Select Month</Label>
                         <Select
                             value={String(selectedDate.getMonth())}
                             onValueChange={(month) => setSelectedDate(setMonth(selectedDate, parseInt(month)))}
                         >
-                             <SelectTrigger className="w-[180px]">
+                             <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Select Month" />
                             </SelectTrigger>
                             <SelectContent>
@@ -833,7 +823,7 @@ const MusterRollTab = ({ authUser }: { authUser: AuthUser }) => {
                             </SelectContent>
                         </Select>
                     </div>
-                    <Button onClick={handleGenerateMuster} disabled={loading} className="mt-auto">
+                    <Button onClick={handleGenerateMuster} disabled={loading} className="w-full">
                         {loading ? <Loader2 className="mr-2 animate-spin"/> : <Users className="mr-2"/>}
                         Generate Muster
                     </Button>
@@ -1108,13 +1098,13 @@ export default function ReportsPage() {
             <Tabs defaultValue="attendance" className="w-full">
                 <TabsList className="grid w-full grid-cols-3 h-auto">
                     <TabsTrigger value="attendance" className="h-full py-2">
-                        <span>Attendance<span className="hidden md:inline"> Report</span></span>
+                        <span>Attendance<br className="md:hidden" /> Report</span>
                     </TabsTrigger>
                      <TabsTrigger value="muster" className="h-full py-2">
-                       <span>Muster<span className="hidden md:inline"> Roll</span></span>
+                       <span>Muster<br className="md:hidden" /> Roll</span>
                      </TabsTrigger>
                     <TabsTrigger value="payroll" className="h-full py-2" disabled={selectedBranch.id === 'all'}>
-                       <span>Payroll<span className="hidden md:inline"> Report</span></span>
+                       <span>Payroll<br className="md:hidden" /> Report</span>
                     </TabsTrigger>
                 </TabsList>
                 <TabsContent value="attendance" className="mt-6">
