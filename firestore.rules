@@ -9,17 +9,19 @@ service cloud.firestore {
     function isSignedIn() {
       return request.auth != null;
     }
- function isOwnerOfResourceShop() {
-  return isSignedIn() &&
-         resource.data.shopId != null &&
-         isShopOwner(resource.data.shopId);
-}
+
+    function isOwnerOfResourceShop() {
+      return isSignedIn() &&
+             resource.data.shopId != null &&
+             isShopOwner(resource.data.shopId);
+    }
     
     // Shop owner check (merged logic from both versions)
     function isShopOwner(shopId) {
       return (isSignedIn() &&
               (request.auth.uid == shopId ||
-               request.auth.uid == get(/databases/$(database)/documents/shops/$(shopId)).data.ownerId));
+               (exists(/databases/$(database)/documents/shops/$(shopId)) &&
+                get(/databases/$(database)/documents/shops/$(shopId)).data.ownerId == request.auth.uid)));
     }
 
     function isSelf(docId, collection) {
@@ -108,7 +110,7 @@ service cloud.firestore {
     match /users/{userId} {
       allow list: if true;
       allow read: if request.auth.uid == userId ||
-                     isShopOwner(resource.data.shopId) ||
+                     (resource.data.shopId != null && isShopOwner(resource.data.shopId)) ||
                      isSuperAdmin();
       allow create: if request.auth.uid == userId ||
                        isShopOwner(userId) ||
@@ -238,15 +240,15 @@ service cloud.firestore {
 // and leaveRequests across all their owned shops.
 
 match /{path=**}/employees/{employeeId} {
-  allow get, list: if isOwnerOfResourceShop() || request.auth.uid == resource.data.ownerId;
+  allow get, list: if isOwnerOfResourceShop();
 }
 
 match /{path=**}/attendance/{attendanceId} {
-  allow get, list: if isOwnerOfResourceShop() || request.auth.uid == resource.data.ownerId;
+  allow get, list: if isOwnerOfResourceShop();
 }
 
 match /{path=**}/leaveRequests/{leaveId} {
-  allow get, list: if isOwnerOfResourceShop() || request.auth.uid == resource.data.ownerId;
+  allow get, list: if isOwnerOfResourceShop();
 }
 
 
