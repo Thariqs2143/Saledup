@@ -28,6 +28,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 type ActivityRecord = {
     id: string;
+    userId: string;
     userName: string;
     checkInTime: Timestamp;
     checkOutTime?: Timestamp;
@@ -458,22 +459,24 @@ const ManualEntryTab = () => {
 
 const QrCodeTabs = () => {
     return (
-         <Tabs defaultValue="permanent" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="permanent" className="flex items-center gap-2">
-                    <QrCode className="h-4 w-4"/> Permanent
-                </TabsTrigger>
-                <TabsTrigger value="advanced" className="flex items-center gap-2">
-                    <ShieldCheck className="h-4 w-4"/> Advanced
-                </TabsTrigger>
-            </TabsList>
-            <TabsContent value="permanent" className="mt-6">
-                <PermanentQrTab />
-            </TabsContent>
-            <TabsContent value="advanced" className="mt-6">
-                <AdvancedQrTab />
-            </TabsContent>
-        </Tabs>
+        <div className='space-y-6'>
+            <Tabs defaultValue="permanent" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="permanent" className="flex items-center gap-2">
+                        <QrCode className="h-4 w-4"/> Permanent
+                    </TabsTrigger>
+                    <TabsTrigger value="advanced" className="flex items-center gap-2">
+                        <ShieldCheck className="h-4 w-4"/> Advanced
+                    </TabsTrigger>
+                </TabsList>
+                <TabsContent value="permanent" className="mt-6">
+                    <PermanentQrTab />
+                </TabsContent>
+                <TabsContent value="advanced" className="mt-6">
+                    <AdvancedQrTab />
+                </TabsContent>
+            </Tabs>
+        </div>
     );
 }
 
@@ -502,7 +505,14 @@ const RecentActivity = () => {
     }, []);
 
     useEffect(() => {
-        if (!authUser || allEmployees.length === 0) return;
+        if (!authUser) return;
+        if (allEmployees.length === 0 && authUser) {
+            // This condition handles the initial load where employees might not be fetched yet.
+            // It will re-run once allEmployees state is updated.
+            setLoading(false); 
+            return;
+        }
+
 
         setLoading(true);
         const attendanceRef = collection(db, 'shops', authUser.uid, 'attendance');
@@ -594,9 +604,3 @@ export default function GenerateAndEntryPage() {
     </div>
   );
 }
-
-    
-
-    
-
-    
