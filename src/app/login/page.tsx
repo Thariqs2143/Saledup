@@ -22,18 +22,11 @@ export default function LoginPage() {
     const recaptchaContainerRef = useRef<HTMLDivElement>(null);
 
      useEffect(() => {
-        // This effect will run only once on the client side
-        const initializeRecaptcha = () => {
-            if (!window.recaptchaVerifier && recaptchaContainerRef.current) {
-                window.recaptchaVerifier = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
-                    'size': 'invisible',
-                    'callback': (response: any) => {},
-                });
-            }
-        };
-
-        if (typeof window !== 'undefined') {
-            initializeRecaptcha();
+        if (typeof window !== 'undefined' && !window.recaptchaVerifier && recaptchaContainerRef.current) {
+            window.recaptchaVerifier = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
+                'size': 'invisible',
+                'callback': (response: any) => {},
+            });
         }
     }, []);
 
@@ -48,20 +41,16 @@ export default function LoginPage() {
         try {
             const phoneNumber = `+91${phone}`;
 
-            // Check if user is an admin/owner
             const phoneLookupRef = doc(db, 'employee_phone_to_shop_lookup', phoneNumber);
             const phoneLookupSnap = await getDoc(phoneLookupRef);
 
             if (phoneLookupSnap.exists() && phoneLookupSnap.data()?.isAdmin) {
-                // User is an existing admin, proceed to login flow
                  router.push(`/admin/login?phone=${phone}`);
 
             } else if (phoneLookupSnap.exists() && !phoneLookupSnap.data()?.isAdmin) {
-                // User is an employee, guide them to the correct login
                  toast({ title: "Employee Account", description: "This number is registered as an employee. Please use the 'Login as Employee' button.", variant: "destructive"});
 
             } else {
-                // New user, proceed to signup flow
                 router.push(`/admin/signup?phone=${phone}`);
             }
 
@@ -78,7 +67,7 @@ export default function LoginPage() {
     <div className="flex flex-col md:grid md:grid-cols-2 min-h-screen w-full">
         <div ref={recaptchaContainerRef}></div>
         {/* Left side with illustration */}
-        <div className="flex-1 md:flex-col items-center justify-center bg-[#0C2A6A] p-6 md:p-10 text-white relative overflow-hidden order-1 md:order-2 h-64 md:h-auto">
+        <div className="flex flex-col items-center justify-center bg-[#0C2A6A] p-6 md:p-10 text-white relative overflow-hidden order-1 md:order-2 h-64 md:h-auto">
              <Image
                 src="https://storage.googleapis.com/framer-usercontent/images/tHflOaA13praLY311Lg9JA5A.png"
                 alt="Business tools illustration"
@@ -86,7 +75,7 @@ export default function LoginPage() {
                 className="object-contain opacity-20"
                 data-ai-hint="business tools"
             />
-            <div className="relative z-10 text-center space-y-6 hidden md:block">
+            <div className="relative z-10 text-center space-y-6 hidden md:flex md:flex-col md:items-center md:justify-center">
                 <div className="flex justify-center items-center gap-4">
                      <Shield className="h-16 w-16 text-white" />
                      <h1 className="text-6xl font-bold tracking-tighter">SALEDIN</h1>
