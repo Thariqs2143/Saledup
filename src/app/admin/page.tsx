@@ -598,14 +598,14 @@ export default function AdminDashboard() {
                 <CardDescription>Select a branch to view its dashboard or manage your branches.</CardDescription>
             </CardHeader>
             <CardContent>
-                <div className="flex flex-col sm:flex-row items-center gap-4">
+                <div className="flex flex-col md:flex-row items-center gap-4">
                     <Popover open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
                         <PopoverTrigger asChild>
                             <Button
                                 variant="outline"
                                 role="combobox"
                                 aria-expanded={openBranchSelector}
-                                className="w-full sm:w-[300px] justify-between border-black dark:border-white"
+                                className="w-full md:w-[300px] justify-between border-black dark:border-white"
                                 disabled={branches.length <= 1}
                             >
                                 {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
@@ -635,7 +635,7 @@ export default function AdminDashboard() {
                             </Command>
                         </PopoverContent>
                     </Popover>
-                    <div className="grid grid-cols-2 gap-4 w-full sm:w-auto">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full md:w-auto md:flex-1">
                         <Link href="/admin/add-branch" className="w-full">
                             <Button className="w-full">
                                 Add Branch
