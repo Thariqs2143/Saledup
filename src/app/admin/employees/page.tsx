@@ -61,7 +61,7 @@ type Branch = {
 };
 
 
-const EmployeeList = ({ selectedBranchId, allBranchIds }: { selectedBranchId: string | null, allBranchIds: string[] }) => {
+const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds }: { allBranches: Branch[], selectedBranchId: string | null, allBranchIds: string[] }) => {
   const [employees, setEmployees] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -90,7 +90,16 @@ const EmployeeList = ({ selectedBranchId, allBranchIds }: { selectedBranchId: st
       : query(collection(db, 'shops', selectedBranchId, 'employees'), where("role", "!=", "Admin"));
     
     const unsubscribe = onSnapshot(q, (snapshot) => {
-        const employeeList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as User));
+        const branchNameMap = new Map(allBranches.map(branch => [branch.id, branch.shopName]));
+
+        const employeeList = snapshot.docs.map(doc => {
+            const data = doc.data() as User;
+            return { 
+                id: doc.id, 
+                ...data,
+                shopName: data.shopId ? branchNameMap.get(data.shopId) : 'N/A',
+             } as User
+        });
         
         // If "All Branches" is selected, filter out the admin role to prevent duplicate keys
         const finalEmployeeList = isAllBranches 
@@ -120,7 +129,7 @@ const EmployeeList = ({ selectedBranchId, allBranchIds }: { selectedBranchId: st
     });
 
     return () => unsubscribe();
-  }, [selectedBranchId, toast, allBranchIds]);
+  }, [selectedBranchId, toast, allBranchIds, allBranches]);
 
   const handleViewProfile = (employee: User) => {
     router.push(`/admin/employees/${employee.id}?branchId=${employee.shopId}`);
@@ -536,7 +545,7 @@ export default function ManageEmployeesPage() {
                 <TabsTrigger value="leave">Leave Requests</TabsTrigger>
             </TabsList>
             <TabsContent value="employees" className="mt-6">
-                <EmployeeList selectedBranchId={selectedBranch?.id || null} allBranchIds={allBranchIds} />
+                <EmployeeList allBranches={branches} selectedBranchId={selectedBranch?.id || null} allBranchIds={allBranchIds} />
             </TabsContent>
             <TabsContent value="leave" className="mt-6">
                 <LeaveRequests selectedBranchId={selectedBranch?.id || null} allBranchIds={allBranchIds} />
