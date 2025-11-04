@@ -27,7 +27,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from '@/components/ui/separator';
 import Link from 'next/link';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList }from "@/components/ui/command";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
 
 // Extend jsPDF with autoTable
@@ -1108,15 +1108,12 @@ export default function ReportsPage() {
             <Tabs defaultValue="attendance" className="w-full">
                 <TabsList className="grid w-full grid-cols-3 h-auto">
                     <TabsTrigger value="attendance" className="h-full py-2">
-                        <span className="md:hidden"><br /></span>
                         <span>Attendance<span className="hidden md:inline"> Report</span></span>
                     </TabsTrigger>
                      <TabsTrigger value="muster" className="h-full py-2">
-                       <span className="md:hidden"><br /></span>
                        <span>Muster<span className="hidden md:inline"> Roll</span></span>
                      </TabsTrigger>
                     <TabsTrigger value="payroll" className="h-full py-2" disabled={selectedBranch.id === 'all'}>
-                       <span className="md:hidden"><br /></span>
                        <span>Payroll<span className="hidden md:inline"> Report</span></span>
                     </TabsTrigger>
                 </TabsList>
