@@ -551,7 +551,7 @@ const RecentActivity = () => {
     }, [authUser, allEmployees]);
 
     return (
-         <Card>
+         <Card className="transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                     <Activity className="h-5 w-5" />
@@ -624,7 +624,7 @@ const QrHistory = () => {
     }, [authUser]);
 
     return (
-        <Card>
+        <Card className="transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2"><History className="h-5 w-5" />Generation History</CardTitle>
                 <CardDescription>A log of the most recently generated QR codes.</CardDescription>
@@ -685,5 +685,3 @@ export default function GenerateAndEntryPage() {
     </div>
   );
 }
-
-    
