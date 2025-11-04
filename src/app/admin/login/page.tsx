@@ -195,7 +195,8 @@ export default function AdminLoginPage() {
 
   return (
     <div className="min-h-screen bg-background md:grid md:grid-cols-2">
-      <div ref={recaptchaContainerRef}></div>
+      <div ref={recaptchaContainerRef} className="hidden"></div>
+      
       {/* LEFT SIDE - Desktop Image */}
       <div className="relative hidden md:block">
         <Image
@@ -208,31 +209,35 @@ export default function AdminLoginPage() {
       </div>
 
        {/* RIGHT SIDE - Form Section */}
-      <div className="flex flex-col items-center justify-center w-full">
-           {/* TOP IMAGE for Mobile */}
-            <div className="md:hidden w-full relative">
-                 <Image
-                    src="https://res.cloudinary.com/dnkghymx5/image/upload/v1762241011/Generated_Image_November_04_2025_-_12_50PM_1_hslend.png"
-                    alt="Attendry illustration"
-                    width={800}
-                    height={600}
-                    className="w-full h-auto object-cover"
-                    priority
-                />
-            </div>
-          <div className="w-full max-w-sm text-center p-6">
-             <h1 className="text-3xl font-bold tracking-tight leading-tight">
-                India’s #1 QR Powered Staff Attendance App
-            </h1>
-             <div className="flex items-center my-4">
-                <hr className="w-full border-muted-foreground/20" />
-                <span className="px-4 text-muted-foreground font-semibold whitespace-nowrap text-sm">
-                LOG IN OR SIGN UP
-                </span>
-                <hr className="w-full border-muted-foreground/20" />
+      <main className="flex flex-col items-center justify-center">
+        {/* TOP IMAGE for Mobile */}
+        <div className="md:hidden w-full relative">
+            <Image
+                src="https://res.cloudinary.com/dnkghymx5/image/upload/v1762241011/Generated_Image_November_04_2025_-_12_50PM_1_hslend.png"
+                alt="Attendry illustration"
+                width={800}
+                height={600}
+                className="w-full h-auto object-contain"
+                priority
+            />
+        </div>
+        
+        {/* FORM CARD */}
+        <div className="w-full max-w-sm space-y-6 p-6">
+            <div className="text-center">
+                <h1 className="text-3xl font-bold tracking-tight leading-tight">
+                    India’s #1 AI-Powered Business Companion
+                </h1>
+                <div className="flex items-center my-4">
+                    <hr className="w-full border-muted-foreground/20" />
+                    <span className="px-4 text-muted-foreground font-semibold whitespace-nowrap text-sm">
+                    ENTER OTP
+                    </span>
+                    <hr className="w-full border-muted-foreground/20" />
+                </div>
             </div>
 
-            <form className="space-y-6 text-left" onSubmit={handleVerifyAndProceed}>
+            <form className="space-y-6" onSubmit={handleVerifyAndProceed}>
                 <div className="flex justify-center gap-2" onPaste={handlePaste}>
                     {otp.map((digit, index) => (
                         <Input
@@ -259,6 +264,7 @@ export default function AdminLoginPage() {
                     Verify OTP
                 </Button>
             </form>
+
             <div className="flex items-center my-8">
                 <hr className="w-full" />
                 <span className="px-4 text-muted-foreground font-medium">OR</span>
@@ -266,12 +272,12 @@ export default function AdminLoginPage() {
             </div>
 
             <Link href="/employee/login" className="w-full">
-            <Button variant="outline" className="w-full">
-                Login as Employee
-            </Button>
+                <Button variant="outline" className="w-full">
+                    Login as Employee
+                </Button>
             </Link>
-          </div>
-      </div>
+        </div>
+      </main>
     </div>
   );
 }
