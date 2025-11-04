@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -156,16 +155,17 @@ export default function ManageBranchesPage() {
                                 <p className="text-sm text-muted-foreground">{branch.address}</p>
                             </CardContent>
                             <CardContent className="border-t p-4 flex gap-2">
+                                <Link href={`/admin?branchId=${branch.id}`} className="w-full">
+                                    <Button variant="outline" className="w-full">View</Button>
+                                </Link>
                                 <Link href={`/admin/branches/${branch.id}/edit`} className="w-full">
-                                    <Button variant="outline" className="w-full">
-                                        <Edit className="mr-2 h-4 w-4"/> Edit
-                                    </Button>
+                                    <Button variant="outline" className="w-full">Edit</Button>
                                 </Link>
                                 {!isMainBranch && (
                                     <AlertDialog>
                                         <AlertDialogTrigger asChild>
                                             <Button variant="destructive" className="w-full" disabled={deletingId === branch.id}>
-                                                {deletingId === branch.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Trash2 className="mr-2 h-4 w-4" />}
+                                                {deletingId === branch.id ? <Loader2 className="h-4 w-4 animate-spin"/> : null}
                                                 Delete
                                             </Button>
                                         </AlertDialogTrigger>
