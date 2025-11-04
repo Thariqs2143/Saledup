@@ -233,7 +233,7 @@ const QrGeneratorCard = () => {
 }
 
 
-const ManualEntryTab = () => {
+const ManualEntry = () => {
     const { toast } = useToast();
     const [loading, setLoading] = useState(false);
     const [employees, setEmployees] = useState<User[]>([]);
@@ -294,13 +294,24 @@ const ManualEntryTab = () => {
     };
     
     return (
-        <Card className="w-full transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
-            <form onSubmit={handleSubmit}>
+        <Dialog>
+            <Card className="w-full transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
                 <CardHeader>
                     <CardTitle>Manual Attendance Entry</CardTitle>
-                    <CardDescription>Create a new attendance record for an employee.</CardDescription>
+                    <CardDescription>If a QR scan fails, you can create a record here.</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-6">
+                <CardContent className="flex justify-center items-center h-24">
+                     <DialogTrigger asChild>
+                        <Button className="w-full max-w-xs"><UserPlus className="mr-2"/>Create Record</Button>
+                    </DialogTrigger>
+                </CardContent>
+            </Card>
+
+            <DialogContent className="sm:max-w-[425px]">
+                 <DialogHeader>
+                    <DialogTitle>Manual Attendance</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-4 py-4">
                     {employees.length > 0 ? (
                         <div className="space-y-2">
                             <Label htmlFor="employee">Employee *</Label>
@@ -324,9 +335,9 @@ const ManualEntryTab = () => {
                         </Popover>
                     </div>
                     
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <div className="space-y-2"><Label htmlFor="checkInTime">Check-in Time *</Label><Input id="checkInTime" type="time" value={checkInTime} onChange={e => setCheckInTime(e.target.value)} required /></div>
-                        <div className="space-y-2"><Label htmlFor="checkOutTime">Check-out Time</Label><Input id="checkOutTime" type="time" value={checkOutTime} onChange={e => setCheckOutTime(e.target.value)} /></div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2"><Label htmlFor="checkInTime">Check-in *</Label><Input id="checkInTime" type="time" value={checkInTime} onChange={e => setCheckInTime(e.target.value)} required /></div>
+                        <div className="space-y-2"><Label htmlFor="checkOutTime">Check-out</Label><Input id="checkOutTime" type="time" value={checkOutTime} onChange={e => setCheckOutTime(e.target.value)} /></div>
                     </div>
 
                     <div className="space-y-2">
@@ -341,14 +352,15 @@ const ManualEntryTab = () => {
                     </div>
 
                     <div className="space-y-2"><Label htmlFor="reason">Reason (Optional)</Label><Textarea id="reason" placeholder="e.g., Forgot phone, technical issue, etc." value={reason} onChange={e => setReason(e.target.value)}/></div>
-                </CardContent>
-                <CardFooter className="border-t pt-6">
-                    <Button type="submit" className="w-full" disabled={loading || employees.length === 0}>
-                        {loading && <Loader2 className="mr-2 animate-spin" />}<Save className="mr-2"/>Save Record
-                    </Button>
-                </CardFooter>
-            </form>
-        </Card>
+
+                     <DialogClose asChild>
+                        <Button type="submit" className="w-full" disabled={loading || employees.length === 0}>
+                            {loading && <Loader2 className="mr-2 animate-spin" />}<Save className="mr-2"/>Save Record
+                        </Button>
+                    </DialogClose>
+                </form>
+            </DialogContent>
+        </Dialog>
     );
 };
 
@@ -464,15 +476,15 @@ export default function GenerateAndEntryPage() {
   return (
     <div className="flex flex-col gap-8">
        <div>
-        <h1 className="text-3xl font-bold tracking-tight">QR & Manual Entry</h1>
+        <h1 className="text-3xl font-bold tracking-tight">QR &amp; Manual Entry</h1>
         <p className="text-muted-foreground">Generate QR codes for attendance or manually enter records.</p>
        </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
             <div className="lg:col-span-2 space-y-8">
                 <QrGeneratorCard />
-                <ManualEntryTab />
             </div>
             <div className="space-y-8 lg:col-span-1">
+                <ManualEntry />
                 <RecentActivity />
                 <QrHistory />
             </div>
