@@ -250,7 +250,7 @@ const ManualEntryForm = () => {
                 setAuthUser(user);
                 const fetchEmployees = async () => {
                     const employeesCollectionRef = collection(db, 'shops', user.uid, 'employees');
-                    const q = query(employeesCollectionRef, where('status', '==', 'Active'));
+                    const q = query(employeesCollectionRef, where('status', '==', 'Active'), where('role', '!=', 'Admin'));
                     const querySnapshot = await getDocs(q);
                     const employeeList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as User));
                     setEmployees(employeeList);
@@ -465,10 +465,6 @@ export default function GenerateAndEntryPage() {
   return (
     <div className="flex flex-col gap-8">
        <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div className="hidden md:block">
-                <h1 className="text-3xl font-bold tracking-tight">QR &amp; Manual Entry</h1>
-                <p className="text-muted-foreground">Generate QR codes or manually enter attendance records.</p>
-            </div>
             <div className="w-full flex justify-center md:absolute md:top-0 md:right-0 md:w-auto">
                 <div className="w-full md:w-auto md:inline-flex rounded-md border-2 border-primary bg-muted p-1 grid grid-cols-2">
                     <Button 
