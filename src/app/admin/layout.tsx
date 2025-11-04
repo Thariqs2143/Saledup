@@ -1,23 +1,50 @@
+
+'use client';
+
+import type { PropsWithChildren } from 'react';
+import { usePathname } from 'next/navigation';
 import { BottomNav, type NavItem } from '@/components/bottom-nav';
-import { LayoutDashboard, Users, Settings } from 'lucide-react';
+import Link from 'next/link';
+import { AdminNav } from '@/components/admin-nav';
+import { Settings, Crown, Bell } from 'lucide-react';
+import { InstallPWA } from '@/components/install-pwa';
+import { Button } from '@/components/ui/button';
 
 const adminNavItems: NavItem[] = [
-  { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/admin/employees', label: 'Employees', icon: Users },
-  { href: '/admin/settings', label: 'Settings', icon: Settings },
+  { href: '/admin', label: 'Home', iconName: 'LayoutDashboard' },
+  { href: '/admin/generate-qr', label: 'QR Entry', iconName: 'QrCode' },
+  { href: '/admin/employees', label: 'Staffs', iconName: 'Users' },
+  { href: '/admin/reports', label: 'Report', iconName: 'BarChart3' },
+  { href: '/admin/settings', label: 'Profile', iconName: 'User' },
 ];
 
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AdminLayout({ children }: PropsWithChildren) {
+  const pathname = usePathname();
+  if (pathname === '/admin/login' || pathname === '/admin/complete-profile' || pathname === '/admin/signup' || pathname === '/admin/add-branch') {
+    return <>{children}</>
+  }
+
   return (
-    <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-md bg-card pb-20">
-        <div className="min-h-screen">{children}</div>
+    <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+      <AdminNav navItems={adminNavItems} />
+      <div className="flex flex-col">
+        <header className="flex h-14 items-center gap-4 border-b bg-background px-4 md:hidden sticky top-0 z-40">
+          <h1 className="font-bold text-xl text-primary">Attendry</h1>
+           <div className="ml-auto flex items-center gap-2">
+             <Link href="/admin/notifications">
+                <Button variant="ghost" size="icon">
+                    <Bell className="h-5 w-5" />
+                    <span className="sr-only">Notifications</span>
+                </Button>
+            </Link>
+           </div>
+        </header>
+        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 pb-20 md:pb-6">
+          {children}
+        </main>
       </div>
       <BottomNav navItems={adminNavItems} />
+      <InstallPWA />
     </div>
   );
 }

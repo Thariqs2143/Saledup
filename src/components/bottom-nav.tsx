@@ -1,14 +1,36 @@
-'use client';
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+"use client";
+
+import { useRouter, usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import type { LucideIcon } from 'lucide-react';
+import { LayoutDashboard, QrCode, Users, Settings, ScanLine, History, User, Trophy, CalendarOff, BarChart3, type LucideIcon, Crown, Store, Gem, BookLock, Megaphone, Bell } from 'lucide-react';
+
+
+const iconMap: { [key: string]: LucideIcon } = {
+  LayoutDashboard,
+  QrCode,
+  Users,
+  Settings,
+  ScanLine,
+  History,
+  User,
+  Trophy,
+  CalendarOff,
+  BarChart3,
+  Crown,
+  Store,
+  Gem,
+  BookLock,
+  Megaphone,
+  Bell,
+};
+
 
 export type NavItem = {
   href: string;
   label: string;
-  icon: LucideIcon;
+  icon?: LucideIcon;
+  iconName?: string;
 };
 
 type BottomNavProps = {
@@ -17,27 +39,37 @@ type BottomNavProps = {
 
 export function BottomNav({ navItems }: BottomNavProps) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleNavigate = (href: string) => {
+    router.push(href);
+  };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-card md:hidden">
-      <div className="mx-auto flex h-16 max-w-md items-center justify-around">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background/95 backdrop-blur-sm md:hidden">
+      <div className="flex h-16 justify-evenly">
         {navItems.map((item) => {
-          const isActive = pathname.startsWith(item.href);
+          const Icon = item.iconName ? iconMap[item.iconName] : item.icon;
+          const isHomePage = item.href === '/admin' || item.href === '/employee' || item.href === '/super-admin';
+          const isActive = isHomePage
+            ? pathname === item.href
+            : pathname.startsWith(item.href);
+
           return (
-            <Link
+            <button
               key={item.href}
-              href={item.href}
+              onClick={() => handleNavigate(item.href)}
               className={cn(
-                'flex flex-col items-center gap-1 p-2 text-muted-foreground transition-colors hover:text-primary',
-                isActive && 'text-primary'
+                'flex flex-1 flex-col items-center justify-center gap-1 text-xs font-medium transition-colors',
+                isActive ? 'text-primary' : 'text-muted-foreground hover:text-primary'
               )}
             >
-              <item.icon className="h-6 w-6" />
-              <span className="text-xs font-medium">{item.label}</span>
-            </Link>
+              {Icon && <Icon className="h-6 w-6" />}
+              <span>{item.label}</span>
+            </button>
           );
         })}
       </div>
-    </div>
+    </nav>
   );
 }

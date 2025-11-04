@@ -1,0 +1,42 @@
+
+{
+    "indexes": [
+      {
+        "collectionGroup": "employees",
+        "queryScope": "COLLECTION_GROUP",
+        "fields": [
+          { "fieldPath": "shopId", "arrayConfig": "CONTAINS" },
+          { "fieldPath": "role", "order": "ASCENDING" }
+        ]
+      },
+      {
+        "collectionGroup": "attendance",
+        "queryScope": "COLLECTION_GROUP",
+        "fields": [
+          { "fieldPath": "shopId", "arrayConfig": "CONTAINS" },
+          { "fieldPath": "checkInTime", "order": "DESCENDING" }
+        ]
+      },
+      {
+        "collectionGroup": "attendance",
+        "queryScope": "COLLECTION_GROUP",
+        "fields": [
+          { "fieldPath": "shopId", "arrayConfig": "CONTAINS" },
+          { "fieldPath": "checkInTime", "order": "ASCENDING" }
+        ]
+      },
+      {
+        "collectionGroup": "leaveRequests",
+        "queryScope": "COLLECTION_GROUP",
+        "fields": [
+          { "fieldPath": "shopId", "arrayConfig": "CONTAINS" },
+          { "fieldPath": "requestedAt", "order": "DESCENDING" }
+        ]
+      }
+    ],
+    "fieldOverrides": []
+  }
+  
+  
+  
+  

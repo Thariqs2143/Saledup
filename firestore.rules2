@@ -1,0 +1,92 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isShopOwner(shopId) {
+      return request.auth != null && request.auth.uid == shopId;
+    }
+
+    function isEmployeeSelf() {
+      // Check if the incoming UID matches the authenticated user's UID.
+      // This is used for an employee updating their own profile.
+      return request.auth.uid == request.resource.data.uid;
+    }
+    
+    // Global User Profiles (for admins)
+    match /users/{userId} {
+      allow read, write: if isShopOwner(userId);
+    }
+    
+    // Shops Collection
+    match /shops/{shopId} {
+      allow read;
+      allow create, update: if isShopOwner(shopId);
+      
+      // Employees Subcollection
+      match /employees/{employeeId} {
+        allow read;
+        // Allow owner to create/write, or allow employee to update their own profile.
+        allow create: if isShopOwner(shopId);
+        allow update: if isShopOwner(shopId) || isEmployeeSelf();
+      }
+
+      // Config Subcollection (private to owner)
+      match /config/{configId} {
+        allow read, write: if isShopOwner(shopId);
+      }
+
+      // Attendance Subcollection
+      match /attendance/{attendanceId} {
+        // Owner can do anything.
+        // Employee can read their own records and create new ones.
+        allow read, write: if isShopOwner(shopId);
+        allow create: if request.resource.data.userId == get(/databases/$(database)/documents/shops/$(shopId)/employees/$(request.auth.token.phone_number)).id;
+      }
+      
+       // Leave Requests Subcollection
+      match /leaveRequests/{leaveId} {
+          allow read, write: if isShopOwner(shopId);
+          allow create: if request.auth.uid != null;
+      }
+
+      // QR History Subcollection
+      match /qr-history/{qrId} {
+        allow read, write: if isShopOwner(shopId);
+      }
+    }
+
+    // Phone number to Shop/Employee ID lookup
+    match /employee_phone_to_shop_lookup/{phone} {
+      // Allow unauthenticated reads for login/signup checks.
+      allow read;
+      // Allow an owner to create/write, or an employee to update their own 'isProfileComplete' flag.
+      allow create, update: if isShopOwner(request.resource.data.shopId) || request.auth.token.phone_number == phone;
+      allow delete: if isShopOwner(get(/databases/$(database)/documents/employee_phone_to_shop_lookup/$(phone)).data.shopId);
+    }
+    
+    // Platform-wide config
+    match /platform_config/{docId} {
+        // Allow anyone to read, but only specific super admins to write.
+        allow read;
+        allow write: if request.auth != null && request.auth.token.phone_number == "+919790296771";
+    }
+
+    // --- Collection Group Rules for Multi-Branch Queries ---
+    // These allow an admin to list all employees/attendance/etc. across all their owned shops.
+    
+    match /{path=**}/employees/{employeeId} {
+        allow list: if request.auth.uid == resource.data.ownerId;
+    }
+    
+    match /{path=**}/attendance/{attendanceId} {
+        allow list: if request.auth.uid == resource.data.ownerId;
+    }
+
+    match /{path=**}/leaveRequests/{leaveRequestId} {
+        allow list: if request.auth.uid == resource.data.ownerId;
+    }
+  }
+
+}

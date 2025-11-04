@@ -1,0 +1,255 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ----------------------
+    // Helper Functions
+    // ----------------------
+    function isSignedIn() {
+      return request.auth != null;
+    }
+ function isOwnerOfResourceShop() {
+  return isSignedIn() &&
+         resource.data.shopId != null &&
+         isShopOwner(resource.data.shopId);
+}
+    
+    // Shop owner check (merged logic from both versions)
+    function isShopOwner(shopId) {
+      return (isSignedIn() &&
+              (request.auth.uid == shopId ||
+               request.auth.uid == get(/databases/$(database)/documents/shops/$(shopId)).data.ownerId));
+    }
+
+    function isSelf(docId, collection) {
+      let shopId = request.resource.data.shopId;
+      return (isSignedIn() &&
+              request.auth.uid == get(/databases/$(database)/documents/shops/$(shopId)/$(collection)/$(docId)).data.uid)
+             || (request.resource.data.uid == request.auth.uid);
+    }
+
+    function isSelfByPhone(phone) {
+      return (isSignedIn() &&
+              request.auth.uid == get(/databases/$(database)/documents/employee_phone_to_shop_lookup/$(phone)).data.uid)
+             || (request.resource.data.uid == request.auth.uid);
+    }
+
+    // Super Admin checks
+    function isSuperAdminByUID() {
+      return request.auth.uid == "9x42M1n2aPVAH8ygeZt1Jc3A4e52";
+    }
+
+    function isSuperAdminByPhone() {
+      return request.auth.token.phone_number == "+919790296771";
+    }
+
+    function isSuperAdmin() {
+      return isSuperAdminByUID() || isSuperAdminByPhone();
+    }
+
+    // Employee checks
+    function isEmployeeByUsersCollection(shopId) {
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Employee' &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.shopId == shopId;
+    }
+
+    function isEmployeeBySubcollection(shopId) {
+      return exists(/databases/$(database)/documents/shops/$(shopId)/employees/$(request.auth.uid));
+    }
+
+   function isEmployeeOfShop(shopId) {
+  let uid = request.auth.uid;
+  let phone = request.auth.token.phone_number;
+
+  // Check by UID
+  let uidPath = /databases/$(database)/documents/shops/$(shopId)/employees/$(uid);
+
+  // Check by phone lookup
+  let phoneLookupPath = /databases/$(database)/documents/employee_phone_to_shop_lookup/$(phone);
+
+  return exists(uidPath) ||
+         (exists(phoneLookupPath) && get(phoneLookupPath).data.shopId == shopId);
+}
+
+
+    function isEmployee(shopId) {
+      return isEmployeeByUsersCollection(shopId) ||
+             isEmployeeBySubcollection(shopId) ||
+             isEmployeeOfShop(shopId);
+    }
+
+    function getEmployeeId() {
+      let phone = request.auth.token.phone_number;
+      return get(/databases/$(database)/documents/employee_phone_to_shop_lookup/$(phone)).data.employeeDocId;
+    }
+
+    function isOwnEmployeeDocument(shopId, employeeId) {
+      let phone = request.auth.token.phone_number;
+      return exists(/databases/$(database)/documents/employee_phone_to_shop_lookup/$(phone)) &&
+             get(/databases/$(database)/documents/employee_phone_to_shop_lookup/$(phone)).data.shopId == shopId &&
+             get(/databases/$(database)/documents/employee_phone_to_shop_lookup/$(phone)).data.employeeDocId == employeeId;
+    }
+
+    function isOwnerOrEmployee(shopId) {
+      return isShopOwner(shopId) || isEmployee(shopId);
+    }
+
+    function isEmployeeSelf() {
+      // Check if the incoming UID matches the authenticated user's UID.
+      // This is used for an employee updating their own profile.
+      return request.auth.uid == request.resource.data.uid;
+    }
+
+    // ----------------------
+    // Users Collection
+    // ----------------------
+    match /users/{userId} {
+      allow list: if true;
+      allow read: if request.auth.uid == userId ||
+                     isShopOwner(resource.data.shopId) ||
+                     isSuperAdmin();
+      allow create: if request.auth.uid == userId ||
+                       isShopOwner(userId) ||
+                       isSuperAdmin();
+      allow update: if request.auth.uid == userId || isSuperAdmin();
+      allow delete: if request.auth.uid == userId || isSuperAdmin();
+    }
+
+    // ----------------------
+    // Employee Phone Lookup
+    // ----------------------
+    match /employee_phone_to_shop_lookup/{phone} {
+      allow get, read: if true; // allow unauthenticated reads (signup/login)
+      allow create: if isSignedIn() &&
+                   (isShopOwner(request.resource.data.shopId) ||
+                    !exists(/databases/$(database)/documents/employee_phone_to_shop_lookup/$(phone)));
+      allow write: if isShopOwner(request.resource.data.shopId) ||
+                      isSelfByPhone(phone) ||
+                      request.auth.uid == request.resource.data.uid;
+      allow update: if isShopOwner(request.resource.data.shopId) || 
+                       request.auth.token.phone_number == phone || 
+                       isSelf(phone, 'employees') ||
+                       isSelfByPhone(phone);
+      allow delete: if isSuperAdmin();
+      // Allow deletion if the user is the shop owner. THIS IS THE FIX.
+      allow delete: if isShopOwner(resource.data.shopId);
+    }
+
+   // Platform-wide config
+    match /platform_config/{docId} {
+        // Allow anyone to read, but only specific super admins to write.
+        allow read;
+        allow write: if request.auth != null && request.auth.token.phone_number == "+919790296771";
+    }
+
+    // ----------------------
+    // Shops Collection
+    // ----------------------
+    match /shops/{shopId} {
+      allow list: if isSuperAdmin() || isSignedIn() ||
+                  (request.query.where.size() == 1 &&
+                   request.query.where[0].field.string_value == 'ownerId' &&
+                   request.query.where[0].op.string_value == '==' &&
+                   request.query.where[0].value.string_value == request.auth.uid);
+
+      allow read, get: if isShopOwner(shopId) ||
+                          isEmployee(shopId) ||
+                          (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+                           get(/databases/$(database)/documents/users/$(request.auth.uid)).data.shopId == shopId) ||
+                          isSuperAdmin();
+      allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
+      allow update, delete: if isShopOwner(shopId) || isSuperAdmin();
+
+      // Employees Subcollection
+      match /employees/{employeeId} {
+        allow create, delete: if isShopOwner(shopId) || isSuperAdmin();
+     
+        allow read: if isShopOwner(shopId) ||
+                       isEmployeeOfShop(shopId) ||
+                       request.auth.uid == resource.data.uid ||
+                       isOwnEmployeeDocument(shopId, employeeId) ||
+                       (request.auth.token.phone_number != null && employeeId == getEmployeeId()) ||
+                       isSuperAdmin();
+
+        allow update: if isShopOwner(shopId) ||
+                         request.auth.uid == resource.data.uid ||
+                         isEmployeeSelf() ||
+                         isOwnEmployeeDocument(shopId, employeeId) ||
+                         (request.auth.token.phone_number != null && employeeId == getEmployeeId()) ||
+                         isSuperAdmin() ||
+                         (isSignedIn() && request.auth.uid == employeeId && isEmployee(shopId));
+      }
+
+      // Attendance Subcollection
+      match /attendance/{recordId} {
+        allow read, get, list: if isOwnerOrEmployee(shopId) ||
+                                  request.auth.uid == resource.data.userId ||
+                                  isSuperAdmin();
+        allow create: if isShopOwner(shopId) ||
+                         (isEmployee(shopId) && request.auth.uid == request.resource.data.userId) ||
+                         request.resource.data.userId == request.auth.uid ||
+                         isOwnEmployeeDocument(shopId, request.resource.data.userId) ||
+                         (request.auth.token.phone_number != null && request.resource.data.userId == getEmployeeId()) ||
+                         isSuperAdmin();
+        allow update: if isShopOwner(shopId) ||
+                         request.auth.uid == resource.data.userId ||
+                         (isEmployee(shopId) && request.auth.uid == resource.data.userId) ||
+                         isOwnEmployeeDocument(shopId, resource.data.userId) ||
+                         (request.auth.token.phone_number != null && resource.data.userId == getEmployeeId()) ||
+                         isSuperAdmin();
+        allow delete: if isShopOwner(shopId) || isSuperAdmin();
+      }
+
+      // Leave Requests Subcollection
+      match /leaveRequests/{requestId} {
+        allow read, get, list: if isOwnerOrEmployee(shopId) ||
+                                  request.auth.uid == resource.data.userId ||
+                                  (request.auth.token.phone_number != null &&
+                                   (resource.data.userId == getEmployeeId() ||
+                                    isOwnEmployeeDocument(shopId, resource.data.userId))) ||
+                                  isSuperAdmin();
+        allow create: if request.resource.data.userId == request.auth.uid ||
+                         (isEmployee(shopId) && request.auth.uid == request.resource.data.userId) ||
+                         isOwnEmployeeDocument(shopId, request.resource.data.userId) ||
+                         (request.auth.token.phone_number != null && request.resource.data.userId == getEmployeeId()) ||
+                         isSuperAdmin();
+        allow update, delete: if isShopOwner(shopId) || isSuperAdmin();
+      }
+
+      // QR History Subcollection
+      match /qr-history/{docId} {
+        allow read, write: if isShopOwner(shopId) || isSuperAdmin();
+      }
+
+      // Config Subcollection
+      match /config/{docId} {
+        allow read, write: if isShopOwner(shopId) || isSuperAdmin();
+      }
+    }
+
+    
+
+    // ----------------------
+// Collection Group Queries (All Branches view)
+// ----------------------
+// These rules allow shop owners/admins to query employees, attendance, 
+// and leaveRequests across all their owned shops.
+
+match /{path=**}/employees/{employeeId} {
+  allow get, list: if isOwnerOfResourceShop() || request.auth.uid == resource.data.ownerId;
+}
+
+match /{path=**}/attendance/{attendanceId} {
+  allow get, list: if isOwnerOfResourceShop() || request.auth.uid == resource.data.ownerId;
+}
+
+match /{path=**}/leaveRequests/{leaveId} {
+  allow get, list: if isOwnerOfResourceShop() || request.auth.uid == resource.data.ownerId;
+}
+
+
+  }
+
+}
