@@ -250,10 +250,8 @@ const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds }: { allBran
                   <TableRow>
                   <TableHead>Name</TableHead>
                    {selectedBranchId === 'all' && <TableHead>Branch</TableHead>}
-                  <TableHead>Contact</TableHead>
                   <TableHead>Role</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Date Joined</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
               </TableHeader>
@@ -273,19 +271,12 @@ const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds }: { allBran
                       </div>
                       </TableCell>
                        {selectedBranchId === 'all' && <TableCell>{employee.shopName || 'N/A'}</TableCell>}
-                      <TableCell>
-                          <div>
-                              {employee.email && <div className="text-sm">{employee.email}</div>}
-                              <div className="text-sm text-muted-foreground">{employee.phone || 'Not provided'}</div>
-                          </div>
-                      </TableCell>
                       <TableCell>{employee.role}</TableCell>
                       <TableCell>
                       <Badge variant={getStatusVariant(employee.status)}>
                           {employee.status}
                       </Badge>
                       </TableCell>
-                      <TableCell>{employee.id && formattedDates[employee.id] ? formattedDates[employee.id] : ''}</TableCell>
                        <TableCell className="text-right">
                           <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white" onClick={() => handleViewProfile(employee)}>
                               <Eye className="mr-2 h-4 w-4"/>
