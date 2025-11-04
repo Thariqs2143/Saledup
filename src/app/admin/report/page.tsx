@@ -27,9 +27,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from '@/components/ui/separator';
 import Link from 'next/link';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList }from "@/components/ui/command";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
 
 // Extend jsPDF with autoTable
@@ -819,7 +818,6 @@ export default function ReportsPage() {
     const [selectedStatus, setSelectedStatus] = useState<string>('all');
     
     const [openBranchSelector, setOpenBranchSelector] = useState(false);
-    const isMobile = useIsMobile();
 
 
     useEffect(() => {
@@ -988,13 +986,13 @@ export default function ReportsPage() {
                     </TabsList>
                     
                     <div className="flex flex-col gap-4 pt-4">
-                        <Sheet open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
-                            <SheetTrigger asChild>{branchSelectorButton}</SheetTrigger>
-                            <SheetContent side="bottom">
-                                <SheetHeader className="p-4"><SheetTitle>Select Branch</SheetTitle></SheetHeader>
-                                <div className="p-4">{branchSelectorContent}</div>
-                            </SheetContent>
-                        </Sheet>
+                        <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
+                            <DialogTrigger asChild>{branchSelectorButton}</DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader><DialogTitle>Select Branch</DialogTitle></DialogHeader>
+                                {branchSelectorContent}
+                            </DialogContent>
+                        </Dialog>
                         <Sheet>
                             <SheetTrigger asChild>
                                 <Button variant="outline" className="w-full">
