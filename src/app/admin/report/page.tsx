@@ -1052,13 +1052,6 @@ export default function ReportsPage() {
                     <CardTitle>Branch & Report Filters</CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-col md:flex-row items-center gap-4">
-                     <div className="relative w-full md:w-auto md:flex-1">
-                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            placeholder="Search reports..."
-                            className="pl-8 w-full"
-                        />
-                    </div>
                     <Popover open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
                         <PopoverTrigger asChild>
                             <Button
@@ -1147,3 +1140,6 @@ export default function ReportsPage() {
     
 
 
+
+
+    
