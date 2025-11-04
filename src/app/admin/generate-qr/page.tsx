@@ -37,6 +37,13 @@ type ActivityRecord = {
     userImageUrl?: string;
 };
 
+type QrHistoryRecord = {
+    id: string;
+    generatedAt: Timestamp;
+    qrCodeUrl: string;
+    type: 'permanent' | 'dynamic';
+};
+
 
 const PermanentQrTab = () => {
     const [qrCodeUrl, setQrCodeUrl] = useState('');
@@ -93,7 +100,8 @@ const PermanentQrTab = () => {
             await setDoc(doc(db, 'shops', authUser.uid, 'qr-history', 'permanent-qr'), {
                 shopId: authUser.uid,
                 generatedAt: Timestamp.now(),
-                qrCodeUrl: generatedUrl
+                qrCodeUrl: generatedUrl,
+                type: 'permanent'
             }, { merge: true });
         } catch (error) {
             console.error("Error saving QR code to history:", error);
@@ -121,11 +129,11 @@ const PermanentQrTab = () => {
     };
 
     return (
-        <Card className="w-full max-w-lg mx-auto transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
+        <Card className="w-full transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
             <CardHeader>
             <CardTitle>Permanent QR Code</CardTitle>
             <CardDescription>
-                This is your permanent attendance QR code for your shop. Print it and place it in your store for employees to scan.
+                Print and place this in your store for employees to scan.
             </CardDescription>
             </CardHeader>
             <CardContent className="flex items-center justify-center p-8">
@@ -171,8 +179,9 @@ const AdvancedQrTab = () => {
     const [timeLeft, setTimeLeft] = useState(15);
     const [authUser, setAuthUser] = useState<AuthUser | null>(null);
     const [shopName, setShopName] = useState('');
+    const { toast } = useToast();
 
-    const generateDynamicQr = useCallback(() => {
+    const generateDynamicQr = useCallback(async () => {
         if (!authUser || !shopName) return;
         
         const timestamp = Date.now();
@@ -180,7 +189,20 @@ const AdvancedQrTab = () => {
         const generatedUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${data}`;
         setQrCodeUrl(generatedUrl);
         setTimeLeft(15);
-    }, [authUser, shopName]);
+        
+        try {
+             await addDoc(collection(db, 'shops', authUser.uid, 'qr-history'), {
+                shopId: authUser.uid,
+                generatedAt: Timestamp.fromMillis(timestamp),
+                qrCodeUrl: generatedUrl,
+                type: 'dynamic'
+            });
+        } catch(error) {
+            console.error("Error saving dynamic QR to history:", error);
+            toast({ title: "History Error", description: "Could not save dynamic QR history log.", variant: "destructive" });
+        }
+
+    }, [authUser, shopName, toast]);
     
      useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -213,10 +235,10 @@ const AdvancedQrTab = () => {
     }, [timeLeft, qrCodeUrl]);
 
     return (
-        <Card className="w-full max-w-lg mx-auto transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
+        <Card className="w-full transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
             <CardHeader>
                 <CardTitle>Advanced QR Code (Dynamic)</CardTitle>
-                <CardDescription>This QR code automatically refreshes to prevent screenshot misuse. Display this on a tablet or screen in your store.</CardDescription>
+                <CardDescription>This refreshes to prevent misuse. Display on a tablet.</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col items-center justify-center p-8 gap-6">
                 {qrCodeUrl ? (
@@ -459,23 +481,15 @@ const ManualEntryTab = () => {
 
 const QrCodeTabs = () => {
     return (
-        <div className='space-y-6'>
-            <Tabs defaultValue="permanent" className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="permanent" className="flex items-center gap-2">
-                        <QrCode className="h-4 w-4"/> Permanent
-                    </TabsTrigger>
-                    <TabsTrigger value="advanced" className="flex items-center gap-2">
-                        <ShieldCheck className="h-4 w-4"/> Advanced
-                    </TabsTrigger>
-                </TabsList>
-                <TabsContent value="permanent" className="mt-6">
-                    <PermanentQrTab />
-                </TabsContent>
-                <TabsContent value="advanced" className="mt-6">
-                    <AdvancedQrTab />
-                </TabsContent>
-            </Tabs>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+             <div className="space-y-8">
+                <PermanentQrTab />
+                <AdvancedQrTab />
+            </div>
+            <div className="space-y-8">
+                <RecentActivity />
+                <QrHistory />
+            </div>
         </div>
     );
 }
@@ -491,7 +505,6 @@ const RecentActivity = () => {
             if (user) {
                 setAuthUser(user);
                 
-                // Fetch all employees once to map their details
                 const employeesRef = collection(db, 'shops', user.uid, 'employees');
                 const empSnapshot = await getDocs(employeesRef);
                 const employeesData = empSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as User));
@@ -507,12 +520,9 @@ const RecentActivity = () => {
     useEffect(() => {
         if (!authUser) return;
         if (allEmployees.length === 0 && authUser) {
-            // This condition handles the initial load where employees might not be fetched yet.
-            // It will re-run once allEmployees state is updated.
             setLoading(false); 
             return;
         }
-
 
         setLoading(true);
         const attendanceRef = collection(db, 'shops', authUser.uid, 'attendance');
@@ -578,6 +588,70 @@ const RecentActivity = () => {
     )
 }
 
+const QrHistory = () => {
+    const [history, setHistory] = useState<QrHistoryRecord[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+
+    useEffect(() => {
+        const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+            if (user) setAuthUser(user);
+        });
+        return () => unsubscribeAuth();
+    }, []);
+
+    useEffect(() => {
+        if (!authUser) return;
+
+        setLoading(true);
+        const historyRef = collection(db, 'shops', authUser.uid, 'qr-history');
+        const q = query(historyRef, orderBy('generatedAt', 'desc'), limit(5));
+
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const fetchedHistory = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data(),
+            } as QrHistoryRecord));
+            setHistory(fetchedHistory);
+            setLoading(false);
+        });
+
+        return () => unsubscribe();
+    }, [authUser]);
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2"><History className="h-5 w-5" />Generation History</CardTitle>
+                <CardDescription>A log of the most recently generated QR codes.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                {loading ? (
+                    <div className="flex items-center justify-center p-8">
+                        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                    </div>
+                ) : history.length > 0 ? (
+                    <div className="space-y-3">
+                        {history.map(item => (
+                            <div key={item.id} className="flex items-center justify-between text-sm">
+                                <div className="flex items-center gap-2">
+                                   <QrCode className="h-4 w-4 text-muted-foreground" />
+                                    <span className="font-semibold capitalize">{item.type}</span>
+                                </div>
+                                <p className="text-xs text-muted-foreground">
+                                    {formatDistanceToNow(item.generatedAt.toDate(), { addSuffix: true })}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <p className="text-sm text-muted-foreground text-center py-4">No QR codes generated yet.</p>
+                )}
+            </CardContent>
+        </Card>
+    );
+};
+
 
 export default function GenerateAndEntryPage() {
   return (
@@ -592,10 +666,7 @@ export default function GenerateAndEntryPage() {
                 <TabsTrigger value="manual">Manual Entry</TabsTrigger>
             </TabsList>
             <TabsContent value="generate" className="mt-6">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <QrCodeTabs />
-                    <RecentActivity />
-                </div>
+                <QrCodeTabs />
             </TabsContent>
             <TabsContent value="manual" className="mt-6">
                 <ManualEntryTab />
@@ -604,3 +675,5 @@ export default function GenerateAndEntryPage() {
     </div>
   );
 }
+
+    
