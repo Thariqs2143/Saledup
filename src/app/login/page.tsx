@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useRef } from "react";
@@ -68,12 +67,12 @@ export default function LoginPage() {
         <div ref={recaptchaContainerRef}></div>
         
         {/* Left side with illustration */}
-        <div className="hidden md:flex relative h-full bg-slate-900">
+        <div className="hidden md:flex relative h-full">
              <Image
                 src="https://res.cloudinary.com/dnkghymx5/image/upload/v1762241011/Generated_Image_November_04_2025_-_12_50PM_1_hslend.png"
                 alt="Business tools illustration"
                 fill
-                className="object-contain"
+                className="object-cover"
                 data-ai-hint="business management"
             />
         </div>
