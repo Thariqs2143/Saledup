@@ -54,8 +54,6 @@ export default function LoginPage() {
 
             if (phoneLookupSnap.exists() && phoneLookupSnap.data()?.isAdmin) {
                 // User is an existing admin, proceed to login flow
-                 localStorage.setItem('loginTarget', 'admin');
-                 localStorage.setItem('loginPhone', phone);
                  router.push(`/admin/login?phone=${phone}`);
 
             } else if (phoneLookupSnap.exists() && !phoneLookupSnap.data()?.isAdmin) {
@@ -64,8 +62,6 @@ export default function LoginPage() {
 
             } else {
                 // New user, proceed to signup flow
-                localStorage.setItem('loginTarget', 'admin');
-                localStorage.setItem('loginPhone', phone);
                 router.push(`/admin/signup?phone=${phone}`);
             }
 
@@ -81,34 +77,27 @@ export default function LoginPage() {
   return (
     <div className="flex flex-col md:grid md:grid-cols-2 min-h-screen w-full">
         <div ref={recaptchaContainerRef}></div>
-        {/* Left side with illustration - visible on all screens, but order changes on mobile */}
-        <div className="flex md:flex-col items-center justify-center bg-[#0C2A6A] p-6 md:p-10 text-white relative overflow-hidden order-1 md:order-2">
+        {/* Left side with illustration */}
+        <div className="flex-1 md:flex-col items-center justify-center bg-[#0C2A6A] p-6 md:p-10 text-white relative overflow-hidden order-1 md:order-2 h-64 md:h-auto">
              <Image
-                src="https://picsum.photos/seed/1/1000/1200"
+                src="https://storage.googleapis.com/framer-usercontent/images/tHflOaA13praLY311Lg9JA5A.png"
                 alt="Business tools illustration"
                 fill
-                className="object-cover opacity-10"
+                className="object-contain opacity-20"
                 data-ai-hint="business tools"
             />
-            <div className="relative z-10 text-center space-y-6">
-                <div className="hidden md:flex justify-center items-center gap-4">
+            <div className="relative z-10 text-center space-y-6 hidden md:block">
+                <div className="flex justify-center items-center gap-4">
                      <Shield className="h-16 w-16 text-white" />
                      <h1 className="text-6xl font-bold tracking-tighter">SALEDIN</h1>
                 </div>
-                 <Image
-                    src="https://storage.googleapis.com/framer-usercontent/images/tHflOaA13praLY311Lg9JA5A.png"
-                    alt="Business tools"
-                    width={500}
-                    height={300}
-                    className="mx-auto w-full max-w-[300px] md:max-w-[500px]"
-                />
             </div>
         </div>
 
         {/* Right side with login form */}
         <div className="flex flex-col items-center justify-center bg-background p-8 order-2 md:order-1">
             <div className="w-full max-w-sm">
-                <div className="text-center mb-10">
+                <div className="text-left mb-10">
                     <h1 className="text-3xl font-bold tracking-tight">India's #1 QR Powered Staff Attendance App</h1>
                     <div className="flex items-center my-4">
                         <hr className="w-full border-muted-foreground/20"/>
