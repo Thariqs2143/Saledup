@@ -464,23 +464,28 @@ export default function GenerateAndEntryPage() {
 
   return (
     <div className="flex flex-col gap-8">
-       <div className="flex flex-col gap-4">
+       <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="hidden md:block">
                 <h1 className="text-3xl font-bold tracking-tight">QR &amp; Manual Entry</h1>
                 <p className="text-muted-foreground">Generate QR codes or manually enter attendance records.</p>
             </div>
-            <div className="flex items-center justify-center space-x-2">
-                <Label htmlFor="view-mode-switch" className={cn("font-semibold", viewMode === 'qr' && 'text-primary')}>
-                    QR
-                </Label>
-                <Switch 
-                    id="view-mode-switch" 
-                    checked={viewMode === 'manual'} 
-                    onCheckedChange={(checked) => setViewMode(checked ? 'manual' : 'qr')}
-                />
-                <Label htmlFor="view-mode-switch" className={cn("font-semibold", viewMode === 'manual' && 'text-primary')}>
-                    Manual Entry
-                </Label>
+            <div className="w-full flex justify-center md:absolute md:top-0 md:right-0 md:w-auto">
+                <div className="inline-flex rounded-md border-2 border-primary bg-muted p-1">
+                    <Button 
+                        onClick={() => setViewMode('qr')}
+                        variant={viewMode === 'qr' ? 'default' : 'ghost'} 
+                        className={cn("rounded-sm px-3 py-1.5 h-auto text-sm font-medium", viewMode === 'qr' ? 'shadow-sm' : '')}
+                    >
+                        QR Code
+                    </Button>
+                    <Button 
+                        onClick={() => setViewMode('manual')}
+                        variant={viewMode === 'manual' ? 'default' : 'ghost'} 
+                        className={cn("rounded-sm px-3 py-1.5 h-auto text-sm font-medium", viewMode === 'manual' ? 'shadow-sm' : '')}
+                    >
+                        Manual Entry
+                    </Button>
+                </div>
             </div>
        </div>
 
