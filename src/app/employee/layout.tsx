@@ -24,7 +24,7 @@ export default function EmployeeLayout({ children }: PropsWithChildren) {
   }
   
   return (
-    <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+    <div className="grid min-h-screen w-full md:grid-cols-[240px_1fr]">
       <EmployeeNav navItems={employeeNavItems} />
       <div className="flex flex-col">
         <header className="flex h-14 items-center gap-4 border-b bg-background px-4 md:hidden sticky top-0 z-40">

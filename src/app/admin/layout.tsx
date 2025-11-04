@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { PropsWithChildren } from 'react';
@@ -19,12 +20,12 @@ const adminNavItems: NavItem[] = [
 
 export default function AdminLayout({ children }: PropsWithChildren) {
   const pathname = usePathname();
-  if (pathname.startsWith('/admin/login') || pathname.startsWith('/admin/signup') || pathname === '/admin/complete-profile' || pathname === '/admin/add-branch') {
+  if (pathname === '/login' || pathname.startsWith('/admin/login') || pathname.startsWith('/admin/signup') || pathname === '/admin/complete-profile' || pathname === '/admin/add-branch') {
     return <>{children}</>
   }
 
   return (
-    <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+    <div className="grid min-h-screen w-full md:grid-cols-[240px_1fr]">
       <AdminNav navItems={adminNavItems} />
       <div className="flex flex-col">
         <header className="flex h-14 items-center gap-4 border-b bg-background px-4 md:hidden sticky top-0 z-40">
