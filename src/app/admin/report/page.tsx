@@ -156,35 +156,6 @@ const AttendanceReportTab = ({ allBranches, selectedBranch, authUser, date, sele
         }
     };
 
-    const handleExportCSV = () => {
-        if (filteredRecords.length === 0) return toast({ title: "No Data", variant: "destructive" });
-        setExporting(true);
-        const headers = ["Employee", "Date", "Check-in", "Check-out", "Status"];
-        let csvContent = "data:text/csv;charset=utf-8," + headers.join(",") + "\r\n";
-        filteredRecords.forEach(r => csvContent += [`"${r.userName}"`, `"${format(r.checkInTime.toDate(), 'yyyy-MM-dd')}"`, `"${format(r.checkInTime.toDate(), 'p')}"`, `"${r.checkOutTime ? format(r.checkOutTime.toDate(), 'p') : 'N/A'}"`, `"${r.status}"`].join(",") + "\r\n");
-        const link = document.createElement("a");
-        link.setAttribute("href", encodeURI(csvContent));
-        link.setAttribute("download", `attendance_report_${format(new Date(), 'yyyy-MM-dd')}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        setExporting(false);
-    };
-
-    const handleExportPDF = () => {
-        if (filteredRecords.length === 0) return toast({ title: "No Data", variant: "destructive" });
-        setExporting(true);
-        const doc = new jsPDF();
-        doc.text("Attendance Report", 14, 15);
-        doc.autoTable({
-            startY: 20,
-            head: [['Employee', 'Date', 'Check-in', 'Check-out', 'Status']],
-            body: filteredRecords.map(r => [r.userName, format(r.checkInTime.toDate(), 'PPP'), format(r.checkInTime.toDate(), 'p'), r.checkOutTime ? format(r.checkOutTime.toDate(), 'p') : 'N/A', r.status]),
-        });
-        doc.save(`attendance_report_${format(new Date(), 'yyyy-MM-dd')}.pdf`);
-        setExporting(false);
-    };
-
     return (
         <div className="space-y-6">
             <div className="space-y-4">
@@ -193,12 +164,7 @@ const AttendanceReportTab = ({ allBranches, selectedBranch, authUser, date, sele
                         <h3 className="text-xl font-bold">Report Results</h3>
                         <p className="text-sm text-muted-foreground">Found {filteredRecords.length} record(s) matching your criteria.</p>
                     </div>
-                     {isProTier ? (
-                        <div className="flex gap-2 w-full sm:w-auto">
-                            <Button className="w-full bg-green-600 hover:bg-green-700" onClick={handleExportCSV} disabled={exporting || filteredRecords.length === 0}>{exporting ? <Loader2 className="animate-spin" /> : <Download />}Export CSV</Button>
-                            <Button className="w-full bg-red-600 hover:bg-red-700" onClick={handleExportPDF} disabled={exporting || filteredRecords.length === 0}>{exporting ? <Loader2 className="animate-spin" /> : <Download />}Export PDF</Button>
-                        </div>
-                     ) : (
+                     {!isProTier && (
                          <div className="w-full sm:w-auto text-sm text-muted-foreground border p-2 rounded-md flex items-center gap-2">
                             <Lock className="h-4 w-4" />
                             <div>
@@ -215,7 +181,7 @@ const AttendanceReportTab = ({ allBranches, selectedBranch, authUser, date, sele
                                 <>
                                     <div className="grid gap-4 md:hidden">
                                         {filteredRecords.map(r => (
-                                            <Card key={r.id} className="p-4 space-y-3 border-2 border-foreground transition-all duration-300 ease-out hover:shadow-lg hover:border-primary">
+                                            <Card key={r.id} className="p-4 space-y-3 rounded-lg border-2 border-border hover:border-primary hover:shadow-lg transition-all">
                                                 <div className="flex justify-between items-start">
                                                     <div><p className="font-bold">{r.userName}</p><p className="text-sm text-muted-foreground">{format(r.checkInTime.toDate(), 'MMM d, yyyy')}</p></div>
                                                     <Badge variant={getStatusVariant(r.status)}>{r.status}</Badge>
@@ -227,7 +193,7 @@ const AttendanceReportTab = ({ allBranches, selectedBranch, authUser, date, sele
                                             </Card>
                                         ))}
                                     </div>
-                                    <div className="hidden md:block rounded-lg border-2 border-foreground">
+                                    <div className="hidden md:block rounded-lg border">
                                         <Table>
                                             <TableHeader>
                                                 <TableRow>
@@ -373,39 +339,6 @@ const PayrollReportTab = ({ shopData, authUser }: { shopData: ShopData, authUser
         setLoading(false);
     };
     
-    const handleExportCSV = () => {
-        if (payrollData.length === 0) return toast({ title: "No Data", variant: "destructive" });
-        setExporting(true);
-        const headers = ["Employee", "Base Salary", "Bonus/Overtime", "Advance/Deduction", "Final Salary"];
-        let csvContent = "data:text/csv;charset=utf-8," + headers.join(",") + "\r\n";
-        payrollData.forEach(p => csvContent += [
-            `"${p.employeeName}"`, p.earnings.base, p.earnings.bonus, p.deductions.advances, p.finalSalary
-        ].join(",") + "\r\n");
-        const link = document.createElement("a");
-        link.setAttribute("href", encodeURI(csvContent));
-        link.setAttribute("download", `payroll_report_${format(selectedDate, 'yyyy-MM')}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        setExporting(false);
-    };
-
-    const handleExportPDF = () => {
-        if (payrollData.length === 0) return toast({ title: "No Data", variant: "destructive" });
-        setExporting(true);
-        const doc = new jsPDF();
-        doc.text(`Payroll Report for ${format(selectedDate, 'MMMM yyyy')}`, 14, 15);
-        doc.autoTable({
-            startY: 20,
-            head: [['Employee', 'Base (₹)', 'Bonus (₹)', 'Deduction (₹)', 'Final Salary (₹)']],
-            body: payrollData.map(p => [
-                p.employeeName, p.earnings.base.toLocaleString(), p.earnings.bonus.toLocaleString(), p.deductions.advances.toLocaleString(), p.finalSalary.toLocaleString()
-            ]),
-        });
-        doc.save(`payroll_report_${format(selectedDate, 'yyyy-MM')}.pdf`);
-        setExporting(false);
-    };
-    
     const handleDownloadSlip = (employeeData: PayrollData) => {
         const doc = new jsPDF();
         const totalEarnings = employeeData.earnings.base + employeeData.earnings.bonus;
@@ -460,19 +393,19 @@ const PayrollReportTab = ({ shopData, authUser }: { shopData: ShopData, authUser
 
     return (
         <div className="space-y-6">
-            <Card className="border-2 border-foreground transition-all duration-300 ease-out hover:shadow-lg hover:border-primary">
+            <Card>
                 <CardHeader>
                     <CardTitle>Generate Payroll</CardTitle>
                     <CardDescription>Select a month to calculate salaries for all employees based on their base pay and leave.</CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col sm:flex-row items-center gap-4">
-                    <div className="space-y-2">
+                    <div className="space-y-2 w-full">
                         <Label>Select Year</Label>
                         <Select
                             value={String(selectedDate.getFullYear())}
                             onValueChange={(year) => setSelectedDate(setYear(selectedDate, parseInt(year)))}
                         >
-                            <SelectTrigger className="w-[180px]">
+                            <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Select Year" />
                             </SelectTrigger>
                             <SelectContent>
@@ -484,13 +417,13 @@ const PayrollReportTab = ({ shopData, authUser }: { shopData: ShopData, authUser
                             </SelectContent>
                         </Select>
                     </div>
-                    <div className="space-y-2">
+                    <div className="space-y-2 w-full">
                         <Label>Select Month</Label>
                         <Select
                             value={String(selectedDate.getMonth())}
                             onValueChange={(month) => setSelectedDate(setMonth(selectedDate, parseInt(month)))}
                         >
-                             <SelectTrigger className="w-[180px]">
+                             <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Select Month" />
                             </SelectTrigger>
                             <SelectContent>
@@ -500,25 +433,20 @@ const PayrollReportTab = ({ shopData, authUser }: { shopData: ShopData, authUser
                             </SelectContent>
                         </Select>
                     </div>
-                    <Button onClick={handleGeneratePayroll} disabled={loading} className="mt-auto">
+                    <Button onClick={handleGeneratePayroll} disabled={loading} className="w-full mt-auto">
                         {loading ? <Loader2 className="mr-2 animate-spin"/> : <Calculator className="mr-2"/>}
                         Generate Report
                     </Button>
                 </CardContent>
             </Card>
-            <Card className="border-2 border-foreground transition-all duration-300 ease-out hover:shadow-lg hover:border-primary">
+            <Card>
                 <CardHeader>
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div>
                             <CardTitle>Payroll Results for {format(selectedDate, 'MMMM yyyy')}</CardTitle>
                             <CardDescription>Found {payrollData.length} employee(s). You can add bonuses or deductions below.</CardDescription>
                         </div>
-                        {isProTier ? (
-                            <div className="flex gap-2 w-full sm:w-auto">
-                               <Button className="w-full bg-green-600 hover:bg-green-700" onClick={handleExportCSV} disabled={exporting || payrollData.length === 0}>{exporting ? <Loader2 className="animate-spin" /> : <Download />}Export CSV</Button>
-                               <Button className="w-full bg-red-600 hover:bg-red-700" onClick={handleExportPDF} disabled={exporting || payrollData.length === 0}>{exporting ? <Loader2 className="animate-spin" /> : <Download />}Export PDF</Button>
-                            </div>
-                        ): (
+                        {!isProTier && (
                              <div className="w-full sm:w-auto text-sm text-muted-foreground border p-2 rounded-md flex items-center gap-2">
                                 <Lock className="h-4 w-4" />
                                 <div>
@@ -735,51 +663,6 @@ const MusterRollTab = ({ authUser }: { authUser: AuthUser }) => {
         setMusterData(musterResults);
         setLoading(false);
     };
-    
-     const handleExportCSV = () => {
-        if (musterData.length === 0) return toast({ title: "No Data", variant: "destructive" });
-        setExporting(true);
-        const headers = ["Employee", ...daysInMonth.map(d => format(d, 'dd'))];
-        let csvContent = "data:text/csv;charset=utf-8," + headers.join(",") + "\r\n";
-        musterData.forEach(p => {
-            const row = [`"${p.employeeName}"`];
-            daysInMonth.forEach(d => {
-                row.push(p.dailyStatus[d.getDate()] || 'A');
-            });
-            csvContent += row.join(",") + "\r\n";
-        });
-        const link = document.createElement("a");
-        link.setAttribute("href", encodeURI(csvContent));
-        link.setAttribute("download", `muster_roll_${format(selectedDate, 'yyyy-MM')}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        setExporting(false);
-    };
-
-    const handleExportPDF = () => {
-        if (musterData.length === 0) return toast({ title: "No Data", variant: "destructive" });
-        setExporting(true);
-        const doc = new jsPDF({ orientation: 'landscape' });
-        doc.text(`Muster Roll for ${format(selectedDate, 'MMMM yyyy')}`, 14, 15);
-        doc.autoTable({
-            startY: 20,
-            head: [['Employee', ...daysInMonth.map(d => format(d, 'dd'))]],
-            body: musterData.map(p => [
-                p.employeeName,
-                ...daysInMonth.map(d => p.dailyStatus[d.getDate()] || 'A')
-            ]),
-            styles: {
-                cellPadding: 1,
-                fontSize: 8,
-            },
-            headStyles: {
-                fillColor: [22, 163, 74],
-            },
-        });
-        doc.save(`muster_roll_${format(selectedDate, 'yyyy-MM')}.pdf`);
-        setExporting(false);
-    };
 
     const getStatusClass = (status: 'P' | 'A' | 'H' | 'L') => {
         switch (status) {
@@ -793,7 +676,7 @@ const MusterRollTab = ({ authUser }: { authUser: AuthUser }) => {
 
     return (
         <div className="space-y-6">
-            <Card className="border-2 border-foreground transition-all duration-300 ease-out hover:shadow-lg hover:border-primary">
+            <Card>
                 <CardHeader>
                     <CardTitle>Generate Muster Roll</CardTitle>
                     <CardDescription>Select a month to generate a classic attendance muster grid for all active employees.</CardDescription>
@@ -839,16 +722,12 @@ const MusterRollTab = ({ authUser }: { authUser: AuthUser }) => {
                     </Button>
                 </CardContent>
             </Card>
-            <Card className="border-2 border-foreground transition-all duration-300 ease-out hover:shadow-lg hover:border-primary">
+            <Card>
                  <CardHeader>
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div>
                             <CardTitle>Muster Roll for {format(selectedDate, 'MMMM yyyy')}</CardTitle>
                             <CardDescription>P = Present, A = Absent, H = Half-day, L = On Leave</CardDescription>
-                        </div>
-                        <div className="flex gap-2 w-full sm:w-auto">
-                           <Button className="w-full bg-green-600 hover:bg-green-700" onClick={handleExportCSV} disabled={exporting || musterData.length === 0}>{exporting ? <Loader2 className="animate-spin" /> : <Download />}Export CSV</Button>
-                           <Button className="w-full bg-red-600 hover:bg-red-700" onClick={handleExportPDF} disabled={exporting || musterData.length === 0}>{exporting ? <Loader2 className="animate-spin" /> : <Download />}Export PDF</Button>
                         </div>
                     </div>
                 </CardHeader>
@@ -996,143 +875,278 @@ export default function ReportsPage() {
 
     return (
         <div className="space-y-6">
-            <div className="hidden md:block">
-                <h1 className="text-3xl font-bold tracking-tight">Reports &amp; Payroll</h1>
-                <p className="text-muted-foreground">Filter records and generate monthly salary reports.</p>
+            <div className="md:hidden">
+                 <Tabs defaultValue="attendance" className="w-full">
+                    <TabsList className="h-auto items-center justify-center rounded-md p-1 grid w-full grid-cols-3 bg-primary text-primary-foreground">
+                        <TabsTrigger value="attendance" className="data-[state=active]:bg-background data-[state=active]:text-foreground">
+                            <span>Attendance<br/>Report</span>
+                        </TabsTrigger>
+                        <TabsTrigger value="muster" className="data-[state=active]:bg-background data-[state=active]:text-foreground">
+                            <span>Muster<br/>Roll</span>
+                        </TabsTrigger>
+                        <TabsTrigger value="payroll" className="data-[state=active]:bg-background data-[state=active]:text-foreground" disabled={selectedBranch.id === 'all'}>
+                            <span>Payroll<br/>Report</span>
+                        </TabsTrigger>
+                    </TabsList>
+
+                    <div className="flex flex-col gap-4 mt-6">
+                        <Popover open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    role="combobox"
+                                    aria-expanded={openBranchSelector}
+                                    className="w-full justify-between"
+                                >
+                                    <Building className="mr-2 h-4 w-4" />
+                                    {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
+                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                                <Command>
+                                    <CommandInput 
+                                        placeholder="Search branch..."
+                                        value={searchTerm}
+                                        onValueChange={setSearchTerm}
+                                    />
+                                    <CommandEmpty>No branches found.</CommandEmpty>
+                                    <CommandGroup>
+                                        <CommandList>
+                                        {filteredBranches.map((branch) => (
+                                            <CommandItem
+                                                key={branch.id}
+                                                value={branch.shopName!}
+                                                onSelect={() => {
+                                                    setSelectedBranch(branch);
+                                                    setOpenBranchSelector(false);
+                                                }}
+                                            >
+                                                {branch.shopName}
+                                            </CommandItem>
+                                        ))}
+                                        </CommandList>
+                                    </CommandGroup>
+                                </Command>
+                            </PopoverContent>
+                        </Popover>
+                        
+                        <Sheet>
+                            <SheetTrigger asChild>
+                                <Button variant="outline" className="w-full">
+                                    <Filter className="mr-2 h-4 w-4" />
+                                    Filter Report
+                                </Button>
+                            </SheetTrigger>
+                            <SheetContent>
+                                <SheetHeader>
+                                    <SheetTitle>Report Filters</SheetTitle>
+                                </SheetHeader>
+                                <div className="py-8 space-y-6">
+                                    <div className="space-y-2">
+                                        <Label>Date Range</Label>
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}>
+                                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                                    {date?.from ? (date.to ? `${format(date.from, "LLL dd, y")} - ${format(date.to, "LLL dd, y")}` : format(date.from, "LLL dd, y")) : <span>Pick a date</span>}
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-auto p-0" align="start">
+                                                <Calendar initialFocus mode="range" defaultMonth={date?.from} selected={date} onSelect={setDate} numberOfMonths={1}/>
+                                            </PopoverContent>
+                                        </Popover>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="employee">Employee</Label>
+                                        <Select onValueChange={setSelectedEmployeeId} value={selectedEmployeeId}>
+                                            <SelectTrigger id="employee"><SelectValue placeholder="All Employees" /></SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="all">All Employees</SelectItem>
+                                                {employees.map(emp => <SelectItem key={emp.id} value={emp.id!}>{emp.name}</SelectItem>)}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="status">Status</Label>
+                                        <Select onValueChange={setSelectedStatus} value={selectedStatus}>
+                                            <SelectTrigger id="status"><SelectValue placeholder="All Statuses" /></SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="all">All Statuses</SelectItem>
+                                                <SelectItem value="On-time">On-time</SelectItem>
+                                                <SelectItem value="Late">Late</SelectItem>
+                                                <SelectItem value="Absent">Absent</SelectItem>
+                                                <SelectItem value="Manual">Manual</SelectItem>
+                                                <SelectItem value="Half-day">Half-day</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+                            </SheetContent>
+                        </Sheet>
+                    </div>
+
+                    <TabsContent value="attendance" className="mt-6">
+                        <AttendanceReportTab allBranches={allBranches} selectedBranch={selectedBranch} authUser={authUser} date={date} selectedEmployeeId={selectedEmployeeId} selectedStatus={selectedStatus} employees={employees} />
+                    </TabsContent>
+                    <TabsContent value="muster" className="mt-6">
+                        {selectedBranch.id === 'all' ? (
+                            <div className="text-center py-12 text-muted-foreground border rounded-lg">
+                                <p>Please select an individual branch to view its Muster Roll.</p>
+                            </div>
+                        ) : (
+                            <MusterRollTab authUser={authUser} />
+                        )}
+                    </TabsContent>
+                    <TabsContent value="payroll" className="mt-6">
+                        {selectedBranch.id === 'all' ? (
+                             <div className="text-center py-12 text-muted-foreground border rounded-lg">
+                                <p>Please select an individual branch to generate a Payroll Report.</p>
+                            </div>
+                        ) : (
+                            <PayrollReportTab shopData={selectedBranch} authUser={authUser} />
+                        )}
+                    </TabsContent>
+                </Tabs>
             </div>
             
-             <div className="flex flex-col md:flex-row items-center gap-4 p-4 rounded-lg border-2 border-foreground transition-all duration-300 ease-out hover:shadow-lg hover:border-primary">
-                <Popover open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
-                    <PopoverTrigger asChild>
-                        <Button
-                            variant="outline"
-                            role="combobox"
-                            aria-expanded={openBranchSelector}
-                            className="w-full md:w-auto md:min-w-[250px] justify-between"
-                        >
-                            <Building className="mr-2 h-4 w-4" />
-                            {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
-                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                        <Command>
-                            <CommandInput 
-                                placeholder="Search branch..."
-                                value={searchTerm}
-                                onValueChange={setSearchTerm}
-                            />
-                            <CommandEmpty>No branches found.</CommandEmpty>
-                            <CommandGroup>
-                                <CommandList>
-                                {filteredBranches.map((branch) => (
-                                    <CommandItem
-                                        key={branch.id}
-                                        value={branch.shopName!}
-                                        onSelect={() => {
-                                            setSelectedBranch(branch);
-                                            setOpenBranchSelector(false);
-                                        }}
-                                    >
-                                        {branch.shopName}
-                                    </CommandItem>
-                                ))}
-                                </CommandList>
-                            </CommandGroup>
-                        </Command>
-                    </PopoverContent>
-                </Popover>
-                
-                <Sheet>
-                    <SheetTrigger asChild>
-                        <Button variant="outline" className="w-full md:w-auto">
-                            <Filter className="mr-2 h-4 w-4" />
-                            Filter Report
-                        </Button>
-                    </SheetTrigger>
-                    <SheetContent>
-                        <SheetHeader>
-                            <SheetTitle>Report Filters</SheetTitle>
-                        </SheetHeader>
-                        <div className="py-8 space-y-6">
-                            <div className="space-y-2">
-                                <Label>Date Range</Label>
-                                <Popover>
-                                    <PopoverTrigger asChild>
-                                        <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}>
-                                            <CalendarIcon className="mr-2 h-4 w-4" />
-                                            {date?.from ? (date.to ? `${format(date.from, "LLL dd, y")} - ${format(date.to, "LLL dd, y")}` : format(date.from, "LLL dd, y")) : <span>Pick a date</span>}
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0" align="start">
-                                        <Calendar initialFocus mode="range" defaultMonth={date?.from} selected={date} onSelect={setDate} numberOfMonths={1}/>
-                                    </PopoverContent>
-                                </Popover>
+            <div className="hidden md:block space-y-6">
+                <h1 className="text-3xl font-bold tracking-tight">Reports &amp; Payroll</h1>
+                <p className="text-muted-foreground">Filter records and generate monthly salary reports.</p>
+
+                 <div className="flex items-center gap-4">
+                    <Popover open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
+                        <PopoverTrigger asChild>
+                            <Button
+                                variant="outline"
+                                role="combobox"
+                                aria-expanded={openBranchSelector}
+                                className="w-full md:w-auto md:min-w-[250px] justify-between"
+                            >
+                                <Building className="mr-2 h-4 w-4" />
+                                {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
+                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                            <Command>
+                                <CommandInput 
+                                    placeholder="Search branch..."
+                                    value={searchTerm}
+                                    onValueChange={setSearchTerm}
+                                />
+                                <CommandEmpty>No branches found.</CommandEmpty>
+                                <CommandGroup>
+                                    <CommandList>
+                                    {filteredBranches.map((branch) => (
+                                        <CommandItem
+                                            key={branch.id}
+                                            value={branch.shopName!}
+                                            onSelect={() => {
+                                                setSelectedBranch(branch);
+                                                setOpenBranchSelector(false);
+                                            }}
+                                        >
+                                            {branch.shopName}
+                                        </CommandItem>
+                                    ))}
+                                    </CommandList>
+                                </CommandGroup>
+                            </Command>
+                        </PopoverContent>
+                    </Popover>
+                    
+                    <Sheet>
+                        <SheetTrigger asChild>
+                            <Button variant="outline" className="w-full md:w-auto">
+                                <Filter className="mr-2 h-4 w-4" />
+                                Filter Report
+                            </Button>
+                        </SheetTrigger>
+                        <SheetContent>
+                            <SheetHeader>
+                                <SheetTitle>Report Filters</SheetTitle>
+                            </SheetHeader>
+                            <div className="py-8 space-y-6">
+                                <div className="space-y-2">
+                                    <Label>Date Range</Label>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}>
+                                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                                {date?.from ? (date.to ? `${format(date.from, "LLL dd, y")} - ${format(date.to, "LLL dd, y")}` : format(date.from, "LLL dd, y")) : <span>Pick a date</span>}
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0" align="start">
+                                            <Calendar initialFocus mode="range" defaultMonth={date?.from} selected={date} onSelect={setDate} numberOfMonths={1}/>
+                                        </PopoverContent>
+                                    </Popover>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="employee-desktop">Employee</Label>
+                                    <Select onValueChange={setSelectedEmployeeId} value={selectedEmployeeId}>
+                                        <SelectTrigger id="employee-desktop"><SelectValue placeholder="All Employees" /></SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">All Employees</SelectItem>
+                                            {employees.map(emp => <SelectItem key={emp.id} value={emp.id!}>{emp.name}</SelectItem>)}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="status-desktop">Status</Label>
+                                    <Select onValueChange={setSelectedStatus} value={selectedStatus}>
+                                        <SelectTrigger id="status-desktop"><SelectValue placeholder="All Statuses" /></SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">All Statuses</SelectItem>
+                                            <SelectItem value="On-time">On-time</SelectItem>
+                                            <SelectItem value="Late">Late</SelectItem>
+                                            <SelectItem value="Absent">Absent</SelectItem>
+                                            <SelectItem value="Manual">Manual</SelectItem>
+                                            <SelectItem value="Half-day">Half-day</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
                             </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="employee">Employee</Label>
-                                <Select onValueChange={setSelectedEmployeeId} value={selectedEmployeeId}>
-                                    <SelectTrigger id="employee"><SelectValue placeholder="All Employees" /></SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All Employees</SelectItem>
-                                        {employees.map(emp => <SelectItem key={emp.id} value={emp.id!}>{emp.name}</SelectItem>)}
-                                    </SelectContent>
-                                </Select>
+                        </SheetContent>
+                    </Sheet>
+                </div>
+
+                <Tabs defaultValue="attendance" className="w-full">
+                    <TabsList className="h-auto items-center justify-center rounded-md p-1 grid w-full grid-cols-3 bg-primary text-primary-foreground">
+                         <TabsTrigger value="attendance" className="data-[state=active]:bg-background data-[state=active]:text-foreground">
+                           <span>Attendance Report</span>
+                        </TabsTrigger>
+                        <TabsTrigger value="muster" className="data-[state=active]:bg-background data-[state=active]:text-foreground">
+                            <span>Muster Roll</span>
+                        </TabsTrigger>
+                        <TabsTrigger value="payroll" className="data-[state=active]:bg-background data-[state=active]:text-foreground" disabled={selectedBranch.id === 'all'}>
+                            <span>Payroll Report</span>
+                        </TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="attendance" className="mt-6">
+                        <AttendanceReportTab allBranches={allBranches} selectedBranch={selectedBranch} authUser={authUser} date={date} selectedEmployeeId={selectedEmployeeId} selectedStatus={selectedStatus} employees={employees} />
+                    </TabsContent>
+                    <TabsContent value="muster" className="mt-6">
+                        {selectedBranch.id === 'all' ? (
+                            <div className="text-center py-12 text-muted-foreground border rounded-lg">
+                                <p>Please select an individual branch to view its Muster Roll.</p>
                             </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="status">Status</Label>
-                                <Select onValueChange={setSelectedStatus} value={selectedStatus}>
-                                    <SelectTrigger id="status"><SelectValue placeholder="All Statuses" /></SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All Statuses</SelectItem>
-                                        <SelectItem value="On-time">On-time</SelectItem>
-                                        <SelectItem value="Late">Late</SelectItem>
-                                        <SelectItem value="Absent">Absent</SelectItem>
-                                        <SelectItem value="Manual">Manual</SelectItem>
-                                        <SelectItem value="Half-day">Half-day</SelectItem>
-                                    </SelectContent>
-                                </Select>
+                        ) : (
+                            <MusterRollTab authUser={authUser} />
+                        )}
+                    </TabsContent>
+                    <TabsContent value="payroll" className="mt-6">
+                        {selectedBranch.id === 'all' ? (
+                             <div className="text-center py-12 text-muted-foreground border rounded-lg">
+                                <p>Please select an individual branch to generate a Payroll Report.</p>
                             </div>
-                        </div>
-                    </SheetContent>
-                </Sheet>
+                        ) : (
+                            <PayrollReportTab shopData={selectedBranch} authUser={authUser} />
+                        )}
+                    </TabsContent>
+                </Tabs>
             </div>
 
-
-            <Tabs defaultValue="attendance" className="w-full">
-                <TabsList className="grid w-full grid-cols-3 bg-primary text-primary-foreground">
-                    <TabsTrigger value="attendance" className="data-[state=active]:bg-background data-[state=active]:text-foreground">
-                        <span>Attendance<br className="md:hidden" /> Report</span>
-                    </TabsTrigger>
-                    <TabsTrigger value="muster" className="data-[state=active]:bg-background data-[state=active]:text-foreground">
-                        <span>Muster<br className="md:hidden" /> Roll</span>
-                    </TabsTrigger>
-                    <TabsTrigger value="payroll" className="data-[state=active]:bg-background data-[state=active]:text-foreground" disabled={selectedBranch.id === 'all'}>
-                        <span>Payroll<br className="md:hidden" /> Report</span>
-                    </TabsTrigger>
-                </TabsList>
-                <TabsContent value="attendance" className="mt-6">
-                    <AttendanceReportTab allBranches={allBranches} selectedBranch={selectedBranch} authUser={authUser} date={date} selectedEmployeeId={selectedEmployeeId} selectedStatus={selectedStatus} employees={employees} />
-                </TabsContent>
-                <TabsContent value="muster" className="mt-6">
-                    {selectedBranch.id === 'all' ? (
-                        <div className="text-center py-12 text-muted-foreground border rounded-lg">
-                            <p>Please select an individual branch to view its Muster Roll.</p>
-                        </div>
-                    ) : (
-                        <MusterRollTab authUser={authUser} />
-                    )}
-                </TabsContent>
-                <TabsContent value="payroll" className="mt-6">
-                    {selectedBranch.id === 'all' ? (
-                         <div className="text-center py-12 text-muted-foreground border rounded-lg">
-                            <p>Please select an individual branch to generate a Payroll Report.</p>
-                        </div>
-                    ) : (
-                        <PayrollReportTab shopData={selectedBranch} authUser={authUser} />
-                    )}
-                </TabsContent>
-            </Tabs>
         </div>
     );
 }
