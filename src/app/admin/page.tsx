@@ -761,7 +761,7 @@ export default function AdminDashboard() {
                         <span className="text-center text-sm font-medium">View Staff</span>
                     </Card>
                 </Link>
-                 <Link href="/admin/reports">
+                 <Link href="/admin/report">
                      <Card className="h-full flex flex-col items-center justify-center p-4 gap-2 transition-all hover:shadow-md hover:border-primary border">
                         <BarChart3 className="h-6 w-6 text-primary"/>
                         <span className="text-center text-sm font-medium">Full Reports</span>

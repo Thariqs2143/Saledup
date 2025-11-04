@@ -19,7 +19,7 @@ const adminNavItems: NavItem[] = [
   { href: '/admin', label: 'Home', iconName: 'LayoutDashboard' },
   { href: '/admin/generate-qr', label: 'QR Entry', iconName: 'QrCode' },
   { href: '/admin/employees', label: 'Staffs', iconName: 'Users' },
-  { href: '/admin/reports', label: 'Report', iconName: 'BarChart3' },
+  { href: '/admin/report', label: 'Report', iconName: 'BarChart3' },
   { href: '/admin/settings', label: 'Profile', iconName: 'User' },
 ];
 
