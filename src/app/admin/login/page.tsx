@@ -4,14 +4,14 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { RecaptchaVerifier, signInWithPhoneNumber, type ConfirmationResult, type User as AuthUser } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, writeBatch } from "firebase/firestore";
 import Image from "next/image";
+import Link from "next/link";
 
 declare global {
   interface Window {
@@ -28,6 +28,7 @@ export default function AdminLoginPage() {
     const [phone, setPhone] = useState('');
     const [otp, setOtp] = useState(new Array(6).fill(""));
     const [loading, setLoading] = useState(false);
+    const [isNewUser, setIsNewUser] = useState(false);
     const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
     const otpInputsRef = useRef<HTMLInputElement[]>([]);
     const recaptchaContainerRef = useRef<HTMLDivElement>(null);
@@ -35,11 +36,14 @@ export default function AdminLoginPage() {
 
      useEffect(() => {
         const phoneFromQuery = searchParams.get('phone');
+        const newUserFlag = searchParams.get('isNewUser');
+
         if (!phoneFromQuery) {
             router.push('/login');
             return;
         }
         setPhone(phoneFromQuery);
+        setIsNewUser(newUserFlag === 'true');
 
         const setupRecaptcha = () => {
             if (!recaptchaVerifierRef.current && recaptchaContainerRef.current) {
@@ -59,7 +63,6 @@ export default function AdminLoginPage() {
             }
         };
         
-        // Delay setup to ensure DOM is ready
         const timeoutId = setTimeout(setupRecaptcha, 100);
 
         return () => clearTimeout(timeoutId);
@@ -86,50 +89,81 @@ export default function AdminLoginPage() {
         }
     }
 
-    const checkUserProfile = async (user: AuthUser) => {
-        let phoneNumber = user.phoneNumber;
-        if (!phoneNumber) {
-             toast({ title: "Error", description: "Phone number not found.", variant: "destructive" });
-             await auth.signOut();
-             return;
+    const handleVerifyAndProceed = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const enteredOtp = otp.join('');
+        if (enteredOtp.length !== 6) {
+            toast({ title: "Error", description: "Please enter a valid 6-digit OTP.", variant: "destructive" });
+            return;
         }
-        if (!phoneNumber.startsWith('+')) {
-            phoneNumber = `+${phoneNumber}`;
-        }
-        
-        const phoneLookupRef = doc(db, "employee_phone_to_shop_lookup", phoneNumber);
-        const phoneLookupSnap = await getDoc(phoneLookupRef);
-        
-        if (!phoneLookupSnap.exists() || !phoneLookupSnap.data()?.isAdmin) {
-             toast({ title: "Access Denied", description: "User is not registered as a shop owner.", variant: "destructive" });
-             await auth.signOut();
-             router.push('/login');
-             return;
-        }
-
-        const lookupData = phoneLookupSnap.data();
-        const shopDocRef = doc(db, 'shops', lookupData.shopId);
-        const shopDocSnap = await getDoc(shopDocRef);
-        
-        if (!shopDocSnap.exists() || shopDocSnap.data()?.status === 'disabled') {
-            const description = shopDocSnap.data()?.status === 'disabled'
-                ? "This shop account has been disabled. Please contact support."
-                : "Shop profile not found. Please contact support.";
-            toast({ title: "Access Denied", description, variant: "destructive" });
-            await auth.signOut();
+        if (!confirmationResult) {
+            toast({ title: "Error", description: "Confirmation result not found. Please try sending OTP again.", variant: "destructive" });
             return;
         }
 
-        if (lookupData.isProfileComplete) {
-            toast({ title: "Login Successful!", description: "Redirecting to dashboard..." });
-            router.push('/admin');
-        } else {
-            localStorage.setItem('adminUID', user.uid);
-            localStorage.setItem('adminPhone', phoneNumber);
-            toast({ title: "Welcome!", description: "Please complete your shop profile." });
-            router.push('/admin/complete-profile');
+        setLoading(true);
+        try {
+            const result = await confirmationResult.confirm(enteredOtp);
+            const user = result.user;
+
+            if (isNewUser) {
+                // New user logic: create records and redirect to complete profile
+                const phoneNumber = `+91${phone}`;
+                const batch = writeBatch(db);
+
+                const userDocRef = doc(db, "users", user.uid);
+                batch.set(userDocRef, { 
+                    uid: user.uid,
+                    phone: phoneNumber,
+                    role: 'Admin',
+                    isProfileComplete: false,
+                    joinDate: new Date().toISOString().split('T')[0],
+                });
+
+                const shopDocRef = doc(db, "shops", user.uid);
+                batch.set(shopDocRef, {
+                    ownerId: user.uid,
+                    status: 'active',
+                });
+
+                const phoneLookupRef = doc(db, 'employee_phone_to_shop_lookup', phoneNumber);
+                batch.set(phoneLookupRef, { 
+                    shopId: user.uid, 
+                    employeeDocId: user.uid, 
+                    isAdmin: true, 
+                    isProfileComplete: false 
+                });
+
+                await batch.commit();
+                
+                localStorage.setItem('adminUID', user.uid);
+                localStorage.setItem('adminPhone', phoneNumber);
+                
+                toast({ title: "Account Created!", description: "Please complete your shop profile to continue." });
+                router.push('/admin/complete-profile');
+            } else {
+                // Existing user logic: just log them in
+                const phoneLookupRef = doc(db, "employee_phone_to_shop_lookup", user.phoneNumber!);
+                const phoneLookupSnap = await getDoc(phoneLookupRef);
+                const lookupData = phoneLookupSnap.data();
+
+                if (lookupData?.isProfileComplete) {
+                    toast({ title: "Login Successful!", description: "Redirecting to dashboard..." });
+                    router.push('/admin');
+                } else {
+                    localStorage.setItem('adminUID', user.uid);
+                    localStorage.setItem('adminPhone', user.phoneNumber!);
+                    toast({ title: "Welcome Back!", description: "Please complete your shop profile." });
+                    router.push('/admin/complete-profile');
+                }
+            }
+        } catch (error) {
+            console.error("Error verifying OTP:", error);
+            toast({ title: "Error", description: "Invalid OTP. Please try again.", variant: "destructive" });
+        } finally {
+            setLoading(false);
         }
-    }
+    };
     
     const handleOtpChange = (index: number, value: string) => {
         if (isNaN(Number(value))) return;
@@ -159,91 +193,83 @@ export default function AdminLoginPage() {
         }
     };
 
-    const handleLogin = async (e: React.FormEvent) => {
-        e.preventDefault();
-        const enteredOtp = otp.join('');
-         if (enteredOtp.length !== 6) {
-            toast({ title: "Error", description: "Please enter a valid 6-digit OTP.", variant: "destructive" });
-            return;
-        }
-        if (!confirmationResult) {
-            toast({ title: "Error", description: "Confirmation result not found. Please try sending OTP again.", variant: "destructive" });
-            return;
-        }
-        setLoading(true);
-        try {
-            const result = await confirmationResult.confirm(enteredOtp);
-            const user = result.user;
-            await checkUserProfile(user);
-        } catch (error) {
-            console.error("Error verifying OTP:", error);
-            toast({ title: "Error", description: "Invalid OTP. Please try again.", variant: "destructive" });
-        } finally {
-            setLoading(false);
-        }
-    }
-
   return (
     <div className="min-h-screen bg-background md:grid md:grid-cols-2">
       <div ref={recaptchaContainerRef}></div>
       {/* LEFT SIDE - Desktop Image */}
       <div className="relative hidden md:block">
-          <Image
+        <Image
           src="https://res.cloudinary.com/dnkghymx5/image/upload/v1762241011/Generated_Image_November_04_2025_-_12_50PM_1_hslend.png"
           alt="Attendry illustration"
           fill
           className="object-cover"
           priority
-          />
+        />
       </div>
 
        {/* RIGHT SIDE - Form Section */}
-      <div className="flex flex-col items-center justify-center py-12 md:py-0 px-4 md:px-12">
+      <div className="flex flex-col items-center justify-center w-full">
            {/* TOP IMAGE for Mobile */}
-            <div className="md:hidden w-screen relative -mt-12 -mx-4">
-                <Image
-                src="https://res.cloudinary.com/dnkghymx5/image/upload/v1762241011/Generated_Image_November_04_2025_-_12_50PM_1_hslend.png"
-                alt="Attendry illustration"
-                width={800}
-                height={600}
-                className="w-full h-auto object-cover"
-                priority
+            <div className="md:hidden w-full relative">
+                 <Image
+                    src="https://res.cloudinary.com/dnkghymx5/image/upload/v1762241011/Generated_Image_November_04_2025_-_12_50PM_1_hslend.png"
+                    alt="Attendry illustration"
+                    width={800}
+                    height={600}
+                    className="w-full h-auto object-cover"
+                    priority
                 />
             </div>
-          <div className="w-full max-w-sm text-center pt-8">
-            <h1 className="text-3xl font-bold">Shop Owner Verification</h1>
-            <p className="text-muted-foreground mt-2 mb-8">
-                Enter the OTP sent to +91 {phone}.
-            </p>
+          <div className="w-full max-w-sm text-center p-6">
+             <h1 className="text-3xl font-bold tracking-tight leading-tight">
+                India’s #1 QR Powered Staff Attendance App
+            </h1>
+             <div className="flex items-center my-4">
+                <hr className="w-full border-muted-foreground/20" />
+                <span className="px-4 text-muted-foreground font-semibold whitespace-nowrap text-sm">
+                LOG IN OR SIGN UP
+                </span>
+                <hr className="w-full border-muted-foreground/20" />
+            </div>
 
-            <form className="space-y-6 text-left" onSubmit={handleLogin}>
-                <div className="space-y-2">
-                    <Label>One-Time Password</Label>
-                    <div className="flex justify-center gap-2" onPaste={handlePaste}>
-                        {otp.map((digit, index) => (
-                            <Input
-                                key={index}
-                                ref={el => otpInputsRef.current[index] = el!}
-                                type="text"
-                                inputMode="numeric"
-                                maxLength={1}
-                                value={digit}
-                                onChange={(e) => handleOtpChange(index, e.target.value)}
-                                onKeyDown={(e) => handleKeyDown(index, e)}
-                                className="w-12 h-14 text-center text-2xl font-semibold rounded-lg"
-                                required
-                            />
-                        ))}
-                    </div>
+            <form className="space-y-6 text-left" onSubmit={handleVerifyAndProceed}>
+                <div className="flex justify-center gap-2" onPaste={handlePaste}>
+                    {otp.map((digit, index) => (
+                        <Input
+                            key={index}
+                            ref={el => otpInputsRef.current[index] = el!}
+                            type="text"
+                            inputMode="numeric"
+                            maxLength={1}
+                            value={digit}
+                            onChange={(e) => handleOtpChange(index, e.target.value)}
+                            onKeyDown={(e) => handleKeyDown(index, e)}
+                            className="w-12 h-14 text-center text-2xl font-semibold rounded-lg"
+                            required
+                        />
+                    ))}
                 </div>
-                <Button type="button" variant="link" size="sm" className="p-0 h-auto" onClick={() => router.push('/login')}>
+
+                <Button type="button" variant="link" size="sm" className="p-0 h-auto text-primary" onClick={() => router.push('/login')}>
                     Use a different phone number
                 </Button>
-                <Button type="submit" className="w-full !mt-8" disabled={loading}>
+
+                <Button type="submit" className="w-full !mt-8 bg-[#0C2A6A] hover:bg-[#0C2A6A]/90" disabled={loading}>
                     {loading && <Loader2 className="mr-2 animate-spin" />}
-                    Verify OTP & Login
+                    Verify OTP
                 </Button>
             </form>
+            <div className="flex items-center my-8">
+                <hr className="w-full" />
+                <span className="px-4 text-muted-foreground font-medium">OR</span>
+                <hr className="w-full" />
+            </div>
+
+            <Link href="/employee/login" className="w-full">
+            <Button variant="outline" className="w-full">
+                Login as Employee
+            </Button>
+            </Link>
           </div>
       </div>
     </div>

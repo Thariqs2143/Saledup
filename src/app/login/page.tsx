@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
@@ -35,21 +36,21 @@ export default function LoginPage() {
       const phoneLookupRef = doc(db, 'employee_phone_to_shop_lookup', phoneNumber);
       const phoneLookupSnap = await getDoc(phoneLookupRef);
 
-      if (phoneLookupSnap.exists() && phoneLookupSnap.data()?.isAdmin) {
-          // Existing owner, go to OTP login
-          router.push(`/admin/login?phone=${phone}`);
-      } else if (phoneLookupSnap.exists() && !phoneLookupSnap.data()?.isAdmin) {
-        // This is an employee account
-        toast({
-          title: "Employee Account",
-          description: "This number is registered as an employee. Please use the employee login.",
-          variant: "default",
-        });
-        setLoading(false);
-      } else {
-        // New user, direct to signup flow (which is also the OTP page but with different logic)
-        router.push(`/admin/signup?phone=${phone}`);
+      let isNewUser = true;
+      if (phoneLookupSnap.exists()) {
+        if(phoneLookupSnap.data()?.isAdmin) {
+          isNewUser = false;
+        } else {
+          toast({
+            title: "Employee Account",
+            description: "This number is registered as an employee. Please use the employee login.",
+          });
+          setLoading(false);
+          return;
+        }
       }
+      
+      router.push(`/admin/login?phone=${phone}&isNewUser=${isNewUser}`);
 
     } catch (error) {
       console.error("Error during owner check:", error);
@@ -76,9 +77,9 @@ export default function LoginPage() {
       </div>
 
       {/* RIGHT SIDE - Form Section */}
-      <div className="flex flex-col items-center justify-center py-12 md:py-0 px-4 md:px-12">
+      <div className="flex flex-col items-center justify-center w-full">
         {/* TOP IMAGE for Mobile */}
-        <div className="md:hidden w-screen relative -mt-12 -mx-4">
+        <div className="md:hidden w-full relative">
             <Image
             src="https://res.cloudinary.com/dnkghymx5/image/upload/v1762241011/Generated_Image_November_04_2025_-_12_50PM_1_hslend.png"
             alt="Attendry illustration"
@@ -90,8 +91,8 @@ export default function LoginPage() {
         </div>
 
         {/* FORM CARD */}
-        <div className="w-full max-w-sm space-y-6">
-            <div className="text-center mb-8 pt-8">
+        <div className="w-full max-w-sm space-y-6 p-6">
+            <div className="text-center mb-8">
             <h1 className="text-3xl font-bold tracking-tight leading-tight">
                 India’s #1 QR Powered Staff Attendance App
             </h1>
