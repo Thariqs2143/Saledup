@@ -72,11 +72,11 @@ export default function LoginPage() {
 
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 min-h-screen w-full">
+    <div className="flex flex-col md:grid md:grid-cols-2 min-h-screen w-full">
         <div ref={recaptchaContainerRef}></div>
-        {/* Left side with illustration */}
-        <div className="hidden md:flex flex-col items-center justify-center bg-[#0C2A6A] p-10 text-white relative overflow-hidden">
-            <Image
+        {/* Left side with illustration - visible on all screens, but order changes on mobile */}
+        <div className="flex md:flex-col items-center justify-center bg-[#0C2A6A] p-10 text-white relative overflow-hidden order-1 md:order-none">
+             <Image
                 src="https://picsum.photos/seed/1/1000/1200"
                 alt="Business tools illustration"
                 fill
@@ -84,11 +84,11 @@ export default function LoginPage() {
                 data-ai-hint="business tools"
             />
             <div className="relative z-10 text-center space-y-6">
-                <div className="flex justify-center items-center gap-4">
+                <div className="hidden md:flex justify-center items-center gap-4">
                      <Shield className="h-16 w-16 text-white" />
                      <h1 className="text-6xl font-bold tracking-tighter">SALEDIN</h1>
                 </div>
-                <Image
+                 <Image
                     src="https://storage.googleapis.com/framer-usercontent/images/tHflOaA13praLY311Lg9JA5A.png"
                     alt="Business tools"
                     width={500}
@@ -99,7 +99,7 @@ export default function LoginPage() {
         </div>
 
         {/* Right side with login form */}
-        <div className="flex flex-col items-center justify-center bg-background p-8">
+        <div className="flex flex-col items-center justify-center bg-background p-8 order-2 md:order-none">
             <div className="w-full max-w-sm">
                 <div className="text-center mb-10">
                     <h1 className="text-3xl font-bold tracking-tight">India's #1 QR Powered Staff Attendance App</h1>
@@ -119,7 +119,7 @@ export default function LoginPage() {
                                 id="phone" 
                                 type="tel" 
                                 inputMode="numeric" 
-                                placeholder="Enter 10-digit mobile number" 
+                                placeholder="10-digit mobile number" 
                                 required 
                                 className="flex-1 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent" 
                                 value={phone} 
