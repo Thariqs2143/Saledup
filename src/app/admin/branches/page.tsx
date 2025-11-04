@@ -127,46 +127,51 @@ export default function ManageBranchesPage() {
             </Card>
         ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {branches.map(branch => (
-                    <Card key={branch.id} className="flex flex-col transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
-                        <CardHeader>
-                            <CardTitle className="text-lg">{branch.shopName}</CardTitle>
-                            <CardDescription>{branch.businessType}</CardDescription>
-                        </CardHeader>
-                        <CardContent className="flex-1">
-                            <p className="text-sm text-muted-foreground">{branch.address}</p>
-                        </CardContent>
-                        <CardContent className="border-t p-4 flex gap-2">
-                             <Link href={`/admin/branches/${branch.id}/edit`} className="w-full">
-                                <Button variant="outline" className="w-full">
-                                    <Edit className="mr-2 h-4 w-4"/> Edit
-                                </Button>
-                            </Link>
-                             <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                    <Button variant="destructive" className="w-full" disabled={deletingId === branch.id}>
-                                         {deletingId === branch.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Trash2 className="mr-2 h-4 w-4" />}
-                                        Delete
+                {branches.map(branch => {
+                    const isMainBranch = authUser?.uid === branch.id;
+                    return (
+                        <Card key={branch.id} className="flex flex-col transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
+                            <CardHeader>
+                                <CardTitle className="text-lg">{branch.shopName}</CardTitle>
+                                <CardDescription>{branch.businessType}</CardDescription>
+                            </CardHeader>
+                            <CardContent className="flex-1">
+                                <p className="text-sm text-muted-foreground">{branch.address}</p>
+                            </CardContent>
+                            <CardContent className="border-t p-4 flex gap-2">
+                                <Link href={`/admin/branches/${branch.id}/edit`} className="w-full">
+                                    <Button variant="outline" className="w-full">
+                                        <Edit className="mr-2 h-4 w-4"/> Edit
                                     </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                        This will permanently delete the <span className="font-bold">{branch.shopName}</span> branch and all of its associated data, including employees and attendance records. This action cannot be undone.
-                                    </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction onClick={() => handleDeleteBranch(branch.id, branch.shopName)} className="bg-destructive hover:bg-destructive/90 text-destructive-foreground">
-                                        Confirm Delete
-                                    </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                </AlertDialogContent>
-                            </AlertDialog>
-                        </CardContent>
-                    </Card>
-                ))}
+                                </Link>
+                                {!isMainBranch && (
+                                    <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                            <Button variant="destructive" className="w-full" disabled={deletingId === branch.id}>
+                                                {deletingId === branch.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Trash2 className="mr-2 h-4 w-4" />}
+                                                Delete
+                                            </Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    This will permanently delete the <span className="font-bold">{branch.shopName}</span> branch and all of its associated data, including employees and attendance records. This action cannot be undone.
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                <AlertDialogAction onClick={() => handleDeleteBranch(branch.id, branch.shopName)} className="bg-destructive hover:bg-destructive/90 text-destructive-foreground">
+                                                    Confirm Delete
+                                                </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
+                                )}
+                            </CardContent>
+                        </Card>
+                    );
+                })}
             </div>
         )}
     </div>
