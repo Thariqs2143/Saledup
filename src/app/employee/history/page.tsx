@@ -27,7 +27,7 @@ const HistoryList = ({ records, loading }: { records: HistoryRecord[]; loading: 
         </div>
     ) : records.length > 0 ? (
         records.map(record => (
-        <Card key={record.id} className="transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
+        <Card key={record.id} className="transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/30 hover:border-primary">
             <CardContent className="p-4 flex items-center justify-between">
             <div className="flex items-center gap-4">
                 {record.status === 'On-time' ? (
@@ -182,5 +182,7 @@ export default function HistoryPage() {
     </div>
   );
 }
+
+    
 
     

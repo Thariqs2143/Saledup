@@ -108,7 +108,7 @@ const PermanentQrTab = () => {
     };
 
     return (
-        <Card className="w-full max-w-lg mx-auto transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
+        <Card className="w-full max-w-lg mx-auto transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/30 hover:border-primary">
             <CardHeader>
             <CardTitle>Permanent QR Code</CardTitle>
             <CardDescription>
@@ -200,7 +200,7 @@ const AdvancedQrTab = () => {
     }, [timeLeft, qrCodeUrl]);
 
     return (
-        <Card className="w-full max-w-lg mx-auto transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
+        <Card className="w-full max-w-lg mx-auto transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/30 hover:border-primary">
             <CardHeader>
                 <CardTitle>Advanced QR Code (Dynamic)</CardTitle>
                 <CardDescription>This QR code automatically refreshes to prevent screenshot misuse. Display this on a tablet or screen in your store.</CardDescription>
@@ -341,7 +341,7 @@ const ManualEntryTab = () => {
     };
     
     return (
-        <Card className="w-full max-w-2xl mx-auto transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary" id="manual-entry">
+        <Card className="w-full max-w-2xl mx-auto transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/30 hover:border-primary" id="manual-entry">
             <form onSubmit={handleSubmit}>
                 <CardHeader>
                     <CardTitle>Create New Record</CardTitle>
@@ -488,3 +488,5 @@ export default function GenerateAndEntryPage() {
     </div>
   );
 }
+
+    

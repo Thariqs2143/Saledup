@@ -125,7 +125,7 @@ export default function RewardsPage() {
         </CardContent>
       </Card>
       
-      <Card className="transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
+      <Card className="transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/30 hover:border-primary">
         <CardHeader>
             <CardTitle>Achievement Badges</CardTitle>
             <CardDescription>Collect badges for your accomplishments.</CardDescription>
@@ -150,3 +150,5 @@ export default function RewardsPage() {
     </div>
   );
 }
+
+    
