@@ -22,11 +22,18 @@ export default function LoginPage() {
     const recaptchaContainerRef = useRef<HTMLDivElement>(null);
 
      useEffect(() => {
-        if (typeof window !== 'undefined' && !window.recaptchaVerifier) {
-            window.recaptchaVerifier = new RecaptchaVerifier(auth, recaptchaContainerRef.current!, {
-                'size': 'invisible',
-                'callback': (response: any) => {},
-            });
+        // This effect will run only once on the client side
+        const initializeRecaptcha = () => {
+            if (!window.recaptchaVerifier && recaptchaContainerRef.current) {
+                window.recaptchaVerifier = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
+                    'size': 'invisible',
+                    'callback': (response: any) => {},
+                });
+            }
+        };
+
+        if (typeof window !== 'undefined') {
+            initializeRecaptcha();
         }
     }, []);
 
@@ -75,7 +82,7 @@ export default function LoginPage() {
     <div className="flex flex-col md:grid md:grid-cols-2 min-h-screen w-full">
         <div ref={recaptchaContainerRef}></div>
         {/* Left side with illustration - visible on all screens, but order changes on mobile */}
-        <div className="flex md:flex-col items-center justify-center bg-[#0C2A6A] p-10 text-white relative overflow-hidden order-1 md:order-none">
+        <div className="flex md:flex-col items-center justify-center bg-[#0C2A6A] p-6 md:p-10 text-white relative overflow-hidden order-1 md:order-2">
              <Image
                 src="https://picsum.photos/seed/1/1000/1200"
                 alt="Business tools illustration"
@@ -92,14 +99,14 @@ export default function LoginPage() {
                     src="https://storage.googleapis.com/framer-usercontent/images/tHflOaA13praLY311Lg9JA5A.png"
                     alt="Business tools"
                     width={500}
-                    height={500}
-                    className="mx-auto"
+                    height={300}
+                    className="mx-auto w-full max-w-[300px] md:max-w-[500px]"
                 />
             </div>
         </div>
 
         {/* Right side with login form */}
-        <div className="flex flex-col items-center justify-center bg-background p-8 order-2 md:order-none">
+        <div className="flex flex-col items-center justify-center bg-background p-8 order-2 md:order-1">
             <div className="w-full max-w-sm">
                 <div className="text-center mb-10">
                     <h1 className="text-3xl font-bold tracking-tight">India's #1 QR Powered Staff Attendance App</h1>
