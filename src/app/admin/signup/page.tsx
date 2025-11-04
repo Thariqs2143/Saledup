@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useRef } from "react";
@@ -36,12 +37,18 @@ export default function AdminSignupPage() {
     }, [searchParams, router]);
 
     useEffect(() => {
-        if (recaptchaContainerRef.current && !recaptchaVerifierRef.current) {
+        const verifier = recaptchaVerifierRef.current;
+        if (recaptchaContainerRef.current && !verifier) {
             recaptchaVerifierRef.current = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
                 'size': 'invisible',
                 'callback': (response: any) => {},
             });
         }
+        return () => {
+            if (verifier) {
+                verifier.clear();
+            }
+        };
     }, []);
 
     const handleGetOtp = async (phoneNum: string) => {

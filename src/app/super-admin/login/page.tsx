@@ -27,7 +27,8 @@ export default function SuperAdminLoginPage() {
     const SUPER_ADMIN_PHONE = "9790296771"; 
 
     useEffect(() => {
-        if (recaptchaContainerRef.current && !recaptchaVerifierRef.current) {
+        const verifier = recaptchaVerifierRef.current;
+        if (recaptchaContainerRef.current && !verifier) {
             recaptchaVerifierRef.current = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
                 'size': 'invisible',
                 'callback': (response: any) => {
@@ -37,8 +38,8 @@ export default function SuperAdminLoginPage() {
         }
         // Cleanup function
         return () => {
-            if (recaptchaVerifierRef.current) {
-                recaptchaVerifierRef.current.clear();
+            if (verifier) {
+                verifier.clear();
             }
         };
     }, []);

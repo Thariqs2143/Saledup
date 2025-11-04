@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useRef } from "react";
@@ -35,15 +36,16 @@ export default function AdminLoginPage() {
     }, [searchParams, router]);
 
     useEffect(() => {
-        if (recaptchaContainerRef.current && !recaptchaVerifierRef.current) {
+        const verifier = recaptchaVerifierRef.current;
+        if (recaptchaContainerRef.current && !verifier) {
             recaptchaVerifierRef.current = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
                 'size': 'invisible',
                 'callback': (response: any) => {},
             });
         }
         return () => {
-            if (recaptchaVerifierRef.current) {
-                recaptchaVerifierRef.current.clear();
+            if (verifier) {
+                verifier.clear();
             }
         };
     }, []);

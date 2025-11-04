@@ -25,7 +25,8 @@ export default function EmployeeLoginPage() {
     const recaptchaContainerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        if (recaptchaContainerRef.current && !recaptchaVerifierRef.current) {
+        const verifier = recaptchaVerifierRef.current;
+        if (recaptchaContainerRef.current && !verifier) {
             recaptchaVerifierRef.current = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
                 'size': 'invisible',
                 'callback': (response: any) => {
@@ -35,8 +36,8 @@ export default function EmployeeLoginPage() {
         }
         // Cleanup function
         return () => {
-            if (recaptchaVerifierRef.current) {
-                recaptchaVerifierRef.current.clear();
+            if (verifier) {
+                verifier.clear();
             }
         };
     }, []);
@@ -232,7 +233,7 @@ export default function EmployeeLoginPage() {
                 )}
                 <p className="mt-8 text-center text-sm text-muted-foreground">
                     Not an employee?{' '}
-                    <Link href="/admin/login" className="text-primary hover:underline font-medium">
+                    <Link href="/login" className="text-primary hover:underline font-medium">
                         Login as Shop Owner
                     </Link>
                 </p>
