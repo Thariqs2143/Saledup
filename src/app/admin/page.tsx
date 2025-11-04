@@ -4,7 +4,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Users, QrCode, Clock, UserCheck, UserX, TrendingUp, Loader2, BarChart3, LogOut, Activity, Sparkles, ChevronsUpDown, Building, UserPlus, CalendarOff, BrainCircuit } from "lucide-react";
+import { Users, QrCode, Clock, UserCheck, UserX, TrendingUp, Loader2, BarChart3, LogOut, Activity, Sparkles, ChevronsUpDown, Building, UserPlus, CalendarOff, BrainCircuit, Eye } from "lucide-react";
 import Link from 'next/link';
 import { AnimatedCounter } from "@/components/animated-counter";
 import { useEffect, useState, useMemo, useCallback } from "react";
@@ -100,7 +100,7 @@ const StaffingAdvisorCard = ({ businessType, currentStaffCount }: { businessType
     };
 
     return (
-        <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/30 dark:border-foreground hover:border-primary">
+        <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
             <CardHeader>
                 <div className="flex items-center gap-3">
                     <BrainCircuit className="h-6 w-6 text-primary"/>
@@ -529,7 +529,7 @@ export default function AdminDashboard() {
             <p className="text-muted-foreground">Here's a quick overview of your attendance.</p>
            </div>
            <Tabs value={statFilter} onValueChange={(value) => setStatFilter(value as StatFilter)}>
-            <TabsList className="border-2 border-foreground/30">
+            <TabsList className="border-2 border-foreground/30 dark:border-foreground/30">
                 <TabsTrigger value="today">Today</TabsTrigger>
                 <TabsTrigger value="week">This Week</TabsTrigger>
                 <TabsTrigger value="month">This Month</TabsTrigger>
@@ -595,7 +595,7 @@ export default function AdminDashboard() {
         <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
             <CardHeader>
                 <CardTitle>Branch Management</CardTitle>
-                <CardDescription>Select a branch to view its dashboard or add a new one.</CardDescription>
+                <CardDescription>Select a branch to view its dashboard or manage your branches.</CardDescription>
             </CardHeader>
             <CardContent>
                 <div className="flex flex-col sm:flex-row items-center gap-4">
@@ -635,10 +635,16 @@ export default function AdminDashboard() {
                             </Command>
                         </PopoverContent>
                     </Popover>
-                    <Link href="/admin/add-branch">
+                     <Link href="/admin/add-branch">
                         <Button className="w-full sm:w-auto">
                             <Building className="mr-2 h-4 w-4" />
                             Add New Branch
+                        </Button>
+                    </Link>
+                    <Link href="/admin/branches">
+                        <Button variant="secondary" className="w-full sm:w-auto">
+                            <Eye className="mr-2 h-4 w-4" />
+                            View Branches
                         </Button>
                     </Link>
                 </div>
