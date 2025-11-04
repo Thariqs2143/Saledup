@@ -187,7 +187,7 @@ const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds }: { allBran
                   <p>No employees found. Invite an employee to get started.</p>
               </div>
           ): (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredEmployees.map((employee) => (
                     <Card key={employee.id} className="group flex flex-col transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-1 border-2 border-foreground/10 hover:border-primary">
                         <CardContent className="pt-6 flex-1">
@@ -484,5 +484,3 @@ export default function ManageEmployeesPage() {
     </div>
   );
 }
-
-    
