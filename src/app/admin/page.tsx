@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -640,8 +641,8 @@ export default function AdminDashboard() {
                     </div>
                 ) : activityFeed.length > 0 ? (
                      <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2">
-                        {activityFeed.map((item) => (
-                          <div key={item.id} className="flex items-start gap-4">
+                        {activityFeed.map((item, index) => (
+                          <div key={`${item.id}-${index}`} className="flex items-start gap-4">
                             <Avatar className="h-9 w-9 border">
                                 <AvatarImage src={item.user.imageUrl} />
                                 <AvatarFallback>{item.user.fallback}</AvatarFallback>
