@@ -102,7 +102,7 @@ export default function AdminLayout({ children }: PropsWithChildren) {
         <header className="flex h-14 items-center gap-4 border-b bg-background px-4 md:hidden sticky top-0 z-40">
            <Sheet>
             <SheetTrigger asChild>
-              <Button size="icon" variant="outline" className="sm:hidden">
+              <Button size="icon" variant="ghost" className="sm:hidden">
                 <PanelLeft className="h-5 w-5" />
                 <span className="sr-only">Toggle Menu</span>
               </Button>
