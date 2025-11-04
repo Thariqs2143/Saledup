@@ -77,7 +77,6 @@ export function AdminNav({ navItems, profile, isDesktop }: AdminNavProps) {
             onClick={() => handleNavigate('/admin')}
             className="flex items-center gap-2 font-semibold"
             >
-            <Shield className="h-8 w-8 text-primary" />
             <span className="font-bold text-2xl text-primary tracking-wider">
                 Attendry
             </span>
