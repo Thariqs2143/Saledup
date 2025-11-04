@@ -95,7 +95,7 @@ export default function LoginPage() {
                 </div>
 
                 <div className="text-center mb-10">
-                    <h1 className="text-3xl font-bold tracking-tight text-center">India's #1 QR Powered Staff Attendance App</h1>
+                    <h1 className="text-3xl font-bold tracking-tight">India's #1 QR Powered Staff Attendance App</h1>
                     <div className="flex items-center my-4">
                         <hr className="w-full border-muted-foreground/20"/>
                         <span className="px-4 text-muted-foreground font-semibold whitespace-nowrap text-sm">LOG IN OR SIGN UP</span>
