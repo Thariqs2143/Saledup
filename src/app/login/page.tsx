@@ -102,8 +102,12 @@ export default function LoginPage() {
         <div className="flex flex-col items-center justify-center bg-background p-8">
             <div className="w-full max-w-sm">
                 <div className="text-center mb-10">
-                    <h1 className="text-3xl font-bold tracking-tight">India's #1 AI-Powered Business Companion</h1>
-                    <p className="text-muted-foreground mt-2 font-semibold">LOG IN OR SIGN UP</p>
+                    <h1 className="text-3xl font-bold tracking-tight">India's #1 QR Powered Staff Attendance App</h1>
+                    <div className="flex items-center my-4">
+                        <hr className="w-full border-muted-foreground/20"/>
+                        <span className="px-4 text-muted-foreground font-semibold whitespace-nowrap text-sm">LOG IN OR SIGN UP</span>
+                        <hr className="w-full border-muted-foreground/20"/>
+                    </div>
                 </div>
                 
                 <form className="space-y-6" onSubmit={handleOwnerLogin}>
