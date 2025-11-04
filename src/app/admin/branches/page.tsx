@@ -1,10 +1,11 @@
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, ArrowLeft, Store, Edit, Trash2, Building, Search } from 'lucide-react';
+import { Loader2, ArrowLeft, Store, Building, Search } from 'lucide-react';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { collection, query, where, onSnapshot, doc, deleteDoc } from 'firebase/firestore';
@@ -156,10 +157,10 @@ export default function ManageBranchesPage() {
                             </CardContent>
                             <CardContent className="border-t p-4 flex gap-2">
                                 <Link href={`/admin?branchId=${branch.id}`} className="w-full">
-                                    <Button variant="outline" className="w-full">View</Button>
+                                    <Button className="w-full">View</Button>
                                 </Link>
                                 <Link href={`/admin/branches/${branch.id}/edit`} className="w-full">
-                                    <Button variant="outline" className="w-full">Edit</Button>
+                                    <Button variant="secondary" className="w-full">Edit</Button>
                                 </Link>
                                 {!isMainBranch && (
                                     <AlertDialog>
