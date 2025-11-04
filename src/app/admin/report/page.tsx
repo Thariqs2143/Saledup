@@ -187,7 +187,7 @@ const AttendanceReportTab = ({ allBranches, selectedBranch, authUser, date, sele
 
     return (
         <div className="space-y-6">
-            <Card className="border-2 border-foreground">
+            <Card className="border-2 border-foreground transition-all duration-300 ease-out hover:shadow-lg hover:border-primary">
                 <CardHeader>
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div>
@@ -462,7 +462,7 @@ const PayrollReportTab = ({ shopData, authUser }: { shopData: ShopData, authUser
 
     return (
         <div className="space-y-6">
-            <Card className="border-2 border-foreground">
+            <Card className="border-2 border-foreground transition-all duration-300 ease-out hover:shadow-lg hover:border-primary">
                 <CardHeader>
                     <CardTitle>Generate Payroll</CardTitle>
                     <CardDescription>Select a month to calculate salaries for all employees based on their base pay and leave.</CardDescription>
@@ -508,7 +508,7 @@ const PayrollReportTab = ({ shopData, authUser }: { shopData: ShopData, authUser
                     </Button>
                 </CardContent>
             </Card>
-            <Card className="border-2 border-foreground">
+            <Card className="border-2 border-foreground transition-all duration-300 ease-out hover:shadow-lg hover:border-primary">
                 <CardHeader>
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div>
@@ -795,7 +795,7 @@ const MusterRollTab = ({ authUser }: { authUser: AuthUser }) => {
 
     return (
         <div className="space-y-6">
-            <Card className="border-2 border-foreground">
+            <Card className="border-2 border-foreground transition-all duration-300 ease-out hover:shadow-lg hover:border-primary">
                 <CardHeader>
                     <CardTitle>Generate Muster Roll</CardTitle>
                     <CardDescription>Select a month to generate a classic attendance muster grid for all active employees.</CardDescription>
@@ -841,7 +841,7 @@ const MusterRollTab = ({ authUser }: { authUser: AuthUser }) => {
                     </Button>
                 </CardContent>
             </Card>
-            <Card className="border-2 border-foreground">
+            <Card className="border-2 border-foreground transition-all duration-300 ease-out hover:shadow-lg hover:border-primary">
                  <CardHeader>
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div>
@@ -1003,7 +1003,7 @@ export default function ReportsPage() {
                 <p className="text-muted-foreground">Filter records and generate monthly salary reports.</p>
             </div>
             
-            <Card className="border-2 border-foreground">
+            <Card className="border-2 border-foreground transition-all duration-300 ease-out hover:shadow-lg hover:border-primary">
                 <CardHeader>
                     <CardTitle>Branch & Filters</CardTitle>
                     <CardDescription>Select a branch and apply filters to generate reports.</CardDescription>
