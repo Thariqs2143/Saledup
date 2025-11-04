@@ -427,7 +427,7 @@ export default function ManageEmployeesPage() {
             <h1 className="text-3xl font-bold tracking-tight">Employees & Leave</h1>
             <p className="text-muted-foreground">Manage your employees and their leave requests by branch.</p>
         </div>
-         <Card>
+         <Card className="transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/10 hover:border-primary">
             <CardHeader>
                 <CardTitle>Select Branch</CardTitle>
                  <Popover open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
