@@ -481,25 +481,19 @@ const ManualEntryTab = () => {
 
 const QrCodeTabs = () => {
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-             <div className="lg:col-span-2 space-y-6">
-                <Tabs defaultValue="permanent" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="permanent">Permanent</TabsTrigger>
-                        <TabsTrigger value="advanced">Advanced</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="permanent" className="mt-6">
-                        <PermanentQrTab />
-                    </TabsContent>
-                    <TabsContent value="advanced" className="mt-6">
-                         <AdvancedQrTab />
-                    </TabsContent>
-                </Tabs>
-            </div>
-            <div className="space-y-8">
-                <RecentActivity />
-                <QrHistory />
-            </div>
+        <div className="lg:col-span-2 space-y-6">
+            <Tabs defaultValue="permanent" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="permanent">Permanent</TabsTrigger>
+                    <TabsTrigger value="advanced">Advanced</TabsTrigger>
+                </TabsList>
+                <TabsContent value="permanent" className="mt-6">
+                    <PermanentQrTab />
+                </TabsContent>
+                <TabsContent value="advanced" className="mt-6">
+                        <AdvancedQrTab />
+                </TabsContent>
+            </Tabs>
         </div>
     );
 }
@@ -676,7 +670,13 @@ export default function GenerateAndEntryPage() {
                 <TabsTrigger value="manual">Manual Entry</TabsTrigger>
             </TabsList>
             <TabsContent value="generate" className="mt-6">
-                <QrCodeTabs />
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                    <QrCodeTabs />
+                    <div className="space-y-8">
+                        <RecentActivity />
+                        <QrHistory />
+                    </div>
+                </div>
             </TabsContent>
             <TabsContent value="manual" className="mt-6">
                 <ManualEntryTab />
@@ -685,7 +685,5 @@ export default function GenerateAndEntryPage() {
     </div>
   );
 }
-
-    
 
     
