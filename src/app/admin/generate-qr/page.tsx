@@ -465,11 +465,11 @@ export default function GenerateAndEntryPage() {
   return (
     <div className="flex flex-col gap-8">
        <div className="flex flex-col gap-4">
-            <div>
+            <div className="hidden md:block">
                 <h1 className="text-3xl font-bold tracking-tight">QR &amp; Manual Entry</h1>
                 <p className="text-muted-foreground">Generate QR codes or manually enter attendance records.</p>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center justify-center space-x-2">
                 <Label htmlFor="view-mode-switch" className={cn("font-semibold", viewMode === 'qr' && 'text-primary')}>
                     QR
                 </Label>
