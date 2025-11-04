@@ -781,6 +781,16 @@ const MusterRollTab = ({ authUser }: { authUser: AuthUser }) => {
         setExporting(false);
     };
 
+    const getStatusClass = (status: 'P' | 'A' | 'H' | 'L') => {
+        switch (status) {
+            case 'P': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+            case 'A': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+            case 'H': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+            case 'L': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+            default: return '';
+        }
+    };
+
     return (
         <div className="space-y-6">
             <Card className="border-2 border-foreground transition-all duration-300 ease-out hover:shadow-lg hover:border-primary">
@@ -987,112 +997,106 @@ export default function ReportsPage() {
     return (
         <div className="space-y-6">
             <div className="hidden md:block">
-                <h1 className="text-3xl font-bold tracking-tight">Reports & Payroll</h1>
+                <h1 className="text-3xl font-bold tracking-tight">Reports &amp; Payroll</h1>
                 <p className="text-muted-foreground">Filter records and generate monthly salary reports.</p>
             </div>
             
-            <Card className="border-2 border-foreground transition-all duration-300 ease-out hover:shadow-lg hover:border-primary">
-                <CardHeader>
-                    <CardTitle>Branch & Filters</CardTitle>
-                    <CardDescription>Select a branch and apply filters to generate reports.</CardDescription>
-                </CardHeader>
-                <CardContent className="flex flex-col md:flex-row items-center gap-4">
-                    <Popover open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
-                        <PopoverTrigger asChild>
-                            <Button
-                                variant="outline"
-                                role="combobox"
-                                aria-expanded={openBranchSelector}
-                                className="w-full md:w-auto md:min-w-[250px] justify-between"
-                            >
-                                <Building className="mr-2 h-4 w-4" />
-                                {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
-                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                            </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                            <Command>
-                                <CommandInput 
-                                    placeholder="Search branch..."
-                                    value={searchTerm}
-                                    onValueChange={setSearchTerm}
-                                />
-                                <CommandEmpty>No branches found.</CommandEmpty>
-                                <CommandGroup>
-                                    <CommandList>
-                                    {filteredBranches.map((branch) => (
-                                        <CommandItem
-                                            key={branch.id}
-                                            value={branch.shopName!}
-                                            onSelect={() => {
-                                                setSelectedBranch(branch);
-                                                setOpenBranchSelector(false);
-                                            }}
-                                        >
-                                            {branch.shopName}
-                                        </CommandItem>
-                                    ))}
-                                    </CommandList>
-                                </CommandGroup>
-                            </Command>
-                        </PopoverContent>
-                    </Popover>
-                    
-                    <Sheet>
-                        <SheetTrigger asChild>
-                            <Button variant="outline" className="w-full md:w-auto">
-                                <Filter className="mr-2 h-4 w-4" />
-                                Filter Report
-                            </Button>
-                        </SheetTrigger>
-                        <SheetContent>
-                            <SheetHeader>
-                                <SheetTitle>Report Filters</SheetTitle>
-                            </SheetHeader>
-                            <div className="py-8 space-y-6">
-                                <div className="space-y-2">
-                                    <Label>Date Range</Label>
-                                    <Popover>
-                                        <PopoverTrigger asChild>
-                                            <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}>
-                                                <CalendarIcon className="mr-2 h-4 w-4" />
-                                                {date?.from ? (date.to ? `${format(date.from, "LLL dd, y")} - ${format(date.to, "LLL dd, y")}` : format(date.from, "LLL dd, y")) : <span>Pick a date</span>}
-                                            </Button>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-auto p-0" align="start">
-                                            <Calendar initialFocus mode="range" defaultMonth={date?.from} selected={date} onSelect={setDate} numberOfMonths={1}/>
-                                        </PopoverContent>
-                                    </Popover>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="employee">Employee</Label>
-                                    <Select onValueChange={setSelectedEmployeeId} value={selectedEmployeeId}>
-                                        <SelectTrigger id="employee"><SelectValue placeholder="All Employees" /></SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="all">All Employees</SelectItem>
-                                            {employees.map(emp => <SelectItem key={emp.id} value={emp.id!}>{emp.name}</SelectItem>)}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="status">Status</Label>
-                                    <Select onValueChange={setSelectedStatus} value={selectedStatus}>
-                                        <SelectTrigger id="status"><SelectValue placeholder="All Statuses" /></SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="all">All Statuses</SelectItem>
-                                            <SelectItem value="On-time">On-time</SelectItem>
-                                            <SelectItem value="Late">Late</SelectItem>
-                                            <SelectItem value="Absent">Absent</SelectItem>
-                                            <SelectItem value="Manual">Manual</SelectItem>
-                                            <SelectItem value="Half-day">Half-day</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
+             <div className="flex flex-col md:flex-row items-center gap-4 p-4 rounded-lg border-2 border-foreground transition-all duration-300 ease-out hover:shadow-lg hover:border-primary">
+                <Popover open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
+                    <PopoverTrigger asChild>
+                        <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={openBranchSelector}
+                            className="w-full md:w-auto md:min-w-[250px] justify-between"
+                        >
+                            <Building className="mr-2 h-4 w-4" />
+                            {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                        <Command>
+                            <CommandInput 
+                                placeholder="Search branch..."
+                                value={searchTerm}
+                                onValueChange={setSearchTerm}
+                            />
+                            <CommandEmpty>No branches found.</CommandEmpty>
+                            <CommandGroup>
+                                <CommandList>
+                                {filteredBranches.map((branch) => (
+                                    <CommandItem
+                                        key={branch.id}
+                                        value={branch.shopName!}
+                                        onSelect={() => {
+                                            setSelectedBranch(branch);
+                                            setOpenBranchSelector(false);
+                                        }}
+                                    >
+                                        {branch.shopName}
+                                    </CommandItem>
+                                ))}
+                                </CommandList>
+                            </CommandGroup>
+                        </Command>
+                    </PopoverContent>
+                </Popover>
+                
+                <Sheet>
+                    <SheetTrigger asChild>
+                        <Button variant="outline" className="w-full md:w-auto">
+                            <Filter className="mr-2 h-4 w-4" />
+                            Filter Report
+                        </Button>
+                    </SheetTrigger>
+                    <SheetContent>
+                        <SheetHeader>
+                            <SheetTitle>Report Filters</SheetTitle>
+                        </SheetHeader>
+                        <div className="py-8 space-y-6">
+                            <div className="space-y-2">
+                                <Label>Date Range</Label>
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}>
+                                            <CalendarIcon className="mr-2 h-4 w-4" />
+                                            {date?.from ? (date.to ? `${format(date.from, "LLL dd, y")} - ${format(date.to, "LLL dd, y")}` : format(date.from, "LLL dd, y")) : <span>Pick a date</span>}
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0" align="start">
+                                        <Calendar initialFocus mode="range" defaultMonth={date?.from} selected={date} onSelect={setDate} numberOfMonths={1}/>
+                                    </PopoverContent>
+                                </Popover>
                             </div>
-                        </SheetContent>
-                    </Sheet>
-                </CardContent>
-            </Card>
+                            <div className="space-y-2">
+                                <Label htmlFor="employee">Employee</Label>
+                                <Select onValueChange={setSelectedEmployeeId} value={selectedEmployeeId}>
+                                    <SelectTrigger id="employee"><SelectValue placeholder="All Employees" /></SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">All Employees</SelectItem>
+                                        {employees.map(emp => <SelectItem key={emp.id} value={emp.id!}>{emp.name}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="status">Status</Label>
+                                <Select onValueChange={setSelectedStatus} value={selectedStatus}>
+                                    <SelectTrigger id="status"><SelectValue placeholder="All Statuses" /></SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">All Statuses</SelectItem>
+                                        <SelectItem value="On-time">On-time</SelectItem>
+                                        <SelectItem value="Late">Late</SelectItem>
+                                        <SelectItem value="Absent">Absent</SelectItem>
+                                        <SelectItem value="Manual">Manual</SelectItem>
+                                        <SelectItem value="Half-day">Half-day</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+                    </SheetContent>
+                </Sheet>
+            </div>
 
 
             <Tabs defaultValue="attendance" className="w-full">
