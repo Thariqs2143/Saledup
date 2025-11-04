@@ -31,8 +31,9 @@ export default function AdminLoginPage() {
     const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
     const otpInputsRef = useRef<HTMLInputElement[]>([]);
     const recaptchaContainerRef = useRef<HTMLDivElement>(null);
+    const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
 
-    useEffect(() => {
+     useEffect(() => {
         const phoneFromQuery = searchParams.get('phone');
         if (!phoneFromQuery) {
             router.push('/login');
@@ -41,23 +42,28 @@ export default function AdminLoginPage() {
         setPhone(phoneFromQuery);
 
         const setupRecaptcha = () => {
-            if (!window.recaptchaVerifier && recaptchaContainerRef.current) {
+            if (!recaptchaVerifierRef.current && recaptchaContainerRef.current) {
                 const verifier = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
                     'size': 'invisible',
                     'callback': () => {},
                 });
-                window.recaptchaVerifier = verifier;
-                handleGetOtp(phoneFromQuery, verifier);
-            } else if (window.recaptchaVerifier) {
-                handleGetOtp(phoneFromQuery, window.recaptchaVerifier);
+                recaptchaVerifierRef.current = verifier;
+                verifier.render().then(() => {
+                    handleGetOtp(phoneFromQuery, verifier);
+                }).catch(error => {
+                    console.error("reCAPTCHA render error:", error);
+                    toast({ title: "reCAPTCHA Error", description: "Could not initialize reCAPTCHA. Please refresh the page.", variant: "destructive"});
+                });
+            } else if (recaptchaVerifierRef.current) {
+                 handleGetOtp(phoneFromQuery, recaptchaVerifierRef.current);
             }
         };
-
-        // Delay setup slightly to ensure DOM is fully ready, especially on mobile.
+        
+        // Delay setup to ensure DOM is ready
         const timeoutId = setTimeout(setupRecaptcha, 100);
 
         return () => clearTimeout(timeoutId);
-    }, [searchParams, router]);
+    }, [searchParams, router, toast]); // Added toast to dependency array
 
 
     const handleGetOtp = async (phoneNum: string, appVerifier: RecaptchaVerifier) => {
@@ -202,12 +208,13 @@ export default function AdminLoginPage() {
        {/* RIGHT SIDE - Form Section */}
       <div className="flex flex-col items-center justify-center py-12 md:py-0 px-4 md:px-12">
            {/* TOP IMAGE for Mobile */}
-            <div className="md:hidden w-full h-[40vh] relative mb-8">
+            <div className="md:hidden w-full relative mb-8">
                 <Image
                 src="https://res.cloudinary.com/dnkghymx5/image/upload/v1762241011/Generated_Image_November_04_2025_-_12_50PM_1_hslend.png"
                 alt="Attendry illustration"
-                fill
-                className="object-cover"
+                width={800}
+                height={600}
+                className="w-full h-auto object-contain"
                 priority
                 />
             </div>

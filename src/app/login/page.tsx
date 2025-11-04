@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from "react";
@@ -6,8 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { doc, getDoc, writeBatch } from "firebase/firestore";
-import { auth, db } from "@/lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 import { IndianFlagIcon } from "@/components/ui/indian-flag-icon";
@@ -35,24 +36,17 @@ export default function LoginPage() {
       const phoneLookupRef = doc(db, 'employee_phone_to_shop_lookup', phoneNumber);
       const phoneLookupSnap = await getDoc(phoneLookupRef);
 
-      if (phoneLookupSnap.exists()) {
-        if(phoneLookupSnap.data()?.isAdmin) {
-           router.push(`/admin/login?phone=${phone}`);
-        } else {
-            toast({
-              title: "Employee Account",
-              description: "This number is registered as an employee. Please use the 'Login as Employee' button.",
-              variant: "destructive",
-            });
-             setLoading(false);
-             return;
-        }
+      if (phoneLookupSnap.exists() && phoneLookupSnap.data()?.isAdmin) {
+          router.push(`/admin/login?phone=${phone}`);
+      } else if (phoneLookupSnap.exists() && !phoneLookupSnap.data()?.isAdmin) {
+        toast({
+          title: "Employee Account",
+          description: "This number is registered as an employee. Please use the 'Login as Employee' button.",
+          variant: "destructive",
+        });
+        setLoading(false);
       } else {
-        // This is a new user, create a temporary marker and proceed to OTP
-        const batch = writeBatch(db);
-        const newDocRef = doc(db, 'employee_phone_to_shop_lookup', phoneNumber);
-        batch.set(newDocRef, { isNewUser: true });
-        await batch.commit();
+        // New user logic
         router.push(`/admin/login?phone=${phone}`);
       }
 
@@ -83,12 +77,13 @@ export default function LoginPage() {
       {/* RIGHT SIDE - Form Section */}
       <div className="flex flex-col items-center justify-center py-12 md:py-0 px-4 md:px-12">
         {/* TOP IMAGE for Mobile */}
-        <div className="md:hidden w-full h-[40vh] relative mb-8">
+        <div className="md:hidden w-full relative mb-8">
             <Image
             src="https://res.cloudinary.com/dnkghymx5/image/upload/v1762241011/Generated_Image_November_04_2025_-_12_50PM_1_hslend.png"
             alt="Attendry illustration"
-            fill
-            className="object-cover"
+            width={800}
+            height={600}
+            className="w-full h-auto object-contain"
             priority
             />
         </div>
