@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { BottomNav, type NavItem } from '@/components/bottom-nav';
 import Link from 'next/link';
 import { AdminNav } from '@/components/admin-nav';
-import { Bell, Loader2 } from 'lucide-react';
+import { Bell, Loader2, PanelLeft } from 'lucide-react';
 import { InstallPWA } from '@/components/install-pwa';
 import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
@@ -14,6 +14,7 @@ import { onAuthStateChanged, type User as AuthUser } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import type { User as AppUser } from './employees/page';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 const adminNavItems: NavItem[] = [
   { href: '/admin', label: 'Home', iconName: 'LayoutDashboard' },
@@ -93,12 +94,23 @@ export default function AdminLayout({ children }: PropsWithChildren) {
   return (
     <div className="flex min-h-screen w-full">
       {/* Sidebar (fixed) */}
-      <AdminNav navItems={adminNavItems} profile={profile} />
+      <AdminNav navItems={adminNavItems} profile={profile} isDesktop={true} />
 
       {/* Main Content Area */}
       <div className="flex flex-col flex-1 md:ml-64">
         {/* Mobile Header */}
         <header className="flex h-14 items-center gap-4 border-b bg-background px-4 md:hidden sticky top-0 z-40">
+           <Sheet>
+            <SheetTrigger asChild>
+              <Button size="icon" variant="outline" className="sm:hidden">
+                <PanelLeft className="h-5 w-5" />
+                <span className="sr-only">Toggle Menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="sm:max-w-xs p-0">
+               <AdminNav navItems={adminNavItems} profile={profile} isDesktop={false} />
+            </SheetContent>
+          </Sheet>
           <h1 className="font-bold text-xl text-primary">Attendry</h1>
           <div className="ml-auto flex items-center gap-2">
             <Link href="/admin/notifications">
