@@ -68,12 +68,12 @@ export default function LoginPage() {
         <div ref={recaptchaContainerRef}></div>
         
         {/* Left side with illustration */}
-        <div className="hidden md:flex relative h-full">
+        <div className="hidden md:flex relative h-full bg-slate-900">
              <Image
                 src="https://res.cloudinary.com/dnkghymx5/image/upload/v1762241011/Generated_Image_November_04_2025_-_12_50PM_1_hslend.png"
                 alt="Business tools illustration"
                 fill
-                className="object-cover"
+                className="object-contain"
                 data-ai-hint="business management"
             />
         </div>
@@ -88,7 +88,7 @@ export default function LoginPage() {
                         alt="Business tools illustration"
                         width={600}
                         height={300}
-                        className="object-cover w-full h-48"
+                        className="object-contain w-full h-48"
                         data-ai-hint="business management"
                     />
                 </div>
