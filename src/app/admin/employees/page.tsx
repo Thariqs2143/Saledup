@@ -295,16 +295,6 @@ const LeaveRequests = ({ selectedBranchId, allBranchIds }: { selectedBranchId: s
       }
     };
 
-    const getStatusVariant = (status: LeaveRequest['status']) => {
-      switch (status) {
-        case 'approved': return 'secondary';
-        case 'denied': return 'destructive';
-        case 'pending':
-        default:
-          return 'outline';
-      }
-    };
-  
     return (
         <div className="space-y-4">
             <div>
@@ -328,7 +318,6 @@ const LeaveRequests = ({ selectedBranchId, allBranchIds }: { selectedBranchId: s
                         <div className="flex-1 space-y-2">
                         <div className="flex items-center gap-4">
                             <p className="font-bold">{request.userName}</p>
-                            <Badge variant={getStatusVariant(request.status)}>{request.status}</Badge>
                         </div>
                         <p className="text-sm font-medium text-primary">
                             {new Date(request.startDate).toLocaleDateString()} to {new Date(request.endDate).toLocaleDateString()}
@@ -492,3 +481,6 @@ export default function ManageEmployeesPage() {
 
     
 
+
+
+    
