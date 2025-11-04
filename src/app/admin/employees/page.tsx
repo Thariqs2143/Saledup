@@ -492,6 +492,7 @@ export default function ManageEmployeesPage() {
     }, [router, selectedBranch]);
     
     const allBranchIds = useMemo(() => branches.filter(b => b.id !== 'all').map(b => b.id), [branches]);
+    const memoizedBranches = useMemo(() => branches, [branches]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -545,7 +546,7 @@ export default function ManageEmployeesPage() {
                 <TabsTrigger value="leave">Leave Requests</TabsTrigger>
             </TabsList>
             <TabsContent value="employees" className="mt-6">
-                <EmployeeList allBranches={branches} selectedBranchId={selectedBranch?.id || null} allBranchIds={allBranchIds} />
+                <EmployeeList allBranches={memoizedBranches} selectedBranchId={selectedBranch?.id || null} allBranchIds={allBranchIds} />
             </TabsContent>
             <TabsContent value="leave" className="mt-6">
                 <LeaveRequests selectedBranchId={selectedBranch?.id || null} allBranchIds={allBranchIds} />
