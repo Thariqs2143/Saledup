@@ -565,7 +565,7 @@ export default function AdminDashboard() {
                                 variant="outline"
                                 role="combobox"
                                 aria-expanded={openBranchSelector}
-                                className="w-full sm:w-[300px] justify-between border-black"
+                                className="w-full sm:w-[300px] justify-between border-black dark:border-white"
                                 disabled={branches.length <= 1}
                             >
                                 {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
