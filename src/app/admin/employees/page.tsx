@@ -137,8 +137,6 @@ const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds }: { allBran
 
   const filteredEmployees = employees.filter(employee =>
     employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (employee.email && employee.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (employee.phone && employee.phone.toLowerCase().includes(searchTerm.toLowerCase())) ||
     (employee.role && employee.role.toLowerCase().includes(searchTerm.toLowerCase())) ||
     (employee.shopName && employee.shopName.toLowerCase().includes(searchTerm.toLowerCase()))
   );
@@ -189,106 +187,46 @@ const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds }: { allBran
                   <p>No employees found. Invite an employee to get started.</p>
               </div>
           ): (
-          <>
-          {/* Mobile View: Card List */}
-          <div className="grid gap-4 md:hidden">
-              {filteredEmployees.map((employee) => (
-                  <div key={employee.id}
-                       className="p-4 rounded-lg bg-muted/50 space-y-4 border-2 border-primary">
-                      <div className="flex items-start gap-4">
-                          <Avatar className="h-12 w-12 border shrink-0">
-                              <AvatarImage src={employee.imageUrl} alt={employee.name} />
-                              <AvatarFallback>{employee.fallback}</AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 space-y-1 min-w-0">
-                              <div className="flex items-center justify-between gap-2">
-                                  <p className="font-bold break-words">{employee.name}</p>
-                                  <Badge variant={getStatusVariant(employee.status)} className="shrink-0">
-                                      {employee.status}
-                                  </Badge>
-                              </div>
-                              <div className="space-y-2 text-sm text-muted-foreground">
-                                  {employee.shopName && (
-                                    <div className="flex items-center gap-2 font-semibold text-primary">
-                                        <Building className="h-3 w-3 shrink-0" />
-                                        <span>{employee.shopName}</span>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredEmployees.map((employee) => (
+                    <Card key={employee.id} className="group flex flex-col transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-1 border-2 border-foreground/10 hover:border-primary">
+                        <CardContent className="pt-6 flex-1">
+                            <div className="flex items-start gap-4">
+                                <Avatar className="h-14 w-14 border-2 border-primary/20 shrink-0">
+                                    <AvatarImage src={employee.imageUrl} alt={employee.name} />
+                                    <AvatarFallback>{employee.fallback}</AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1 space-y-1 min-w-0">
+                                    <div className="flex items-center justify-between gap-2">
+                                        <p className="font-bold text-lg break-words">{employee.name}</p>
                                     </div>
-                                  )}
-                                  {employee.email && (
-                                      <div className="flex items-center gap-2">
-                                          <Mail className="h-3 w-3 shrink-0" />
-                                          <span className="break-all">{employee.email}</span>
-                                      </div>
-                                  )}
-                                   <div className="flex items-center gap-2">
-                                      <Phone className="h-3 w-3 shrink-0" />
-                                      <span className="break-all">{employee.phone || 'Not provided'}</span>
-                                  </div>
-                                  <div className="flex items-center gap-2">
-                                      <Briefcase className="h-3 w-3 shrink-0" />
-                                      <span>{employee.role}</span>
-                                  </div>
-                                  <div className="flex items-center gap-2">
-                                      <Calendar className="h-3 w-3 shrink-0" />
-                                      <span>Joined: {employee.id && formattedDates[employee.id] ? formattedDates[employee.id] : ''}</span>
-                                  </div>
-                              </div>
-                          </div>
-                      </div>
-                       <Button size="lg" className="w-full bg-blue-600 hover:bg-blue-700 text-white" onClick={() => handleViewProfile(employee)}>
-                          <Eye className="mr-2 h-4 w-4"/>
-                          View Profile
-                      </Button>
-                  </div>
-              ))}
-          </div>
-
-          {/* Desktop View: Table */}
-          <div className="hidden md:block rounded-lg border">
-              <Table>
-              <TableHeader>
-                  <TableRow>
-                  <TableHead>Name</TableHead>
-                   {selectedBranchId === 'all' && <TableHead>Branch</TableHead>}
-                  <TableHead>Role</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-              </TableHeader>
-              <TableBody>
-                  {filteredEmployees.map((employee) => (
-                  <TableRow key={employee.id}>
-                      <TableCell>
-                      <div className="flex items-center gap-3">
-                          <Avatar className="h-9 w-9">
-                          <AvatarImage src={employee.imageUrl} alt={employee.name} />
-                          <AvatarFallback>{employee.fallback}</AvatarFallback>
-                          </Avatar>
-                          <div>
-                              <div className="font-medium">{employee.name}</div>
-                              <div className="text-sm text-muted-foreground">{employee.employeeId}</div>
-                          </div>
-                      </div>
-                      </TableCell>
-                       {selectedBranchId === 'all' && <TableCell>{employee.shopName || 'N/A'}</TableCell>}
-                      <TableCell>{employee.role}</TableCell>
-                      <TableCell>
-                      <Badge variant={getStatusVariant(employee.status)}>
-                          {employee.status}
-                      </Badge>
-                      </TableCell>
-                       <TableCell className="text-right">
-                          <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white" onClick={() => handleViewProfile(employee)}>
-                              <Eye className="mr-2 h-4 w-4"/>
-                              View Profile
-                          </Button>
-                      </TableCell>
-                  </TableRow>
-                  ))}
-              </TableBody>
-              </Table>
-          </div>
-          </>
+                                     <div className="flex items-center gap-2 font-semibold text-primary">
+                                        <Briefcase className="h-4 w-4 shrink-0" />
+                                        <span>{employee.role}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="mt-4 space-y-2 text-sm text-muted-foreground">
+                                {selectedBranchId === 'all' && employee.shopName && (
+                                <div className="flex items-center gap-2 font-semibold">
+                                    <Building className="h-4 w-4 shrink-0 text-foreground" />
+                                    <span>{employee.shopName}</span>
+                                </div>
+                                )}
+                            </div>
+                        </CardContent>
+                        <CardContent className="border-t pt-4 flex flex-col sm:flex-row justify-between items-center gap-2">
+                            <Badge variant={getStatusVariant(employee.status)} className="shrink-0">
+                                {employee.status}
+                            </Badge>
+                             <Button size="lg" className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white mt-2 sm:mt-0" onClick={() => handleViewProfile(employee)}>
+                                <Eye className="mr-2 h-4 w-4"/>
+                                View Profile
+                            </Button>
+                        </CardContent>
+                    </Card>
+                ))}
+            </div>
           )}
           </>
           )}
@@ -546,3 +484,5 @@ export default function ManageEmployeesPage() {
     </div>
   );
 }
+
+    
