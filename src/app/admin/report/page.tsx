@@ -1109,17 +1109,14 @@ export default function ReportsPage() {
 
             <Tabs defaultValue="attendance" className="w-full">
                 <TabsList className="grid w-full grid-cols-3 h-auto">
-                    <TabsTrigger value="attendance" className="flex flex-col h-full py-2">
-                      <span>Attendance</span>
-                      <span>Report</span>
+                    <TabsTrigger value="attendance" className="h-full py-2">
+                      <span>Attendance<br className="md:hidden" /> Report</span>
                     </TabsTrigger>
-                     <TabsTrigger value="muster" className="flex flex-col h-full py-2">
-                       <span>Muster</span>
-                       <span>Roll</span>
+                     <TabsTrigger value="muster" className="h-full py-2">
+                       <span>Muster<br className="md:hidden" /> Roll</span>
                      </TabsTrigger>
-                    <TabsTrigger value="payroll" className="flex flex-col h-full py-2" disabled={selectedBranch.id === 'all'}>
-                       <span>Payroll</span>
-                       <span>Report</span>
+                    <TabsTrigger value="payroll" className="h-full py-2" disabled={selectedBranch.id === 'all'}>
+                       <span>Payroll<br className="md:hidden" /> Report</span>
                     </TabsTrigger>
                 </TabsList>
                 <TabsContent value="attendance" className="mt-6">
