@@ -294,30 +294,7 @@ const LeaveRequests = ({ selectedBranchId, allBranchIds }: { selectedBranchId: s
         setUpdatingId(null);
       }
     };
-    
-    const handleDeleteRequest = async (requestId: string) => {
-        const request = leaveRequests.find(r => r.id === requestId);
-        if (!request || !('shopId' in request)) return;
-      
-        const shopId = (request as any).shopId;
-        if (!shopId) {
-            toast({ title: "Error", description: "Shop ID not found for this request.", variant: "destructive" });
-            return;
-        }
 
-        setUpdatingId(requestId);
-        const docRef = doc(db, 'shops', shopId, 'leaveRequests', requestId);
-        try {
-            await deleteDoc(docRef);
-            toast({ title: "Request Deleted", description: "The leave request has been permanently removed." });
-        } catch (error) {
-            console.error("Error deleting leave request:", error);
-            toast({ title: "Delete Failed", description: "Could not delete the request.", variant: "destructive" });
-        } finally {
-            setUpdatingId(null);
-        }
-    };
-  
     const getStatusVariant = (status: LeaveRequest['status']) => {
       switch (status) {
         case 'approved': return 'secondary';
@@ -362,7 +339,7 @@ const LeaveRequests = ({ selectedBranchId, allBranchIds }: { selectedBranchId: s
                         </p>
                         </div>
                         <div className="flex flex-col sm:flex-row gap-2 shrink-0 w-full sm:w-auto">
-                            {request.status === 'pending' && (
+                           {request.status === 'pending' ? (
                                 <>
                                     <Button
                                     variant="outline"
@@ -385,27 +362,17 @@ const LeaveRequests = ({ selectedBranchId, allBranchIds }: { selectedBranchId: s
                                     <span className="ml-2">Deny</span>
                                     </Button>
                                 </>
+                            ) : request.status === 'approved' ? (
+                                <Button variant="secondary" size="sm" className="w-full sm:w-auto" disabled>
+                                    <Check className="h-4 w-4 mr-2" />
+                                    Approved
+                                </Button>
+                            ) : (
+                                 <Button variant="destructive" size="sm" className="w-full sm:w-auto" disabled>
+                                    <X className="h-4 w-4 mr-2" />
+                                    Denied
+                                </Button>
                             )}
-                             <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                     <Button variant="ghost" size="sm" className="w-full sm:w-auto text-destructive hover:bg-destructive/10 hover:text-destructive" disabled={updatingId === request.id}>
-                                        <Trash2 className="h-4 w-4"/>
-                                        <span className="ml-2">Delete</span>
-                                    </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                            This will permanently delete the leave request from {request.userName}. This action cannot be undone.
-                                        </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                        <AlertDialogAction onClick={() => handleDeleteRequest(request.id)} className="bg-destructive hover:bg-destructive/90">Confirm Delete</AlertDialogAction>
-                                    </AlertDialogFooter>
-                                </AlertDialogContent>
-                            </AlertDialog>
                         </div>
                     </CardContent>
                     </Card>
@@ -524,3 +491,4 @@ export default function ManageEmployeesPage() {
     
 
     
+
