@@ -22,7 +22,7 @@ export default function LoginPage() {
     const recaptchaContainerRef = useRef<HTMLDivElement>(null);
 
      useEffect(() => {
-        if (!window.recaptchaVerifier) {
+        if (typeof window !== 'undefined' && !window.recaptchaVerifier) {
             window.recaptchaVerifier = new RecaptchaVerifier(auth, recaptchaContainerRef.current!, {
                 'size': 'invisible',
                 'callback': (response: any) => {},
@@ -112,7 +112,7 @@ export default function LoginPage() {
                 
                 <form className="space-y-6" onSubmit={handleOwnerLogin}>
                     <div className="space-y-2">
-                        <div className="flex items-center gap-2 border border-input rounded-md px-3 bg-white">
+                        <div className="flex items-center gap-2 border border-input rounded-md px-3 bg-transparent">
                              <IndianFlagIcon />
                              <span className="text-sm font-medium text-muted-foreground">+91</span>
                             <Input 
@@ -121,7 +121,7 @@ export default function LoginPage() {
                                 inputMode="numeric" 
                                 placeholder="Enter Phone Number" 
                                 required 
-                                className="flex-1 border-0 focus-visible:ring-0 focus-visible:ring-offset-0" 
+                                className="flex-1 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent" 
                                 value={phone} 
                                 onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))} 
                                 maxLength={10} 

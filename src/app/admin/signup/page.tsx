@@ -12,6 +12,7 @@ import { RecaptchaVerifier, signInWithPhoneNumber, type ConfirmationResult } fro
 import { auth, db } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import { doc, getDoc, setDoc, writeBatch } from "firebase/firestore";
+import { IndianFlagIcon } from "@/components/ui/indian-flag-icon";
 
 declare global {
   interface Window {
@@ -42,8 +43,8 @@ export default function AdminSignupPage() {
     }, [searchParams, router]);
 
     useEffect(() => {
-        if (!window.recaptchaVerifier && recaptchaContainerRef.current) {
-            window.recaptchaVerifier = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
+        if (typeof window !== 'undefined' && !window.recaptchaVerifier) {
+            window.recaptchaVerifier = new RecaptchaVerifier(auth, recaptchaContainerRef.current!, {
                 'size': 'invisible',
                 'callback': (response: any) => {},
             });

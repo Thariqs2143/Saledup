@@ -25,7 +25,7 @@ export default function EmployeeLoginPage() {
     const recaptchaContainerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        if (!window.recaptchaVerifier) {
+        if (typeof window !== 'undefined' && !window.recaptchaVerifier) {
             window.recaptchaVerifier = new RecaptchaVerifier(auth, recaptchaContainerRef.current!, {
                 'size': 'invisible',
                 'callback': (response: any) => {
