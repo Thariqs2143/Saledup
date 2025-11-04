@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Loader2, Calendar as CalendarIcon, Download, FileText, Check, X, Calculator, Clock4, Users, Receipt, ChevronDown, Lock, Building, ChevronsUpDown } from "lucide-react";
+import { Loader2, Calendar as CalendarIcon, Download, FileText, Check, X, Calculator, Clock4, Users, Receipt, ChevronDown, Lock, Building, ChevronsUpDown, Search } from "lucide-react";
 import { collection, query, where, getDocs, orderBy, Timestamp, doc, getDoc, collectionGroup } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
 import { format, subDays, getDaysInMonth, startOfMonth, endOfMonth, differenceInDays, eachDayOfInterval, startOfWeek, endOfWeek, setMonth, setYear } from 'date-fns';
@@ -983,6 +983,7 @@ export default function ReportsPage() {
     const [selectedBranch, setSelectedBranch] = useState<ShopData | null>(null);
     const [openBranchSelector, setOpenBranchSelector] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -1017,6 +1018,11 @@ export default function ReportsPage() {
 
         return () => unsubscribe();
     }, [router, selectedBranch]);
+    
+    const filteredBranches = useMemo(() => {
+        return allBranches.filter(branch => branch.shopName?.toLowerCase().includes(searchTerm.toLowerCase()));
+    }, [allBranches, searchTerm]);
+
 
     if (loading) {
         return (
@@ -1041,29 +1047,42 @@ export default function ReportsPage() {
                 <p className="text-muted-foreground">Filter records and generate monthly salary reports.</p>
             </div>
             
-            <Card>
+            <Card className="border-2 border-primary">
                 <CardHeader>
-                    <CardTitle>Select Branch</CardTitle>
+                    <CardTitle>Branch & Report Filters</CardTitle>
+                </CardHeader>
+                <CardContent className="flex flex-col md:flex-row items-center gap-4">
+                     <div className="relative w-full md:w-auto md:flex-1">
+                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            placeholder="Search reports..."
+                            className="pl-8 w-full"
+                        />
+                    </div>
                     <Popover open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
                         <PopoverTrigger asChild>
                             <Button
                                 variant="outline"
                                 role="combobox"
                                 aria-expanded={openBranchSelector}
-                                className="w-full sm:w-[300px] justify-between mt-2"
+                                className="w-full md:w-auto md:min-w-[250px] justify-between"
                             >
                                 <Building className="mr-2 h-4 w-4" />
                                 {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
                                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                             </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-full sm:w-[300px] p-0">
+                        <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
                             <Command>
-                                <CommandInput placeholder="Search branch..." />
+                                <CommandInput 
+                                    placeholder="Search branch..."
+                                    value={searchTerm}
+                                    onValueChange={setSearchTerm}
+                                />
                                 <CommandEmpty>No branches found.</CommandEmpty>
                                 <CommandGroup>
                                     <CommandList>
-                                    {allBranches.map((branch) => (
+                                    {filteredBranches.map((branch) => (
                                         <CommandItem
                                             key={branch.id}
                                             value={branch.shopName!}
@@ -1080,7 +1099,7 @@ export default function ReportsPage() {
                             </Command>
                         </PopoverContent>
                     </Popover>
-                </CardHeader>
+                </CardContent>
             </Card>
 
 
@@ -1126,4 +1145,5 @@ export default function ReportsPage() {
 }
 
     
+
 
