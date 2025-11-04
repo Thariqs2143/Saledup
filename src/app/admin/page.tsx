@@ -592,7 +592,7 @@ export default function AdminDashboard() {
         </Card>
       </div>
 
-        <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
+        <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground dark:border-foreground hover:border-primary">
             <CardHeader>
                 <CardTitle>Branch Management</CardTitle>
                 <CardDescription>Select a branch to view its dashboard or manage your branches.</CardDescription>
@@ -635,18 +635,20 @@ export default function AdminDashboard() {
                             </Command>
                         </PopoverContent>
                     </Popover>
-                     <Link href="/admin/add-branch">
-                        <Button className="w-full sm:w-auto">
-                            <Building className="mr-2 h-4 w-4" />
-                            Add New Branch
-                        </Button>
-                    </Link>
-                    <Link href="/admin/branches">
-                        <Button variant="secondary" className="w-full sm:w-auto">
-                            <Eye className="mr-2 h-4 w-4" />
-                            View Branches
-                        </Button>
-                    </Link>
+                    <div className="grid grid-cols-2 sm:flex sm:flex-row gap-4 w-full sm:w-auto">
+                        <Link href="/admin/add-branch" className="w-full">
+                            <Button className="w-full">
+                                <Building className="mr-2 h-4 w-4" />
+                                Add Branch
+                            </Button>
+                        </Link>
+                        <Link href="/admin/branches" className="w-full">
+                            <Button variant="secondary" className="w-full">
+                                <Eye className="mr-2 h-4 w-4" />
+                                View Branches
+                            </Button>
+                        </Link>
+                    </div>
                 </div>
             </CardContent>
         </Card>
