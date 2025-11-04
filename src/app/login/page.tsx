@@ -68,7 +68,7 @@ export default function LoginPage() {
         <div ref={recaptchaContainerRef}></div>
         
         {/* Left side with illustration */}
-        <div className="hidden md:flex flex-col items-center justify-center bg-[#0C2A6A] p-10 text-white relative overflow-hidden">
+        <div className="hidden md:flex relative h-full">
              <Image
                 src="https://res.cloudinary.com/dnkghymx5/image/upload/v1762241011/Generated_Image_November_04_2025_-_12_50PM_1_hslend.png"
                 alt="Business tools illustration"
