@@ -237,6 +237,7 @@ export default function AdminDashboard() {
   const allBranchIds = useMemo(() => branches.filter(b => b.id !== 'all').map(b => b.id), [branches]);
   
   const staffEmployees = useMemo(() => employees.filter(e => e.role !== 'Admin'), [employees]);
+  const ownerProfile = useMemo(() => employees.find(e => e.role === 'Admin'), [employees]);
   
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
@@ -490,7 +491,9 @@ export default function AdminDashboard() {
     <div className="flex flex-col gap-6 lg:gap-8">
        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Good Morning, Shop Owner!</h1>
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+                Good Morning, {ownerProfile?.name?.split(' ')[0] || 'Shop Owner'}!
+            </h1>
             <p className="text-muted-foreground">Here's a quick overview of your attendance today.</p>
            </div>
        </div>
@@ -780,8 +783,3 @@ export default function AdminDashboard() {
     </div>
   );
 }
-
-    
-
-    
-
