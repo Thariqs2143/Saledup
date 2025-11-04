@@ -470,7 +470,7 @@ export default function GenerateAndEntryPage() {
                 <p className="text-muted-foreground">Generate QR codes or manually enter attendance records.</p>
             </div>
             <div className="w-full flex justify-center md:absolute md:top-0 md:right-0 md:w-auto">
-                <div className="inline-flex rounded-md border-2 border-primary bg-muted p-1">
+                <div className="w-full md:w-auto md:inline-flex rounded-md border-2 border-primary bg-muted p-1 grid grid-cols-2">
                     <Button 
                         onClick={() => setViewMode('qr')}
                         variant={viewMode === 'qr' ? 'default' : 'ghost'} 
