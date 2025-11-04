@@ -845,10 +845,11 @@ export default function ReportsPage() {
                         if (!selectedBranch) {
                              setSelectedBranch(allBranchesOption);
                         }
+                        setLoading(false);
                     });
+                     return () => unsubscribeBranches();
                 } catch (error) {
                     console.error("Error fetching branches:", error);
-                } finally {
                     setLoading(false);
                 }
             } else {
@@ -906,10 +907,106 @@ export default function ReportsPage() {
         )
     }
 
+    const branchSelectorButton = (
+        <Button variant="outline" className="w-full justify-between">
+            <Building className="mr-2 h-4 w-4" />
+            {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
+            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+    );
+
+    const branchSelectorContent = (
+        <BranchSelector 
+            open={openBranchSelector}
+            onOpenChange={setOpenBranchSelector}
+            selectedBranch={selectedBranch}
+            branches={allBranches}
+            setSelectedBranch={setSelectedBranch}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+        />
+    );
+
+
     return (
         <div className="space-y-6">
             <div className="md:hidden">
-                 <Tabs defaultValue="attendance" className="w-full">
+                <div className="flex flex-col gap-4">
+                     <h1 className="text-3xl font-bold tracking-tight">Reports &amp; Payroll</h1>
+                      {isMobile ? (
+                        <Sheet open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
+                            <SheetTrigger asChild>{branchSelectorButton}</SheetTrigger>
+                            <SheetContent side="bottom">
+                                <SheetHeader className="p-4"><SheetTitle>Select Branch</SheetTitle></SheetHeader>
+                                <div className="p-4">{branchSelectorContent}</div>
+                            </SheetContent>
+                        </Sheet>
+                    ) : (
+                        <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
+                            <DialogTrigger asChild>{branchSelectorButton}</DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader><DialogTitle>Select Branch</DialogTitle></DialogHeader>
+                                {branchSelectorContent}
+                            </DialogContent>
+                        </Dialog>
+                    )}
+
+                    <Sheet>
+                        <SheetTrigger asChild>
+                            <Button variant="outline" className="w-full">
+                                <Filter className="mr-2 h-4 w-4" />
+                                Filter Report
+                            </Button>
+                        </SheetTrigger>
+                        <SheetContent side="bottom">
+                            <SheetHeader className="p-4">
+                                <SheetTitle>Report Filters</SheetTitle>
+                            </SheetHeader>
+                            <div className="p-4 space-y-6">
+                                <div className="space-y-2">
+                                    <Label>Date Range</Label>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}>
+                                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                                {date?.from ? (date.to ? `${format(date.from, "LLL dd, y")} - ${format(date.to, "LLL dd, y")}` : format(date.from, "LLL dd, y")) : <span>Pick a date</span>}
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0" align="start">
+                                            <Calendar initialFocus mode="range" defaultMonth={date?.from} selected={date} onSelect={setDate} numberOfMonths={1}/>
+                                        </PopoverContent>
+                                    </Popover>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="employee">Employee</Label>
+                                    <Select onValueChange={setSelectedEmployeeId} value={selectedEmployeeId}>
+                                        <SelectTrigger id="employee"><SelectValue placeholder="All Employees" /></SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">All Employees</SelectItem>
+                                            {employees.map(emp => <SelectItem key={emp.id} value={emp.id!}>{emp.name}</SelectItem>)}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="status">Status</Label>
+                                    <Select onValueChange={setSelectedStatus} value={selectedStatus}>
+                                        <SelectTrigger id="status"><SelectValue placeholder="All Statuses" /></SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">All Statuses</SelectItem>
+                                            <SelectItem value="On-time">On-time</SelectItem>
+                                            <SelectItem value="Late">Late</SelectItem>
+                                            <SelectItem value="Absent">Absent</SelectItem>
+                                            <SelectItem value="Manual">Manual</SelectItem>
+                                            <SelectItem value="Half-day">Half-day</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+                        </SheetContent>
+                    </Sheet>
+                </div>
+
+                 <Tabs defaultValue="attendance" className="w-full pt-6">
                     <TabsList className="h-auto items-center justify-center rounded-md p-1 grid w-full grid-cols-3 bg-primary text-primary-foreground">
                         <TabsTrigger value="attendance" className="data-[state=active]:bg-background data-[state=active]:text-foreground">
                              <span>Attendance<br/>Report</span>
@@ -921,115 +1018,6 @@ export default function ReportsPage() {
                             <span>Payroll<br/>Report</span>
                         </TabsTrigger>
                     </TabsList>
-                    
-                    <div className="flex flex-col gap-4 mt-6">
-                        {isMobile ? (
-                            <Sheet open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
-                                <SheetTrigger asChild>
-                                    <Button variant="outline" className="w-full justify-between">
-                                        <Building className="mr-2 h-4 w-4" />
-                                        {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
-                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                    </Button>
-                                </SheetTrigger>
-                                <SheetContent side="bottom">
-                                    <SheetHeader className="p-4">
-                                        <SheetTitle>Select Branch</SheetTitle>
-                                    </SheetHeader>
-                                    <div className="p-4">
-                                        <BranchSelector 
-                                            open={openBranchSelector}
-                                            onOpenChange={setOpenBranchSelector}
-                                            selectedBranch={selectedBranch}
-                                            branches={allBranches}
-                                            setSelectedBranch={setSelectedBranch}
-                                            searchTerm={searchTerm}
-                                            setSearchTerm={setSearchTerm}
-                                        />
-                                    </div>
-                                </SheetContent>
-                            </Sheet>
-                        ) : (
-                             <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
-                                <DialogTrigger asChild>
-                                      <Button variant="outline" className="w-full justify-between">
-                                        <Building className="mr-2 h-4 w-4" />
-                                        {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
-                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                    </Button>
-                                </DialogTrigger>
-                                <DialogContent>
-                                     <DialogHeader>
-                                        <DialogTitle>Select Branch</DialogTitle>
-                                     </DialogHeader>
-                                      <BranchSelector 
-                                        open={openBranchSelector}
-                                        onOpenChange={setOpenBranchSelector}
-                                        selectedBranch={selectedBranch}
-                                        branches={allBranches}
-                                        setSelectedBranch={setSelectedBranch}
-                                        searchTerm={searchTerm}
-                                        setSearchTerm={setSearchTerm}
-                                    />
-                                </DialogContent>
-                            </Dialog>
-                        )}
-
-                        <Sheet>
-                            <SheetTrigger asChild>
-                                <Button variant="outline" className="w-full">
-                                    <Filter className="mr-2 h-4 w-4" />
-                                    Filter Report
-                                </Button>
-                            </SheetTrigger>
-                            <SheetContent side="bottom">
-                                <SheetHeader className="p-4">
-                                    <SheetTitle>Report Filters</SheetTitle>
-                                </SheetHeader>
-                                <div className="p-4 space-y-6">
-                                    <div className="space-y-2">
-                                        <Label>Date Range</Label>
-                                        <Popover>
-                                            <PopoverTrigger asChild>
-                                                <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}>
-                                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                                    {date?.from ? (date.to ? `${format(date.from, "LLL dd, y")} - ${format(date.to, "LLL dd, y")}` : format(date.from, "LLL dd, y")) : <span>Pick a date</span>}
-                                                </Button>
-                                            </PopoverTrigger>
-                                            <PopoverContent className="w-auto p-0" align="start">
-                                                <Calendar initialFocus mode="range" defaultMonth={date?.from} selected={date} onSelect={setDate} numberOfMonths={1}/>
-                                            </PopoverContent>
-                                        </Popover>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="employee">Employee</Label>
-                                        <Select onValueChange={setSelectedEmployeeId} value={selectedEmployeeId}>
-                                            <SelectTrigger id="employee"><SelectValue placeholder="All Employees" /></SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="all">All Employees</SelectItem>
-                                                {employees.map(emp => <SelectItem key={emp.id} value={emp.id!}>{emp.name}</SelectItem>)}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="status">Status</Label>
-                                        <Select onValueChange={setSelectedStatus} value={selectedStatus}>
-                                            <SelectTrigger id="status"><SelectValue placeholder="All Statuses" /></SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="all">All Statuses</SelectItem>
-                                                <SelectItem value="On-time">On-time</SelectItem>
-                                                <SelectItem value="Late">Late</SelectItem>
-                                                <SelectItem value="Absent">Absent</SelectItem>
-                                                <SelectItem value="Manual">Manual</SelectItem>
-                                                <SelectItem value="Half-day">Half-day</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                </div>
-                            </SheetContent>
-                        </Sheet>
-                    </div>
-
                     <TabsContent value="attendance" className="mt-6">
                         <AttendanceReportTab allBranches={allBranches} selectedBranch={selectedBranch} authUser={authUser} date={date} selectedEmployeeId={selectedEmployeeId} selectedStatus={selectedStatus} employees={employees} />
                     </TabsContent>
@@ -1059,27 +1047,11 @@ export default function ReportsPage() {
                 <p className="text-muted-foreground">Filter records and generate monthly salary reports.</p>
 
                 <div className="flex items-center gap-4">
-                    <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
-                        <DialogTrigger asChild>
-                            <Button variant="outline" className="w-full md:w-auto md:min-w-[250px] justify-between">
-                                <Building className="mr-2 h-4 w-4" />
-                                {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
-                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                            </Button>
-                        </DialogTrigger>
+                     <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
+                        <DialogTrigger asChild>{branchSelectorButton}</DialogTrigger>
                         <DialogContent>
-                             <DialogHeader>
-                                <DialogTitle>Select Branch</DialogTitle>
-                             </DialogHeader>
-                              <BranchSelector 
-                                open={openBranchSelector}
-                                onOpenChange={setOpenBranchSelector}
-                                selectedBranch={selectedBranch}
-                                branches={allBranches}
-                                setSelectedBranch={setSelectedBranch}
-                                searchTerm={searchTerm}
-                                setSearchTerm={setSearchTerm}
-                            />
+                            <DialogHeader><DialogTitle>Select Branch</DialogTitle></DialogHeader>
+                            {branchSelectorContent}
                         </DialogContent>
                     </Dialog>
                     
