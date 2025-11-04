@@ -926,14 +926,68 @@ export default function ReportsPage() {
             setSearchTerm={setSearchTerm}
         />
     );
-
+    
+    const filtersContent = (
+        <div className="py-4 space-y-6">
+            <div className="space-y-2">
+                <Label>Date Range</Label>
+                <Popover>
+                    <PopoverTrigger asChild>
+                        <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}>
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {date?.from ? (date.to ? `${format(date.from, "LLL dd, y")} - ${format(date.to, "LLL dd, y")}` : format(date.from, "LLL dd, y")) : <span>Pick a date</span>}
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar initialFocus mode="range" defaultMonth={date?.from} selected={date} onSelect={setDate} numberOfMonths={1}/>
+                    </PopoverContent>
+                </Popover>
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="employee">Employee</Label>
+                <Select onValueChange={setSelectedEmployeeId} value={selectedEmployeeId}>
+                    <SelectTrigger id="employee"><SelectValue placeholder="All Employees" /></SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All Employees</SelectItem>
+                        {employees.map(emp => <SelectItem key={emp.id} value={emp.id!}>{emp.name}</SelectItem>)}
+                    </SelectContent>
+                </Select>
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="status">Status</Label>
+                <Select onValueChange={setSelectedStatus} value={selectedStatus}>
+                    <SelectTrigger id="status"><SelectValue placeholder="All Statuses" /></SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All Statuses</SelectItem>
+                        <SelectItem value="On-time">On-time</SelectItem>
+                        <SelectItem value="Late">Late</SelectItem>
+                        <SelectItem value="Absent">Absent</SelectItem>
+                        <SelectItem value="Manual">Manual</SelectItem>
+                        <SelectItem value="Half-day">Half-day</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
+        </div>
+    );
 
     return (
         <div className="space-y-6">
-            <div className="md:hidden">
-                <div className="flex flex-col gap-4">
-                     <h1 className="text-3xl font-bold tracking-tight">Reports &amp; Payroll</h1>
-                      {isMobile ? (
+            {/* Mobile View */}
+            <div className="md:hidden space-y-4">
+                <Tabs defaultValue="attendance" className="w-full">
+                    <TabsList className="h-auto items-center justify-center rounded-md p-1 grid w-full grid-cols-3 bg-primary text-primary-foreground">
+                        <TabsTrigger value="attendance" className="data-[state=active]:bg-background data-[state=active]:text-foreground">
+                             <span className="text-center text-xs leading-tight">Attendance<br/>Report</span>
+                        </TabsTrigger>
+                        <TabsTrigger value="muster" className="data-[state=active]:bg-background data-[state=active]:text-foreground">
+                            <span className="text-center text-xs leading-tight">Muster<br/>Roll</span>
+                        </TabsTrigger>
+                        <TabsTrigger value="payroll" className="data-[state=active]:bg-background data-[state=active]:text-foreground" disabled={selectedBranch.id === 'all'}>
+                            <span className="text-center text-xs leading-tight">Payroll<br/>Report</span>
+                        </TabsTrigger>
+                    </TabsList>
+                    
+                    <div className="flex flex-col gap-4 pt-4">
                         <Sheet open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
                             <SheetTrigger asChild>{branchSelectorButton}</SheetTrigger>
                             <SheetContent side="bottom">
@@ -941,83 +995,20 @@ export default function ReportsPage() {
                                 <div className="p-4">{branchSelectorContent}</div>
                             </SheetContent>
                         </Sheet>
-                    ) : (
-                        <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
-                            <DialogTrigger asChild>{branchSelectorButton}</DialogTrigger>
-                            <DialogContent>
-                                <DialogHeader><DialogTitle>Select Branch</DialogTitle></DialogHeader>
-                                {branchSelectorContent}
-                            </DialogContent>
-                        </Dialog>
-                    )}
+                        <Sheet>
+                            <SheetTrigger asChild>
+                                <Button variant="outline" className="w-full">
+                                    <Filter className="mr-2 h-4 w-4" />
+                                    Filter Report
+                                </Button>
+                            </SheetTrigger>
+                            <SheetContent side="bottom">
+                                <SheetHeader className="p-4"><SheetTitle>Report Filters</SheetTitle></SheetHeader>
+                                {filtersContent}
+                            </SheetContent>
+                        </Sheet>
+                    </div>
 
-                    <Sheet>
-                        <SheetTrigger asChild>
-                            <Button variant="outline" className="w-full">
-                                <Filter className="mr-2 h-4 w-4" />
-                                Filter Report
-                            </Button>
-                        </SheetTrigger>
-                        <SheetContent side="bottom">
-                            <SheetHeader className="p-4">
-                                <SheetTitle>Report Filters</SheetTitle>
-                            </SheetHeader>
-                            <div className="p-4 space-y-6">
-                                <div className="space-y-2">
-                                    <Label>Date Range</Label>
-                                    <Popover>
-                                        <PopoverTrigger asChild>
-                                            <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}>
-                                                <CalendarIcon className="mr-2 h-4 w-4" />
-                                                {date?.from ? (date.to ? `${format(date.from, "LLL dd, y")} - ${format(date.to, "LLL dd, y")}` : format(date.from, "LLL dd, y")) : <span>Pick a date</span>}
-                                            </Button>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-auto p-0" align="start">
-                                            <Calendar initialFocus mode="range" defaultMonth={date?.from} selected={date} onSelect={setDate} numberOfMonths={1}/>
-                                        </PopoverContent>
-                                    </Popover>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="employee">Employee</Label>
-                                    <Select onValueChange={setSelectedEmployeeId} value={selectedEmployeeId}>
-                                        <SelectTrigger id="employee"><SelectValue placeholder="All Employees" /></SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="all">All Employees</SelectItem>
-                                            {employees.map(emp => <SelectItem key={emp.id} value={emp.id!}>{emp.name}</SelectItem>)}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="status">Status</Label>
-                                    <Select onValueChange={setSelectedStatus} value={selectedStatus}>
-                                        <SelectTrigger id="status"><SelectValue placeholder="All Statuses" /></SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="all">All Statuses</SelectItem>
-                                            <SelectItem value="On-time">On-time</SelectItem>
-                                            <SelectItem value="Late">Late</SelectItem>
-                                            <SelectItem value="Absent">Absent</SelectItem>
-                                            <SelectItem value="Manual">Manual</SelectItem>
-                                            <SelectItem value="Half-day">Half-day</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            </div>
-                        </SheetContent>
-                    </Sheet>
-                </div>
-
-                 <Tabs defaultValue="attendance" className="w-full pt-6">
-                    <TabsList className="h-auto items-center justify-center rounded-md p-1 grid w-full grid-cols-3 bg-primary text-primary-foreground">
-                        <TabsTrigger value="attendance" className="data-[state=active]:bg-background data-[state=active]:text-foreground">
-                             <span>Attendance<br/>Report</span>
-                        </TabsTrigger>
-                        <TabsTrigger value="muster" className="data-[state=active]:bg-background data-[state=active]:text-foreground">
-                            <span>Muster<br/>Roll</span>
-                        </TabsTrigger>
-                        <TabsTrigger value="payroll" className="data-[state=active]:bg-background data-[state=active]:text-foreground" disabled={selectedBranch.id === 'all'}>
-                            <span>Payroll<br/>Report</span>
-                        </TabsTrigger>
-                    </TabsList>
                     <TabsContent value="attendance" className="mt-6">
                         <AttendanceReportTab allBranches={allBranches} selectedBranch={selectedBranch} authUser={authUser} date={date} selectedEmployeeId={selectedEmployeeId} selectedStatus={selectedStatus} employees={employees} />
                     </TabsContent>
@@ -1042,12 +1033,13 @@ export default function ReportsPage() {
                 </Tabs>
             </div>
             
+            {/* Desktop View */}
             <div className="hidden md:block space-y-6">
-                <h1 className="text-3xl font-bold tracking-tight">Reports &amp; Payroll</h1>
+                <h1 className="text-3xl font-bold tracking-tight">Reports & Payroll</h1>
                 <p className="text-muted-foreground">Filter records and generate monthly salary reports.</p>
 
                 <div className="flex items-center gap-4">
-                     <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
+                    <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
                         <DialogTrigger asChild>{branchSelectorButton}</DialogTrigger>
                         <DialogContent>
                             <DialogHeader><DialogTitle>Select Branch</DialogTitle></DialogHeader>
@@ -1063,49 +1055,8 @@ export default function ReportsPage() {
                             </Button>
                         </SheetTrigger>
                         <SheetContent>
-                            <SheetHeader>
-                                <SheetTitle>Report Filters</SheetTitle>
-                            </SheetHeader>
-                            <div className="py-8 space-y-6">
-                                <div className="space-y-2">
-                                    <Label>Date Range</Label>
-                                    <Popover>
-                                        <PopoverTrigger asChild>
-                                            <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}>
-                                                <CalendarIcon className="mr-2 h-4 w-4" />
-                                                {date?.from ? (date.to ? `${format(date.from, "LLL dd, y")} - ${format(date.to, "LLL dd, y")}` : format(date.from, "LLL dd, y")) : <span>Pick a date</span>}
-                                            </Button>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-auto p-0" align="start">
-                                            <Calendar initialFocus mode="range" defaultMonth={date?.from} selected={date} onSelect={setDate} numberOfMonths={1}/>
-                                        </PopoverContent>
-                                    </Popover>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="employee-desktop">Employee</Label>
-                                    <Select onValueChange={setSelectedEmployeeId} value={selectedEmployeeId}>
-                                        <SelectTrigger id="employee-desktop"><SelectValue placeholder="All Employees" /></SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="all">All Employees</SelectItem>
-                                            {employees.map(emp => <SelectItem key={emp.id} value={emp.id!}>{emp.name}</SelectItem>)}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="status-desktop">Status</Label>
-                                    <Select onValueChange={setSelectedStatus} value={selectedStatus}>
-                                        <SelectTrigger id="status-desktop"><SelectValue placeholder="All Statuses" /></SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="all">All Statuses</SelectItem>
-                                            <SelectItem value="On-time">On-time</SelectItem>
-                                            <SelectItem value="Late">Late</SelectItem>
-                                            <SelectItem value="Absent">Absent</SelectItem>
-                                            <SelectItem value="Manual">Manual</SelectItem>
-                                            <SelectItem value="Half-day">Half-day</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            </div>
+                            <SheetHeader className="p-6 pb-0"><SheetTitle>Report Filters</SheetTitle></SheetHeader>
+                            <div className="p-6">{filtersContent}</div>
                         </SheetContent>
                     </Sheet>
                 </div>
