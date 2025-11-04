@@ -50,7 +50,16 @@ export default function EmployeeLayout({ children }: PropsWithChildren) {
             const employeeDocSnap = await getDoc(employeeDocRef);
 
             if (employeeDocSnap.exists()) {
-              setUserProfile({ id: employeeDocSnap.id, ...employeeDocSnap.data() } as AppUser);
+              const employeeData = { id: employeeDocSnap.id, ...employeeDocSnap.data() } as AppUser;
+
+              // Fetch shop name
+              const shopDocRef = doc(db, "shops", shopId);
+              const shopDocSnap = await getDoc(shopDocRef);
+              if(shopDocSnap.exists()) {
+                  employeeData.shopName = shopDocSnap.data().shopName;
+              }
+
+              setUserProfile(employeeData);
             } else {
               router.replace('/employee/login');
             }
