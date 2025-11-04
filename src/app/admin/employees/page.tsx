@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, Mail, Phone, Briefcase, Calendar, Eye, Loader2, Check, X, CalendarOff, UserPlus, ChevronsUpDown, Building } from "lucide-react";
+import { Search, Mail, Phone, Briefcase, Calendar, Eye, Loader2, Check, X, CalendarOff, UserPlus, ChevronsUpDown, Building, MoreHorizontal, FilePen } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { collection, onSnapshot, query, orderBy, doc, updateDoc, getDocs, where, collectionGroup, deleteDoc } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
@@ -19,6 +19,8 @@ import Link from 'next/link';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 
 export type User = {
@@ -67,9 +69,9 @@ const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds }: { allBran
   const [employees, setEmployees] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
   const router = useRouter();
   const { toast } = useToast();
-  const [formattedDates, setFormattedDates] = useState<{[key: string]: string}>({});
 
   useEffect(() => {
     if (!selectedBranchId) {
@@ -108,20 +110,6 @@ const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds }: { allBran
             : employeeList;
 
         setEmployees(finalEmployeeList);
-        
-        const dates: {[key: string]: string} = {};
-        finalEmployeeList.forEach(employee => {
-            if (employee.id && employee.joinDate) {
-              try {
-                dates[employee.id] = new Date(employee.joinDate).toLocaleDateString('en-IN');
-              } catch (e) {
-                console.error("Invalid date for employee", employee.id, employee.joinDate);
-                dates[employee.id] = 'Invalid Date';
-              }
-            }
-        });
-        setFormattedDates(dates);
-
         setLoading(false);
     }, (error) => {
         console.error("Error fetching employees: ", error);
@@ -132,15 +120,14 @@ const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds }: { allBran
     return () => unsubscribe();
   }, [selectedBranchId, toast, allBranchIds, allBranches]);
 
-  const handleViewProfile = (employee: User) => {
-    router.push(`/admin/employees/${employee.id}?branchId=${employee.shopId}`);
-  };
-
-  const filteredEmployees = employees.filter(employee =>
-    employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (employee.role && employee.role.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (employee.shopName && employee.shopName.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const filteredEmployees = useMemo(() => {
+    return employees.filter(employee =>
+      (employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (employee.role && employee.role.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (employee.shopName && employee.shopName.toLowerCase().includes(searchTerm.toLowerCase()))) &&
+      (statusFilter === 'all' || employee.status === statusFilter)
+    );
+  }, [employees, searchTerm, statusFilter]);
 
   const getStatusVariant = (status: User['status']) => {
     switch (status) {
@@ -162,66 +149,100 @@ const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds }: { allBran
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
               type="search"
-              placeholder="Search employees..."
-              className="w-full rounded-lg bg-background pl-8 border-2 border-foreground/30"
+              placeholder="Search by name, role, or shop..."
+              className="w-full rounded-lg bg-background pl-8"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               />
           </div>
-          <Link href="/admin/employees/add" className="w-full sm:w-auto">
-            <Button className="w-full sm:w-auto">
-              <UserPlus className="mr-2 h-4 w-4" />
-              Invite Employee
-            </Button>
-          </Link>
+          <div className="flex w-full sm:w-auto gap-2">
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="Active">Active</SelectItem>
+                <SelectItem value="Inactive">Inactive</SelectItem>
+                <SelectItem value="Pending Onboarding">Pending Onboarding</SelectItem>
+              </SelectContent>
+            </Select>
+            <Link href="/admin/employees/add" className="w-full sm:w-auto">
+              <Button className="w-full sm:w-auto">
+                <UserPlus className="mr-2 h-4 w-4" />
+                Invite
+              </Button>
+            </Link>
+          </div>
       </div>
   
-      <div>
+      <Card>
            {loading ? (
-              <div className="flex items-center justify-center h-48">
+              <CardContent className="flex items-center justify-center h-48">
                   <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div>
+              </CardContent>
            ) : (
           <>
           {filteredEmployees.length === 0 ? (
-               <div className="text-center py-12 text-muted-foreground">
+               <CardContent className="text-center py-12 text-muted-foreground">
                   <p>No employees found. Invite an employee to get started.</p>
-              </div>
+              </CardContent>
           ): (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredEmployees.map((employee) => (
-                    <Card key={employee.id} className="group flex flex-col transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
-                        <CardContent className="p-4 flex-1">
-                            <div className="flex items-start justify-between gap-4 mb-4">
-                                <div className="flex items-center gap-4">
-                                    <Avatar className="h-12 w-12 border-2 border-primary/20 shrink-0">
-                                        <AvatarImage src={employee.imageUrl} alt={employee.name} />
-                                        <AvatarFallback>{employee.fallback}</AvatarFallback>
-                                    </Avatar>
-                                    <p className="font-bold text-lg">{employee.name}</p>
-                                </div>
-                                <Badge variant={getStatusVariant(employee.status)}>{employee.status}</Badge>
-                            </div>
-                            <div className="space-y-2 text-sm text-muted-foreground">
-                                {employee.email && <div className="flex items-center gap-2"><Mail className="h-4 w-4 shrink-0" /><span>{employee.email}</span></div>}
-                                {employee.phone && <div className="flex items-center gap-2"><Phone className="h-4 w-4 shrink-0" /><span>{employee.phone}</span></div>}
-                                {employee.role && <div className="flex items-center gap-2"><Briefcase className="h-4 w-4 shrink-0" /><span>{employee.role}</span></div>}
-                                {formattedDates[employee.id!] && <div className="flex items-center gap-2"><Calendar className="h-4 w-4 shrink-0" /><span>Joined: {formattedDates[employee.id!]}</span></div>}
-                            </div>
-                        </CardContent>
-                        <CardContent className="p-4 border-t">
-                             <Button size="lg" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground" onClick={() => handleViewProfile(employee)}>
+            <div className="rounded-lg border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Employee</TableHead>
+                    {selectedBranchId === 'all' && <TableHead>Shop</TableHead>}
+                    <TableHead>Role</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredEmployees.map((employee) => (
+                    <TableRow key={employee.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <Avatar>
+                            <AvatarImage src={employee.imageUrl} alt={employee.name} />
+                            <AvatarFallback>{employee.fallback}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium">{employee.name}</p>
+                            <p className="text-xs text-muted-foreground">{employee.phone || employee.email}</p>
+                          </div>
+                        </div>
+                      </TableCell>
+                       {selectedBranchId === 'all' && <TableCell>{employee.shopName}</TableCell>}
+                      <TableCell>{employee.role}</TableCell>
+                      <TableCell><Badge variant={getStatusVariant(employee.status)}>{employee.status}</Badge></TableCell>
+                      <TableCell className="text-right">
+                         <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" className="h-8 w-8 p-0">
+                                <span className="sr-only">Open menu</span>
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                              <DropdownMenuItem onClick={() => router.push(`/admin/employees/${employee.id}?branchId=${employee.shopId}`)}>
                                 <Eye className="mr-2 h-4 w-4"/>
                                 View Profile
-                            </Button>
-                        </CardContent>
-                    </Card>
-                ))}
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           )}
           </>
           )}
-      </div>
+      </Card>
   </div>
   );
 };
@@ -472,5 +493,3 @@ export default function ManageEmployeesPage() {
     </div>
   );
 }
-
-    
