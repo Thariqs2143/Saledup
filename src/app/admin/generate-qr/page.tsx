@@ -213,16 +213,22 @@ const QrGeneratorCard = () => {
 
     return (
         <Card className="w-full transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
-            <CardHeader>
+            <CardHeader className="relative">
                 <CardTitle>QR Code Generator</CardTitle>
+                <div className="absolute top-4 right-4 hidden md:flex items-center space-x-2">
+                    <Switch id="qr-mode-switch-desktop" checked={qrMode === 'dynamic'} onCheckedChange={(checked) => setQrMode(checked ? 'dynamic' : 'permanent')}/>
+                    <Label htmlFor="qr-mode-switch-desktop" className={cn("font-semibold", qrMode === 'dynamic' && 'text-primary')}>
+                        Dynamic QR
+                    </Label>
+                </div>
+            </CardHeader>
+            <CardContent>
                 <CardDescription>
                     {qrMode === 'permanent' ? 'Print and place this in your store for employees.' : 'This refreshes to prevent misuse. Display on a tablet.'}
                 </CardDescription>
-            </CardHeader>
-            <CardContent>
-                <div className="flex items-center space-x-2">
-                    <Switch id="qr-mode-switch" checked={qrMode === 'dynamic'} onCheckedChange={(checked) => setQrMode(checked ? 'dynamic' : 'permanent')}/>
-                    <Label htmlFor="qr-mode-switch" className={cn("font-semibold", qrMode === 'dynamic' && 'text-primary')}>
+                <div className="mt-4 flex justify-center md:hidden items-center space-x-2">
+                    <Switch id="qr-mode-switch-mobile" checked={qrMode === 'dynamic'} onCheckedChange={(checked) => setQrMode(checked ? 'dynamic' : 'permanent')}/>
+                    <Label htmlFor="qr-mode-switch-mobile" className={cn("font-semibold", qrMode === 'dynamic' && 'text-primary')}>
                         Use Dynamic QR
                     </Label>
                 </div>
