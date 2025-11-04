@@ -1100,15 +1100,15 @@ export default function ReportsPage() {
 
 
             <Tabs defaultValue="attendance" className="w-full">
-                <TabsList className="grid w-full grid-cols-3 md:max-w-md bg-primary text-primary-foreground">
+                <TabsList className="grid w-full grid-cols-3 bg-primary text-primary-foreground">
                     <TabsTrigger value="attendance" className="data-[state=active]:bg-background data-[state=active]:text-foreground">
-                        <span>Attendance<span className="hidden md:inline"> Report</span></span>
+                        <span>Attendance<br className="md:hidden" /> Report</span>
                     </TabsTrigger>
                     <TabsTrigger value="muster" className="data-[state=active]:bg-background data-[state=active]:text-foreground">
-                        <span>Muster<span className="hidden md:inline"> Roll</span></span>
+                        <span>Muster<br className="md:hidden" /> Roll</span>
                     </TabsTrigger>
                     <TabsTrigger value="payroll" className="data-[state=active]:bg-background data-[state=active]:text-foreground" disabled={selectedBranch.id === 'all'}>
-                        <span>Payroll<span className="hidden md:inline"> Report</span></span>
+                        <span>Payroll<br className="md:hidden" /> Report</span>
                     </TabsTrigger>
                 </TabsList>
                 <TabsContent value="attendance" className="mt-6">
