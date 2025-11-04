@@ -1,4 +1,3 @@
-
 'use client';
 
 import type { PropsWithChildren } from 'react';
@@ -6,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { BottomNav, type NavItem } from '@/components/bottom-nav';
 import Link from 'next/link';
 import { AdminNav } from '@/components/admin-nav';
-import { Settings, Crown, Bell } from 'lucide-react';
+import { Bell } from 'lucide-react';
 import { InstallPWA } from '@/components/install-pwa';
 import { Button } from '@/components/ui/button';
 
@@ -20,29 +19,44 @@ const adminNavItems: NavItem[] = [
 
 export default function AdminLayout({ children }: PropsWithChildren) {
   const pathname = usePathname();
-  if (pathname === '/login' || pathname.startsWith('/admin/login') || pathname.startsWith('/admin/signup') || pathname === '/admin/complete-profile' || pathname === '/admin/add-branch') {
-    return <>{children}</>
+
+  if (
+    pathname === '/login' ||
+    pathname.startsWith('/admin/login') ||
+    pathname.startsWith('/admin/signup') ||
+    pathname === '/admin/complete-profile' ||
+    pathname === '/admin/add-branch'
+  ) {
+    return <>{children}</>;
   }
 
   return (
-    <div className="grid min-h-screen w-full md:grid-cols-[240px_1fr]">
+    <div className="flex min-h-screen w-full">
+      {/* Sidebar (fixed) */}
       <AdminNav navItems={adminNavItems} />
-      <div className="flex flex-col">
+
+      {/* Main Content Area */}
+      <div className="flex flex-col flex-1 md:ml-64">
+        {/* Mobile Header */}
         <header className="flex h-14 items-center gap-4 border-b bg-background px-4 md:hidden sticky top-0 z-40">
           <h1 className="font-bold text-xl text-primary">Attendry</h1>
-           <div className="ml-auto flex items-center gap-2">
-             <Link href="/admin/notifications">
-                <Button variant="ghost" size="icon">
-                    <Bell className="h-5 w-5" />
-                    <span className="sr-only">Notifications</span>
-                </Button>
+          <div className="ml-auto flex items-center gap-2">
+            <Link href="/admin/notifications">
+              <Button variant="ghost" size="icon">
+                <Bell className="h-5 w-5" />
+                <span className="sr-only">Notifications</span>
+              </Button>
             </Link>
-           </div>
+          </div>
         </header>
+
+        {/* Main Page */}
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 pb-20 md:pb-6">
           {children}
         </main>
       </div>
+
+      {/* Mobile Bottom Nav + PWA */}
       <BottomNav navItems={adminNavItems} />
       <InstallPWA />
     </div>
