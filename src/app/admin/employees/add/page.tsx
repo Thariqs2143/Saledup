@@ -15,6 +15,7 @@ import { onAuthStateChanged, type User as AuthUser } from "firebase/auth";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { IndianFlagIcon } from "@/components/ui/indian-flag-icon";
 
 const PLAN_LIMITS = {
     'Free': 10,
@@ -261,7 +262,7 @@ export default function AddEmployeePage() {
                                 <Label htmlFor="phone">Phone Number *</Label>
                                 <div className="flex items-center gap-2">
                                     <div className="flex h-10 items-center rounded-md border border-input bg-transparent px-3">
-                                        <span role="img" aria-label="Indian Flag">🇮🇳</span>
+                                        <IndianFlagIcon />
                                         <span className="ml-2 text-sm font-medium text-muted-foreground">+91</span>
                                     </div>
                                     <Input id="phone" name="phone" type="tel" inputMode="numeric" placeholder="1234567890" required className="flex-1" pattern="\d{10}" title="Phone number must be 10 digits" maxLength={10} />
@@ -286,4 +287,3 @@ export default function AddEmployeePage() {
         </div>
     );
 }
-

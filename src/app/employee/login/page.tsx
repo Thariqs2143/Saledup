@@ -11,6 +11,7 @@ import { RecaptchaVerifier, signInWithPhoneNumber, type ConfirmationResult } fro
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
+import { IndianFlagIcon } from "@/components/ui/indian-flag-icon";
 
 export default function EmployeeLoginPage() {
     const router = useRouter();
@@ -21,25 +22,17 @@ export default function EmployeeLoginPage() {
     const [loading, setLoading] = useState(false);
     const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
     const otpInputsRef = useRef<HTMLInputElement[]>([]);
-    const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
     const recaptchaContainerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        const verifier = recaptchaVerifierRef.current;
-        if (recaptchaContainerRef.current && !verifier) {
-            recaptchaVerifierRef.current = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
+        if (!window.recaptchaVerifier) {
+            window.recaptchaVerifier = new RecaptchaVerifier(auth, recaptchaContainerRef.current!, {
                 'size': 'invisible',
                 'callback': (response: any) => {
                     // reCAPTCHA solved, allow signInWithPhoneNumber.
                 },
             });
         }
-        // Cleanup function
-        return () => {
-            if (verifier) {
-                verifier.clear();
-            }
-        };
     }, []);
     
     useEffect(() => {
@@ -59,7 +52,7 @@ export default function EmployeeLoginPage() {
         setLoading(true);
         try {
             const phoneNumber = `+91${phone}`;
-            const appVerifier = recaptchaVerifierRef.current;
+            const appVerifier = window.recaptchaVerifier;
             if (!appVerifier) {
                 throw new Error("reCAPTCHA not initialized");
             }
@@ -190,7 +183,7 @@ export default function EmployeeLoginPage() {
                             <Label htmlFor="phone">Phone Number</Label>
                             <div className="flex items-center gap-2">
                                 <div className="flex h-10 items-center rounded-md border border-input bg-transparent px-3">
-                                    <span role="img" aria-label="Indian Flag">🇮🇳</span>
+                                    <IndianFlagIcon />
                                     <span className="ml-2 text-sm font-medium text-muted-foreground">+91</span>
                                 </div>
                                 <Input id="phone" name="phone" type="tel" inputMode="numeric" placeholder="1234567890" required className="flex-1" value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))} maxLength={10} pattern="\d{10}" title="Please enter a 10-digit phone number" />

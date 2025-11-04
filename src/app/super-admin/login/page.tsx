@@ -10,6 +10,13 @@ import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { RecaptchaVerifier, signInWithPhoneNumber, type ConfirmationResult } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import { IndianFlagIcon } from "@/components/ui/indian-flag-icon";
+
+declare global {
+  interface Window {
+    recaptchaVerifier: RecaptchaVerifier;
+  }
+}
 
 export default function SuperAdminLoginPage() {
     const router = useRouter();
@@ -20,28 +27,20 @@ export default function SuperAdminLoginPage() {
     const [loading, setLoading] = useState(false);
     const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
     const otpInputsRef = useRef<HTMLInputElement[]>([]);
-    const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
     const recaptchaContainerRef = useRef<HTMLDivElement>(null);
     
     // Hardcoded credentials for the special Super Admin account
     const SUPER_ADMIN_PHONE = "9790296771"; 
 
     useEffect(() => {
-        const verifier = recaptchaVerifierRef.current;
-        if (recaptchaContainerRef.current && !verifier) {
-            recaptchaVerifierRef.current = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
+        if (!window.recaptchaVerifier && recaptchaContainerRef.current) {
+            window.recaptchaVerifier = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
                 'size': 'invisible',
                 'callback': (response: any) => {
                     // reCAPTCHA solved, allow signInWithPhoneNumber.
                 },
             });
         }
-        // Cleanup function
-        return () => {
-            if (verifier) {
-                verifier.clear();
-            }
-        };
     }, []);
     
     useEffect(() => {
@@ -60,7 +59,7 @@ export default function SuperAdminLoginPage() {
         setLoading(true);
         try {
             const phoneNumber = `+91${phone}`;
-            const appVerifier = recaptchaVerifierRef.current;
+            const appVerifier = window.recaptchaVerifier;
             if (!appVerifier) {
                 throw new Error("reCAPTCHA not initialized");
             }
@@ -149,7 +148,7 @@ export default function SuperAdminLoginPage() {
                 <Label htmlFor="phone">Phone Number</Label>
                 <div className="flex items-center gap-2">
                     <div className="flex h-10 items-center rounded-md border border-input bg-transparent px-3">
-                        <span role="img" aria-label="Indian Flag">🇮🇳</span>
+                        <IndianFlagIcon />
                         <span className="ml-2 text-sm font-medium text-muted-foreground">+91</span>
                     </div>
                     <Input id="phone" type="tel" required className="flex-1" value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))} />

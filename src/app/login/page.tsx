@@ -7,33 +7,27 @@ import { Input } from "@/components/ui/input";
 import { Loader2, Shield } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { RecaptchaVerifier, signInWithPhoneNumber, type ConfirmationResult, type User as AuthUser } from "firebase/auth";
+import { RecaptchaVerifier } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import { doc, getDoc } from "firebase/firestore";
 import Image from "next/image";
+import { IndianFlagIcon } from "@/components/ui/indian-flag-icon";
 
 export default function LoginPage() {
     const router = useRouter();
     const { toast } = useToast();
     const [phone, setPhone] = useState('');
     const [loading, setLoading] = useState(false);
-    const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
     const recaptchaContainerRef = useRef<HTMLDivElement>(null);
 
      useEffect(() => {
-        const verifier = recaptchaVerifierRef.current;
-        if (recaptchaContainerRef.current && !verifier) {
-            recaptchaVerifierRef.current = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
+        if (!window.recaptchaVerifier) {
+            window.recaptchaVerifier = new RecaptchaVerifier(auth, recaptchaContainerRef.current!, {
                 'size': 'invisible',
                 'callback': (response: any) => {},
             });
         }
-        return () => {
-            if (verifier) {
-                verifier.clear();
-            }
-        };
     }, []);
 
     const handleOwnerLogin = async (e: React.FormEvent) => {
@@ -115,7 +109,7 @@ export default function LoginPage() {
                 <form className="space-y-6" onSubmit={handleOwnerLogin}>
                     <div className="space-y-2">
                         <div className="flex items-center gap-2 border border-input rounded-md px-3 bg-white">
-                             <span role="img" aria-label="Indian Flag" className="text-lg">🇮🇳</span>
+                             <IndianFlagIcon />
                              <span className="text-sm font-medium text-muted-foreground">+91</span>
                             <Input 
                                 id="phone" 

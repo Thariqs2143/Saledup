@@ -13,6 +13,12 @@ import { auth, db } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import { doc, getDoc, setDoc, writeBatch } from "firebase/firestore";
 
+declare global {
+  interface Window {
+    recaptchaVerifier: RecaptchaVerifier;
+  }
+}
+
 export default function AdminSignupPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -23,7 +29,6 @@ export default function AdminSignupPage() {
     const [loading, setLoading] = useState(false);
     const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
     const otpInputsRef = useRef<HTMLInputElement[]>([]);
-    const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
     const recaptchaContainerRef = useRef<HTMLDivElement>(null);
     
     useEffect(() => {
@@ -37,25 +42,19 @@ export default function AdminSignupPage() {
     }, [searchParams, router]);
 
     useEffect(() => {
-        const verifier = recaptchaVerifierRef.current;
-        if (recaptchaContainerRef.current && !verifier) {
-            recaptchaVerifierRef.current = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
+        if (!window.recaptchaVerifier && recaptchaContainerRef.current) {
+            window.recaptchaVerifier = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
                 'size': 'invisible',
                 'callback': (response: any) => {},
             });
         }
-        return () => {
-            if (verifier) {
-                verifier.clear();
-            }
-        };
     }, []);
 
     const handleGetOtp = async (phoneNum: string) => {
         setLoading(true);
         try {
             const phoneNumber = `+91${phoneNum}`;
-            const appVerifier = recaptchaVerifierRef.current;
+            const appVerifier = window.recaptchaVerifier;
             if (!appVerifier) {
                 throw new Error("reCAPTCHA not initialized");
             }
