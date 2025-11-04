@@ -1036,7 +1036,7 @@ export default function ReportsPage() {
 
     return (
         <div className="space-y-6">
-            <div>
+            <div className="hidden md:block">
                 <h1 className="text-3xl font-bold tracking-tight">Reports & Payroll</h1>
                 <p className="text-muted-foreground">Filter records and generate monthly salary reports.</p>
             </div>
@@ -1126,3 +1126,4 @@ export default function ReportsPage() {
 }
 
     
+
