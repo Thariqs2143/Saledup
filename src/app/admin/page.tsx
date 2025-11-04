@@ -530,7 +530,7 @@ export default function AdminDashboard() {
             <p className="text-muted-foreground">Here's a quick overview of your attendance.</p>
            </div>
            <Tabs value={statFilter} onValueChange={(value) => setStatFilter(value as StatFilter)} className="w-full lg:w-auto">
-            <TabsList className="grid w-full grid-cols-4 border-2 border-foreground/30 dark:border-foreground/30">
+            <TabsList className="h-auto items-center justify-center rounded-md bg-muted p-1 text-muted-foreground grid w-full grid-cols-4 border-2 border-foreground/30 dark:border-foreground/30">
                 <TabsTrigger value="today">Today</TabsTrigger>
                 <TabsTrigger value="week">Weekly</TabsTrigger>
                 <TabsTrigger value="month">Monthly</TabsTrigger>
@@ -599,21 +599,21 @@ export default function AdminDashboard() {
                 <CardDescription>Select a branch to view its dashboard or manage your branches.</CardDescription>
             </CardHeader>
             <CardContent>
-                <div className="flex flex-col sm:flex-row items-center gap-4">
+                <div className="flex flex-col md:flex-row items-center gap-4">
                     <Popover open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
                         <PopoverTrigger asChild>
                             <Button
                                 variant="outline"
                                 role="combobox"
                                 aria-expanded={openBranchSelector}
-                                className="w-full sm:w-[300px] justify-between border-black dark:border-white"
+                                className="w-full md:max-w-xs justify-between border-black dark:border-white"
                                 disabled={branches.length <= 1}
                             >
                                 {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
                                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                             </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-full sm:w-[300px] p-0">
+                        <PopoverContent className="w-full p-0 md:max-w-xs">
                             <Command>
                                 <CommandInput placeholder="Search branch..." />
                                 <CommandEmpty>No branches found. <Link href="/admin/add-branch" className="text-primary underline">Add one now</Link>.</CommandEmpty>
@@ -636,7 +636,7 @@ export default function AdminDashboard() {
                             </Command>
                         </PopoverContent>
                     </Popover>
-                    <div className="grid grid-cols-2 sm:flex sm:flex-row gap-4 w-full sm:w-auto">
+                    <div className="grid grid-cols-2 md:flex md:flex-row gap-4 w-full md:w-auto">
                         <Link href="/admin/add-branch" className="w-full">
                             <Button className="w-full">
                                 Add Branch
