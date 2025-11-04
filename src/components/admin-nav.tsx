@@ -59,8 +59,8 @@ export function AdminNav({ navItems }: AdminNavProps) {
   };
 
   return (
-    <div className="hidden border-r bg-background md:flex md:flex-col">
-      <div className="flex h-16 items-center border-b px-6 shrink-0">
+    <div className="hidden border-r bg-background md:flex md:flex-col h-full">
+      <div className="flex h-[60px] items-center border-b px-6 shrink-0">
         <button
           onClick={() => handleNavigate('/admin')}
           className="flex items-center gap-2 font-semibold"
@@ -96,21 +96,23 @@ export function AdminNav({ navItems }: AdminNavProps) {
         </nav>
       </div>
       <div className="mt-auto p-4 space-y-4 border-t">
-        <div className="flex items-center gap-3">
-          <Avatar className="h-10 w-10 border">
-            <AvatarFallback>SO</AvatarFallback>
-          </Avatar>
-          <div>
-            <p className="font-bold text-sm">Shop Owner</p>
-            <p className="text-xs text-muted-foreground">My Business</p>
-          </div>
-        </div>
+         <Link href="/admin/settings">
+            <div className="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-muted">
+              <Avatar className="h-10 w-10 border">
+                <AvatarFallback>SO</AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="font-bold text-sm">Shop Owner</p>
+                <p className="text-xs text-muted-foreground">My Business</p>
+              </div>
+            </div>
+        </Link>
         <Button
           variant="destructive"
           onClick={handleLogout}
-          className="w-full bg-red-100 text-red-600 hover:bg-red-200"
+          className="w-full justify-start h-auto p-3 text-base bg-red-100 text-red-600 hover:bg-red-200"
         >
-          <LogOut className="mr-2 h-4 w-4" />
+          <LogOut className="mr-2 h-5 w-5" />
           Logout
         </Button>
       </div>
