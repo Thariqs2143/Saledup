@@ -529,7 +529,7 @@ export default function AdminDashboard() {
             <p className="text-muted-foreground">Here's a quick overview of your attendance.</p>
            </div>
            <Tabs value={statFilter} onValueChange={(value) => setStatFilter(value as StatFilter)}>
-            <TabsList className="border-2 border-foreground/10 dark:border-foreground/30">
+            <TabsList className="border-2 border-foreground/30">
                 <TabsTrigger value="today">Today</TabsTrigger>
                 <TabsTrigger value="week">This Week</TabsTrigger>
                 <TabsTrigger value="month">This Month</TabsTrigger>
