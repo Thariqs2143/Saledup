@@ -635,16 +635,14 @@ export default function AdminDashboard() {
                             </Command>
                         </PopoverContent>
                     </Popover>
-                    <div className="grid grid-cols-2 sm:flex sm:flex-row gap-4 w-full sm:w-auto">
+                    <div className="grid grid-cols-2 gap-4 w-full sm:w-auto">
                         <Link href="/admin/add-branch" className="w-full">
                             <Button className="w-full">
-                                <Building className="mr-2 h-4 w-4" />
                                 Add Branch
                             </Button>
                         </Link>
                         <Link href="/admin/branches" className="w-full">
-                            <Button variant="secondary" className="w-full">
-                                <Eye className="mr-2 h-4 w-4" />
+                            <Button variant="outline" className="w-full">
                                 View Branches
                             </Button>
                         </Link>
