@@ -5,7 +5,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, ArrowLeft, Store, Building, Search } from 'lucide-react';
+import { Loader2, ArrowLeft, Store, Building, Search, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { collection, query, where, onSnapshot, doc, deleteDoc } from 'firebase/firestore';
@@ -147,8 +147,31 @@ export default function ManageBranchesPage() {
                 {filteredBranches.map(branch => {
                     const isMainBranch = authUser?.uid === branch.id;
                     return (
-                        <Card key={branch.id} className="flex flex-col transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
-                            <CardHeader>
+                        <Card key={branch.id} className="relative flex flex-col transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
+                             {!isMainBranch && (
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <Button variant="ghost" size="icon" className="absolute top-2 right-2 h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive" disabled={deletingId === branch.id}>
+                                            {deletingId === branch.id ? <Loader2 className="h-4 w-4 animate-spin"/> : <Trash2 className="h-4 w-4"/>}
+                                        </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                This will permanently delete the <span className="font-bold">{branch.shopName}</span> branch and all of its associated data, including employees and attendance records. This action cannot be undone.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                            <AlertDialogAction onClick={() => handleDeleteBranch(branch.id, branch.shopName)} className="bg-destructive hover:bg-destructive/90 text-destructive-foreground">
+                                                Confirm Delete
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            )}
+                            <CardHeader className="pr-12">
                                 <CardTitle className="text-lg">{branch.shopName}</CardTitle>
                                 <CardDescription>{branch.businessType}</CardDescription>
                             </CardHeader>
@@ -160,32 +183,8 @@ export default function ManageBranchesPage() {
                                     <Button className="w-full">View</Button>
                                 </Link>
                                 <Link href={`/admin/branches/${branch.id}/edit`} className="w-full">
-                                    <Button variant="secondary" className="w-full">Edit</Button>
+                                    <Button className="w-full bg-green-600 hover:bg-green-700 text-white">Edit</Button>
                                 </Link>
-                                {!isMainBranch && (
-                                    <AlertDialog>
-                                        <AlertDialogTrigger asChild>
-                                            <Button variant="destructive" className="w-full" disabled={deletingId === branch.id}>
-                                                {deletingId === branch.id ? <Loader2 className="h-4 w-4 animate-spin"/> : null}
-                                                Delete
-                                            </Button>
-                                        </AlertDialogTrigger>
-                                        <AlertDialogContent>
-                                            <AlertDialogHeader>
-                                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                                <AlertDialogDescription>
-                                                    This will permanently delete the <span className="font-bold">{branch.shopName}</span> branch and all of its associated data, including employees and attendance records. This action cannot be undone.
-                                                </AlertDialogDescription>
-                                            </AlertDialogHeader>
-                                            <AlertDialogFooter>
-                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                <AlertDialogAction onClick={() => handleDeleteBranch(branch.id, branch.shopName)} className="bg-destructive hover:bg-destructive/90 text-destructive-foreground">
-                                                    Confirm Delete
-                                                </AlertDialogAction>
-                                            </AlertDialogFooter>
-                                        </AlertDialogContent>
-                                    </AlertDialog>
-                                )}
                             </CardContent>
                         </Card>
                     );
