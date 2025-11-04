@@ -37,17 +37,19 @@ export default function AdminLayout({ children }: PropsWithChildren) {
   const [profile, setProfile] = useState<Partial<FullProfile>>({});
   const [loading, setLoading] = useState(true);
 
-  if (
+  const isAuthPage =
     pathname === '/login' ||
     pathname.startsWith('/admin/login') ||
     pathname.startsWith('/admin/signup') ||
     pathname === '/admin/complete-profile' ||
-    pathname === '/admin/add-branch'
-  ) {
-    return <>{children}</>;
-  }
-  
+    pathname === '/admin/add-branch';
+
   useEffect(() => {
+    if (isAuthPage) {
+      setLoading(false);
+      return;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         try {
@@ -73,8 +75,12 @@ export default function AdminLayout({ children }: PropsWithChildren) {
       setLoading(false);
     });
     return () => unsubscribe();
-  }, [router]);
+  }, [router, isAuthPage]);
   
+  if (isAuthPage) {
+    return <>{children}</>;
+  }
+
   if(loading){
     return (
       <div className="flex min-h-screen w-full items-center justify-center">
