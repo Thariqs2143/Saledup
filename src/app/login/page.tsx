@@ -70,11 +70,11 @@ export default function LoginPage() {
         {/* Left side with illustration */}
         <div className="hidden md:flex flex-col items-center justify-center bg-[#0C2A6A] p-10 text-white relative overflow-hidden">
              <Image
-                src="https://storage.googleapis.com/framer-usercontent/images/tHflOaA13praLY311Lg9JA5A.png"
+                src="https://res.cloudinary.com/dnkghymx5/image/upload/v1762241011/Generated_Image_November_04_2025_-_12_50PM_1_hslend.png"
                 alt="Business tools illustration"
                 fill
                 className="object-cover"
-                data-ai-hint="business tools"
+                data-ai-hint="business management"
             />
         </div>
 
@@ -84,17 +84,17 @@ export default function LoginPage() {
                  {/* Mobile-only Image */}
                 <div className="md:hidden mb-8 -mt-8 -mx-8">
                      <Image
-                        src="https://storage.googleapis.com/framer-usercontent/images/tHflOaA13praLY311Lg9JA5A.png"
+                        src="https://res.cloudinary.com/dnkghymx5/image/upload/v1762241011/Generated_Image_November_04_2025_-_12_50PM_1_hslend.png"
                         alt="Business tools illustration"
                         width={600}
-                        height={400}
+                        height={300}
                         className="object-cover w-full h-48"
-                        data-ai-hint="business tools"
+                        data-ai-hint="business management"
                     />
                 </div>
 
                 <div className="text-center mb-10">
-                    <h1 className="text-3xl font-bold tracking-tight">India's #1 QR Powered Staff Attendance App</h1>
+                    <h1 className="text-3xl font-bold tracking-tight text-center">India's #1 QR Powered Staff Attendance App</h1>
                     <div className="flex items-center my-4">
                         <hr className="w-full border-muted-foreground/20"/>
                         <span className="px-4 text-muted-foreground font-semibold whitespace-nowrap text-sm">LOG IN OR SIGN UP</span>
