@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -98,7 +97,7 @@ const StaffingAdvisorCard = ({ businessType, currentStaffCount }: { businessType
     };
 
     return (
-        <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/30 hover:border-primary">
+        <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
             <CardHeader>
                 <div className="flex items-center gap-3">
                     <BrainCircuit className="h-6 w-6 text-primary"/>
@@ -550,7 +549,7 @@ export default function AdminDashboard() {
         </Card>
       </div>
 
-        <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/30 hover:border-primary">
+        <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
             <CardHeader>
                 <CardTitle>Branch Management</CardTitle>
                 <CardDescription>Select a branch to view its dashboard or add a new one.</CardDescription>
@@ -604,7 +603,7 @@ export default function AdminDashboard() {
         </Card>
 
        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <Card className="transform-gpu xl:col-span-2 transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/30 hover:border-primary">
+        <Card className="transform-gpu xl:col-span-2 transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
           <CardHeader>
             <div className="flex items-center gap-3">
               <BarChart3 className="h-6 w-6 text-primary"/>
@@ -626,7 +625,7 @@ export default function AdminDashboard() {
             )}
           </CardContent>
        </Card>
-       <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/30 hover:border-primary">
+       <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
             <CardHeader>
                 <div className="flex items-center gap-3">
                    <Activity className="h-6 w-6 text-primary"/>
@@ -668,7 +667,7 @@ export default function AdminDashboard() {
 
        <StaffingAdvisorCard businessType={selectedBranch?.businessType} currentStaffCount={staffEmployees.length} />
 
-      <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/30 hover:border-primary">
+      <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
         <CardHeader>
             <div className="flex items-center gap-3">
               <Sparkles className="h-6 w-6 text-primary"/>
@@ -693,7 +692,7 @@ export default function AdminDashboard() {
 
 
       <div className="grid gap-4 md:grid-cols-2 lg:gap-6">
-        <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/30 hover:border-primary">
+        <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
             <CardHeader>
                 <CardTitle>Active Staff</CardTitle>
                 <CardDescription>Employees who are currently checked in.</CardDescription>
@@ -738,7 +737,7 @@ export default function AdminDashboard() {
                  )}
             </CardContent>
         </Card>
-        <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/30 hover:border-primary">
+        <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
             <CardHeader>
                 <CardTitle>Quick Actions</CardTitle>
                 <CardDescription>Shortcuts to common management tasks.</CardDescription>
@@ -781,5 +780,7 @@ export default function AdminDashboard() {
     </div>
   );
 }
+
+    
 
     

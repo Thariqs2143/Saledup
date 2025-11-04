@@ -315,7 +315,7 @@ export default function EmployeeDetailPage() {
             </Dialog>
         </div>
         <Separator/>
-        <Card className="w-full max-w-3xl mx-auto transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/30 hover:border-primary">
+        <Card className="w-full max-w-3xl mx-auto transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
             <CardContent className="pt-6">
             <div className="flex flex-col sm:flex-row items-center gap-6">
                 <Avatar className="h-20 w-20 sm:h-24 sm:w-24 border-2 border-primary">
@@ -331,7 +331,7 @@ export default function EmployeeDetailPage() {
             </CardContent>
         </Card>
 
-      <Card className="transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/30 hover:border-primary">
+      <Card className="transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
         <CardHeader>
           <CardTitle>Contact Information</CardTitle>
           <CardDescription>Update the employee's details below.</CardDescription>
@@ -412,6 +412,8 @@ export default function EmployeeDetailPage() {
     </div>
   );
 }
+
+    
 
     
 

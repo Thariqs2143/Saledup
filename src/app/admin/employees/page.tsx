@@ -188,7 +188,7 @@ const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds }: { allBran
           ): (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredEmployees.map((employee) => (
-                    <Card key={employee.id} className="group flex flex-col transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/30 hover:border-primary">
+                    <Card key={employee.id} className="group flex flex-col transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
                         <CardContent className="p-4 flex-1">
                             <div className="flex items-start justify-between gap-4 mb-4">
                                 <div className="flex items-center gap-4">
@@ -418,7 +418,7 @@ export default function ManageEmployeesPage() {
             <h1 className="text-3xl font-bold tracking-tight">Employees & Leave</h1>
             <p className="text-muted-foreground">Manage your employees and their leave requests by branch.</p>
         </div>
-         <Card className="transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/30 hover:border-primary">
+         <Card className="transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
             <CardHeader>
                 <CardTitle>Select Branch</CardTitle>
                  <Popover open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
@@ -473,6 +473,8 @@ export default function ManageEmployeesPage() {
     </div>
   );
 }
+
+    
 
     
 

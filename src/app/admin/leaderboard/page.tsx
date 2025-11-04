@@ -69,7 +69,7 @@ export default function LeaderboardPage() {
             <p className="text-muted-foreground">Top employees by attendance points.</p>
         </div>
       </div>
-      <Card className="transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/30 hover:border-primary">
+      <Card className="transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
         <CardHeader>
           <CardTitle>Punctuality Champions</CardTitle>
           <CardDescription>
@@ -145,7 +145,7 @@ export default function LeaderboardPage() {
           )}
         </CardContent>
       </Card>
-       <Card className="transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/30 hover:border-primary">
+       <Card className="transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
         <CardHeader>
             <CardTitle>How Points Work</CardTitle>
         </CardHeader>
@@ -158,5 +158,7 @@ export default function LeaderboardPage() {
     </div>
   );
 }
+
+    
 
     
