@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, Mail, Phone, Briefcase, Calendar, Eye, Loader2, Check, X, CalendarOff, UserPlus, ChevronsUpDown, Building, Trash2 } from "lucide-react";
+import { Search, Mail, Phone, Briefcase, Calendar, Eye, Loader2, Check, X, CalendarOff, UserPlus, ChevronsUpDown, Building } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { collection, onSnapshot, query, orderBy, doc, updateDoc, getDocs, where, collectionGroup, deleteDoc } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
@@ -352,7 +352,7 @@ const LeaveRequests = ({ selectedBranchId, allBranchIds }: { selectedBranchId: s
                                     </Button>
                                 </>
                             ) : request.status === 'approved' ? (
-                                <Button variant="secondary" size="sm" className="w-full sm:w-auto" disabled>
+                                <Button size="sm" className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white" disabled>
                                     <Check className="h-4 w-4 mr-2" />
                                     Approved
                                 </Button>
@@ -472,15 +472,3 @@ export default function ManageEmployeesPage() {
     </div>
   );
 }
-
-    
-
-    
-
-    
-
-    
-
-
-
-    
