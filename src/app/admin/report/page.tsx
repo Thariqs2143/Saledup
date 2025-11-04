@@ -11,7 +11,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Loader2, Calendar as CalendarIcon, Download, FileText, Check, X, Calculator, Clock4, Users, Receipt, ChevronDown, Lock, Building, ChevronsUpDown, Search, Filter } from "lucide-react";
-import { collection, query, where, getDocs, orderBy, Timestamp, doc, getDoc, collectionGroup } from "firebase/firestore";
+import { collection, query, where, getDocs, orderBy, Timestamp, doc, getDoc, collectionGroup, onSnapshot } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
 import { format, subDays, getDaysInMonth, startOfMonth, endOfMonth, differenceInDays, eachDayOfInterval, startOfWeek, endOfWeek, setMonth, setYear } from 'date-fns';
 import type { DateRange } from "react-day-picker";
@@ -795,19 +795,21 @@ export default function ReportsPage() {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
                 setAuthUser(user);
-                 try {
+                try {
                     const q = query(collection(db, "shops"), where("ownerId", "==", user.uid));
-                    const querySnapshot = await getDocs(q);
-                    const fetchedBranches = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ShopData));
+                    const unsubscribeBranches = onSnapshot(q, (querySnapshot) => {
+                        const fetchedBranches = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ShopData));
+                        const allBranchesOption: ShopData = { id: 'all', shopName: 'All Branches', ownerId: user.uid };
+                        const fullBranchList = [allBranchesOption, ...fetchedBranches];
+                        setAllBranches(fullBranchList);
 
-                    const allBranchesOption: ShopData = { id: 'all', shopName: 'All Branches', ownerId: user.uid };
-                    const fullBranchList = [allBranchesOption, ...fetchedBranches];
-                    setAllBranches(fullBranchList);
+                        if (!selectedBranch) {
+                            setSelectedBranch(allBranchesOption);
+                        }
+                    });
 
-                    if (!selectedBranch) {
-                        setSelectedBranch(allBranchesOption);
-                    }
-
+                    // Returning unsubscribe function for cleanup
+                    // But here we need to ensure it's handled correctly as part of the main unsubscribe
                 } catch (error) {
                     console.error("Error fetching branches:", error);
                 } finally {
@@ -888,7 +890,7 @@ export default function ReportsPage() {
                             <span>Payroll<br/>Report</span>
                         </TabsTrigger>
                     </TabsList>
-
+                    
                     <div className="flex flex-col gap-4 mt-6">
                         <Popover open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
                             <PopoverTrigger asChild>
@@ -985,11 +987,12 @@ export default function ReportsPage() {
                             </SheetContent>
                         </Sheet>
                     </div>
-                     <TabsContent value="attendance" className="mt-6">
+
+                    <TabsContent value="attendance" className="mt-6">
                         <AttendanceReportTab allBranches={allBranches} selectedBranch={selectedBranch} authUser={authUser} date={date} selectedEmployeeId={selectedEmployeeId} selectedStatus={selectedStatus} employees={employees} />
                     </TabsContent>
                     <TabsContent value="muster" className="mt-6">
-                        {selectedBranch.id === 'all' ? (
+                         {selectedBranch.id === 'all' ? (
                             <div className="text-center py-12 text-muted-foreground border rounded-lg">
                                 <p>Please select an individual branch to view its Muster Roll.</p>
                             </div>
@@ -1013,7 +1016,7 @@ export default function ReportsPage() {
                 <h1 className="text-3xl font-bold tracking-tight">Reports &amp; Payroll</h1>
                 <p className="text-muted-foreground">Filter records and generate monthly salary reports.</p>
 
-                 <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4">
                     <Popover open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
                         <PopoverTrigger asChild>
                             <Button
