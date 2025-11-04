@@ -27,7 +27,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from '@/components/ui/separator';
 import Link from 'next/link';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList }from "@/components/ui/command";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 
 // Extend jsPDF with autoTable
@@ -767,13 +769,46 @@ const MusterRollTab = ({ authUser }: { authUser: AuthUser }) => {
     );
 };
 
+const BranchSelector = ({ open, onOpenChange, selectedBranch, branches, setSelectedBranch, searchTerm, setSearchTerm }: { open: boolean, onOpenChange: (open: boolean) => void, selectedBranch: ShopData, branches: ShopData[], setSelectedBranch: (branch: ShopData) => void, searchTerm: string, setSearchTerm: (term: string) => void }) => {
+    
+    const filteredBranches = useMemo(() => {
+        return branches.filter(branch => branch.shopName?.toLowerCase().includes(searchTerm.toLowerCase()));
+    }, [branches, searchTerm]);
+    
+    return (
+        <Command>
+            <CommandInput 
+                placeholder="Search branch..."
+                value={searchTerm}
+                onValueChange={setSearchTerm}
+            />
+            <CommandEmpty>No branches found.</CommandEmpty>
+            <CommandGroup>
+                <CommandList>
+                {filteredBranches.map((branch) => (
+                    <CommandItem
+                        key={branch.id}
+                        value={branch.shopName!}
+                        onSelect={() => {
+                            setSelectedBranch(branch);
+                            onOpenChange(false);
+                        }}
+                    >
+                        {branch.shopName}
+                    </CommandItem>
+                ))}
+                </CommandList>
+            </CommandGroup>
+        </Command>
+    )
+}
+
 
 export default function ReportsPage() {
     const router = useRouter();
     const [authUser, setAuthUser] = useState<AuthUser | null>(null);
     const [allBranches, setAllBranches] = useState<ShopData[]>([]);
     const [selectedBranch, setSelectedBranch] = useState<ShopData | null>(null);
-    const [openBranchSelector, setOpenBranchSelector] = useState(false);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     
@@ -782,6 +817,10 @@ export default function ReportsPage() {
     const [date, setDate] = useState<DateRange | undefined>(undefined);
     const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>('all');
     const [selectedStatus, setSelectedStatus] = useState<string>('all');
+    
+    const [openBranchSelector, setOpenBranchSelector] = useState(false);
+    const isMobile = useIsMobile();
+
 
     useEffect(() => {
         setDate({ from: subDays(new Date(), 7), to: new Date() });
@@ -792,7 +831,7 @@ export default function ReportsPage() {
 
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (user) {
                 setAuthUser(user);
                 try {
@@ -804,12 +843,9 @@ export default function ReportsPage() {
                         setAllBranches(fullBranchList);
 
                         if (!selectedBranch) {
-                            setSelectedBranch(allBranchesOption);
+                             setSelectedBranch(allBranchesOption);
                         }
                     });
-
-                    // Returning unsubscribe function for cleanup
-                    // But here we need to ensure it's handled correctly as part of the main unsubscribe
                 } catch (error) {
                     console.error("Error fetching branches:", error);
                 } finally {
@@ -825,7 +861,7 @@ export default function ReportsPage() {
         });
 
         return () => unsubscribe();
-    }, [router, selectedBranch]);
+    }, [router]);
     
     useEffect(() => {
         if (!authUser || !selectedBranch) return;
@@ -853,11 +889,6 @@ export default function ReportsPage() {
         };
         fetchEmployees();
     }, [authUser, selectedBranch, isAllBranches, allBranchIds]);
-    
-    const filteredBranches = useMemo(() => {
-        return allBranches.filter(branch => branch.shopName?.toLowerCase().includes(searchTerm.toLowerCase()));
-    }, [allBranches, searchTerm]);
-
 
     if (loading) {
         return (
@@ -892,47 +923,58 @@ export default function ReportsPage() {
                     </TabsList>
                     
                     <div className="flex flex-col gap-4 mt-6">
-                        <Popover open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
-                            <PopoverTrigger asChild>
-                                <Button
-                                    variant="outline"
-                                    role="combobox"
-                                    aria-expanded={openBranchSelector}
-                                    className="w-full justify-between"
-                                >
-                                    <Building className="mr-2 h-4 w-4" />
-                                    {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
-                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                                <Command>
-                                    <CommandInput 
-                                        placeholder="Search branch..."
-                                        value={searchTerm}
-                                        onValueChange={setSearchTerm}
+                        {isMobile ? (
+                            <Sheet open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
+                                <SheetTrigger asChild>
+                                    <Button variant="outline" className="w-full justify-between">
+                                        <Building className="mr-2 h-4 w-4" />
+                                        {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
+                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                    </Button>
+                                </SheetTrigger>
+                                <SheetContent side="bottom">
+                                    <SheetHeader className="p-4">
+                                        <SheetTitle>Select Branch</SheetTitle>
+                                    </SheetHeader>
+                                    <div className="p-4">
+                                        <BranchSelector 
+                                            open={openBranchSelector}
+                                            onOpenChange={setOpenBranchSelector}
+                                            selectedBranch={selectedBranch}
+                                            branches={allBranches}
+                                            setSelectedBranch={setSelectedBranch}
+                                            searchTerm={searchTerm}
+                                            setSearchTerm={setSearchTerm}
+                                        />
+                                    </div>
+                                </SheetContent>
+                            </Sheet>
+                        ) : (
+                             <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
+                                <DialogTrigger asChild>
+                                      <Button variant="outline" className="w-full justify-between">
+                                        <Building className="mr-2 h-4 w-4" />
+                                        {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
+                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                     <DialogHeader>
+                                        <DialogTitle>Select Branch</DialogTitle>
+                                     </DialogHeader>
+                                      <BranchSelector 
+                                        open={openBranchSelector}
+                                        onOpenChange={setOpenBranchSelector}
+                                        selectedBranch={selectedBranch}
+                                        branches={allBranches}
+                                        setSelectedBranch={setSelectedBranch}
+                                        searchTerm={searchTerm}
+                                        setSearchTerm={setSearchTerm}
                                     />
-                                    <CommandEmpty>No branches found.</CommandEmpty>
-                                    <CommandGroup>
-                                        <CommandList>
-                                        {filteredBranches.map((branch) => (
-                                            <CommandItem
-                                                key={branch.id}
-                                                value={branch.shopName!}
-                                                onSelect={() => {
-                                                    setSelectedBranch(branch);
-                                                    setOpenBranchSelector(false);
-                                                }}
-                                            >
-                                                {branch.shopName}
-                                            </CommandItem>
-                                        ))}
-                                        </CommandList>
-                                    </CommandGroup>
-                                </Command>
-                            </PopoverContent>
-                        </Popover>
-                        
+                                </DialogContent>
+                            </Dialog>
+                        )}
+
                         <Sheet>
                             <SheetTrigger asChild>
                                 <Button variant="outline" className="w-full">
@@ -940,11 +982,11 @@ export default function ReportsPage() {
                                     Filter Report
                                 </Button>
                             </SheetTrigger>
-                            <SheetContent>
-                                <SheetHeader>
+                            <SheetContent side="bottom">
+                                <SheetHeader className="p-4">
                                     <SheetTitle>Report Filters</SheetTitle>
                                 </SheetHeader>
-                                <div className="py-8 space-y-6">
+                                <div className="p-4 space-y-6">
                                     <div className="space-y-2">
                                         <Label>Date Range</Label>
                                         <Popover>
@@ -1017,46 +1059,29 @@ export default function ReportsPage() {
                 <p className="text-muted-foreground">Filter records and generate monthly salary reports.</p>
 
                 <div className="flex items-center gap-4">
-                    <Popover open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
-                        <PopoverTrigger asChild>
-                            <Button
-                                variant="outline"
-                                role="combobox"
-                                aria-expanded={openBranchSelector}
-                                className="w-full md:w-auto md:min-w-[250px] justify-between"
-                            >
+                    <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
+                        <DialogTrigger asChild>
+                            <Button variant="outline" className="w-full md:w-auto md:min-w-[250px] justify-between">
                                 <Building className="mr-2 h-4 w-4" />
                                 {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
                                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                             </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                            <Command>
-                                <CommandInput 
-                                    placeholder="Search branch..."
-                                    value={searchTerm}
-                                    onValueChange={setSearchTerm}
-                                />
-                                <CommandEmpty>No branches found.</CommandEmpty>
-                                <CommandGroup>
-                                    <CommandList>
-                                    {filteredBranches.map((branch) => (
-                                        <CommandItem
-                                            key={branch.id}
-                                            value={branch.shopName!}
-                                            onSelect={() => {
-                                                setSelectedBranch(branch);
-                                                setOpenBranchSelector(false);
-                                            }}
-                                        >
-                                            {branch.shopName}
-                                        </CommandItem>
-                                    ))}
-                                    </CommandList>
-                                </CommandGroup>
-                            </Command>
-                        </PopoverContent>
-                    </Popover>
+                        </DialogTrigger>
+                        <DialogContent>
+                             <DialogHeader>
+                                <DialogTitle>Select Branch</DialogTitle>
+                             </DialogHeader>
+                              <BranchSelector 
+                                open={openBranchSelector}
+                                onOpenChange={setOpenBranchSelector}
+                                selectedBranch={selectedBranch}
+                                branches={allBranches}
+                                setSelectedBranch={setSelectedBranch}
+                                searchTerm={searchTerm}
+                                setSearchTerm={setSearchTerm}
+                            />
+                        </DialogContent>
+                    </Dialog>
                     
                     <Sheet>
                         <SheetTrigger asChild>
