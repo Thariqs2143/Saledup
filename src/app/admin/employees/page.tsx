@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, Mail, Phone, Briefcase, Calendar, Eye, Loader2, Check, X, CalendarOff, UserPlus, ChevronsUpDown, Building, MoreHorizontal, FilePen } from "lucide-react";
+import { Search, Mail, Phone, Briefcase, Calendar, Eye, Loader2, Check, X, CalendarOff, UserPlus, ChevronsUpDown, Building, MoreHorizontal, FilePen, Store, User } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { collection, onSnapshot, query, orderBy, doc, updateDoc, getDocs, where, collectionGroup, deleteDoc } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
@@ -188,57 +188,93 @@ const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds }: { allBran
                   <p>No employees found. Invite an employee to get started.</p>
               </CardContent>
           ): (
-            <div className="rounded-lg border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Employee</TableHead>
-                    {selectedBranchId === 'all' && <TableHead>Shop</TableHead>}
-                    <TableHead>Role</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredEmployees.map((employee) => (
-                    <TableRow key={employee.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <Avatar>
-                            <AvatarImage src={employee.imageUrl} alt={employee.name} />
-                            <AvatarFallback>{employee.fallback}</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="font-medium">{employee.name}</p>
-                            <p className="text-xs text-muted-foreground">{employee.phone || employee.email}</p>
-                          </div>
-                        </div>
-                      </TableCell>
-                       {selectedBranchId === 'all' && <TableCell>{employee.shopName}</TableCell>}
-                      <TableCell>{employee.role}</TableCell>
-                      <TableCell><Badge variant={getStatusVariant(employee.status)}>{employee.status}</Badge></TableCell>
-                      <TableCell className="text-right">
-                         <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" className="h-8 w-8 p-0">
-                                <span className="sr-only">Open menu</span>
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem onClick={() => router.push(`/admin/employees/${employee.id}?branchId=${employee.shopId}`)}>
-                                <Eye className="mr-2 h-4 w-4"/>
-                                View Profile
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+            <>
+                {/* Mobile View */}
+                <div className="grid gap-4 md:hidden">
+                    {filteredEmployees.map((employee) => (
+                        <Card key={employee.id} className="p-4 space-y-3" onClick={() => router.push(`/admin/employees/${employee.id}?branchId=${employee.shopId}`)}>
+                            <div className="flex justify-between items-start">
+                                <div className="flex items-center gap-3">
+                                    <Avatar>
+                                        <AvatarImage src={employee.imageUrl} alt={employee.name} />
+                                        <AvatarFallback>{employee.fallback}</AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                        <p className="font-bold">{employee.name}</p>
+                                        <p className="text-xs text-muted-foreground">{employee.phone || employee.email}</p>
+                                    </div>
+                                </div>
+                                <Badge variant={getStatusVariant(employee.status)}>{employee.status}</Badge>
+                            </div>
+                             <div className="space-y-2 text-sm text-muted-foreground">
+                                <div className="flex items-center gap-2">
+                                    <User className="h-3 w-3 shrink-0" />
+                                    <span>{employee.role}</span>
+                                </div>
+                                {selectedBranchId === 'all' && (
+                                     <div className="flex items-center gap-2">
+                                        <Store className="h-3 w-3 shrink-0" />
+                                        <span>{employee.shopName}</span>
+                                    </div>
+                                )}
+                            </div>
+                        </Card>
+                    ))}
+                </div>
+
+                {/* Desktop View */}
+                <div className="hidden md:block rounded-lg border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Employee</TableHead>
+                        {selectedBranchId === 'all' && <TableHead>Shop</TableHead>}
+                        <TableHead>Role</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredEmployees.map((employee) => (
+                        <TableRow key={employee.id}>
+                          <TableCell>
+                            <div className="flex items-center gap-3">
+                              <Avatar>
+                                <AvatarImage src={employee.imageUrl} alt={employee.name} />
+                                <AvatarFallback>{employee.fallback}</AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <p className="font-medium">{employee.name}</p>
+                                <p className="text-xs text-muted-foreground">{employee.phone || employee.email}</p>
+                              </div>
+                            </div>
+                          </TableCell>
+                           {selectedBranchId === 'all' && <TableCell>{employee.shopName}</TableCell>}
+                          <TableCell>{employee.role}</TableCell>
+                          <TableCell><Badge variant={getStatusVariant(employee.status)}>{employee.status}</Badge></TableCell>
+                          <TableCell className="text-right">
+                             <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" className="h-8 w-8 p-0">
+                                    <span className="sr-only">Open menu</span>
+                                    <MoreHorizontal className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                  <DropdownMenuItem onClick={() => router.push(`/admin/employees/${employee.id}?branchId=${employee.shopId}`)}>
+                                    <Eye className="mr-2 h-4 w-4"/>
+                                    View Profile
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+            </>
           )}
           </>
           )}
@@ -493,3 +529,5 @@ export default function ManageEmployeesPage() {
     </div>
   );
 }
+
+    
