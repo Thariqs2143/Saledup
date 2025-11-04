@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from 'next/image';
-import { CheckCircle, Expand, QrCode, Loader2, History, Download, X, UserPlus, Calendar as CalendarIcon, Save, Clock4, ShieldCheck, RefreshCw, Activity } from 'lucide-react';
+import { Expand, QrCode, Loader2, History, Download, X, UserPlus, Calendar as CalendarIcon, Save, RefreshCw, Activity, Edit } from 'lucide-react';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
 import { doc, getDoc, addDoc, collection, onSnapshot, query, orderBy, Timestamp, where, getDocs, setDoc, limit } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
@@ -51,16 +51,13 @@ const QrGeneratorCard = () => {
     const [authUser, setAuthUser] = useState<AuthUser | null>(null);
     const [shopName, setShopName] = useState('');
     
-    // State for permanent QR
     const [permanentQrUrl, setPermanentQrUrl] = useState('');
     const [isPermanentGenerated, setIsPermanentGenerated] = useState(false);
     const [permanentLoading, setPermanentLoading] = useState(true);
 
-    // State for dynamic QR
     const [dynamicQrUrl, setDynamicQrUrl] = useState('');
     const [timeLeft, setTimeLeft] = useState(15);
     
-    // Fetch initial data
      useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -87,7 +84,6 @@ const QrGeneratorCard = () => {
         return () => unsubscribe();
     }, []);
 
-    // --- PERMANENT QR LOGIC ---
     const handleGeneratePermanent = async () => {
         if (!authUser || !shopName) return;
         setPermanentLoading(true);
@@ -119,7 +115,6 @@ const QrGeneratorCard = () => {
         }).catch(console.error);
     };
     
-    // --- DYNAMIC QR LOGIC ---
      const generateDynamicQr = useCallback(async () => {
         if (!authUser || !shopName) return;
         const timestamp = Date.now();
@@ -136,17 +131,15 @@ const QrGeneratorCard = () => {
         }
     }, [authUser, shopName]);
 
-    // Effect for dynamic QR generation interval
     useEffect(() => {
         let genInterval: NodeJS.Timeout | undefined;
         if (qrMode === 'dynamic' && authUser && shopName) {
-            generateDynamicQr(); // Initial generation
+            generateDynamicQr();
             genInterval = setInterval(generateDynamicQr, 15000);
         }
         return () => clearInterval(genInterval);
     }, [qrMode, authUser, shopName, generateDynamicQr]);
 
-    // Effect for dynamic QR countdown timer
     useEffect(() => {
         if (qrMode !== 'dynamic' || !timeLeft || !dynamicQrUrl) return;
         const countdownInterval = setInterval(() => {
@@ -213,9 +206,12 @@ const QrGeneratorCard = () => {
 
     return (
         <Card className="w-full transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
-            <CardHeader className="relative">
+            <CardHeader className="relative pb-2">
                 <CardTitle>QR Code Generator</CardTitle>
-                <div className="absolute top-4 right-4 hidden md:flex items-center space-x-2">
+                 <CardDescription>
+                    {qrMode === 'permanent' ? 'Print and place this in your store for employees.' : 'This refreshes to prevent misuse. Display on a tablet.'}
+                </CardDescription>
+                 <div className="absolute top-4 right-4 hidden md:flex items-center space-x-2">
                     <Switch id="qr-mode-switch-desktop" checked={qrMode === 'dynamic'} onCheckedChange={(checked) => setQrMode(checked ? 'dynamic' : 'permanent')}/>
                     <Label htmlFor="qr-mode-switch-desktop" className={cn("font-semibold", qrMode === 'dynamic' && 'text-primary')}>
                         Dynamic QR
@@ -223,9 +219,6 @@ const QrGeneratorCard = () => {
                 </div>
             </CardHeader>
             <CardContent>
-                <CardDescription>
-                    {qrMode === 'permanent' ? 'Print and place this in your store for employees.' : 'This refreshes to prevent misuse. Display on a tablet.'}
-                </CardDescription>
                 <div className="mt-4 flex justify-center md:hidden items-center space-x-2">
                     <Switch id="qr-mode-switch-mobile" checked={qrMode === 'dynamic'} onCheckedChange={(checked) => setQrMode(checked ? 'dynamic' : 'permanent')}/>
                     <Label htmlFor="qr-mode-switch-mobile" className={cn("font-semibold", qrMode === 'dynamic' && 'text-primary')}>
@@ -239,7 +232,7 @@ const QrGeneratorCard = () => {
 }
 
 
-const ManualEntry = () => {
+const ManualEntryForm = () => {
     const { toast } = useToast();
     const [loading, setLoading] = useState(false);
     const [employees, setEmployees] = useState<User[]>([]);
@@ -300,24 +293,13 @@ const ManualEntry = () => {
     };
     
     return (
-        <Dialog>
-            <Card className="w-full transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
-                <CardHeader>
-                    <CardTitle>Manual Attendance Entry</CardTitle>
-                    <CardDescription>If a QR scan fails, you can create a record here.</CardDescription>
-                </CardHeader>
-                <CardContent className="flex justify-center items-center h-24">
-                     <DialogTrigger asChild>
-                        <Button className="w-full max-w-xs"><UserPlus className="mr-2"/>Create Record</Button>
-                    </DialogTrigger>
-                </CardContent>
-            </Card>
-
-            <DialogContent className="sm:max-w-[425px]">
-                 <DialogHeader>
-                    <DialogTitle>Manual Attendance</DialogTitle>
-                </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-4 py-4">
+        <Card className="w-full transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
+            <CardHeader>
+                <CardTitle>Manual Attendance Entry</CardTitle>
+                <CardDescription>If a QR scan fails, you can create a record here.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-4">
                     {employees.length > 0 ? (
                         <div className="space-y-2">
                             <Label htmlFor="employee">Employee *</Label>
@@ -359,16 +341,15 @@ const ManualEntry = () => {
 
                     <div className="space-y-2"><Label htmlFor="reason">Reason (Optional)</Label><Textarea id="reason" placeholder="e.g., Forgot phone, technical issue, etc." value={reason} onChange={e => setReason(e.target.value)}/></div>
 
-                     <DialogClose asChild>
-                        <Button type="submit" className="w-full" disabled={loading || employees.length === 0}>
-                            {loading && <Loader2 className="mr-2 animate-spin" />}<Save className="mr-2"/>Save Record
-                        </Button>
-                    </DialogClose>
+                     <Button type="submit" className="w-full" disabled={loading || employees.length === 0}>
+                        {loading && <Loader2 className="mr-2 animate-spin" />}<Save className="mr-2"/>Save Record
+                    </Button>
                 </form>
-            </DialogContent>
-        </Dialog>
+            </CardContent>
+        </Card>
     );
 };
+
 
 const RecentActivity = () => {
     const [activities, setActivities] = useState<ActivityRecord[]>([]);
@@ -479,18 +460,35 @@ const QrHistory = () => {
 
 
 export default function GenerateAndEntryPage() {
+  const [viewMode, setViewMode] = useState<'qr' | 'manual'>('qr');
+
   return (
     <div className="flex flex-col gap-8">
-       <div>
-        <h1 className="text-3xl font-bold tracking-tight">QR &amp; Manual Entry</h1>
-        <p className="text-muted-foreground">Generate QR codes for attendance or manually enter records.</p>
+       <div className="flex justify-between items-center">
+            <div>
+                <h1 className="text-3xl font-bold tracking-tight">QR &amp; Manual Entry</h1>
+                <p className="text-muted-foreground">Generate QR codes or manually enter attendance records.</p>
+            </div>
+            <div className="flex items-center space-x-2">
+                <Label htmlFor="view-mode-switch" className={cn("font-semibold", viewMode === 'qr' && 'text-primary')}>
+                    QR
+                </Label>
+                <Switch 
+                    id="view-mode-switch" 
+                    checked={viewMode === 'manual'} 
+                    onCheckedChange={(checked) => setViewMode(checked ? 'manual' : 'qr')}
+                />
+                <Label htmlFor="view-mode-switch" className={cn("font-semibold", viewMode === 'manual' && 'text-primary')}>
+                    Manual Entry
+                </Label>
+            </div>
        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
             <div className="lg:col-span-2 space-y-8">
-                <QrGeneratorCard />
+                {viewMode === 'qr' ? <QrGeneratorCard /> : <ManualEntryForm />}
             </div>
             <div className="space-y-8 lg:col-span-1">
-                <ManualEntry />
                 <RecentActivity />
                 <QrHistory />
             </div>
