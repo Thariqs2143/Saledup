@@ -82,14 +82,15 @@ export default function LoginPage() {
         <div className="flex flex-col items-center justify-center bg-background p-8 order-1 md:order-2">
             <div className="w-full max-w-sm">
                  {/* Mobile-only Image */}
-                <div className="md:hidden mb-8 -mt-8 -mx-8">
+                <div className="md:hidden -mt-8 -mx-8 mb-8">
                      <Image
                         src="https://res.cloudinary.com/dnkghymx5/image/upload/v1762241011/Generated_Image_November_04_2025_-_12_50PM_1_hslend.png"
                         alt="Business tools illustration"
                         width={600}
-                        height={300}
-                        className="object-cover w-full h-48"
+                        height={400}
+                        className="w-full h-auto object-contain"
                         data-ai-hint="business management"
+                        priority
                     />
                 </div>
 
