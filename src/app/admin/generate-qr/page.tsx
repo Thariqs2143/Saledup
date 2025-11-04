@@ -464,7 +464,7 @@ export default function GenerateAndEntryPage() {
 
   return (
     <div className="flex flex-col gap-8">
-       <div className="flex justify-between items-center">
+       <div className="flex flex-col gap-4">
             <div>
                 <h1 className="text-3xl font-bold tracking-tight">QR &amp; Manual Entry</h1>
                 <p className="text-muted-foreground">Generate QR codes or manually enter attendance records.</p>
