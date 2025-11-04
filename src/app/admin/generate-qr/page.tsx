@@ -469,10 +469,6 @@ const QrCodeTabs = () => {
 export default function GenerateAndEntryPage() {
   return (
     <div className="flex flex-col gap-8">
-        <div>
-            <h1 className="text-3xl font-bold tracking-tight">QR Code & Manual Entry</h1>
-            <p className="text-muted-foreground">Manage your shop's QR code or manually add attendance records.</p>
-        </div>
         <Tabs defaultValue="generate" className="w-full">
             <TabsList className="grid w-full grid-cols-2 md:max-w-md">
                 <TabsTrigger value="generate">QR Code</TabsTrigger>
