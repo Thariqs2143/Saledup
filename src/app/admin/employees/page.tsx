@@ -414,7 +414,7 @@ export default function ManageEmployeesPage() {
 
   return (
     <div className="flex flex-col gap-6">
-        <div>
+        <div className="hidden md:block">
             <h1 className="text-3xl font-bold tracking-tight">Employees & Leave</h1>
             <p className="text-muted-foreground">Manage your employees and their leave requests by branch.</p>
         </div>
@@ -473,6 +473,8 @@ export default function ManageEmployeesPage() {
     </div>
   );
 }
+
+    
 
     
 
