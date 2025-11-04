@@ -861,7 +861,7 @@ export default function ReportsPage() {
         });
 
         return () => unsubscribe();
-    }, [router]);
+    }, [router, selectedBranch]);
     
     useEffect(() => {
         if (!authUser || !selectedBranch) return;
