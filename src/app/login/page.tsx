@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useRef } from "react";
@@ -66,26 +65,33 @@ export default function LoginPage() {
   return (
     <div className="flex flex-col md:grid md:grid-cols-2 min-h-screen w-full">
         <div ref={recaptchaContainerRef}></div>
+        
         {/* Left side with illustration */}
-        <div className="flex flex-col items-center justify-center bg-[#0C2A6A] p-6 md:p-10 text-white relative overflow-hidden order-1 md:order-2 h-64 md:h-auto">
+        <div className="hidden md:flex flex-col items-center justify-center bg-[#0C2A6A] p-10 text-white relative overflow-hidden">
              <Image
                 src="https://storage.googleapis.com/framer-usercontent/images/tHflOaA13praLY311Lg9JA5A.png"
                 alt="Business tools illustration"
                 fill
-                className="object-contain opacity-20"
+                className="object-cover"
                 data-ai-hint="business tools"
             />
-            <div className="relative z-10 text-center space-y-6 hidden md:flex md:flex-col md:items-center md:justify-center">
-                <div className="flex justify-center items-center gap-4">
-                     <Shield className="h-16 w-16 text-white" />
-                     <h1 className="text-6xl font-bold tracking-tighter">SALEDIN</h1>
-                </div>
-            </div>
         </div>
 
         {/* Right side with login form */}
-        <div className="flex flex-col items-center justify-center bg-background p-8 order-2 md:order-1">
+        <div className="flex flex-col items-center justify-center bg-background p-8 order-1 md:order-2">
             <div className="w-full max-w-sm">
+                 {/* Mobile-only Image */}
+                <div className="md:hidden mb-8 -mt-8 -mx-8">
+                     <Image
+                        src="https://storage.googleapis.com/framer-usercontent/images/tHflOaA13praLY311Lg9JA5A.png"
+                        alt="Business tools illustration"
+                        width={600}
+                        height={400}
+                        className="object-cover w-full h-48"
+                        data-ai-hint="business tools"
+                    />
+                </div>
+
                 <div className="text-left mb-10">
                     <h1 className="text-3xl font-bold tracking-tight">India's #1 QR Powered Staff Attendance App</h1>
                     <div className="flex items-center my-4">
