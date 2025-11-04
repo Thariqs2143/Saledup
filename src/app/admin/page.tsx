@@ -11,7 +11,7 @@ import { useEffect, useState, useMemo, useCallback } from "react";
 import { collection, onSnapshot, query, where, Timestamp, orderBy, limit, updateDoc, doc, getDocs, collectionGroup } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
 import type { User, LeaveRequest } from "./employees/page";
-import { subDays, startOfDay, formatDistanceToNow } from 'date-fns';
+import { subDays, startOfDay, formatDistanceToNow, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
 import { AttendanceChart, type ChartData } from '@/components/attendance-chart';
 import { onAuthStateChanged, type User as AuthUser } from 'firebase/auth';
 import { useToast } from "@/hooks/use-toast";
@@ -24,6 +24,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getStaffingAdvice, type StaffingAdvice } from "@/lib/staffing-logic";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from 'recharts';
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 
 type AttendanceRecord = {
@@ -54,6 +55,8 @@ type Branch = {
     ownerId?: string; // Optional for the "All Branches" object
     businessType?: string;
 };
+
+type StatFilter = 'today' | 'week' | 'month';
 
 const chartColors = ['hsl(var(--primary))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))'];
 
@@ -97,7 +100,7 @@ const StaffingAdvisorCard = ({ businessType, currentStaffCount }: { businessType
     };
 
     return (
-        <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
+        <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/30 dark:border-foreground hover:border-primary">
             <CardHeader>
                 <div className="flex items-center gap-3">
                     <BrainCircuit className="h-6 w-6 text-primary"/>
@@ -232,6 +235,7 @@ export default function AdminDashboard() {
   const [initialLoading, setInitialLoading] = useState(true);
   const [openBranchSelector, setOpenBranchSelector] = useState(false);
   const router = useRouter();
+  const [statFilter, setStatFilter] = useState<StatFilter>('today');
   
   const selectedBranchId = useMemo(() => selectedBranch?.id, [selectedBranch]);
   const allBranchIds = useMemo(() => branches.filter(b => b.id !== 'all').map(b => b.id), [branches]);
@@ -426,20 +430,44 @@ export default function AdminDashboard() {
 
 
     // --- Today's Stats & Active Staff ---
-    const todayStart = startOfDay(new Date());
-    const todayStartTimestamp = Timestamp.fromDate(todayStart);
-    const todayAttendanceQuery = isAllBranches
-        ? query(collectionGroup(db, 'attendance'), where('shopId', 'in', targetShopIds), where('checkInTime', '>=', todayStartTimestamp))
-        : query(collection(db, 'shops', selectedBranchId, 'attendance'), where('checkInTime', '>=', todayStartTimestamp));
+    let start, end;
+    const now = new Date();
+    switch (statFilter) {
+      case 'week':
+        start = startOfWeek(now);
+        end = endOfWeek(now);
+        break;
+      case 'month':
+        start = startOfMonth(now);
+        end = endOfMonth(now);
+        break;
+      case 'today':
+      default:
+        start = startOfDay(now);
+        end = now;
+        break;
+    }
 
-    const unsubscribeTodayAttendance = onSnapshot(todayAttendanceQuery, (snapshot) => {
+    const attendanceQuery = isAllBranches
+        ? query(collectionGroup(db, 'attendance'), where('shopId', 'in', targetShopIds), where('checkInTime', '>=', start), where('checkInTime', '<=', end))
+        : query(collection(db, 'shops', selectedBranchId, 'attendance'), where('checkInTime', '>=', start), where('checkInTime', '<=', end));
+
+    const unsubscribeTodayAttendance = onSnapshot(attendanceQuery, (snapshot) => {
         let onTime = 0; let late = 0; const currentActiveStaff: AttendanceRecord[] = [];
         snapshot.forEach(doc => {
             const data = doc.data() as AttendanceRecord;
             if (data.status === 'On-time') onTime++; else if (data.status === 'Late') late++;
-            if (!data.checkOutTime) { currentActiveStaff.push({id: doc.id, ...data}); }
+            // Active staff logic should only consider today
+            if (statFilter === 'today' && !data.checkOutTime) {
+                 currentActiveStaff.push({id: doc.id, ...data});
+            }
         });
-        setOnTimeCount(onTime); setLateArrivalsCount(late); setActiveStaff(currentActiveStaff);
+        setOnTimeCount(onTime); setLateArrivalsCount(late); 
+        if (statFilter === 'today') {
+            setActiveStaff(currentActiveStaff);
+        } else {
+            setActiveStaff([]); // Clear active staff if not viewing today
+        }
     });
 
     // --- Weekly Chart Data Fetching ---
@@ -473,7 +501,7 @@ export default function AdminDashboard() {
         unsubscribeTodayAttendance(); 
         unsubscribeWeekAttendance(); 
     };
-  }, [selectedBranchId, authUser, allBranchIds, employees.length]); 
+  }, [selectedBranchId, authUser, allBranchIds, employees.length, statFilter]); 
 
   const onLeaveCount = useMemo(() => {
     return staffEmployees.filter(e => e.status === 'Inactive').length;
@@ -496,6 +524,13 @@ export default function AdminDashboard() {
             </h1>
             <p className="text-muted-foreground">Here's a quick overview of your attendance today.</p>
            </div>
+           <Tabs value={statFilter} onValueChange={(value) => setStatFilter(value as StatFilter)}>
+            <TabsList>
+                <TabsTrigger value="today">Today</TabsTrigger>
+                <TabsTrigger value="week">This Week</TabsTrigger>
+                <TabsTrigger value="month">This Month</TabsTrigger>
+            </TabsList>
+           </Tabs>
        </div>
 
        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
@@ -523,7 +558,7 @@ export default function AdminDashboard() {
              <div className="text-4xl font-bold">
                 {loading ? <Loader2 className="animate-spin" /> : <AnimatedCounter from={0} to={onTimeCount} />}
             </div>
-            <p className="text-xs text-green-100 mt-1">Checked in today</p>
+            <p className="text-xs text-green-100 mt-1">Checked in this period</p>
           </CardContent>
         </Card>
         <Card className="relative overflow-hidden transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br from-orange-500 to-amber-600 text-white border-none">
@@ -535,7 +570,7 @@ export default function AdminDashboard() {
             <div className="text-4xl font-bold">
                 {loading ? <Loader2 className="animate-spin" /> : <AnimatedCounter from={0} to={lateArrivalsCount} />}
             </div>
-             <p className="text-xs text-orange-100 mt-1">Checked in today</p>
+             <p className="text-xs text-orange-100 mt-1">Checked in this period</p>
           </CardContent>
         </Card>
         <Card className="relative overflow-hidden transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br from-red-500 to-rose-600 text-white border-none">
@@ -552,7 +587,7 @@ export default function AdminDashboard() {
         </Card>
       </div>
 
-        <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
+        <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/30 dark:border-foreground hover:border-primary">
             <CardHeader>
                 <CardTitle>Branch Management</CardTitle>
                 <CardDescription>Select a branch to view its dashboard or add a new one.</CardDescription>
@@ -606,7 +641,7 @@ export default function AdminDashboard() {
         </Card>
 
        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <Card className="transform-gpu xl:col-span-2 transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
+        <Card className="transform-gpu xl:col-span-2 transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/30 dark:border-foreground hover:border-primary">
           <CardHeader>
             <div className="flex items-center gap-3">
               <BarChart3 className="h-6 w-6 text-primary"/>
@@ -628,7 +663,7 @@ export default function AdminDashboard() {
             )}
           </CardContent>
        </Card>
-       <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
+       <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/30 dark:border-foreground hover:border-primary">
             <CardHeader>
                 <div className="flex items-center gap-3">
                    <Activity className="h-6 w-6 text-primary"/>
@@ -670,7 +705,7 @@ export default function AdminDashboard() {
 
        <StaffingAdvisorCard businessType={selectedBranch?.businessType} currentStaffCount={staffEmployees.length} />
 
-      <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
+      <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/30 dark:border-foreground hover:border-primary">
         <CardHeader>
             <div className="flex items-center gap-3">
               <Sparkles className="h-6 w-6 text-primary"/>
@@ -695,7 +730,7 @@ export default function AdminDashboard() {
 
 
       <div className="grid gap-4 md:grid-cols-2 lg:gap-6">
-        <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
+        <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/30 dark:border-foreground hover:border-primary">
             <CardHeader>
                 <CardTitle>Active Staff</CardTitle>
                 <CardDescription>Employees who are currently checked in.</CardDescription>
@@ -740,32 +775,32 @@ export default function AdminDashboard() {
                  )}
             </CardContent>
         </Card>
-        <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
+        <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/30 dark:border-foreground hover:border-primary">
             <CardHeader>
                 <CardTitle>Quick Actions</CardTitle>
                 <CardDescription>Shortcuts to common management tasks.</CardDescription>
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-4">
                 <Link href="/admin/employees/add">
-                    <Card className="h-full flex flex-col items-center justify-center p-4 gap-2 transition-all hover:shadow-md hover:border-primary border-2 border-foreground">
+                    <Card className="h-full flex flex-col items-center justify-center p-4 gap-2 transition-all hover:shadow-md hover:border-primary border-2 border-foreground/30 dark:border-foreground">
                         <UserPlus className="h-6 w-6 text-primary"/>
                         <span className="text-center text-sm font-medium">Invite Employee</span>
                     </Card>
                 </Link>
                  <Link href="/admin/generate-qr#manual-entry">
-                    <Card className="h-full flex flex-col items-center justify-center p-4 gap-2 transition-all hover:shadow-md hover:border-primary border-2 border-foreground">
+                    <Card className="h-full flex flex-col items-center justify-center p-4 gap-2 transition-all hover:shadow-md hover:border-primary border-2 border-foreground/30 dark:border-foreground">
                         <QrCode className="h-6 w-6 text-primary"/>
                         <span className="text-center text-sm font-medium">Manual Entry</span>
                     </Card>
                 </Link>
                  <Link href="/admin/employees">
-                     <Card className="h-full flex flex-col items-center justify-center p-4 gap-2 transition-all hover:shadow-md hover:border-primary border-2 border-foreground">
+                     <Card className="h-full flex flex-col items-center justify-center p-4 gap-2 transition-all hover:shadow-md hover:border-primary border-2 border-foreground/30 dark:border-foreground">
                         <Users className="h-6 w-6 text-primary"/>
                         <span className="text-center text-sm font-medium">View Staff</span>
                     </Card>
                 </Link>
                  <Link href="/admin/report">
-                     <Card className="h-full flex flex-col items-center justify-center p-4 gap-2 transition-all hover:shadow-md hover:border-primary border-2 border-foreground">
+                     <Card className="h-full flex flex-col items-center justify-center p-4 gap-2 transition-all hover:shadow-md hover:border-primary border-2 border-foreground/30 dark:border-foreground">
                         <BarChart3 className="h-6 w-6 text-primary"/>
                         <span className="text-center text-sm font-medium">Full Reports</span>
                     </Card>
