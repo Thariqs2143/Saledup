@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Loader2, Calendar as CalendarIcon, Download, FileText, Check, X, Calculator, Clock4, Users, Receipt, ChevronDown, Lock, Building, ChevronsUpDown, Search } from "lucide-react";
+import { Loader2, Calendar as CalendarIcon, Download, FileText, Check, X, Calculator, Clock4, Users, Receipt, ChevronDown, Lock, Building, ChevronsUpDown, Search, Filter } from "lucide-react";
 import { collection, query, where, getDocs, orderBy, Timestamp, doc, getDoc, collectionGroup } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
 import { format, subDays, getDaysInMonth, startOfMonth, endOfMonth, differenceInDays, eachDayOfInterval, startOfWeek, endOfWeek, setMonth, setYear } from 'date-fns';
@@ -27,6 +27,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from '@/components/ui/separator';
 import Link from 'next/link';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList }from "@/components/ui/command";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
 
 // Extend jsPDF with autoTable
@@ -225,52 +226,59 @@ const AttendanceReportTab = ({ allBranches, selectedBranch, authUser }: { allBra
 
     return (
         <div className="space-y-6">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Filters</CardTitle>
-                    <CardDescription>Select filters to generate a report.</CardDescription>
-                </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
-                    <div className="space-y-2 lg:col-span-2">
-                        <Label>Date Range</Label>
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}>
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {date?.from ? (date.to ? `${format(date.from, "LLL dd, y")} - ${format(date.to, "LLL dd, y")}` : format(date.from, "LLL dd, y")) : <span>Pick a date</span>}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                                <Calendar initialFocus mode="range" defaultMonth={date?.from} selected={date} onSelect={setDate} numberOfMonths={1}/>
-                            </PopoverContent>
-                        </Popover>
+             <Sheet>
+                <SheetTrigger asChild>
+                    <Button variant="outline" className="w-full md:w-auto">
+                        <Filter className="mr-2 h-4 w-4" />
+                        Filter Report
+                    </Button>
+                </SheetTrigger>
+                <SheetContent>
+                    <SheetHeader>
+                        <SheetTitle>Report Filters</SheetTitle>
+                    </SheetHeader>
+                    <div className="py-8 space-y-6">
+                        <div className="space-y-2">
+                            <Label>Date Range</Label>
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}>
+                                        <CalendarIcon className="mr-2 h-4 w-4" />
+                                        {date?.from ? (date.to ? `${format(date.from, "LLL dd, y")} - ${format(date.to, "LLL dd, y")}` : format(date.from, "LLL dd, y")) : <span>Pick a date</span>}
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0" align="start">
+                                    <Calendar initialFocus mode="range" defaultMonth={date?.from} selected={date} onSelect={setDate} numberOfMonths={1}/>
+                                </PopoverContent>
+                            </Popover>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="employee">Employee</Label>
+                            <Select onValueChange={setSelectedEmployeeId} value={selectedEmployeeId}>
+                                <SelectTrigger id="employee"><SelectValue placeholder="All Employees" /></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Employees</SelectItem>
+                                    {employees.map(emp => <SelectItem key={emp.id} value={emp.id!}>{emp.name}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="status">Status</Label>
+                            <Select onValueChange={setSelectedStatus} value={selectedStatus}>
+                                <SelectTrigger id="status"><SelectValue placeholder="All Statuses" /></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Statuses</SelectItem>
+                                    <SelectItem value="On-time">On-time</SelectItem>
+                                    <SelectItem value="Late">Late</SelectItem>
+                                    <SelectItem value="Absent">Absent</SelectItem>
+                                    <SelectItem value="Manual">Manual</SelectItem>
+                                    <SelectItem value="Half-day">Half-day</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="employee">Employee</Label>
-                        <Select onValueChange={setSelectedEmployeeId} value={selectedEmployeeId}>
-                            <SelectTrigger id="employee"><SelectValue placeholder="All Employees" /></SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All Employees</SelectItem>
-                                {employees.map(emp => <SelectItem key={emp.id} value={emp.id!}>{emp.name}</SelectItem>)}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="status">Status</Label>
-                        <Select onValueChange={setSelectedStatus} value={selectedStatus}>
-                            <SelectTrigger id="status"><SelectValue placeholder="All Statuses" /></SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All Statuses</SelectItem>
-                                <SelectItem value="On-time">On-time</SelectItem>
-                                <SelectItem value="Late">Late</SelectItem>
-                                <SelectItem value="Absent">Absent</SelectItem>
-                                <SelectItem value="Manual">Manual</SelectItem>
-                                <SelectItem value="Half-day">Half-day</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-                </CardContent>
-            </Card>
+                </SheetContent>
+            </Sheet>
 
             <Card>
                 <CardHeader>
@@ -1047,9 +1055,9 @@ export default function ReportsPage() {
                 <p className="text-muted-foreground">Filter records and generate monthly salary reports.</p>
             </div>
             
-            <Card className="border-2 border-primary">
+            <Card>
                 <CardHeader>
-                    <CardTitle>Branch & Report Filters</CardTitle>
+                    <CardTitle>Branch Selection</CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-col md:flex-row items-center gap-4">
                     <Popover open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
@@ -1136,10 +1144,5 @@ export default function ReportsPage() {
         </div>
     );
 }
-
-    
-
-
-
 
     
