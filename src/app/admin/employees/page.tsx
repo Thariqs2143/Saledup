@@ -7,9 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, Mail, Phone, Briefcase, Calendar, Eye, Loader2, Check, X, CalendarOff, UserPlus, ChevronsUpDown, Building } from "lucide-react";
+import { Search, Mail, Phone, Briefcase, Calendar, Eye, Loader2, Check, X, CalendarOff, UserPlus, ChevronsUpDown, Building, Trash2 } from "lucide-react";
 import { useRouter } from 'next/navigation';
-import { collection, onSnapshot, query, orderBy, doc, updateDoc, getDocs, where, collectionGroup } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, doc, updateDoc, getDocs, where, collectionGroup, deleteDoc } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
 import { onAuthStateChanged, type User as AuthUser } from 'firebase/auth';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -18,6 +18,8 @@ import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+
 
 export type User = {
   id?: string;
@@ -292,6 +294,29 @@ const LeaveRequests = ({ selectedBranchId, allBranchIds }: { selectedBranchId: s
         setUpdatingId(null);
       }
     };
+    
+    const handleDeleteRequest = async (requestId: string) => {
+        const request = leaveRequests.find(r => r.id === requestId);
+        if (!request || !('shopId' in request)) return;
+      
+        const shopId = (request as any).shopId;
+        if (!shopId) {
+            toast({ title: "Error", description: "Shop ID not found for this request.", variant: "destructive" });
+            return;
+        }
+
+        setUpdatingId(requestId);
+        const docRef = doc(db, 'shops', shopId, 'leaveRequests', requestId);
+        try {
+            await deleteDoc(docRef);
+            toast({ title: "Request Deleted", description: "The leave request has been permanently removed." });
+        } catch (error) {
+            console.error("Error deleting leave request:", error);
+            toast({ title: "Delete Failed", description: "Could not delete the request.", variant: "destructive" });
+        } finally {
+            setUpdatingId(null);
+        }
+    };
   
     const getStatusVariant = (status: LeaveRequest['status']) => {
       switch (status) {
@@ -304,72 +329,90 @@ const LeaveRequests = ({ selectedBranchId, allBranchIds }: { selectedBranchId: s
     };
   
     return (
-        <Card>
-        <CardHeader>
-          <CardTitle>Incoming Requests</CardTitle>
-          <CardDescription>
-            Here are all the leave requests submitted by your employees in this branch.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="flex justify-center items-center h-48">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="space-y-4">
+            <div>
+                <h3 className="text-xl font-bold">Incoming Requests</h3>
+                <p className="text-muted-foreground">Here are all the leave requests submitted by your employees in this branch.</p>
             </div>
-          ) : leaveRequests.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              <CalendarOff className="h-12 w-12 mx-auto mb-4 opacity-50"/>
-              <p>No leave requests found for this branch.</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {leaveRequests.map((request) => (
-                <Card key={request.id} className="transition-all duration-300 ease-out hover:shadow-md border-2 border-foreground/30">
-                  <CardContent className="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <div className="flex-1 space-y-2">
-                      <div className="flex items-center gap-4">
-                         <p className="font-bold">{request.userName}</p>
-                         <Badge variant={getStatusVariant(request.status)}>{request.status}</Badge>
-                      </div>
-                      <p className="text-sm font-medium text-primary">
-                        {new Date(request.startDate).toLocaleDateString()} to {new Date(request.endDate).toLocaleDateString()}
-                      </p>
-                      <p className="text-sm text-muted-foreground">{request.reason}</p>
-                       <p className="text-xs text-muted-foreground/70">
-                        Requested on: {new Date(request.requestedAt.seconds * 1000).toLocaleString()}
-                      </p>
-                    </div>
-                    {request.status === 'pending' && (
-                      <div className="flex gap-2 shrink-0 w-full sm:w-auto">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full sm:w-auto border-green-500 text-green-600 hover:bg-green-50 hover:text-green-700"
-                          onClick={() => handleUpdateRequest(request.id, 'approved')}
-                          disabled={updatingId === request.id}
-                        >
-                          {updatingId === request.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-                          <span className="ml-2">Approve</span>
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          className="w-full sm:w-auto"
-                          onClick={() => handleUpdateRequest(request.id, 'denied')}
-                          disabled={updatingId === request.id}
-                        >
-                           {updatingId === request.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <X className="h-4 w-4" />}
-                           <span className="ml-2">Deny</span>
-                        </Button>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            {loading ? (
+                <div className="flex justify-center items-center h-48">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+            ) : leaveRequests.length === 0 ? (
+                <div className="text-center py-12 text-muted-foreground border rounded-lg">
+                <CalendarOff className="h-12 w-12 mx-auto mb-4 opacity-50"/>
+                <p>No leave requests found for this branch.</p>
+                </div>
+            ) : (
+                <div className="space-y-4">
+                {leaveRequests.map((request) => (
+                    <Card key={request.id} className="transition-all duration-300 ease-out hover:shadow-md border-2 border-foreground/30">
+                    <CardContent className="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div className="flex-1 space-y-2">
+                        <div className="flex items-center gap-4">
+                            <p className="font-bold">{request.userName}</p>
+                            <Badge variant={getStatusVariant(request.status)}>{request.status}</Badge>
+                        </div>
+                        <p className="text-sm font-medium text-primary">
+                            {new Date(request.startDate).toLocaleDateString()} to {new Date(request.endDate).toLocaleDateString()}
+                        </p>
+                        <p className="text-sm text-muted-foreground">{request.reason}</p>
+                        <p className="text-xs text-muted-foreground/70">
+                            Requested on: {new Date(request.requestedAt.seconds * 1000).toLocaleString()}
+                        </p>
+                        </div>
+                        <div className="flex flex-col sm:flex-row gap-2 shrink-0 w-full sm:w-auto">
+                            {request.status === 'pending' && (
+                                <>
+                                    <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="w-full sm:w-auto border-green-500 text-green-600 hover:bg-green-50 hover:text-green-700"
+                                    onClick={() => handleUpdateRequest(request.id, 'approved')}
+                                    disabled={updatingId === request.id}
+                                    >
+                                    {updatingId === request.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                                    <span className="ml-2">Approve</span>
+                                    </Button>
+                                    <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    className="w-full sm:w-auto"
+                                    onClick={() => handleUpdateRequest(request.id, 'denied')}
+                                    disabled={updatingId === request.id}
+                                    >
+                                    {updatingId === request.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <X className="h-4 w-4" />}
+                                    <span className="ml-2">Deny</span>
+                                    </Button>
+                                </>
+                            )}
+                             <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                     <Button variant="ghost" size="sm" className="w-full sm:w-auto text-destructive hover:bg-destructive/10 hover:text-destructive" disabled={updatingId === request.id}>
+                                        <Trash2 className="h-4 w-4"/>
+                                        <span className="ml-2">Delete</span>
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            This will permanently delete the leave request from {request.userName}. This action cannot be undone.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction onClick={() => handleDeleteRequest(request.id)} className="bg-destructive hover:bg-destructive/90">Confirm Delete</AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                        </div>
+                    </CardContent>
+                    </Card>
+                ))}
+                </div>
+            )}
+        </div>
     );
 };
 
@@ -459,9 +502,9 @@ export default function ManageEmployeesPage() {
             </CardHeader>
         </Card>
          <Tabs defaultValue="employees" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 md:max-w-md">
-                <TabsTrigger value="employees">All Employees</TabsTrigger>
-                <TabsTrigger value="leave">Leave Requests</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 md:max-w-md bg-primary text-primary-foreground">
+                <TabsTrigger value="employees" className="data-[state=active]:bg-background data-[state=active]:text-foreground">All Employees</TabsTrigger>
+                <TabsTrigger value="leave" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Leave Requests</TabsTrigger>
             </TabsList>
             <TabsContent value="employees" className="mt-6">
                 <EmployeeList allBranches={memoizedBranches} selectedBranchId={selectedBranch?.id || null} allBranchIds={allBranchIds} />
