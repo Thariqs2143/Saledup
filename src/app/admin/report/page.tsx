@@ -27,7 +27,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from '@/components/ui/separator';
 import Link from 'next/link';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList }from "@/components/ui/command";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 
 
 // Extend jsPDF with autoTable
@@ -215,7 +215,7 @@ const AttendanceReportTab = ({ allBranches, selectedBranch, authUser, date, sele
                                 <>
                                     <div className="grid gap-4 md:hidden">
                                         {filteredRecords.map(r => (
-                                            <Card key={r.id} className="p-4 space-y-3">
+                                            <Card key={r.id} className="p-4 space-y-3 border-2 border-foreground transition-all duration-300 ease-out hover:shadow-lg hover:border-primary">
                                                 <div className="flex justify-between items-start">
                                                     <div><p className="font-bold">{r.userName}</p><p className="text-sm text-muted-foreground">{format(r.checkInTime.toDate(), 'MMM d, yyyy')}</p></div>
                                                     <Badge variant={getStatusVariant(r.status)}>{r.status}</Badge>
@@ -1108,8 +1108,8 @@ export default function ReportsPage() {
             <Tabs defaultValue="attendance" className="w-full">
                 <TabsList className="grid w-full grid-cols-3 h-auto">
                     <TabsTrigger value="attendance" className="h-full py-2">
-                      <span className="md:hidden"><br /></span>
-                      <span>Attendance<span className="hidden md:inline"> Report</span></span>
+                        <span className="md:hidden"><br /></span>
+                        <span>Attendance<span className="hidden md:inline"> Report</span></span>
                     </TabsTrigger>
                      <TabsTrigger value="muster" className="h-full py-2">
                        <span className="md:hidden"><br /></span>
@@ -1145,8 +1145,3 @@ export default function ReportsPage() {
         </div>
     );
 }
-
-    
-
-    
-
