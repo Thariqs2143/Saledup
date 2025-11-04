@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Button } from "@/components/ui/button";
@@ -222,7 +221,7 @@ function SettingsPageContent() {
     try {
       await signOut(auth);
       toast({ title: "Logged Out" });
-      router.push('/role-selection');
+      router.push('/login');
     } catch (error) {
       toast({ title: "Logout Failed", variant: "destructive" });
     }

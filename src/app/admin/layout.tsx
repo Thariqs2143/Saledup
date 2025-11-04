@@ -1,4 +1,3 @@
-
 'use client';
 
 import type { PropsWithChildren } from 'react';
@@ -20,7 +19,7 @@ const adminNavItems: NavItem[] = [
 
 export default function AdminLayout({ children }: PropsWithChildren) {
   const pathname = usePathname();
-  if (pathname === '/admin/login' || pathname === '/admin/complete-profile' || pathname === '/admin/signup' || pathname === '/admin/add-branch') {
+  if (pathname.startsWith('/admin/login') || pathname.startsWith('/admin/signup') || pathname === '/admin/complete-profile' || pathname === '/admin/add-branch') {
     return <>{children}</>
   }
 

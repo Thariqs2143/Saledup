@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useRef } from "react";
@@ -7,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Shield, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { RecaptchaVerifier, signInWithPhoneNumber, type ConfirmationResult, type User as AuthUser } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
@@ -15,10 +14,10 @@ import { doc, getDoc } from "firebase/firestore";
 
 export default function AdminLoginPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const { toast } = useToast();
     const [phone, setPhone] = useState('');
     const [otp, setOtp] = useState(new Array(6).fill(""));
-    const [step, setStep] = useState<'phone' | 'otp'>('phone');
     const [loading, setLoading] = useState(false);
     const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
     const otpInputsRef = useRef<HTMLInputElement[]>([]);
@@ -26,15 +25,22 @@ export default function AdminLoginPage() {
     const recaptchaContainerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
+        const phoneFromQuery = searchParams.get('phone');
+        if (phoneFromQuery) {
+            setPhone(phoneFromQuery);
+            handleGetOtp(phoneFromQuery);
+        } else {
+            router.push('/login');
+        }
+    }, [searchParams, router]);
+
+    useEffect(() => {
         if (recaptchaContainerRef.current && !recaptchaVerifierRef.current) {
             recaptchaVerifierRef.current = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
                 'size': 'invisible',
-                'callback': (response: any) => {
-                    // reCAPTCHA solved, allow signInWithPhoneNumber.
-                },
+                'callback': (response: any) => {},
             });
         }
-        // Cleanup function
         return () => {
             if (recaptchaVerifierRef.current) {
                 recaptchaVerifierRef.current.clear();
@@ -43,33 +49,15 @@ export default function AdminLoginPage() {
     }, []);
 
 
-    useEffect(() => {
-        if (step === 'otp') {
-            otpInputsRef.current[0]?.focus();
-        }
-    }, [step]);
-
-
-    const handleGetOtp = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!/^\d{10}$/.test(phone)) {
-            toast({ title: "Error", description: "Please enter a valid 10-digit phone number.", variant: "destructive" });
+    const handleGetOtp = async (phoneNum: string) => {
+        if (!/^\d{10}$/.test(phoneNum)) {
+            toast({ title: "Error", description: "Invalid phone number.", variant: "destructive" });
             return;
         }
         setLoading(true);
         
         try {
-            const phoneNumber = `+91${phone}`;
-
-            const phoneLookupRef = doc(db, 'employee_phone_to_shop_lookup', phoneNumber);
-            const phoneLookupSnap = await getDoc(phoneLookupRef);
-
-            if (!phoneLookupSnap.exists() || !phoneLookupSnap.data()?.isAdmin) {
-                 toast({ title: "Access Denied", description: "This phone number is not registered as a shop owner.", variant: "destructive"});
-                 setLoading(false);
-                 return;
-            }
-            
+            const phoneNumber = `+91${phoneNum}`;
             const appVerifier = recaptchaVerifierRef.current;
             if (!appVerifier) {
                 throw new Error("reCAPTCHA not initialized");
@@ -77,11 +65,10 @@ export default function AdminLoginPage() {
             
             const result = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
             setConfirmationResult(result);
-            setStep('otp');
             toast({ title: "OTP Sent!", description: `An OTP has been sent to ${phoneNumber}.` });
         } catch (error) {
             console.error("Error sending OTP:", error);
-            toast({ title: "Error", description: "Failed to send OTP. Please ensure your project is configured correctly and try again.", variant: "destructive" });
+            toast({ title: "Error", description: "Failed to send OTP. Please try again.", variant: "destructive" });
         } finally {
             setLoading(false);
         }
@@ -138,7 +125,6 @@ export default function AdminLoginPage() {
         newOtp[index] = value;
         setOtp(newOtp);
 
-        // Move to next input
         if (value && index < 5) {
             otpInputsRef.current[index + 1]?.focus();
         }
@@ -195,27 +181,9 @@ export default function AdminLoginPage() {
         </div>
         <h1 className="text-3xl font-bold">Shop Owner Login</h1>
         <p className="text-muted-foreground mt-2 mb-8">
-            {step === 'phone' ? 'Enter your phone number to continue.' : 'Enter the OTP sent to your phone.'}
+            Enter the OTP sent to +91 {phone}.
         </p>
 
-        {step === 'phone' ? (
-        <form className="space-y-6 text-left" onSubmit={handleGetOtp}>
-            <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number</Label>
-                <div className="flex items-center gap-2">
-                    <div className="flex h-10 items-center rounded-md border border-input bg-transparent px-3">
-                        <span role="img" aria-label="Indian Flag">🇮🇳</span>
-                        <span className="ml-2 text-sm font-medium text-muted-foreground">+91</span>
-                    </div>
-                    <Input id="phone" type="tel" inputMode="numeric" placeholder="1234567890" required className="flex-1" value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))} maxLength={10} pattern="\d{10}" title="Please enter a 10-digit phone number" />
-                </div>
-            </div>
-            <Button type="submit" className="w-full !mt-8" disabled={loading}>
-                {loading && <Loader2 className="mr-2 animate-spin" />}
-                Send OTP
-            </Button>
-        </form>
-        ) : (
         <form className="space-y-6 text-left" onSubmit={handleLogin}>
             <div className="space-y-2">
                 <Label>One-Time Password</Label>
@@ -236,7 +204,7 @@ export default function AdminLoginPage() {
                     ))}
                 </div>
             </div>
-            <Button type="button" variant="link" size="sm" className="p-0 h-auto" onClick={() => { setStep('phone'); setOtp(new Array(6).fill("")); }}>
+            <Button type="button" variant="link" size="sm" className="p-0 h-auto" onClick={() => router.push('/login')}>
                 Use a different phone number
             </Button>
             <Button type="submit" className="w-full !mt-8" disabled={loading}>
@@ -244,19 +212,6 @@ export default function AdminLoginPage() {
                  Verify OTP & Login
             </Button>
         </form>
-        )}
-        <p className="mt-8 text-center text-sm text-muted-foreground">
-            Don't have an account?{' '}
-            <Link href="/admin/signup" className="text-primary hover:underline font-medium">
-                Sign Up
-            </Link>
-        </p>
-        <p className="mt-2 text-center text-sm text-muted-foreground">
-            Not a shop owner?{' '}
-            <Link href="/employee/login" className="text-primary hover:underline font-medium">
-                Login as Employee
-            </Link>
-        </p>
       </div>
     </div>
   );

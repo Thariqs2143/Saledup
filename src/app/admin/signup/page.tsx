@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useRef } from "react";
@@ -7,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { UserPlus, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { RecaptchaVerifier, signInWithPhoneNumber, type ConfirmationResult } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
@@ -15,54 +14,40 @@ import { doc, getDoc, setDoc, writeBatch } from "firebase/firestore";
 
 export default function AdminSignupPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const { toast } = useToast();
     const [phone, setPhone] = useState('');
     const [referralCode, setReferralCode] = useState('');
     const [otp, setOtp] = useState(new Array(6).fill(""));
-    const [step, setStep] = useState<'phone' | 'otp'>('phone');
     const [loading, setLoading] = useState(false);
     const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
     const otpInputsRef = useRef<HTMLInputElement[]>([]);
     const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
     const recaptchaContainerRef = useRef<HTMLDivElement>(null);
+    
+    useEffect(() => {
+        const phoneFromQuery = searchParams.get('phone');
+        if (phoneFromQuery) {
+            setPhone(phoneFromQuery);
+            handleGetOtp(phoneFromQuery);
+        } else {
+            router.push('/login');
+        }
+    }, [searchParams, router]);
 
     useEffect(() => {
         if (recaptchaContainerRef.current && !recaptchaVerifierRef.current) {
             recaptchaVerifierRef.current = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
                 'size': 'invisible',
-                'callback': (response: any) => {
-                    // reCAPTCHA solved, allow signInWithPhoneNumber.
-                },
+                'callback': (response: any) => {},
             });
         }
     }, []);
 
-    useEffect(() => {
-        if (step === 'otp') {
-            otpInputsRef.current[0]?.focus();
-        }
-    }, [step]);
-
-    const handleGetOtp = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!/^\d{10}$/.test(phone)) {
-            toast({ title: "Error", description: "Please enter a valid 10-digit phone number.", variant: "destructive" });
-            return;
-        }
+    const handleGetOtp = async (phoneNum: string) => {
         setLoading(true);
-        
         try {
-            const phoneNumber = `+91${phone}`;
-
-            const phoneLookupRef = doc(db, 'employee_phone_to_shop_lookup', phoneNumber);
-            const phoneLookupSnap = await getDoc(phoneLookupRef);
-
-            if (phoneLookupSnap.exists()) {
-                 toast({ title: "Already Registered", description: "This phone number is already in use. Please log in instead.", variant: "destructive"});
-                 setLoading(false);
-                 return;
-            }
-            
+            const phoneNumber = `+91${phoneNum}`;
             const appVerifier = recaptchaVerifierRef.current;
             if (!appVerifier) {
                 throw new Error("reCAPTCHA not initialized");
@@ -70,11 +55,11 @@ export default function AdminSignupPage() {
 
             const result = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
             setConfirmationResult(result);
-            setStep('otp');
             toast({ title: "OTP Sent!", description: `An OTP has been sent to ${phoneNumber}.` });
         } catch (error) {
             console.error("Error sending OTP:", error);
             toast({ title: "Error", description: "Failed to send OTP. Please try again.", variant: "destructive" });
+            router.push('/login');
         } finally {
             setLoading(false);
         }
@@ -177,31 +162,9 @@ export default function AdminSignupPage() {
         </div>
         <h1 className="text-3xl font-bold">Create Owner Account</h1>
         <p className="text-muted-foreground mt-2 mb-8">
-            {step === 'phone' ? 'Enter your phone number to get started.' : 'Enter the OTP to verify your number.'}
+            Enter the OTP sent to +91 {phone} to verify your number.
         </p>
-
-        {step === 'phone' ? (
-        <form className="space-y-6 text-left" onSubmit={handleGetOtp}>
-            <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number</Label>
-                <div className="flex items-center gap-2">
-                    <div className="flex h-10 items-center rounded-md border border-input bg-transparent px-3">
-                        <span role="img" aria-label="Indian Flag">🇮🇳</span>
-                        <span className="ml-2 text-sm font-medium text-muted-foreground">+91</span>
-                    </div>
-                    <Input id="phone" type="tel" inputMode="numeric" placeholder="1234567890" required className="flex-1" value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))} maxLength={10} pattern="\d{10}" title="Please enter a 10-digit phone number" />
-                </div>
-            </div>
-             <div className="space-y-2">
-                <Label htmlFor="referralCode">Referral Code (Optional)</Label>
-                <Input id="referralCode" placeholder="Enter referral code" value={referralCode} onChange={(e) => setReferralCode(e.target.value)} />
-            </div>
-            <Button type="submit" className="w-full !mt-8" disabled={loading}>
-                {loading && <Loader2 className="mr-2 animate-spin" />}
-                Send OTP
-            </Button>
-        </form>
-        ) : (
+        
         <form className="space-y-6 text-left" onSubmit={handleVerifyAndProceed}>
             <div className="space-y-2">
                 <Label>One-Time Password</Label>
@@ -222,7 +185,11 @@ export default function AdminSignupPage() {
                     ))}
                 </div>
             </div>
-            <Button type="button" variant="link" size="sm" className="p-0 h-auto" onClick={() => { setStep('phone'); setOtp(new Array(6).fill("")); }}>
+            <div className="space-y-2">
+                <Label htmlFor="referralCode">Referral Code (Optional)</Label>
+                <Input id="referralCode" placeholder="Enter referral code" value={referralCode} onChange={(e) => setReferralCode(e.target.value)} />
+            </div>
+            <Button type="button" variant="link" size="sm" className="p-0 h-auto" onClick={() => router.push('/login')}>
                 Use a different phone number
             </Button>
             <Button type="submit" className="w-full !mt-8" disabled={loading}>
@@ -230,10 +197,9 @@ export default function AdminSignupPage() {
                  Verify & Create Account
             </Button>
         </form>
-        )}
         <p className="mt-8 text-center text-sm text-muted-foreground">
             Already have an account?{' '}
-            <Link href="/admin/login" className="text-primary hover:underline font-medium">
+            <Link href="/login" className="text-primary hover:underline font-medium">
                 Log In
             </Link>
         </p>

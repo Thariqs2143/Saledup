@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -159,7 +158,7 @@ export default function ProfilePage() {
         title: "Logged Out",
         description: "You have been successfully logged out.",
       });
-      router.push('/role-selection');
+      router.push('/login');
     } catch (error) {
       console.error("Error signing out: ", error);
       toast({
