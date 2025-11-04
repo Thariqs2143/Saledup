@@ -21,6 +21,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { format } from 'date-fns';
 
 
 export type User = {
@@ -190,36 +191,55 @@ const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds }: { allBran
           ): (
             <>
                 {/* Mobile View */}
-                <div className="grid gap-4 md:hidden">
-                    {filteredEmployees.map((employee) => (
-                        <Card key={employee.id} className="p-4 space-y-3" onClick={() => router.push(`/admin/employees/${employee.id}?branchId=${employee.shopId}`)}>
-                            <div className="flex justify-between items-start">
-                                <div className="flex items-center gap-3">
-                                    <Avatar>
-                                        <AvatarImage src={employee.imageUrl} alt={employee.name} />
-                                        <AvatarFallback>{employee.fallback}</AvatarFallback>
-                                    </Avatar>
-                                    <div>
-                                        <p className="font-bold">{employee.name}</p>
-                                        <p className="text-xs text-muted-foreground">{employee.phone || employee.email}</p>
-                                    </div>
-                                </div>
-                                <Badge variant={getStatusVariant(employee.status)}>{employee.status}</Badge>
-                            </div>
-                             <div className="space-y-2 text-sm text-muted-foreground">
-                                <div className="flex items-center gap-2">
-                                    <User className="h-3 w-3 shrink-0" />
-                                    <span>{employee.role}</span>
-                                </div>
-                                {selectedBranchId === 'all' && (
-                                     <div className="flex items-center gap-2">
-                                        <Store className="h-3 w-3 shrink-0" />
-                                        <span>{employee.shopName}</span>
-                                    </div>
-                                )}
-                            </div>
-                        </Card>
-                    ))}
+                 <div className="grid gap-4 md:hidden">
+                  {filteredEmployees.map((employee) => (
+                    <div key={employee.id} className="bg-gray-800 text-white rounded-lg p-4 space-y-4 border-2 border-primary/50 shadow-lg">
+                      <div className="flex justify-between items-start">
+                        <div className="flex items-center gap-4">
+                          <Avatar className="h-12 w-12 border-2 border-gray-600">
+                            <AvatarImage src={employee.imageUrl} alt={employee.name} />
+                            <AvatarFallback className="bg-gray-700 text-gray-300">{employee.fallback}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-bold text-lg">{employee.name}</p>
+                            {selectedBranchId === 'all' && (
+                                <p className="text-xs text-gray-400 flex items-center gap-1"><Store className="h-3 w-3"/> {employee.shopName}</p>
+                            )}
+                          </div>
+                        </div>
+                        <Badge variant={getStatusVariant(employee.status)}>{employee.status}</Badge>
+                      </div>
+                      <div className="space-y-2 text-sm text-gray-300 pl-2">
+                        {employee.email && (
+                          <div className="flex items-center gap-3">
+                            <Mail className="h-4 w-4 text-gray-400" />
+                            <span>{employee.email}</span>
+                          </div>
+                        )}
+                        {employee.phone && (
+                          <div className="flex items-center gap-3">
+                            <Phone className="h-4 w-4 text-gray-400" />
+                            <span>{employee.phone}</span>
+                          </div>
+                        )}
+                        <div className="flex items-center gap-3">
+                          <Briefcase className="h-4 w-4 text-gray-400" />
+                          <span>{employee.role}</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <Calendar className="h-4 w-4 text-gray-400" />
+                          <span>Joined: {employee.joinDate ? format(new Date(employee.joinDate), 'dd/MM/yyyy') : 'N/A'}</span>
+                        </div>
+                      </div>
+                      <Button 
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                        onClick={() => router.push(`/admin/employees/${employee.id}?branchId=${employee.shopId}`)}
+                      >
+                        <Eye className="mr-2 h-4 w-4"/>
+                        View Profile
+                      </Button>
+                    </div>
+                  ))}
                 </div>
 
                 {/* Desktop View */}
