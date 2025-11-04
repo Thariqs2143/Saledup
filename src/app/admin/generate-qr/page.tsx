@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from 'next/image';
@@ -10,7 +10,6 @@ import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, Dialog
 import { doc, getDoc, addDoc, collection, onSnapshot, query, orderBy, Timestamp, where, getDocs, setDoc, limit } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
 import { format, setHours, setMinutes, setSeconds, formatDistanceToNow } from 'date-fns';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { User } from '../employees/page';
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -24,6 +23,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Switch } from '@/components/ui/switch';
 
 
 type ActivityRecord = {
@@ -45,14 +45,22 @@ type QrHistoryRecord = {
 };
 
 
-const PermanentQrTab = () => {
-    const [qrCodeUrl, setQrCodeUrl] = useState('');
-    const [isGenerated, setIsGenerated] = useState(false);
-    const [loading, setLoading] = useState(true);
+const QrGeneratorCard = () => {
+    const { toast } = useToast();
+    const [qrMode, setQrMode] = useState<'permanent' | 'dynamic'>('permanent');
     const [authUser, setAuthUser] = useState<AuthUser | null>(null);
     const [shopName, setShopName] = useState('');
-    const { toast } = useToast();
+    
+    // State for permanent QR
+    const [permanentQrUrl, setPermanentQrUrl] = useState('');
+    const [isPermanentGenerated, setIsPermanentGenerated] = useState(false);
+    const [permanentLoading, setPermanentLoading] = useState(true);
 
+    // State for dynamic QR
+    const [dynamicQrUrl, setDynamicQrUrl] = useState('');
+    const [timeLeft, setTimeLeft] = useState(15);
+    
+    // Fetch initial data
      useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -62,60 +70,44 @@ const PermanentQrTab = () => {
                     const shopSnap = await getDoc(shopDocRef);
                     if (shopSnap.exists()) {
                         setShopName(shopSnap.data().shopName);
-                        // Fetch the permanent QR if it exists
                          const qrHistoryRef = doc(db, 'shops', user.uid, 'qr-history', 'permanent-qr');
                          const qrSnap = await getDoc(qrHistoryRef);
                          if (qrSnap.exists()) {
-                             setQrCodeUrl(qrSnap.data().qrCodeUrl);
-                             setIsGenerated(true);
+                             setPermanentQrUrl(qrSnap.data().qrCodeUrl);
+                             setIsPermanentGenerated(true);
                          }
                     }
                 } catch(e) {
                     console.error("Error fetching initial data", e);
                 } finally {
-                    setLoading(false);
+                    setPermanentLoading(false);
                 }
             }
         });
         return () => unsubscribe();
     }, []);
-    
-    const handleGenerate = async () => {
-        if (!authUser || !shopName) {
-            toast({
-                title: "Error",
-                description: "Shop information not found.",
-                variant: "destructive"
-            });
-            return;
-        }
-        setLoading(true);
 
+    // --- PERMANENT QR LOGIC ---
+    const handleGeneratePermanent = async () => {
+        if (!authUser || !shopName) return;
+        setPermanentLoading(true);
         const data = encodeURIComponent(`attendry-shop-qr;shopId=${authUser.uid};shopName=${shopName}`);
         const generatedUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${data}`;
-        setQrCodeUrl(generatedUrl);
-        setIsGenerated(true);
-    
+        setPermanentQrUrl(generatedUrl);
+        setIsPermanentGenerated(true);
         try {
             await setDoc(doc(db, 'shops', authUser.uid, 'qr-history', 'permanent-qr'), {
-                shopId: authUser.uid,
-                generatedAt: Timestamp.now(),
-                qrCodeUrl: generatedUrl,
-                type: 'permanent'
+                shopId: authUser.uid, generatedAt: Timestamp.now(), qrCodeUrl: generatedUrl, type: 'permanent'
             }, { merge: true });
         } catch (error) {
-            console.error("Error saving QR code to history:", error);
             toast({ title: "Error", description: "Could not save QR code history.", variant: "destructive" });
         } finally {
-            setLoading(false);
+            setPermanentLoading(false);
         }
     };
-    
-    const handleDownload = () => {
-        if (!qrCodeUrl) return;
-        fetch(qrCodeUrl)
-          .then(response => response.blob())
-          .then(blob => {
+     const handleDownloadPermanent = () => {
+        if (!permanentQrUrl) return;
+        fetch(permanentQrUrl).then(response => response.blob()).then(blob => {
             const blobUrl = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = blobUrl;
@@ -124,167 +116,124 @@ const PermanentQrTab = () => {
             link.click();
             document.body.removeChild(link);
             window.URL.revokeObjectURL(blobUrl);
-          })
-          .catch(console.error);
+        }).catch(console.error);
     };
-
-    return (
-        <Card className="w-full transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
-            <CardHeader>
-            <CardTitle>Permanent QR Code</CardTitle>
-            <CardDescription>
-                Print and place this in your store for employees to scan.
-            </CardDescription>
-            </CardHeader>
-            <CardContent className="flex items-center justify-center p-8">
-            {loading ? (
-                <div className="flex items-center justify-center p-8">
-                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                </div>
-            ) : isGenerated ? (
-                <div className="flex flex-col items-center justify-center gap-4 transition-all animate-in fade-in-50 duration-500">
-                    <div className="relative w-64 h-64 border p-2 rounded-lg bg-white">
-                        {qrCodeUrl && <Image src={qrCodeUrl} alt="Generated QR Code" width={256} height={256} className="rounded-md"/>}
-                    </div>
-                </div>
-            ) : (
-                <p className="text-muted-foreground">Click the button below to generate your QR code.</p>
-            )}
-            </CardContent>
-            <CardFooter className="flex-col gap-2 pt-6">
-                {isGenerated ? (
-                    <div className="w-full space-y-2">
-                        <Button onClick={handleGenerate} className="w-full" disabled={loading}>
-                            <QrCode className="mr-2 h-4 w-4"/>
-                            Re-generate QR Code
-                        </Button>
-                        <Button variant="secondary" onClick={handleDownload} className="w-full">
-                            <Download className="mr-2 h-4 w-4"/>
-                            Download for Print
-                        </Button>
-                    </div>
-                ) : (
-                    <Button onClick={handleGenerate} className="w-full" disabled={loading}>
-                        <QrCode className="mr-2 h-4 w-4"/>
-                        Generate QR Code
-                    </Button>
-                )}
-            </CardFooter>
-        </Card>
-    );
-};
-
-const AdvancedQrTab = () => {
-    const [qrCodeUrl, setQrCodeUrl] = useState('');
-    const [timeLeft, setTimeLeft] = useState(15);
-    const [authUser, setAuthUser] = useState<AuthUser | null>(null);
-    const [shopName, setShopName] = useState('');
-    const { toast } = useToast();
-
-    const generateDynamicQr = useCallback(async () => {
+    
+    // --- DYNAMIC QR LOGIC ---
+     const generateDynamicQr = useCallback(async () => {
         if (!authUser || !shopName) return;
-        
         const timestamp = Date.now();
         const data = encodeURIComponent(`attendry-shop-qr;shopId=${authUser.uid};shopName=${shopName};ts=${timestamp}`);
         const generatedUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${data}`;
-        setQrCodeUrl(generatedUrl);
+        setDynamicQrUrl(generatedUrl);
         setTimeLeft(15);
-        
         try {
              await addDoc(collection(db, 'shops', authUser.uid, 'qr-history'), {
-                shopId: authUser.uid,
-                generatedAt: Timestamp.fromMillis(timestamp),
-                qrCodeUrl: generatedUrl,
-                type: 'dynamic'
+                shopId: authUser.uid, generatedAt: Timestamp.fromMillis(timestamp), qrCodeUrl: generatedUrl, type: 'dynamic'
             });
         } catch(error) {
             console.error("Error saving dynamic QR to history:", error);
-            toast({ title: "History Error", description: "Could not save dynamic QR history log.", variant: "destructive" });
         }
+    }, [authUser, shopName]);
 
-    }, [authUser, shopName, toast]);
-    
-     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                setAuthUser(user);
-                const shopDocRef = doc(db, 'shops', user.uid);
-                const shopSnap = await getDoc(shopDocRef);
-                if (shopSnap.exists()) {
-                    setShopName(shopSnap.data().shopName);
-                }
-            }
-        });
-        return () => unsubscribe();
-    }, []);
-
+    // Effect for dynamic QR generation interval
     useEffect(() => {
-        if (authUser && shopName) {
+        let genInterval: NodeJS.Timeout | undefined;
+        if (qrMode === 'dynamic' && authUser && shopName) {
             generateDynamicQr(); // Initial generation
-            const interval = setInterval(generateDynamicQr, 15000);
-            return () => clearInterval(interval);
+            genInterval = setInterval(generateDynamicQr, 15000);
         }
-    }, [authUser, shopName, generateDynamicQr]);
+        return () => clearInterval(genInterval);
+    }, [qrMode, authUser, shopName, generateDynamicQr]);
 
+    // Effect for dynamic QR countdown timer
     useEffect(() => {
-        if (!timeLeft || !qrCodeUrl) return;
+        if (qrMode !== 'dynamic' || !timeLeft || !dynamicQrUrl) return;
         const countdownInterval = setInterval(() => {
             setTimeLeft(prevTime => prevTime > 0 ? prevTime - 1 : 0);
         }, 1000);
         return () => clearInterval(countdownInterval);
-    }, [timeLeft, qrCodeUrl]);
+    }, [qrMode, timeLeft, dynamicQrUrl]);
+
+
+    const renderQrContent = () => {
+        if (qrMode === 'permanent') {
+            return (
+                <>
+                    <CardContent className="flex items-center justify-center p-8">
+                        {permanentLoading ? <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                            : isPermanentGenerated ? (
+                                <div className="flex flex-col items-center justify-center gap-4 transition-all animate-in fade-in-50 duration-500">
+                                    <div className="relative w-64 h-64 border p-2 rounded-lg bg-white">
+                                        {permanentQrUrl && <Image src={permanentQrUrl} alt="Generated QR Code" width={256} height={256} className="rounded-md"/>}
+                                    </div>
+                                </div>
+                            ) : <p className="text-muted-foreground">Click the button below to generate your QR code.</p>
+                        }
+                    </CardContent>
+                    <CardFooter className="flex-col gap-2 pt-6">
+                        <Button onClick={handleGeneratePermanent} className="w-full" disabled={permanentLoading}>{isPermanentGenerated ? 'Re-generate QR Code' : 'Generate QR Code'}</Button>
+                        {isPermanentGenerated && <Button variant="secondary" onClick={handleDownloadPermanent} className="w-full"><Download className="mr-2 h-4 w-4"/>Download for Print</Button>}
+                    </CardFooter>
+                </>
+            )
+        }
+        
+        if (qrMode === 'dynamic') {
+             return (
+                <>
+                    <CardContent className="flex flex-col items-center justify-center p-8 gap-6">
+                        {dynamicQrUrl ? (
+                            <>
+                                <div className="relative w-64 h-64 border p-2 rounded-lg bg-white">
+                                    <Image src={dynamicQrUrl} alt="Dynamic QR Code" width={256} height={256} className="rounded-md"/>
+                                </div>
+                                <div className="w-full space-y-2 text-center">
+                                    <div className="flex items-center justify-center gap-2 font-semibold text-primary"><RefreshCw className="h-4 w-4 animate-spin"/><span>Refreshes in {timeLeft}s</span></div>
+                                    <Progress value={(timeLeft / 15) * 100} className="w-full h-2" />
+                                </div>
+                            </>
+                        ) : <Loader2 className="h-6 w-6 animate-spin text-primary" />}
+                    </CardContent>
+                    <CardFooter>
+                        <Dialog>
+                            <DialogTrigger asChild><Button className="w-full"><Expand className="mr-2 h-4 w-4"/>Full Screen</Button></DialogTrigger>
+                            <DialogContent className="w-screen h-screen max-w-full p-4 bg-white flex flex-col items-center justify-center gap-8">
+                                <DialogHeader><DialogTitle className="sr-only">Full Screen QR Code</DialogTitle></DialogHeader>
+                                {dynamicQrUrl && <Image src={dynamicQrUrl.replace('size=400x400', 'size=800x800')} alt="Full Screen QR Code" width={800} height={800} className="rounded-lg max-w-[90vw] max-h-[80vh] object-contain"/>}
+                                <DialogClose asChild><Button size="lg" className="w-full max-w-xs"><X className="mr-2 h-4 w-4"/>Close</Button></DialogClose>
+                            </DialogContent>
+                        </Dialog>
+                    </CardFooter>
+                </>
+             )
+        }
+    }
+
 
     return (
         <Card className="w-full transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
             <CardHeader>
-                <CardTitle>Advanced QR Code (Dynamic)</CardTitle>
-                <CardDescription>This refreshes to prevent misuse. Display on a tablet.</CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col items-center justify-center p-8 gap-6">
-                {qrCodeUrl ? (
-                    <>
-                        <div className="relative w-64 h-64 border p-2 rounded-lg bg-white">
-                            <Image src={qrCodeUrl} alt="Dynamic QR Code" width={256} height={256} className="rounded-md"/>
-                        </div>
-                        <div className="w-full space-y-2 text-center">
-                            <div className="flex items-center justify-center gap-2 font-semibold text-primary">
-                                <RefreshCw className="h-4 w-4 animate-spin"/>
-                                <span>Refreshes in {timeLeft}s</span>
-                            </div>
-                            <Progress value={(timeLeft / 15) * 100} className="w-full h-2" />
-                        </div>
-                    </>
-                ) : (
-                    <div className="flex items-center justify-center p-8">
-                        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                <div className="flex justify-between items-center">
+                    <div>
+                        <CardTitle>QR Code Generator</CardTitle>
+                        <CardDescription>
+                            {qrMode === 'permanent' ? 'Print and place this in your store for employees.' : 'This refreshes to prevent misuse. Display on a tablet.'}
+                        </CardDescription>
                     </div>
-                )}
-            </CardContent>
-            <CardFooter>
-                <Dialog>
-                    <DialogTrigger asChild>
-                        <Button className="w-full">
-                            <Expand className="mr-2 h-4 w-4"/>
-                            Full Screen
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="w-screen h-screen max-w-full p-4 bg-white flex flex-col items-center justify-center gap-8">
-                            <DialogHeader>
-                            <DialogTitle className="sr-only">Full Screen QR Code</DialogTitle>
-                        </DialogHeader>
-                        {qrCodeUrl && <Image src={qrCodeUrl.replace('size=400x400', 'size=800x800')} alt="Full Screen QR Code" width={800} height={800} className="rounded-lg max-w-[90vw] max-h-[80vh] object-contain"/>}
-                        <DialogClose asChild>
-                            <Button size="lg" className="w-full max-w-xs">
-                                <X className="mr-2 h-4 w-4"/>
-                                Close
-                            </Button>
-                        </DialogClose>
-                    </DialogContent>
-                </Dialog>
-            </CardFooter>
+                     <div className="flex items-center space-x-2">
+                        <Label htmlFor="qr-mode-switch" className={cn("font-semibold", qrMode === 'dynamic' && 'text-primary')}>
+                            Use Dynamic QR
+                        </Label>
+                        <Switch id="qr-mode-switch" checked={qrMode === 'dynamic'} onCheckedChange={(checked) => setQrMode(checked ? 'dynamic' : 'permanent')}/>
+                    </div>
+                </div>
+            </CardHeader>
+            {renderQrContent()}
         </Card>
-    );
-};
+    )
+}
+
 
 const ManualEntryTab = () => {
     const { toast } = useToast();
@@ -320,183 +269,90 @@ const ManualEntryTab = () => {
         setLoading(true);
 
         if (!selectedEmployeeId || !date || !checkInTime || !status || !authUser) {
-            toast({
-                title: "Missing Fields",
-                description: "Please select an employee, date, status, and check-in time.",
-                variant: "destructive",
-            });
-            setLoading(false);
-            return;
+            toast({ title: "Missing Fields", description: "Please select an employee, date, status, and check-in time.", variant: "destructive" }); setLoading(false); return;
         }
 
         try {
             const [checkInHours, checkInMinutes] = checkInTime.split(':').map(Number);
             let finalCheckIn = setSeconds(setMinutes(setHours(date, checkInHours), checkInMinutes), 0);
-
             let finalCheckOut = null;
             if (checkOutTime) {
                 const [checkOutHours, checkOutMinutes] = checkOutTime.split(':').map(Number);
                 finalCheckOut = setSeconds(setMinutes(setHours(date, checkOutHours), checkOutMinutes), 0);
             }
-            
             const employee = employees.find(e => e.id === selectedEmployeeId);
 
             await addDoc(collection(db, 'shops', authUser.uid, 'attendance'), {
-                userId: selectedEmployeeId,
-                userName: employee?.name || 'Unknown',
-                shopId: authUser.uid,
-                checkInTime: Timestamp.fromDate(finalCheckIn),
-                checkOutTime: finalCheckOut ? Timestamp.fromDate(finalCheckOut) : null,
-                status: status,
-                reason: reason,
+                userId: selectedEmployeeId, userName: employee?.name || 'Unknown', shopId: authUser.uid,
+                checkInTime: Timestamp.fromDate(finalCheckIn), checkOutTime: finalCheckOut ? Timestamp.fromDate(finalCheckOut) : null,
+                status: status, reason: reason,
             });
 
-            toast({
-                title: "Record Added!",
-                description: `Attendance for ${employee?.name} has been saved.`,
-            });
-            
-            setSelectedEmployeeId('');
-            setDate(new Date());
-            setCheckInTime('');
-            setCheckOutTime('');
-            setStatus('Manual');
-            setReason('');
-
+            toast({ title: "Record Added!", description: `Attendance for ${employee?.name} has been saved.` });
+            setSelectedEmployeeId(''); setDate(new Date()); setCheckInTime(''); setCheckOutTime(''); setStatus('Manual'); setReason('');
         } catch (error) {
-            console.error("Error adding attendance record:", error);
-            toast({
-                title: "Error",
-                description: "Could not save the record. Please try again.",
-                variant: "destructive",
-            });
-        } finally {
-            setLoading(false);
-        }
+            toast({ title: "Error", description: "Could not save the record. Please try again.", variant: "destructive" });
+        } finally { setLoading(false); }
     };
     
     return (
-        <Card className="w-full max-w-2xl mx-auto transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary" id="manual-entry">
+        <Card className="w-full transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
             <form onSubmit={handleSubmit}>
                 <CardHeader>
-                    <CardTitle>Create New Record</CardTitle>
-                    <CardDescription>Fill in the details below to create a new attendance entry for your shop.</CardDescription>
+                    <CardTitle>Manual Attendance Entry</CardTitle>
+                    <CardDescription>Create a new attendance record for an employee.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     {employees.length > 0 ? (
-                            <div className="space-y-2">
+                        <div className="space-y-2">
                             <Label htmlFor="employee">Employee *</Label>
                             <Select onValueChange={setSelectedEmployeeId} value={selectedEmployeeId} required>
-                                <SelectTrigger id="employee">
-                                    <SelectValue placeholder="Select an employee" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {employees.map(emp => (
-                                        <SelectItem key={emp.id} value={emp.id!}>{emp.name} ({emp.employeeId})</SelectItem>
-                                    ))}
-                                </SelectContent>
+                                <SelectTrigger id="employee"><SelectValue placeholder="Select an employee" /></SelectTrigger>
+                                <SelectContent>{employees.map(emp => (<SelectItem key={emp.id} value={emp.id!}>{emp.name} ({emp.employeeId})</SelectItem>))}</SelectContent>
                             </Select>
                         </div>
                     ) : (
                         <div className="text-center p-4 border rounded-md">
-                            <p className="text-muted-foreground text-sm">No active employees found in your shop.</p>
-                            <Link href="/admin/employees">
-                                <Button variant="link" className="mt-2">
-                                    <UserPlus className="mr-2"/>
-                                    Manage Employees
-                                </Button>
-                            </Link>
+                            <p className="text-muted-foreground text-sm">No active employees found.</p>
+                            <Link href="/admin/employees"><Button variant="link" className="mt-2"><UserPlus className="mr-2"/>Manage Employees</Button></Link>
                         </div>
                     )}
                     
                     <div className="space-y-2">
-                            <Label htmlFor="date">Date *</Label>
-                            <Popover>
-                            <PopoverTrigger asChild>
-                            <Button
-                                variant={"outline"}
-                                className={cn(
-                                "w-full justify-start text-left font-normal",
-                                !date && "text-muted-foreground"
-                                )}
-                            >
-                                <CalendarIcon className="mr-2 h-4 w-4" />
-                                {date ? format(date, "PPP") : <span>Pick a date</span>}
-                            </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0">
-                                <Calendar
-                                    mode="single"
-                                    selected={date}
-                                    onSelect={setDate}
-                                    initialFocus
-                                />
-                            </PopoverContent>
+                        <Label htmlFor="date">Date *</Label>
+                        <Popover>
+                            <PopoverTrigger asChild><Button variant={"outline"} className={cn("w-full justify-start text-left font-normal",!date && "text-muted-foreground")}><CalendarIcon className="mr-2 h-4 w-4" />{date ? format(date, "PPP") : <span>Pick a date</span>}</Button></PopoverTrigger>
+                            <PopoverContent className="w-auto p-0"><Calendar mode="single" selected={date} onSelect={setDate} initialFocus /></PopoverContent>
                         </Popover>
                     </div>
                     
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                            <Label htmlFor="checkInTime">Check-in Time *</Label>
-                            <Input id="checkInTime" type="time" value={checkInTime} onChange={e => setCheckInTime(e.target.value)} required />
-                        </div>
-                            <div className="space-y-2">
-                            <Label htmlFor="checkOutTime">Check-out Time</Label>
-                            <Input id="checkOutTime" type="time" value={checkOutTime} onChange={e => setCheckOutTime(e.target.value)} />
-                        </div>
+                        <div className="space-y-2"><Label htmlFor="checkInTime">Check-in Time *</Label><Input id="checkInTime" type="time" value={checkInTime} onChange={e => setCheckInTime(e.target.value)} required /></div>
+                        <div className="space-y-2"><Label htmlFor="checkOutTime">Check-out Time</Label><Input id="checkOutTime" type="time" value={checkOutTime} onChange={e => setCheckOutTime(e.target.value)} /></div>
                     </div>
 
-                        <div className="space-y-2">
+                    <div className="space-y-2">
                         <Label htmlFor="status">Status *</Label>
                         <Select onValueChange={(value) => setStatus(value as any)} value={status} required>
-                            <SelectTrigger id="status">
-                                <SelectValue placeholder="Select status" />
-                            </SelectTrigger>
+                            <SelectTrigger id="status"><SelectValue placeholder="Select status" /></SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="Manual">Manual</SelectItem>
-                                <SelectItem value="On-time">On-time</SelectItem>
-                                <SelectItem value="Late">Late</SelectItem>
-                                <SelectItem value="Absent">Absent</SelectItem>
-                                <SelectItem value="Half-day">Half-day</SelectItem>
+                                <SelectItem value="Manual">Manual</SelectItem><SelectItem value="On-time">On-time</SelectItem><SelectItem value="Late">Late</SelectItem>
+                                <SelectItem value="Absent">Absent</SelectItem><SelectItem value="Half-day">Half-day</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="reason">Reason (Optional)</Label>
-                        <Textarea id="reason" placeholder="e.g., Forgot phone, technical issue, etc." value={reason} onChange={e => setReason(e.target.value)}/>
-                    </div>
+                    <div className="space-y-2"><Label htmlFor="reason">Reason (Optional)</Label><Textarea id="reason" placeholder="e.g., Forgot phone, technical issue, etc." value={reason} onChange={e => setReason(e.target.value)}/></div>
                 </CardContent>
-                <CardContent className="flex justify-center border-t pt-6">
-                        <Button type="submit" size="lg" className="w-full max-w-sm" disabled={loading || employees.length === 0}>
-                        {loading && <Loader2 className="mr-2 animate-spin" />}
-                        <Save className="mr-2"/>
-                        Save Record
+                <CardFooter className="border-t pt-6">
+                    <Button type="submit" className="w-full" disabled={loading || employees.length === 0}>
+                        {loading && <Loader2 className="mr-2 animate-spin" />}<Save className="mr-2"/>Save Record
                     </Button>
-                </CardContent>
-                </form>
+                </CardFooter>
+            </form>
         </Card>
     );
 };
-
-const QrCodeTabs = () => {
-    return (
-        <div className="lg:col-span-2 space-y-6">
-            <Tabs defaultValue="permanent" className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="permanent">Permanent</TabsTrigger>
-                    <TabsTrigger value="advanced">Advanced</TabsTrigger>
-                </TabsList>
-                <TabsContent value="permanent" className="mt-6">
-                    <PermanentQrTab />
-                </TabsContent>
-                <TabsContent value="advanced" className="mt-6">
-                        <AdvancedQrTab />
-                </TabsContent>
-            </Tabs>
-        </div>
-    );
-}
 
 const RecentActivity = () => {
     const [activities, setActivities] = useState<ActivityRecord[]>([]);
@@ -508,12 +364,10 @@ const RecentActivity = () => {
         const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
             if (user) {
                 setAuthUser(user);
-                
                 const employeesRef = collection(db, 'shops', user.uid, 'employees');
                 const empSnapshot = await getDocs(employeesRef);
                 const employeesData = empSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as User));
                 setAllEmployees(employeesData);
-
             } else {
                 setLoading(false);
             }
@@ -523,70 +377,41 @@ const RecentActivity = () => {
 
     useEffect(() => {
         if (!authUser) return;
-        if (allEmployees.length === 0 && authUser) {
-            setLoading(false); 
-            return;
-        }
-
+        if (allEmployees.length === 0 && authUser) { setLoading(false); return; }
         setLoading(true);
         const attendanceRef = collection(db, 'shops', authUser.uid, 'attendance');
         const q = query(attendanceRef, orderBy('checkInTime', 'desc'), limit(5));
-
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const fetchedActivities = snapshot.docs.map(doc => {
                 const data = doc.data() as ActivityRecord;
                 const employee = allEmployees.find(e => e.id === data.userId);
-                return {
-                    ...data,
-                    id: doc.id,
-                    userFallback: employee?.fallback,
-                    userImageUrl: employee?.imageUrl
-                };
+                return { ...data, id: doc.id, userFallback: employee?.fallback, userImageUrl: employee?.imageUrl };
             });
             setActivities(fetchedActivities);
             setLoading(false);
         });
-
         return () => unsubscribe();
     }, [authUser, allEmployees]);
 
     return (
          <Card className="transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                    <Activity className="h-5 w-5" />
-                    Recent Activity
-                </CardTitle>
-                <CardDescription>A live log of the most recent attendance scans.</CardDescription>
-            </CardHeader>
+            <CardHeader><CardTitle className="flex items-center gap-2"><Activity className="h-5 w-5" />Recent Activity</CardTitle><CardDescription>A live log of the most recent attendance scans.</CardDescription></CardHeader>
             <CardContent>
-                {loading ? (
-                    <div className="flex items-center justify-center p-8">
-                        <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                    </div>
-                ) : activities.length > 0 ? (
-                    <div className="space-y-4">
-                        {activities.map((item) => (
-                            <div key={item.id} className="flex items-start gap-4">
-                                <Avatar className="h-9 w-9 border">
-                                    <AvatarImage src={item.userImageUrl} />
-                                    <AvatarFallback>{item.userFallback || '?'}</AvatarFallback>
-                                </Avatar>
-                                <div className="flex-1 text-sm">
-                                    <p>
-                                        <span className="font-semibold">{item.userName}</span>
-                                        {item.checkOutTime ? ' checked out.' : ` checked in (${item.status}).`}
-                                    </p>
-                                    <p className="text-xs text-muted-foreground">
-                                        {formatDistanceToNow(item.checkOutTime?.toDate() || item.checkInTime.toDate(), { addSuffix: true })}
-                                    </p>
+                {loading ? <div className="flex items-center justify-center p-8"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+                    : activities.length > 0 ? (
+                        <div className="space-y-4">
+                            {activities.map((item) => (
+                                <div key={item.id} className="flex items-start gap-4">
+                                    <Avatar className="h-9 w-9 border"><AvatarImage src={item.userImageUrl} /><AvatarFallback>{item.userFallback || '?'}</AvatarFallback></Avatar>
+                                    <div className="flex-1 text-sm">
+                                        <p><span className="font-semibold">{item.userName}</span>{item.checkOutTime ? ' checked out.' : ` checked in (${item.status}).`}</p>
+                                        <p className="text-xs text-muted-foreground">{formatDistanceToNow(item.checkOutTime?.toDate() || item.checkInTime.toDate(), { addSuffix: true })}</p>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
-                ) : (
-                    <p className="text-sm text-muted-foreground text-center py-4">No attendance activity yet.</p>
-                )}
+                            ))}
+                        </div>
+                    ) : <p className="text-sm text-muted-foreground text-center py-4">No attendance activity yet.</p>
+                }
             </CardContent>
         </Card>
     )
@@ -598,59 +423,39 @@ const QrHistory = () => {
     const [authUser, setAuthUser] = useState<AuthUser | null>(null);
 
     useEffect(() => {
-        const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
-            if (user) setAuthUser(user);
-        });
+        const unsubscribeAuth = onAuthStateChanged(auth, (user) => { if (user) setAuthUser(user); });
         return () => unsubscribeAuth();
     }, []);
 
     useEffect(() => {
         if (!authUser) return;
-
         setLoading(true);
         const historyRef = collection(db, 'shops', authUser.uid, 'qr-history');
         const q = query(historyRef, orderBy('generatedAt', 'desc'), limit(5));
-
         const unsubscribe = onSnapshot(q, (snapshot) => {
-            const fetchedHistory = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data(),
-            } as QrHistoryRecord));
+            const fetchedHistory = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as QrHistoryRecord));
             setHistory(fetchedHistory);
             setLoading(false);
         });
-
         return () => unsubscribe();
     }, [authUser]);
 
     return (
         <Card className="transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2"><History className="h-5 w-5" />Generation History</CardTitle>
-                <CardDescription>A log of the most recently generated QR codes.</CardDescription>
-            </CardHeader>
+            <CardHeader><CardTitle className="flex items-center gap-2"><History className="h-5 w-5" />Generation History</CardTitle><CardDescription>A log of the most recently generated QR codes.</CardDescription></CardHeader>
             <CardContent>
-                {loading ? (
-                    <div className="flex items-center justify-center p-8">
-                        <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                    </div>
-                ) : history.length > 0 ? (
-                    <div className="space-y-3">
-                        {history.map(item => (
-                            <div key={item.id} className="flex items-center justify-between text-sm">
-                                <div className="flex items-center gap-2">
-                                   <QrCode className="h-4 w-4 text-muted-foreground" />
-                                    <span className="font-semibold capitalize">{item.type}</span>
+                {loading ? <div className="flex items-center justify-center p-8"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+                    : history.length > 0 ? (
+                        <div className="space-y-3">
+                            {history.map(item => (
+                                <div key={item.id} className="flex items-center justify-between text-sm">
+                                    <div className="flex items-center gap-2"><QrCode className="h-4 w-4 text-muted-foreground" /><span className="font-semibold capitalize">{item.type}</span></div>
+                                    <p className="text-xs text-muted-foreground">{formatDistanceToNow(item.generatedAt.toDate(), { addSuffix: true })}</p>
                                 </div>
-                                <p className="text-xs text-muted-foreground">
-                                    {formatDistanceToNow(item.generatedAt.toDate(), { addSuffix: true })}
-                                </p>
-                            </div>
-                        ))}
-                    </div>
-                ) : (
-                    <p className="text-sm text-muted-foreground text-center py-4">No QR codes generated yet.</p>
-                )}
+                            ))}
+                        </div>
+                    ) : <p className="text-sm text-muted-foreground text-center py-4">No QR codes generated yet.</p>
+                }
             </CardContent>
         </Card>
     );
@@ -664,24 +469,16 @@ export default function GenerateAndEntryPage() {
         <h1 className="text-3xl font-bold tracking-tight">QR & Manual Entry</h1>
         <p className="text-muted-foreground">Generate QR codes for attendance or manually enter records.</p>
        </div>
-        <Tabs defaultValue="generate" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 md:max-w-md">
-                <TabsTrigger value="generate">QR Code</TabsTrigger>
-                <TabsTrigger value="manual">Manual Entry</TabsTrigger>
-            </TabsList>
-            <TabsContent value="generate" className="mt-6">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-                    <QrCodeTabs />
-                    <div className="space-y-8">
-                        <RecentActivity />
-                        <QrHistory />
-                    </div>
-                </div>
-            </TabsContent>
-            <TabsContent value="manual" className="mt-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            <div className="lg:col-span-2 space-y-8">
+                <QrGeneratorCard />
                 <ManualEntryTab />
-            </TabsContent>
-        </Tabs>
+            </div>
+            <div className="space-y-8 lg:col-span-1">
+                <RecentActivity />
+                <QrHistory />
+            </div>
+        </div>
     </div>
   );
 }
