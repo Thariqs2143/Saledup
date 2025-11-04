@@ -521,7 +521,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="flex flex-col gap-6 lg:gap-8">
-       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
                 Good Morning, {ownerProfile?.name?.split(' ')[0] || 'Shop Owner'}!
