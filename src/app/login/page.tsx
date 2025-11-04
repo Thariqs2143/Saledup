@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useRef } from "react";
@@ -21,8 +22,8 @@ export default function LoginPage() {
     const recaptchaContainerRef = useRef<HTMLDivElement>(null);
 
      useEffect(() => {
-        if (typeof window !== 'undefined' && !window.recaptchaVerifier && recaptchaContainerRef.current) {
-            window.recaptchaVerifier = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
+        if (typeof window !== 'undefined' && !(window as any).recaptchaVerifier && recaptchaContainerRef.current) {
+            (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
                 'size': 'invisible',
                 'callback': (response: any) => {},
             });
@@ -92,7 +93,7 @@ export default function LoginPage() {
                     />
                 </div>
 
-                <div className="text-left mb-10">
+                <div className="text-center mb-10">
                     <h1 className="text-3xl font-bold tracking-tight">India's #1 QR Powered Staff Attendance App</h1>
                     <div className="flex items-center my-4">
                         <hr className="w-full border-muted-foreground/20"/>
