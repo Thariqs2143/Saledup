@@ -272,7 +272,7 @@ export default function AdminLoginPage() {
             </div>
 
             <Link href="/employee/login" className="w-full">
-                <Button variant="outline" className="w-full">
+                <Button variant="outline" className="w-full border-primary text-primary hover:bg-primary/5">
                     Login as Employee
                 </Button>
             </Link>
