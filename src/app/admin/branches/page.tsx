@@ -1,11 +1,11 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, ArrowLeft, Store, Edit, Trash2, Building } from 'lucide-react';
+import { Loader2, ArrowLeft, Store, Edit, Trash2, Building, Search } from 'lucide-react';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { collection, query, where, onSnapshot, doc, deleteDoc } from 'firebase/firestore';
@@ -22,6 +22,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Input } from '@/components/ui/input';
 
 
 type Branch = {
@@ -38,6 +39,7 @@ export default function ManageBranchesPage() {
   const [branches, setBranches] = useState<Branch[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
 
   useEffect(() => {
@@ -88,6 +90,13 @@ export default function ManageBranchesPage() {
     }
   };
 
+  const filteredBranches = useMemo(() => {
+    return branches.filter(branch => 
+      branch.shopName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      branch.address.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [branches, searchTerm]);
+
 
   return (
     <div className="space-y-8">
@@ -97,9 +106,15 @@ export default function ManageBranchesPage() {
                     <ArrowLeft className="h-4 w-4" />
                 </Button>
             </Link>
-            <div>
-                <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Manage Branches</h1>
-                <p className="text-muted-foreground">View, edit, or delete your business locations.</p>
+            <div className="relative w-full">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Search branches by name or address..."
+                className="w-full rounded-lg bg-background pl-8"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
             </div>
         </div>
 
@@ -107,14 +122,16 @@ export default function ManageBranchesPage() {
              <div className="flex items-center justify-center h-48">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
-        ) : branches.length === 0 ? (
+        ) : filteredBranches.length === 0 ? (
             <Card className="text-center py-12">
                 <CardHeader>
                     <div className="mx-auto bg-muted rounded-full p-3 w-fit">
                         <Building className="h-10 w-10 text-muted-foreground"/>
                     </div>
-                    <CardTitle>No Branches Found</CardTitle>
-                    <CardDescription>You haven't added any additional branches yet.</CardDescription>
+                    <CardTitle>{searchTerm ? 'No Branches Found' : 'No Branches Added'}</CardTitle>
+                    <CardDescription>
+                      {searchTerm ? `Your search for "${searchTerm}" did not match any branches.` : "You haven't added any additional branches yet."}
+                    </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Link href="/admin/add-branch">
@@ -127,7 +144,7 @@ export default function ManageBranchesPage() {
             </Card>
         ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {branches.map(branch => {
+                {filteredBranches.map(branch => {
                     const isMainBranch = authUser?.uid === branch.id;
                     return (
                         <Card key={branch.id} className="flex flex-col transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
