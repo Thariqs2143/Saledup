@@ -15,7 +15,8 @@ import { doc, getDoc } from "firebase/firestore";
 
 declare global {
   interface Window {
-    recaptchaVerifier: RecaptchaVerifier;
+    recaptchaVerifier?: RecaptchaVerifier;
+    confirmationResult?: ConfirmationResult;
   }
 }
 
@@ -33,25 +34,30 @@ export default function AdminLoginPage() {
 
     useEffect(() => {
         const phoneFromQuery = searchParams.get('phone');
-        if (phoneFromQuery) {
-            setPhone(phoneFromQuery);
-            handleGetOtp(phoneFromQuery);
-        } else {
+        if (!phoneFromQuery) {
             router.push('/login');
+            return;
         }
+        setPhone(phoneFromQuery);
+        
+        if (!window.recaptchaVerifier && recaptchaContainerRef.current) {
+            console.log("Initializing reCAPTCHA...");
+            const verifier = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
+                'size': 'invisible',
+                'callback': (response: any) => {
+                    console.log("reCAPTCHA solved");
+                },
+            });
+            window.recaptchaVerifier = verifier;
+            handleGetOtp(phoneFromQuery, verifier);
+        } else if (window.recaptchaVerifier) {
+            handleGetOtp(phoneFromQuery, window.recaptchaVerifier);
+        }
+        
     }, [searchParams, router]);
 
-    useEffect(() => {
-        if (!window.recaptchaVerifier && recaptchaContainerRef.current) {
-            window.recaptchaVerifier = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
-                'size': 'invisible',
-                'callback': (response: any) => {},
-            });
-        }
-    }, []);
 
-
-    const handleGetOtp = async (phoneNum: string) => {
+    const handleGetOtp = async (phoneNum: string, appVerifier: RecaptchaVerifier) => {
         if (!/^\d{10}$/.test(phoneNum)) {
             toast({ title: "Error", description: "Invalid phone number.", variant: "destructive" });
             return;
@@ -60,11 +66,6 @@ export default function AdminLoginPage() {
         
         try {
             const phoneNumber = `+91${phoneNum}`;
-            const appVerifier = window.recaptchaVerifier;
-            if (!appVerifier) {
-                throw new Error("reCAPTCHA not initialized");
-            }
-            
             const result = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
             setConfirmationResult(result);
             toast({ title: "OTP Sent!", description: `An OTP has been sent to ${phoneNumber}.` });
