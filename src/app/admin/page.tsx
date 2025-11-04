@@ -14,7 +14,7 @@ import type { User, LeaveRequest } from "./employees/page";
 import { subDays, startOfDay, formatDistanceToNow, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear } from 'date-fns';
 import { AttendanceChart, type ChartData } from '@/components/attendance-chart';
 import { onAuthStateChanged, type User as AuthUser } from 'firebase/auth';
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from '@/hooks/use-toast';
 import { generateWeeklyBriefing } from "@/lib/insights";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList }from "@/components/ui/command";
@@ -528,7 +528,7 @@ export default function AdminDashboard() {
             </h1>
             <p className="text-muted-foreground">Here's a quick overview of your attendance.</p>
            </div>
-           <Tabs value={statFilter} onValueChange={(value) => setStatFilter(value as StatFilter)}>
+           <Tabs value={statFilter} onValueChange={(value) => setStatFilter(value as StatFilter)} className="w-full lg:w-auto">
             <TabsList className="grid w-full grid-cols-4 border-2 border-foreground/30 dark:border-foreground/30">
                 <TabsTrigger value="today">Today</TabsTrigger>
                 <TabsTrigger value="week">Weekly</TabsTrigger>
@@ -830,3 +830,4 @@ export default function AdminDashboard() {
       </div>
     </div>
   );
+}
