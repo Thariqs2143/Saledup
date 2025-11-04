@@ -63,7 +63,7 @@ export default function AdminLoginPage() {
         const timeoutId = setTimeout(setupRecaptcha, 100);
 
         return () => clearTimeout(timeoutId);
-    }, [searchParams, router, toast]); // Added toast to dependency array
+    }, [searchParams, router, toast]);
 
 
     const handleGetOtp = async (phoneNum: string, appVerifier: RecaptchaVerifier) => {
@@ -99,14 +99,6 @@ export default function AdminLoginPage() {
         
         const phoneLookupRef = doc(db, "employee_phone_to_shop_lookup", phoneNumber);
         const phoneLookupSnap = await getDoc(phoneLookupRef);
-        
-        if (phoneLookupSnap.exists() && phoneLookupSnap.data()?.isNewUser) {
-             localStorage.setItem('adminUID', user.uid);
-             localStorage.setItem('adminPhone', phoneNumber);
-             toast({ title: "Welcome!", description: "Please complete your shop profile." });
-             router.push('/admin/complete-profile');
-             return;
-        }
         
         if (!phoneLookupSnap.exists() || !phoneLookupSnap.data()?.isAdmin) {
              toast({ title: "Access Denied", description: "User is not registered as a shop owner.", variant: "destructive" });
@@ -208,17 +200,17 @@ export default function AdminLoginPage() {
        {/* RIGHT SIDE - Form Section */}
       <div className="flex flex-col items-center justify-center py-12 md:py-0 px-4 md:px-12">
            {/* TOP IMAGE for Mobile */}
-            <div className="md:hidden w-full relative mb-8">
+            <div className="md:hidden w-screen relative -mt-12 -mx-4">
                 <Image
                 src="https://res.cloudinary.com/dnkghymx5/image/upload/v1762241011/Generated_Image_November_04_2025_-_12_50PM_1_hslend.png"
                 alt="Attendry illustration"
                 width={800}
                 height={600}
-                className="w-full h-auto object-contain"
+                className="w-full h-auto object-cover"
                 priority
                 />
             </div>
-          <div className="w-full max-w-sm text-center">
+          <div className="w-full max-w-sm text-center pt-8">
             <h1 className="text-3xl font-bold">Shop Owner Verification</h1>
             <p className="text-muted-foreground mt-2 mb-8">
                 Enter the OTP sent to +91 {phone}.

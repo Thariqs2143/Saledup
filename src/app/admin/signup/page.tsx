@@ -176,16 +176,17 @@ export default function AdminSignupPage() {
         {/* RIGHT SIDE - Form Section */}
         <div className="flex flex-col items-center justify-center px-4 md:px-12 py-10 md:py-12">
             {/* TOP IMAGE for Mobile */}
-            <div className="md:hidden w-full h-[40vh] relative mb-8">
+            <div className="md:hidden w-screen relative -mt-10 -mx-4">
                 <Image
                 src="https://res.cloudinary.com/dnkghymx5/image/upload/v1762241011/Generated_Image_November_04_2025_-_12_50PM_1_hslend.png"
                 alt="Attendry illustration"
-                fill
-                className="object-contain"
+                width={800}
+                height={600}
+                className="w-full h-auto object-cover"
                 priority
                 />
             </div>
-            <div className="w-full max-w-sm text-center">
+            <div className="w-full max-w-sm text-center pt-8">
                 <div className="flex justify-center mb-6">
                     <div className="p-4 bg-primary/10 rounded-full">
                         <UserPlus className="h-12 w-12 text-primary"/>
