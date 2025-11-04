@@ -1,3 +1,4 @@
+
 'use client';
 import { useRouter, usePathname } from 'next/navigation';
 import {
@@ -21,6 +22,7 @@ import { useToast } from '@/hooks/use-toast';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { useMemo } from 'react';
+import type { User as AppUser } from '@/app/admin/employees/page';
 
 const iconMap: { [key: string]: any } = {
   LayoutDashboard,
@@ -35,9 +37,10 @@ const iconMap: { [key: string]: any } = {
 
 type AdminNavProps = {
   navItems: NavItem[];
+  profile: Partial<AppUser & { shopName?: string }>;
 };
 
-export function AdminNav({ navItems }: AdminNavProps) {
+export function AdminNav({ navItems, profile }: AdminNavProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { toast } = useToast();
@@ -56,7 +59,6 @@ export function AdminNav({ navItems }: AdminNavProps) {
     }
   };
 
-  // Compute active path similar to your Saledin code
   const activePath = useMemo(() => {
     const matches = navItems.filter((item) => pathname.startsWith(item.href));
     if (matches.length === 0) return null;
@@ -68,9 +70,9 @@ export function AdminNav({ navItems }: AdminNavProps) {
   return (
     <div
       className="
-        fixed left-0 top-0 h-screen w-64 
+        hidden md:flex fixed left-0 top-0 h-screen w-64 
         border-r bg-background 
-        flex flex-col
+        flex-col
       "
     >
       {/* Header / Logo */}
@@ -115,15 +117,15 @@ export function AdminNav({ navItems }: AdminNavProps) {
         <Link href="/admin/settings">
           <div className="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-muted">
             <Avatar className="h-10 w-10 border-2 border-primary">
-              <AvatarImage src={''} />
-              <AvatarFallback>SO</AvatarFallback>
+              <AvatarImage src={profile?.imageUrl} />
+              <AvatarFallback>{profile?.fallback || 'SO'}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col overflow-hidden">
               <span className="text-sm font-bold text-foreground truncate">
-                Shop Owner
+                {profile?.name || 'Shop Owner'}
               </span>
               <span className="text-xs text-muted-foreground truncate">
-                My Business
+                {profile?.shopName || 'My Business'}
               </span>
             </div>
           </div>

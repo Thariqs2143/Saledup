@@ -1,13 +1,19 @@
+
 'use client';
 
 import type { PropsWithChildren } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { BottomNav, type NavItem } from '@/components/bottom-nav';
 import Link from 'next/link';
 import { AdminNav } from '@/components/admin-nav';
-import { Bell } from 'lucide-react';
+import { Bell, Loader2 } from 'lucide-react';
 import { InstallPWA } from '@/components/install-pwa';
 import { Button } from '@/components/ui/button';
+import { useEffect, useState } from 'react';
+import { onAuthStateChanged, type User as AuthUser } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { auth, db } from '@/lib/firebase';
+import type { User as AppUser } from './employees/page';
 
 const adminNavItems: NavItem[] = [
   { href: '/admin', label: 'Home', iconName: 'LayoutDashboard' },
@@ -17,8 +23,19 @@ const adminNavItems: NavItem[] = [
   { href: '/admin/settings', label: 'Profile', iconName: 'User' },
 ];
 
+type ShopProfile = {
+  shopName?: string;
+  fallback?: string;
+}
+
+type FullProfile = AppUser & ShopProfile;
+
+
 export default function AdminLayout({ children }: PropsWithChildren) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [profile, setProfile] = useState<Partial<FullProfile>>({});
+  const [loading, setLoading] = useState(true);
 
   if (
     pathname === '/login' ||
@@ -29,11 +46,48 @@ export default function AdminLayout({ children }: PropsWithChildren) {
   ) {
     return <>{children}</>;
   }
+  
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          const userDocRef = doc(db, 'users', user.uid);
+          const shopDocRef = doc(db, 'shops', user.uid);
+
+          const [userSnap, shopSnap] = await Promise.all([
+            getDoc(userDocRef),
+            getDoc(shopDocRef)
+          ]);
+
+          const userData = userSnap.exists() ? userSnap.data() : {};
+          const shopData = shopSnap.exists() ? shopSnap.data() : {};
+          
+          setProfile({ ...userData, ...shopData });
+
+        } catch (error) {
+          console.error("Failed to fetch admin profile", error);
+        }
+      } else {
+        router.replace('/login');
+      }
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, [router]);
+  
+  if(loading){
+    return (
+      <div className="flex min-h-screen w-full items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
 
   return (
     <div className="flex min-h-screen w-full">
       {/* Sidebar (fixed) */}
-      <AdminNav navItems={adminNavItems} />
+      <AdminNav navItems={adminNavItems} profile={profile} />
 
       {/* Main Content Area */}
       <div className="flex flex-col flex-1 md:ml-64">
