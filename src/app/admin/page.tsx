@@ -11,7 +11,7 @@ import { useEffect, useState, useMemo, useCallback } from "react";
 import { collection, onSnapshot, query, where, Timestamp, orderBy, limit, updateDoc, doc, getDocs, collectionGroup } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
 import type { User, LeaveRequest } from "./employees/page";
-import { subDays, startOfDay, formatDistanceToNow, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
+import { subDays, startOfDay, formatDistanceToNow, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear } from 'date-fns';
 import { AttendanceChart, type ChartData } from '@/components/attendance-chart';
 import { onAuthStateChanged, type User as AuthUser } from 'firebase/auth';
 import { useToast } from "@/hooks/use-toast";
@@ -56,7 +56,7 @@ type Branch = {
     businessType?: string;
 };
 
-type StatFilter = 'today' | 'week' | 'month';
+type StatFilter = 'today' | 'week' | 'month' | 'year';
 
 const chartColors = ['hsl(var(--primary))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))'];
 
@@ -441,6 +441,10 @@ export default function AdminDashboard() {
         start = startOfMonth(now);
         end = endOfMonth(now);
         break;
+      case 'year':
+        start = startOfYear(now);
+        end = endOfYear(now);
+        break;
       case 'today':
       default:
         start = startOfDay(now);
@@ -522,13 +526,14 @@ export default function AdminDashboard() {
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
                 Good Morning, {ownerProfile?.name?.split(' ')[0] || 'Shop Owner'}!
             </h1>
-            <p className="text-muted-foreground">Here's a quick overview of your attendance today.</p>
+            <p className="text-muted-foreground">Here's a quick overview of your attendance.</p>
            </div>
            <Tabs value={statFilter} onValueChange={(value) => setStatFilter(value as StatFilter)}>
-            <TabsList>
+            <TabsList className="border-2 border-foreground/10 dark:border-foreground/30">
                 <TabsTrigger value="today">Today</TabsTrigger>
                 <TabsTrigger value="week">This Week</TabsTrigger>
                 <TabsTrigger value="month">This Month</TabsTrigger>
+                <TabsTrigger value="year">This Year</TabsTrigger>
             </TabsList>
            </Tabs>
        </div>
@@ -587,7 +592,7 @@ export default function AdminDashboard() {
         </Card>
       </div>
 
-        <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/30 dark:border-foreground hover:border-primary">
+        <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
             <CardHeader>
                 <CardTitle>Branch Management</CardTitle>
                 <CardDescription>Select a branch to view its dashboard or add a new one.</CardDescription>
@@ -782,25 +787,25 @@ export default function AdminDashboard() {
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-4">
                 <Link href="/admin/employees/add">
-                    <Card className="h-full flex flex-col items-center justify-center p-4 gap-2 transition-all hover:shadow-md hover:border-primary border-2 border-foreground/30 dark:border-foreground">
+                    <Card className="h-full flex flex-col items-center justify-center p-4 gap-2 transition-all hover:shadow-md hover:border-primary border-2 border-foreground">
                         <UserPlus className="h-6 w-6 text-primary"/>
                         <span className="text-center text-sm font-medium">Invite Employee</span>
                     </Card>
                 </Link>
                  <Link href="/admin/generate-qr#manual-entry">
-                    <Card className="h-full flex flex-col items-center justify-center p-4 gap-2 transition-all hover:shadow-md hover:border-primary border-2 border-foreground/30 dark:border-foreground">
+                    <Card className="h-full flex flex-col items-center justify-center p-4 gap-2 transition-all hover:shadow-md hover:border-primary border-2 border-foreground">
                         <QrCode className="h-6 w-6 text-primary"/>
                         <span className="text-center text-sm font-medium">Manual Entry</span>
                     </Card>
                 </Link>
                  <Link href="/admin/employees">
-                     <Card className="h-full flex flex-col items-center justify-center p-4 gap-2 transition-all hover:shadow-md hover:border-primary border-2 border-foreground/30 dark:border-foreground">
+                     <Card className="h-full flex flex-col items-center justify-center p-4 gap-2 transition-all hover:shadow-md hover:border-primary border-2 border-foreground">
                         <Users className="h-6 w-6 text-primary"/>
                         <span className="text-center text-sm font-medium">View Staff</span>
                     </Card>
                 </Link>
                  <Link href="/admin/report">
-                     <Card className="h-full flex flex-col items-center justify-center p-4 gap-2 transition-all hover:shadow-md hover:border-primary border-2 border-foreground/30 dark:border-foreground">
+                     <Card className="h-full flex flex-col items-center justify-center p-4 gap-2 transition-all hover:shadow-md hover:border-primary border-2 border-foreground">
                         <BarChart3 className="h-6 w-6 text-primary"/>
                         <span className="text-center text-sm font-medium">Full Reports</span>
                     </Card>
