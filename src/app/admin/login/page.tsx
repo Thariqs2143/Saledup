@@ -5,13 +5,13 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Shield, Loader2 } from "lucide-react";
-import Link from "next/link";
+import { Loader2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { RecaptchaVerifier, signInWithPhoneNumber, type ConfirmationResult, type User as AuthUser } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import { doc, getDoc } from "firebase/firestore";
+import Image from "next/image";
 
 declare global {
   interface Window {
@@ -33,27 +33,32 @@ export default function AdminLoginPage() {
     const recaptchaContainerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        const phoneFromQuery = searchParams.get('phone');
-        if (!phoneFromQuery) {
-            router.push('/login');
-            return;
-        }
-        setPhone(phoneFromQuery);
-        
+      const phoneFromQuery = searchParams.get('phone');
+      if (!phoneFromQuery) {
+        router.push('/login');
+        return;
+      }
+      setPhone(phoneFromQuery);
+    
+      const setupRecaptcha = () => {
         if (!window.recaptchaVerifier && recaptchaContainerRef.current) {
-            console.log("Initializing reCAPTCHA...");
-            const verifier = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
-                'size': 'invisible',
-                'callback': (response: any) => {
-                    console.log("reCAPTCHA solved");
-                },
-            });
-            window.recaptchaVerifier = verifier;
-            handleGetOtp(phoneFromQuery, verifier);
+          const verifier = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
+            'size': 'invisible',
+            'callback': () => {},
+          });
+          window.recaptchaVerifier = verifier;
+          handleGetOtp(phoneFromQuery, verifier);
         } else if (window.recaptchaVerifier) {
-            handleGetOtp(phoneFromQuery, window.recaptchaVerifier);
+          handleGetOtp(phoneFromQuery, window.recaptchaVerifier);
         }
-        
+      };
+
+      if (document.readyState === 'complete') {
+        setupRecaptcha();
+      } else {
+        window.addEventListener('load', setupRecaptcha);
+        return () => window.removeEventListener('load', setupRecaptcha);
+      }
     }, [searchParams, router]);
 
 
@@ -94,6 +99,7 @@ export default function AdminLoginPage() {
         if (!phoneLookupSnap.exists() || !phoneLookupSnap.data()?.isAdmin) {
              toast({ title: "Access Denied", description: "User is not registered as a shop owner.", variant: "destructive" });
              await auth.signOut();
+             router.push('/login');
              return;
         }
 
@@ -174,47 +180,66 @@ export default function AdminLoginPage() {
     }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-start bg-background p-4 pt-20 sm:pt-28">
+    <div className="min-h-screen bg-background md:grid md:grid-cols-2">
       <div ref={recaptchaContainerRef}></div>
-      <div className="w-full max-w-sm text-center">
-        <div className="flex justify-center mb-6">
-            <div className="p-4 bg-primary/10 rounded-full">
-                <Shield className="h-12 w-12 text-primary"/>
-            </div>
-        </div>
-        <h1 className="text-3xl font-bold">Shop Owner Login</h1>
-        <p className="text-muted-foreground mt-2 mb-8">
-            Enter the OTP sent to +91 {phone}.
-        </p>
+      {/* LEFT SIDE - Desktop Image */}
+      <div className="relative hidden md:block">
+          <Image
+          src="https://res.cloudinary.com/dnkghymx5/image/upload/v1762241011/Generated_Image_November_04_2025_-_12_50PM_1_hslend.png"
+          alt="Attendry illustration"
+          fill
+          className="object-cover"
+          priority
+          />
+      </div>
 
-        <form className="space-y-6 text-left" onSubmit={handleLogin}>
-            <div className="space-y-2">
-                <Label>One-Time Password</Label>
-                <div className="flex justify-center gap-2" onPaste={handlePaste}>
-                    {otp.map((digit, index) => (
-                        <Input
-                            key={index}
-                            ref={el => otpInputsRef.current[index] = el!}
-                            type="text"
-                            inputMode="numeric"
-                            maxLength={1}
-                            value={digit}
-                            onChange={(e) => handleOtpChange(index, e.target.value)}
-                            onKeyDown={(e) => handleKeyDown(index, e)}
-                            className="w-12 h-14 text-center text-2xl font-semibold rounded-lg"
-                            required
-                        />
-                    ))}
-                </div>
+       {/* RIGHT SIDE - Form Section */}
+      <div className="flex flex-col items-center justify-center px-4 md:px-12 py-10 md:py-12">
+           {/* TOP IMAGE for Mobile */}
+            <div className="md:hidden w-full h-[40vh] relative mb-8">
+                <Image
+                src="https://res.cloudinary.com/dnkghymx5/image/upload/v1762241011/Generated_Image_November_04_2025_-_12_50PM_1_hslend.png"
+                alt="Attendry illustration"
+                fill
+                className="object-contain"
+                priority
+                />
             </div>
-            <Button type="button" variant="link" size="sm" className="p-0 h-auto" onClick={() => router.push('/login')}>
-                Use a different phone number
-            </Button>
-            <Button type="submit" className="w-full !mt-8" disabled={loading}>
-                 {loading && <Loader2 className="mr-2 animate-spin" />}
-                 Verify OTP & Login
-            </Button>
-        </form>
+          <div className="w-full max-w-sm text-center">
+            <h1 className="text-3xl font-bold">Shop Owner Verification</h1>
+            <p className="text-muted-foreground mt-2 mb-8">
+                Enter the OTP sent to +91 {phone}.
+            </p>
+
+            <form className="space-y-6 text-left" onSubmit={handleLogin}>
+                <div className="space-y-2">
+                    <Label>One-Time Password</Label>
+                    <div className="flex justify-center gap-2" onPaste={handlePaste}>
+                        {otp.map((digit, index) => (
+                            <Input
+                                key={index}
+                                ref={el => otpInputsRef.current[index] = el!}
+                                type="text"
+                                inputMode="numeric"
+                                maxLength={1}
+                                value={digit}
+                                onChange={(e) => handleOtpChange(index, e.target.value)}
+                                onKeyDown={(e) => handleKeyDown(index, e)}
+                                className="w-12 h-14 text-center text-2xl font-semibold rounded-lg"
+                                required
+                            />
+                        ))}
+                    </div>
+                </div>
+                <Button type="button" variant="link" size="sm" className="p-0 h-auto" onClick={() => router.push('/login')}>
+                    Use a different phone number
+                </Button>
+                <Button type="submit" className="w-full !mt-8" disabled={loading}>
+                    {loading && <Loader2 className="mr-2 animate-spin" />}
+                    Verify OTP & Login
+                </Button>
+            </form>
+          </div>
       </div>
     </div>
   );
