@@ -490,13 +490,13 @@ export default function ManageEmployeesPage() {
 
   return (
     <div className="flex flex-col gap-6">
-        <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
+        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
             <div className="hidden md:block">
                 <h1 className="text-3xl font-bold tracking-tight">Employees & Leave</h1>
                 <p className="text-muted-foreground">Manage your employees and their leave requests by branch.</p>
             </div>
             
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full md:w-auto">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full lg:w-auto">
                 <TabsList className="grid w-full grid-cols-2 bg-primary text-primary-foreground p-1 h-auto rounded-lg md:max-w-xs">
                     <TabsTrigger value="employees" className="data-[state=active]:bg-background data-[state=active]:text-foreground rounded-md py-2 transition-all duration-300">All Employees</TabsTrigger>
                     <TabsTrigger value="leave" className="data-[state=active]:bg-background data-[state=active]:text-foreground rounded-md py-2 transition-all duration-300">Leave Requests</TabsTrigger>
