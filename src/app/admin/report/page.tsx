@@ -395,47 +395,51 @@ const PayrollReportTab = ({ shopData, authUser }: { shopData: ShopData, authUser
     return (
         <div className="space-y-6">
             <div className="p-6 rounded-lg border-2 border-foreground hover:border-primary transition-all duration-300 ease-out">
-                <h3 className="text-2xl font-semibold leading-none tracking-tight">Generate Payroll</h3>
-                <p className="text-sm text-muted-foreground mt-2">Select a month to calculate salaries for all employees based on their base pay and leave.</p>
-                <div className="mt-4 flex flex-col sm:flex-row items-center gap-4">
-                    <div className="space-y-2 w-full">
-                        <Label>Select Year</Label>
-                        <Select
-                            value={String(selectedDate.getFullYear())}
-                            onValueChange={(year) => setSelectedDate(setYear(selectedDate, parseInt(year)))}
-                        >
-                            <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Select Year" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {[...Array(5)].map((_, i) => (
-                                    <SelectItem key={i} value={String(new Date().getFullYear() - i)}>
-                                        {new Date().getFullYear() - i}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
+                    <div className="flex-1">
+                        <h3 className="text-2xl font-semibold leading-none tracking-tight">Generate Payroll</h3>
+                        <p className="text-sm text-muted-foreground mt-2">Select a month to calculate salaries for all employees based on their base pay and leave.</p>
                     </div>
-                    <div className="space-y-2 w-full">
-                        <Label>Select Month</Label>
-                        <Select
-                            value={String(selectedDate.getMonth())}
-                            onValueChange={(month) => setSelectedDate(setMonth(selectedDate, parseInt(month)))}
-                        >
-                             <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Select Month" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {[...Array(12)].map((_, i) => (
-                                    <SelectItem key={i} value={String(i)}>{format(setMonth(new Date(), i), 'MMMM')}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                    <div className="flex flex-col sm:flex-row w-full md:w-auto items-center gap-4">
+                        <div className="space-y-2 w-full flex-1">
+                            <Label>Year</Label>
+                            <Select
+                                value={String(selectedDate.getFullYear())}
+                                onValueChange={(year) => setSelectedDate(setYear(selectedDate, parseInt(year)))}
+                            >
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Select Year" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {[...Array(5)].map((_, i) => (
+                                        <SelectItem key={i} value={String(new Date().getFullYear() - i)}>
+                                            {new Date().getFullYear() - i}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2 w-full flex-1">
+                            <Label>Month</Label>
+                            <Select
+                                value={String(selectedDate.getMonth())}
+                                onValueChange={(month) => setSelectedDate(setMonth(selectedDate, parseInt(month)))}
+                            >
+                                 <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Select Month" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {[...Array(12)].map((_, i) => (
+                                        <SelectItem key={i} value={String(i)}>{format(setMonth(new Date(), i), 'MMMM')}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <Button onClick={handleGeneratePayroll} disabled={loading} className="w-full md:w-auto mt-auto">
+                            {loading ? <Loader2 className="mr-2 animate-spin"/> : <Calculator className="mr-2"/>}
+                            Generate
+                        </Button>
                     </div>
-                    <Button onClick={handleGeneratePayroll} disabled={loading} className="w-full mt-auto">
-                        {loading ? <Loader2 className="mr-2 animate-spin"/> : <Calculator className="mr-2"/>}
-                        Generate Report
-                    </Button>
                 </div>
             </div>
             <div className="p-6 rounded-lg border-2 border-foreground hover:border-primary transition-all duration-300 ease-out">
@@ -674,47 +678,51 @@ const MusterRollTab = ({ authUser }: { authUser: AuthUser }) => {
     return (
         <div className="space-y-6">
             <div className="p-6 rounded-lg border-2 border-foreground hover:border-primary transition-all duration-300 ease-out">
-                <h3 className="text-2xl font-semibold leading-none tracking-tight">Generate Muster Roll</h3>
-                <p className="text-sm text-muted-foreground mt-2">Select a month to generate a classic attendance muster grid for all active employees.</p>
-                 <div className="mt-4 flex flex-col gap-4">
-                     <div className="space-y-2 w-full">
-                        <Label>Select Year</Label>
-                        <Select
-                            value={String(selectedDate.getFullYear())}
-                            onValueChange={(year) => setSelectedDate(setYear(selectedDate, parseInt(year)))}
-                        >
-                            <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Select Year" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {[...Array(5)].map((_, i) => (
-                                    <SelectItem key={i} value={String(new Date().getFullYear() - i)}>
-                                        {new Date().getFullYear() - i}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
+                    <div className="flex-1">
+                        <h3 className="text-2xl font-semibold leading-none tracking-tight">Generate Muster Roll</h3>
+                        <p className="text-sm text-muted-foreground mt-2">Select a month to generate a classic attendance muster grid for all active employees.</p>
                     </div>
-                    <div className="space-y-2 w-full">
-                        <Label>Select Month</Label>
-                        <Select
-                            value={String(selectedDate.getMonth())}
-                            onValueChange={(month) => setSelectedDate(setMonth(selectedDate, parseInt(month)))}
-                        >
-                             <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Select Month" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {[...Array(12)].map((_, i) => (
-                                    <SelectItem key={i} value={String(i)}>{format(setMonth(new Date(), i), 'MMMM')}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                    <div className="flex flex-col sm:flex-row w-full md:w-auto items-center gap-4">
+                        <div className="space-y-2 w-full flex-1">
+                            <Label>Year</Label>
+                            <Select
+                                value={String(selectedDate.getFullYear())}
+                                onValueChange={(year) => setSelectedDate(setYear(selectedDate, parseInt(year)))}
+                            >
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Select Year" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {[...Array(5)].map((_, i) => (
+                                        <SelectItem key={i} value={String(new Date().getFullYear() - i)}>
+                                            {new Date().getFullYear() - i}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2 w-full flex-1">
+                            <Label>Month</Label>
+                            <Select
+                                value={String(selectedDate.getMonth())}
+                                onValueChange={(month) => setSelectedDate(setMonth(selectedDate, parseInt(month)))}
+                            >
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Select Month" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {[...Array(12)].map((_, i) => (
+                                        <SelectItem key={i} value={String(i)}>{format(setMonth(new Date(), i), 'MMMM')}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <Button onClick={handleGenerateMuster} disabled={loading} className="w-full md:w-auto mt-auto">
+                            {loading ? <Loader2 className="mr-2 animate-spin"/> : <Users className="mr-2"/>}
+                            Generate
+                        </Button>
                     </div>
-                    <Button onClick={handleGenerateMuster} disabled={loading} className="w-full">
-                        {loading ? <Loader2 className="mr-2 animate-spin"/> : <Users className="mr-2"/>}
-                        Generate Muster
-                    </Button>
                 </div>
             </div>
             <div className="p-6 rounded-lg border-2 border-foreground hover:border-primary transition-all duration-300 ease-out">
@@ -899,103 +907,94 @@ export default function ReportsPage() {
     return (
         <div className="space-y-6">
             <Tabs defaultValue="attendance" className="w-full">
-                <div className="flex flex-col md:flex-row md:justify-between md:items-start">
-                    <div className="md:hidden">
-                        <TabsList className="mb-6 h-auto items-center justify-center rounded-md p-1 grid w-full grid-cols-3 bg-primary text-primary-foreground">
-                            <TabsTrigger value="attendance" className="data-[state=active]:bg-background data-[state=active]:text-foreground whitespace-normal h-12 text-xs">Attendance</TabsTrigger>
-                            <TabsTrigger value="muster" className="data-[state=active]:bg-background data-[state=active]:text-foreground whitespace-normal h-12 text-xs">Muster Roll</TabsTrigger>
-                            <TabsTrigger value="payroll" className="data-[state=active]:bg-background data-[state=active]:text-foreground whitespace-normal h-12 text-xs" disabled={selectedBranch.id === 'all'}>Payroll</TabsTrigger>
-                        </TabsList>
-                        <div className="flex items-center gap-4">
-                            <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
-                                <DialogTrigger asChild>
-                                    <Button variant="outline" className="w-full justify-between flex-1">
-                                        <Building className="mr-2 h-4 w-4" />
-                                        <span className="truncate">{selectedBranch ? selectedBranch.shopName : "Select a branch..."}</span>
-                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                    </Button>
-                                </DialogTrigger>
-                                <DialogContent>
-                                    <DialogHeader><DialogTitle>Select Branch</DialogTitle></DialogHeader>
-                                    <BranchSelector 
-                                        open={openBranchSelector}
-                                        onOpenChange={setOpenBranchSelector}
-                                        selectedBranch={selectedBranch}
-                                        branches={allBranches}
-                                        setSelectedBranch={setSelectedBranch}
-                                        searchTerm={searchTerm}
-                                        setSearchTerm={setSearchTerm}
-                                    />
-                                </DialogContent>
-                            </Dialog>
-                            <Sheet>
-                                <SheetTrigger asChild>
-                                    <Button variant="outline" className="flex-initial">
-                                        <Filter className="mr-2 h-4 w-4" />
-                                        Filter
-                                    </Button>
-                                </SheetTrigger>
-                                <SheetContent side="bottom">
-                                    <SheetHeader className="p-4"><SheetTitle>Report Filters</SheetTitle></SheetHeader>
-                                    <div className="px-4 pb-4 space-y-6">
-                                        <div className="space-y-2">
-                                            <Label>Date Range</Label>
-                                            <Popover>
-                                                <PopoverTrigger asChild>
-                                                    <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}>
-                                                        <CalendarIcon className="mr-2 h-4 w-4" />
-                                                        {date?.from ? (date.to ? `${format(date.from, "LLL dd, y")} - ${format(date.to, "LLL dd, y")}` : format(date.from, "LLL dd, y")) : <span>Pick a date</span>}
-                                                    </Button>
-                                                </PopoverTrigger>
-                                                <PopoverContent className="w-auto p-0" align="start">
-                                                    <Calendar initialFocus mode="range" defaultMonth={date?.from} selected={date} onSelect={setDate} numberOfMonths={1}/>
-                                                </PopoverContent>
-                                            </Popover>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="employee-mobile">Employee</Label>
-                                            <Select onValueChange={setSelectedEmployeeId} value={selectedEmployeeId}>
-                                                <SelectTrigger id="employee-mobile"><SelectValue placeholder="All Employees" /></SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="all">All Employees</SelectItem>
-                                                    {employees.map(emp => <SelectItem key={emp.id} value={emp.id!}>{emp.name}</SelectItem>)}
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="status-mobile">Status</Label>
-                                            <Select onValueChange={setSelectedStatus} value={selectedStatus}>
-                                                <SelectTrigger id="status-mobile"><SelectValue placeholder="All Statuses" /></SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="all">All Statuses</SelectItem>
-                                                    <SelectItem value="On-time">On-time</SelectItem>
-                                                    <SelectItem value="Late">Late</SelectItem>
-                                                    <SelectItem value="Absent">Absent</SelectItem>
-                                                    <SelectItem value="Manual">Manual</SelectItem>
-                                                    <SelectItem value="Half-day">Half-day</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                    </div>
-                                </SheetContent>
-                            </Sheet>
-                        </div>
+                <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-6">
+                    <div className="flex-1">
+                        <h1 className="text-3xl font-bold tracking-tight hidden md:block">Reports &amp; Payroll</h1>
+                        <p className="text-muted-foreground mt-2 hidden md:block">Filter records and generate monthly salary reports.</p>
                     </div>
-
-                    <div className="hidden md:flex flex-1 justify-between items-start">
-                        <div>
-                            <h1 className="text-3xl font-bold tracking-tight">Reports &amp; Payroll</h1>
-                            <p className="text-muted-foreground mt-2">Filter records and generate monthly salary reports.</p>
-                        </div>
-                        <TabsList className="inline-flex h-auto items-center justify-center rounded-md p-1 bg-primary text-primary-foreground md:max-w-md">
-                           <TabsTrigger value="attendance" className="data-[state=active]:bg-background data-[state=active]:text-foreground whitespace-nowrap h-12 text-sm px-3 py-1.5"><span className="text-center text-xs sm:text-sm leading-tight">Attendance Report</span></TabsTrigger>
-                            <TabsTrigger value="muster" className="data-[state=active]:bg-background data-[state=active]:text-foreground whitespace-nowrap h-12 text-sm px-3 py-1.5"><span className="text-center text-xs sm:text-sm leading-tight">Muster Roll</span></TabsTrigger>
-                            <TabsTrigger value="payroll" className="data-[state=active]:bg-background data-[state=active]:text-foreground whitespace-nowrap h-12 text-sm px-3 py-1.5" disabled={selectedBranch.id === 'all'}><span className="text-center text-xs sm:text-sm leading-tight">Payroll Report</span></TabsTrigger>
-                        </TabsList>
-                    </div>
+                     <TabsList className="w-full md:w-auto h-auto items-center justify-center rounded-md p-1 grid grid-cols-3 bg-primary text-primary-foreground md:inline-flex md:max-w-md">
+                        <TabsTrigger value="attendance" className="data-[state=active]:bg-background data-[state=active]:text-foreground whitespace-nowrap h-12 text-sm px-3 py-1.5"><span className="text-center text-xs sm:text-sm leading-tight">Attendance Report</span></TabsTrigger>
+                        <TabsTrigger value="muster" className="data-[state=active]:bg-background data-[state=active]:text-foreground whitespace-nowrap h-12 text-sm px-3 py-1.5"><span className="text-center text-xs sm:text-sm leading-tight">Muster Roll</span></TabsTrigger>
+                        <TabsTrigger value="payroll" className="data-[state=active]:bg-background data-[state=active]:text-foreground whitespace-nowrap h-12 text-sm px-3 py-1.5" disabled={selectedBranch.id === 'all'}><span className="text-center text-xs sm:text-sm leading-tight">Payroll Report</span></TabsTrigger>
+                    </TabsList>
                 </div>
 
-                <div className="hidden md:flex flex-wrap items-end gap-4 p-4">
+                 <div className="md:hidden flex items-center gap-4">
+                    <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
+                        <DialogTrigger asChild>
+                             <Button variant="outline" className="w-full justify-between flex-1">
+                                <Building className="mr-2 h-4 w-4 flex-shrink-0" />
+                                <span className="truncate">{selectedBranch ? selectedBranch.shopName : "Select a branch..."}</span>
+                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader><DialogTitle>Select Branch</DialogTitle></DialogHeader>
+                            <BranchSelector 
+                                open={openBranchSelector}
+                                onOpenChange={setOpenBranchSelector}
+                                selectedBranch={selectedBranch}
+                                branches={allBranches}
+                                setSelectedBranch={setSelectedBranch}
+                                searchTerm={searchTerm}
+                                setSearchTerm={setSearchTerm}
+                            />
+                        </DialogContent>
+                    </Dialog>
+                    <Sheet>
+                        <SheetTrigger asChild>
+                            <Button variant="outline" className="flex-initial">
+                                <Filter className="mr-2 h-4 w-4" />
+                                Filter
+                            </Button>
+                        </SheetTrigger>
+                        <SheetContent side="bottom">
+                            <SheetHeader className="p-4"><SheetTitle>Report Filters</SheetTitle></SheetHeader>
+                            <div className="px-4 pb-4 space-y-6">
+                                <div className="space-y-2">
+                                    <Label>Date Range</Label>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}>
+                                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                                {date?.from ? (date.to ? `${format(date.from, "LLL dd, y")} - ${format(date.to, "LLL dd, y")}` : format(date.from, "LLL dd, y")) : <span>Pick a date</span>}
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0" align="start">
+                                            <Calendar initialFocus mode="range" defaultMonth={date?.from} selected={date} onSelect={setDate} numberOfMonths={1}/>
+                                        </PopoverContent>
+                                    </Popover>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="employee-mobile">Employee</Label>
+                                    <Select onValueChange={setSelectedEmployeeId} value={selectedEmployeeId}>
+                                        <SelectTrigger id="employee-mobile"><SelectValue placeholder="All Employees" /></SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">All Employees</SelectItem>
+                                            {employees.map(emp => <SelectItem key={emp.id} value={emp.id!}>{emp.name}</SelectItem>)}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="status-mobile">Status</Label>
+                                    <Select onValueChange={setSelectedStatus} value={selectedStatus}>
+                                        <SelectTrigger id="status-mobile"><SelectValue placeholder="All Statuses" /></SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">All Statuses</SelectItem>
+                                            <SelectItem value="On-time">On-time</SelectItem>
+                                            <SelectItem value="Late">Late</SelectItem>
+                                            <SelectItem value="Absent">Absent</SelectItem>
+                                            <SelectItem value="Manual">Manual</SelectItem>
+                                            <SelectItem value="Half-day">Half-day</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+                        </SheetContent>
+                    </Sheet>
+                </div>
+
+                <div className="hidden md:flex flex-wrap items-end gap-4 p-4 rounded-lg border bg-card text-card-foreground">
                      <div className="flex-1 min-w-[200px]">
                          <Label className="text-xs font-semibold">Branch</Label>
                          <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
@@ -1060,7 +1059,7 @@ export default function ReportsPage() {
                       </div>
                 </div>
 
-                 <TabsContent value="attendance" className="mt-6">
+                <TabsContent value="attendance" className="mt-6">
                     <AttendanceReportTab allBranches={allBranches} selectedBranch={selectedBranch} authUser={authUser} date={date} selectedEmployeeId={selectedEmployeeId} selectedStatus={selectedStatus} employees={employees} />
                 </TabsContent>
                 <TabsContent value="muster" className="mt-6">
@@ -1085,3 +1084,4 @@ export default function ReportsPage() {
         </div>
     );
 }
+
