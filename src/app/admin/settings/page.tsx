@@ -13,7 +13,7 @@ import { signOut, onAuthStateChanged, type User as AuthUser } from "firebase/aut
 import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect, useState, Suspense } from "react";
-import { collection, getDocs, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { collection, getDocs, doc, getDoc, setDoc, updateDoc, query, where } from "firebase/firestore";
 import { Switch } from "@/components/ui/switch";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import type { User as AppUser } from '@/app/admin/employees/page';
@@ -323,6 +323,7 @@ function SettingsPageContent() {
   const defaultTab = searchParams.get('tab') || 'profile';
   const { planDetails } = useSubscription();
   const [employeeCount, setEmployeeCount] = useState(0);
+  const [branchCount, setBranchCount] = useState(0);
 
 
   useEffect(() => {
@@ -346,8 +347,11 @@ function SettingsPageContent() {
             setUserProfile({ ...userData, ...shopData } as FullProfile);
             
             const employeesSnapshot = await getDocs(collection(db, 'shops', user.uid, 'employees'));
-            setEmployeeCount(employeesSnapshot.size - 1); // -1 to exclude owner
+            setEmployeeCount(employeesSnapshot.docs.filter(doc => doc.data().role !== 'Admin').length);
 
+            const branchesQuery = query(collection(db, "shops"), where("ownerId", "==", user.uid));
+            const branchesSnapshot = await getDocs(branchesQuery);
+            setBranchCount(branchesSnapshot.size);
 
             const settingsDocRef = doc(db, 'shops', user.uid, 'config', 'main');
             const docSnap = await getDoc(settingsDocRef);
@@ -546,7 +550,7 @@ function SettingsPageContent() {
                             <CardTitle>Usage</CardTitle>
                             <CardDescription>Your current plan usage.</CardDescription>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className="space-y-6">
                             <div className="space-y-4">
                                 <div>
                                     <div className="flex justify-between items-center mb-2">
@@ -557,11 +561,23 @@ function SettingsPageContent() {
                                     </div>
                                     <Progress value={(employeeCount / (planDetails.maxEmployees === Infinity ? employeeCount : planDetails.maxEmployees)) * 100} />
                                 </div>
+                                <div>
+                                    <div className="flex justify-between items-center mb-2">
+                                        <h4 className="font-semibold">Branches</h4>
+                                        <p className="text-sm text-muted-foreground">
+                                            <span className="font-bold text-foreground">{branchCount}</span> / {planDetails.maxBranches === Infinity ? 'Unlimited' : planDetails.maxBranches}
+                                        </p>
+                                    </div>
+                                    <Progress value={(branchCount / (planDetails.maxBranches === Infinity ? branchCount : planDetails.maxBranches)) * 100} />
+                                </div>
                             </div>
                         </CardContent>
-                        <CardFooter>
-                            <Link href="/admin/employees">
-                                <Button variant="outline">Manage Employees</Button>
+                        <CardFooter className="flex gap-4">
+                            <Link href="/admin/employees" className="flex-1">
+                                <Button variant="outline" className="w-full">Manage Employees</Button>
+                            </Link>
+                             <Link href="/admin/branches" className="flex-1">
+                                <Button variant="outline" className="w-full">Manage Branches</Button>
                             </Link>
                         </CardFooter>
                     </Card>
