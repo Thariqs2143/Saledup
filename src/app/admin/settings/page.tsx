@@ -120,15 +120,15 @@ const PricingPlans = () => {
         'QR Code Check-in/out (permanent & dynamic)',
         'Manual Attendance Entry',
         'Live Attendance Dashboard',
-        'Employee Profiles',
         'Easy Employee Onboarding (phone number invite)',
+        'Employee Profiles',
         'Detailed Attendance Reports (daily/weekly/monthly)',
         'Muster Roll Generation',
         'Automated Payroll Calculation',
         'Export Reports (PDF / Excel)',
         'Points & Rewards System',
         'Punctuality Leaderboard',
-        'Achievement Badges',
+        'Achievement Badges'
       ]),
       highlight: 'Try our core features, risk-free for 14 days.',
       accent: 'from-gray-500 to-gray-600 dark:from-gray-700 dark:to-gray-800'
@@ -240,15 +240,15 @@ const PricingPlans = () => {
 
       <h3 className="text-2xl font-bold text-left mb-6 text-gray-900 dark:text-gray-100">Feature Comparison</h3>
       
-      <div className="bg-white dark:bg-gray-800/50 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+      <div className="rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
         {/* Desktop Table */}
         <div className="hidden lg:block">
           <table className="min-w-full">
             <thead className="bg-gray-100 dark:bg-gray-900/50">
               <tr>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-800 dark:text-gray-200 rounded-tl-3xl">Feature</th>
-                {plans.map((p, index) => (
-                  <th key={p.id} className={cn("px-6 py-3 text-center text-sm font-semibold text-gray-800 dark:text-gray-200", index === plans.length - 1 && "rounded-tr-3xl")}>{p.name}</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-800 dark:text-gray-200">Feature</th>
+                {plans.map((p) => (
+                  <th key={p.id} className="px-6 py-3 text-center text-sm font-semibold text-gray-800 dark:text-gray-200">{p.name}</th>
                 ))}
               </tr>
             </thead>
