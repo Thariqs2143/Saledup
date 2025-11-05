@@ -12,16 +12,14 @@ import { auth, db, requestForToken } from "@/lib/firebase";
 import { signOut, onAuthStateChanged, type User as AuthUser } from "firebase/auth";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import { useEffect, useState, useRef, Suspense } from "react";
-import { doc, getDoc, setDoc, updateDoc, collection, query, orderBy, onSnapshot } from "firebase/firestore";
+import { useEffect, useState, Suspense } from "react";
+import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { Switch } from "@/components/ui/switch";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import type { User as AppUser } from '@/app/admin/employees/page';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { cn } from "@/lib/utils";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 
 // Types
@@ -54,19 +52,11 @@ type ShopProfile = {
     ownerName: string;
     shopName: string;
     email?: string;
-    subscriptionPlan?: string;
     businessType?: string;
     address?: string;
     gstNumber?: string;
     phone?: string
 }
-
-type Referral = {
-    id: string;
-    referredShopName: string;
-    status: 'Joined' | 'Pending';
-    date: string;
-};
 
 type FullProfile = AppUser & ShopProfile;
 
@@ -102,10 +92,6 @@ function SettingsPageContent() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [notifLoading, setNotifLoading] = useState(false);
-  const [referralCode, setReferralCode] = useState('');
-  const [fullReferralCode, setFullReferralCode] = useState('');
-  const [referralHistory, setReferralHistory] = useState<Referral[]>([]);
-  const [loadingReferrals, setLoadingReferrals] = useState(true);
   const defaultTab = searchParams.get('tab') || 'profile';
 
   useEffect(() => {
@@ -115,10 +101,7 @@ function SettingsPageContent() {
             return;
         }
         setAuthUser(user);
-        setReferralCode(user.uid.substring(0, 8).toUpperCase());
-        setFullReferralCode(user.uid);
         setLoading(true);
-        setLoadingReferrals(true);
 
         try {
             const userDocRef = doc(db, 'users', user.uid);
@@ -156,16 +139,6 @@ function SettingsPageContent() {
         } finally {
             setLoading(false);
         }
-
-        const referralsRef = collection(db, 'shops', user.uid, 'referrals');
-        const q = query(referralsRef, orderBy('date', 'desc'));
-        const unsubscribeHistory = onSnapshot(q, (snapshot) => {
-            const history = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Referral));
-            setReferralHistory(history);
-            setLoadingReferrals(false);
-        }, () => setLoadingReferrals(false));
-
-        return () => unsubscribeHistory();
     });
 
     return () => unsubscribe();
@@ -226,17 +199,6 @@ function SettingsPageContent() {
     }
   };
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(fullReferralCode);
-    toast({ title: "Copied!" });
-  };
-    
-  const shareOnWhatsApp = () => {
-    const message = `Hey! I'm using Attendry to manage my staff attendance. Sign up using my referral code and get a special discount: ${fullReferralCode}`;
-    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
-  };
-
   if (loading) {
     return <div className="flex items-center justify-center h-full"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
   }
@@ -249,26 +211,22 @@ function SettingsPageContent() {
                 <p className="text-muted-foreground">Manage your account and shop preferences.</p>
             </div>
             
-            <div className="lg:grid lg:grid-cols-[220px_1fr] lg:gap-8">
+             <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr] lg:gap-8">
                 <TabsList className="grid w-full grid-cols-4 lg:hidden">
                   <TabsTrigger value="profile"><UserIcon className="h-5 w-5"/></TabsTrigger>
-                  <TabsTrigger value="subscription"><Crown className="h-5 w-5"/></TabsTrigger>
                   <TabsTrigger value="general"><SettingsIcon className="h-5 w-5"/></TabsTrigger>
                   <TabsTrigger value="business"><Building className="h-5 w-5"/></TabsTrigger>
                 </TabsList>
 
                 <aside className="hidden lg:flex lg:flex-col lg:sticky lg:top-24 h-fit">
                     <TabsList className="flex-col h-auto items-start gap-2 bg-transparent p-0">
-                        <TabsTrigger value="profile" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-foreground/20 hover:bg-muted/50 hover:border-primary">
+                        <TabsTrigger value="profile" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-foreground/20 hover:bg-muted/50 hover:border-primary transition-all duration-300 ease-out">
                             Profile
                         </TabsTrigger>
-                        <TabsTrigger value="subscription" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-foreground/20 hover:bg-muted/50 hover:border-primary">
-                            Subscription
-                        </TabsTrigger>
-                        <TabsTrigger value="general" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-foreground/20 hover:bg-muted/50 hover:border-primary">
+                        <TabsTrigger value="general" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-foreground/20 hover:bg-muted/50 hover:border-primary transition-all duration-300 ease-out">
                             General
                         </TabsTrigger>
-                        <TabsTrigger value="business" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-foreground/20 hover:bg-muted/50 hover:border-primary">
+                        <TabsTrigger value="business" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-foreground/20 hover:bg-muted/50 hover:border-primary transition-all duration-300 ease-out">
                             Business
                         </TabsTrigger>
                         <Button onClick={handleSaveSettings} className="w-full mt-4" disabled={saving}>
@@ -346,60 +304,6 @@ function SettingsPageContent() {
                     )}
                 </TabsContent>
 
-                {/* Subscription & Referrals Tab */}
-                <TabsContent value="subscription" className="space-y-6">
-                    <Card className="transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/20 hover:border-primary">
-                        <CardHeader>
-                            <CardTitle>Current Subscription</CardTitle>
-                            <CardDescription>You are on the <span className="font-semibold text-primary">{userProfile?.subscriptionPlan || 'Free'} Plan</span>.</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <Link href="/admin/subscription"><Button className="w-full sm:w-auto"><ArrowRight className="mr-2 h-4 w-4" />View & Upgrade Subscription</Button></Link>
-                        </CardContent>
-                    </Card>
-                    <Card className="transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/20 hover:border-primary">
-                        <CardHeader><CardTitle>Referral Program</CardTitle></CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="border-2 border-dashed border-primary/50 bg-primary/5 p-4 rounded-lg flex items-center justify-center">
-                                <p className="text-2xl md:text-4xl font-bold tracking-widest text-primary text-center">{referralCode}</p>
-                            </div>
-                            <div className="flex flex-col sm:flex-row gap-2">
-                                <Button onClick={copyToClipboard} className="w-full"><Copy className="mr-2 h-4 w-4"/> Copy Code</Button>
-                                <Button onClick={shareOnWhatsApp} variant="secondary" className="w-full"><Share2 className="mr-2 h-4 w-4"/> Share on WhatsApp</Button>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card className="transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/20 hover:border-primary">
-                        <CardHeader><CardTitle>Referral History</CardTitle></CardHeader>
-                        <CardContent className="space-y-4">
-                            {loadingReferrals ? (
-                                <div className="flex justify-center items-center h-24">
-                                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                                </div>
-                            ) : referralHistory.length === 0 ? (
-                                <div className="text-center py-8 text-muted-foreground">
-                                    <Users className="h-12 w-12 mx-auto mb-4 opacity-50"/>
-                                    <p>You haven't referred anyone yet.</p>
-                                    <p className="text-xs mt-1">Share your code above to get started!</p>
-                                </div>
-                            ) : (
-                            referralHistory.map((referral) => (
-                                    <div key={referral.id} className="flex items-center justify-between p-3 border rounded-lg bg-muted/40">
-                                        <div>
-                                            <p className="font-semibold">{referral.referredShopName}</p>
-                                            <p className="text-xs text-muted-foreground">Referred on: {new Date(referral.date).toLocaleDateString()}</p>
-                                        </div>
-                                        <div className={`flex items-center text-sm font-medium ${referral.status === 'Joined' ? 'text-green-600' : 'text-amber-600'}`}>
-                                            {referral.status === 'Joined' ? <CheckCircle className="mr-2 h-4 w-4" /> : <Users className="mr-2 h-4 w-4" />}
-                                            {referral.status}
-                                        </div>
-                                    </div>
-                                ))
-                            )}
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-                
                 {/* General Settings Tab */}
                 <TabsContent value="general" className="space-y-6">
                     <Card className="transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/20 hover:border-primary">

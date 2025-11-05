@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Loader2, Calendar as CalendarIcon, Download, FileText, Check, X, Calculator, Clock4, Users, Receipt, ChevronDown, Lock, Building, ChevronsUpDown, Search, Filter } from "lucide-react";
+import { Loader2, Calendar as CalendarIcon, Download, FileText, Check, X, Calculator, Clock4, Users, Receipt, ChevronDown, Building, ChevronsUpDown, Search, Filter } from "lucide-react";
 import { collection, query, where, getDocs, orderBy, Timestamp, doc, getDoc, collectionGroup, onSnapshot } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
 import { format, subDays, getDaysInMonth, startOfMonth, endOfMonth, differenceInDays, eachDayOfInterval, startOfWeek, endOfWeek, setMonth, setYear } from 'date-fns';
@@ -44,7 +44,6 @@ type ShopData = {
     shopName?: string;
     address?: string;
     imageUrl?: string;
-    subscriptionPlan?: 'Free' | 'Pro' | 'Business' | 'Enterprise';
     ownerId?: string;
 };
 
@@ -88,10 +87,8 @@ const AttendanceReportTab = ({ allBranches, selectedBranch, authUser, date, sele
     const [records, setRecords] = useState<AttendanceRecord[]>([]);
     const [filteredRecords, setFilteredRecords] = useState<AttendanceRecord[]>([]);
     const [loading, setLoading] = useState(false);
-    const [exporting, setExporting] = useState(false);
     const { toast } = useToast();
     
-    const isProTier = selectedBranch.subscriptionPlan === 'Pro' || selectedBranch.subscriptionPlan === 'Business' || selectedBranch.subscriptionPlan === 'Enterprise';
     const isAllBranches = selectedBranch.id === 'all';
     const allBranchIds = useMemo(() => allBranches.filter(b => b.id !== 'all').map(b => b.id), [allBranches]);
 
@@ -166,15 +163,6 @@ const AttendanceReportTab = ({ allBranches, selectedBranch, authUser, date, sele
                         <h3 className="text-xl font-bold">Report Results</h3>
                         <p className="text-sm text-muted-foreground">Found {filteredRecords.length} record(s) matching your criteria.</p>
                     </div>
-                     {!isProTier && (
-                         <div className="w-full sm:w-auto text-sm text-muted-foreground border p-2 rounded-md flex items-center gap-2">
-                            <Lock className="h-4 w-4" />
-                            <div>
-                                Export is a Pro feature.
-                                <Link href="/admin/subscription" className="font-bold text-primary underline ml-1">Upgrade</Link>
-                            </div>
-                        </div>
-                     )}
                 </div>
                 <div>
                     {loading ? <div className="flex items-center justify-center h-48"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
@@ -222,12 +210,8 @@ const AttendanceReportTab = ({ allBranches, selectedBranch, authUser, date, sele
 const PayrollReportTab = ({ shopData, authUser }: { shopData: ShopData, authUser: AuthUser }) => {
     const [payrollData, setPayrollData] = useState<PayrollData[]>([]);
     const [loading, setLoading] = useState(false);
-    const [exporting, setExporting] = useState(false);
     const [selectedDate, setSelectedDate] = useState(new Date());
     const { toast } = useToast();
-    
-    const isProTier = shopData.subscriptionPlan === 'Pro' || shopData.subscriptionPlan === 'Business' || shopData.subscriptionPlan === 'Enterprise';
-
     
     const handleAdjustmentChange = (employeeId: string, type: 'bonus' | 'advances', value: string) => {
         const numericValue = Number(value) || 0;
@@ -449,15 +433,6 @@ const PayrollReportTab = ({ shopData, authUser }: { shopData: ShopData, authUser
                         <h3 className="text-2xl font-semibold leading-none tracking-tight">Payroll Results for {format(selectedDate, 'MMMM yyyy')}</h3>
                         <p className="text-sm text-muted-foreground mt-2">Found {payrollData.length} employee(s). You can add bonuses or deductions below.</p>
                     </div>
-                    {!isProTier && (
-                         <div className="w-full sm:w-auto text-sm text-muted-foreground border p-2 rounded-md flex items-center gap-2">
-                            <Lock className="h-4 w-4" />
-                            <div>
-                                Export is a Pro feature.
-                                <Link href="/admin/subscription" className="font-bold text-primary underline ml-1">Upgrade</Link>
-                            </div>
-                        </div>
-                    )}
                 </div>
                 <div className="mt-4">
                     {loading ? <div className="flex items-center justify-center h-48"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
@@ -473,7 +448,7 @@ const PayrollReportTab = ({ shopData, authUser }: { shopData: ShopData, authUser
                                                     <Button 
                                                         size="sm"
                                                         onClick={() => handleDownloadSlip(p)}
-                                                        disabled={p.baseSalary === 0 || !isProTier}
+                                                        disabled={p.baseSalary === 0}
                                                         className="bg-blue-600 hover:bg-blue-600"
                                                     >
                                                         <Receipt className="mr-2 h-4 w-4"/> Slip
@@ -561,7 +536,7 @@ const PayrollReportTab = ({ shopData, authUser }: { shopData: ShopData, authUser
                                                             <Button 
                                                                 size="sm"
                                                                 onClick={() => handleDownloadSlip(p)}
-                                                                disabled={p.baseSalary === 0 || !isProTier}
+                                                                disabled={p.baseSalary === 0}
                                                                 className="bg-blue-600 hover:bg-blue-700"
                                                             >
                                                                 <Receipt className="mr-2 h-4 w-4"/> Slip
@@ -584,7 +559,6 @@ const MusterRollTab = ({ authUser }: { authUser: AuthUser }) => {
     const [musterData, setMusterData] = useState<MusterData[]>([]);
     const [daysInMonth, setDaysInMonth] = useState<Date[]>([]);
     const [loading, setLoading] = useState(false);
-    const [exporting, setExporting] = useState(false);
     const [selectedDate, setSelectedDate] = useState(new Date());
     const { toast } = useToast();
 

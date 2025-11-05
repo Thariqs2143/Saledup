@@ -5,23 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, UserPlus, Loader2, Lock, Store, Building, ChevronsUpDown } from "lucide-react";
+import { ArrowLeft, UserPlus, Loader2, ChevronsUpDown } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { collection, addDoc, query, where, getDocs, doc, setDoc, writeBatch, getDoc } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
 import { useState, useEffect } from "react";
 import { onAuthStateChanged, type User as AuthUser } from "firebase/auth";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { IndianFlagIcon } from "@/components/ui/indian-flag-icon";
-
-const PLAN_LIMITS = {
-    'Free': 10,
-    'Pro': 50,
-    'Business': Infinity,
-};
 
 type Branch = {
     id: string;
@@ -34,9 +27,6 @@ export default function AddEmployeePage() {
     const { toast } = useToast();
     const [loading, setLoading] = useState(false);
     const [authUser, setAuthUser] = useState<AuthUser | null>(null);
-    const [employeeCount, setEmployeeCount] = useState(0);
-    const [subscriptionPlan, setSubscriptionPlan] = useState('Free');
-    const [limitReached, setLimitReached] = useState(false);
     const [branches, setBranches] = useState<Branch[]>([]);
     const [selectedBranch, setSelectedBranch] = useState<Branch | null>(null);
     const [openBranchSelector, setOpenBranchSelector] = useState(false);
@@ -61,41 +51,11 @@ export default function AddEmployeePage() {
         return () => unsubscribe();
     }, [router]);
 
-    useEffect(() => {
-        if (!selectedBranch) return;
-
-        const checkLimit = async () => {
-            const employeesRef = collection(db, 'shops', selectedBranch.id, 'employees');
-            const employeeSnapshot = await getDocs(employeesRef);
-            const currentEmployeeCount = employeeSnapshot.size;
-            setEmployeeCount(currentEmployeeCount);
-            
-            const shopDocRef = doc(db, 'shops', selectedBranch.id);
-            const shopSnap = await getDoc(shopDocRef);
-            const plan = shopSnap.exists() ? shopSnap.data().subscriptionPlan || 'Free' : 'Free';
-            setSubscriptionPlan(plan);
-
-            const limit = PLAN_LIMITS[plan as keyof typeof PLAN_LIMITS] || 10;
-            if (currentEmployeeCount >= limit) {
-                setLimitReached(true);
-            } else {
-                setLimitReached(false);
-            }
-        };
-        checkLimit();
-    }, [selectedBranch]);
-
-
     const handleAddEmployee = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         if (!authUser || !selectedBranch) {
              toast({ title: "Authentication or Branch Error", description: "You must be logged in and have a branch selected.", variant: "destructive" });
              return;
-        }
-
-        if (limitReached) {
-            toast({ title: "Limit Reached", description: `You have reached the employee limit for the ${subscriptionPlan} plan in ${selectedBranch.shopName}.`, variant: "destructive" });
-            return;
         }
 
         setLoading(true);
@@ -188,19 +148,6 @@ export default function AddEmployeePage() {
                     <p className="text-muted-foreground text-sm sm:text-base">Enter the employee's details to invite them to join a shop.</p>
                 </div>
             </div>
-            {limitReached && (
-                 <Alert variant="destructive">
-                    <Lock className="h-4 w-4" />
-                    <AlertTitle>Employee Limit Reached</AlertTitle>
-                    <AlertDescription>
-                        You have {employeeCount} employees in {selectedBranch?.shopName}, which is the maximum for the {subscriptionPlan} plan. 
-                        <Link href="/admin/subscription" className="font-bold underline ml-1">
-                             Upgrade your plan
-                        </Link>
-                         to add more team members.
-                    </AlertDescription>
-                </Alert>
-            )}
             <form onSubmit={handleAddEmployee} className="w-full max-w-2xl mx-auto space-y-8">
                 <fieldset disabled={loading} className="group">
                     <div className="space-y-2">
@@ -244,7 +191,7 @@ export default function AddEmployeePage() {
                         </Popover>
                     </div>
 
-                    <fieldset disabled={!selectedBranch || limitReached} className="group">
+                    <fieldset disabled={!selectedBranch} className="group">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                             <div className="space-y-2">
                                 <Label htmlFor="name">Full Name *</Label>
@@ -275,7 +222,7 @@ export default function AddEmployeePage() {
                         </div>
                         <p className="text-xs text-muted-foreground mt-2 text-center">The employee will use this phone number to log in and complete their profile by adding their Aadhaar number.</p>
                         <div className="flex justify-center mt-8">
-                            <Button type="submit" size="lg" className="w-full max-w-xs" disabled={!selectedBranch || limitReached || loading}>
+                            <Button type="submit" size="lg" className="w-full max-w-xs" disabled={!selectedBranch || loading}>
                                 {loading && <Loader2 className="mr-2 animate-spin" />}
                                 <UserPlus className="mr-2"/>
                                 Send Invitation
