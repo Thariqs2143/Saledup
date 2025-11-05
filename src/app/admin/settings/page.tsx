@@ -58,7 +58,7 @@ type ShopProfile = {
     businessType?: string;
     address?: string;
     gstNumber?: string;
-    phone?: string;
+    phone?: string
 }
 
 type Referral = {
@@ -253,19 +253,24 @@ function SettingsPageContent() {
               </TabsList>
             </div>
             
-            <div className="md:grid md:grid-cols-[220px_1fr] md:gap-8">
-                <div className="hidden md:block">
-                    <TabsList className="flex-col h-auto items-start gap-2 bg-transparent p-0 sticky top-4">
-                        <TabsTrigger value="profile" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-border hover:bg-muted hover:border-primary">
+            <div className="hidden md:block">
+                <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+                <p className="text-muted-foreground">Manage your account and shop preferences.</p>
+            </div>
+            
+            <div className="w-full md:grid md:grid-cols-[220px_1fr] md:gap-8">
+                <aside className="hidden md:flex md:flex-col md:sticky md:top-0 h-screen">
+                    <TabsList className="flex-col h-auto items-start gap-2 bg-transparent p-0">
+                        <TabsTrigger value="profile" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-foreground/20 hover:bg-muted/50 hover:border-primary">
                             Profile
                         </TabsTrigger>
-                        <TabsTrigger value="subscription" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-border hover:bg-muted hover:border-primary">
+                        <TabsTrigger value="subscription" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-foreground/20 hover:bg-muted/50 hover:border-primary">
                             Subscription
                         </TabsTrigger>
-                        <TabsTrigger value="general" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-border hover:bg-muted hover:border-primary">
+                        <TabsTrigger value="general" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-foreground/20 hover:bg-muted/50 hover:border-primary">
                             General
                         </TabsTrigger>
-                        <TabsTrigger value="business" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-border hover:bg-muted hover:border-primary">
+                        <TabsTrigger value="business" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-foreground/20 hover:bg-muted/50 hover:border-primary">
                             Business
                         </TabsTrigger>
                         <Button onClick={handleSaveSettings} className="w-full mt-4" disabled={saving}>
@@ -273,13 +278,13 @@ function SettingsPageContent() {
                             Save All Settings
                         </Button>
                     </TabsList>
-                </div>
+                </aside>
             
               <div className="mt-8 md:mt-0">
                 {/* Profile Tab */}
                 <TabsContent value="profile">
                     {userProfile && (
-                        <Card>
+                        <Card className="transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/20 hover:border-primary">
                             <CardHeader className="flex flex-row justify-between items-start">
                                 <div>
                                     <CardTitle>Shop Profile</CardTitle>
@@ -345,7 +350,7 @@ function SettingsPageContent() {
 
                 {/* Subscription & Referrals Tab */}
                 <TabsContent value="subscription" className="space-y-6">
-                    <Card>
+                    <Card className="transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/20 hover:border-primary">
                         <CardHeader>
                             <CardTitle>Current Subscription</CardTitle>
                             <CardDescription>You are on the <span className="font-semibold text-primary">{userProfile?.subscriptionPlan || 'Free'} Plan</span>.</CardDescription>
@@ -354,7 +359,7 @@ function SettingsPageContent() {
                             <Link href="/admin/subscription"><Button className="w-full sm:w-auto"><ArrowRight className="mr-2 h-4 w-4" />View & Upgrade Subscription</Button></Link>
                         </CardContent>
                     </Card>
-                    <Card>
+                    <Card className="transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/20 hover:border-primary">
                         <CardHeader><CardTitle>Referral Program</CardTitle></CardHeader>
                         <CardContent className="space-y-4">
                             <div className="border-2 border-dashed border-primary/50 bg-primary/5 p-4 rounded-lg flex items-center justify-center">
@@ -366,7 +371,7 @@ function SettingsPageContent() {
                             </div>
                         </CardContent>
                     </Card>
-                    <Card>
+                    <Card className="transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/20 hover:border-primary">
                         <CardHeader><CardTitle>Referral History</CardTitle></CardHeader>
                         <CardContent className="space-y-4">
                             {loadingReferrals ? (
@@ -399,11 +404,11 @@ function SettingsPageContent() {
                 
                 {/* General Settings Tab */}
                 <TabsContent value="general" className="space-y-6">
-                    <Card>
+                    <Card className="transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/20 hover:border-primary">
                         <CardHeader><CardTitle>Appearance</CardTitle></CardHeader>
                         <CardContent><div className="flex items-center justify-between"><Label className="font-medium">Theme</Label><ThemeSwitcher /></div></CardContent>
                     </Card>
-                    <Card>
+                    <Card className="transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/20 hover:border-primary">
                         <CardHeader><CardTitle>Notifications</CardTitle></CardHeader>
                         <CardContent className="space-y-4">
                             <div className="rounded-lg border p-4 flex items-center justify-between">
@@ -420,7 +425,7 @@ function SettingsPageContent() {
                             </div>
                         </CardContent>
                     </Card>
-                    <Card className="border-destructive">
+                    <Card className="border-destructive transition-all duration-300 ease-out hover:shadow-lg hover:border-primary">
                         <CardHeader><CardTitle className="text-destructive">Account Actions</CardTitle></CardHeader>
                         <CardContent className="flex justify-center">
                             <Button variant="destructive" className="w-full max-w-xs" onClick={handleLogout}><LogOut className="mr-2 h-4 w-4"/>Logout</Button>
@@ -436,7 +441,7 @@ function SettingsPageContent() {
                     </div>
                     <div className="space-y-4">
                         {Object.keys(settings.businessHours).map((day) => (
-                            <div key={day} className="flex flex-col md:flex-row items-center justify-between rounded-lg border p-3 sm:p-4 gap-4 bg-card text-card-foreground shadow-sm">
+                            <div key={day} className="flex flex-col md:flex-row items-center justify-between rounded-lg border p-3 sm:p-4 gap-4 bg-card text-card-foreground shadow-sm transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/20 hover:border-primary">
                                 <div className="flex items-center gap-4 w-full md:w-auto">
                                     <Switch id={`${day}-is-open`} checked={settings.businessHours[day as keyof BusinessHours].isOpen} onCheckedChange={(checked) => handleDaySettingChange(day as keyof BusinessHours, 'isOpen', checked)} />
                                     <Label htmlFor={`${day}-is-open`} className="capitalize text-lg font-medium flex-1">{day}</Label>
@@ -448,7 +453,7 @@ function SettingsPageContent() {
                             </div>
                         ))}
                     </div>
-                    <Card>
+                    <Card className="transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/20 hover:border-primary">
                         <CardHeader><CardTitle>Attendance & Leave</CardTitle></CardHeader>
                         <CardContent className="grid sm:grid-cols-2 gap-6">
                             <div className="space-y-2">
@@ -469,7 +474,7 @@ function SettingsPageContent() {
                             </div>
                         </CardContent>
                     </Card>
-                    <Card>
+                    <Card className="transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/20 hover:border-primary">
                         <CardHeader><CardTitle>QR Code Security</CardTitle></CardHeader>
                         <CardContent>
                             <RadioGroup value={settings.qrCodeMode} onValueChange={(value: 'permanent' | 'dynamic') => setSettings(prev => ({...prev, qrCodeMode: value}))} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
