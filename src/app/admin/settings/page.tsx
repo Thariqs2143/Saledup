@@ -93,9 +93,9 @@ const PricingPlans = () => {
     'Easy Employee Onboarding (phone number invite)',
     'Employee Profiles',
     'Detailed Attendance Reports (daily/weekly/monthly)',
+    'Export Reports (PDF / Excel)',
     'Muster Roll Generation',
     'Automated Payroll Calculation',
-    'Export Reports (PDF / Excel)',
     'Points & Rewards System',
     'Punctuality Leaderboard',
     'Achievement Badges',
@@ -123,9 +123,9 @@ const PricingPlans = () => {
         'Easy Employee Onboarding (phone number invite)',
         'Employee Profiles',
         'Detailed Attendance Reports (daily/weekly/monthly)',
+        'Export Reports (PDF / Excel)',
         'Muster Roll Generation',
         'Automated Payroll Calculation',
-        'Export Reports (PDF / Excel)',
         'Points & Rewards System',
         'Punctuality Leaderboard',
         'Achievement Badges'
@@ -142,7 +142,7 @@ const PricingPlans = () => {
       cta: 'Upgrade to Growth',
       employees: 'Up to 50 employees',
       branches: 'Up to 5 branches',
-      included: new Set(features.filter(f => !f.includes('AI'))),
+      included: new Set(features.filter(f => !f.includes('AI') && !f.includes('Customizable Alerts'))),
       isPopular: true,
       highlight: 'For growing businesses that need more power.',
       accent: 'from-primary to-blue-500'
@@ -192,8 +192,8 @@ const PricingPlans = () => {
       <div className="grid gap-8 lg:grid-cols-3 mb-14">
         {plans.map((p) => (
           <div key={p.id} className={`relative rounded-3xl shadow-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 hover:shadow-xl transition-transform hover:-translate-y-1`}>
-            {p.isPopular && <div className="absolute -top-3.5 left-1/2 -translate-x-1/2"><div className="px-4 py-1 text-sm font-semibold rounded-full bg-primary text-primary-foreground shadow-md">Most Popular</div></div>}
-            <div className={`absolute top-0 left-0 right-0 h-1.5 rounded-t-3xl bg-gradient-to-r ${p.accent}`}></div>
+            {p.isPopular && <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10"><div className="px-4 py-1 text-sm font-semibold rounded-full bg-primary text-primary-foreground shadow-md">Most Popular</div></div>}
+            <div className={`absolute top-px left-px right-px h-1.5 rounded-t-3xl bg-gradient-to-r ${p.accent}`}></div>
             <div className="p-8 flex flex-col h-full">
               <div className="flex items-start justify-between mb-6">
                 <div>
@@ -238,7 +238,9 @@ const PricingPlans = () => {
         ))}
       </div>
 
-      <h3 className="text-2xl font-bold text-left mb-6 text-gray-900 dark:text-gray-100">Feature Comparison</h3>
+      <div className="text-left mb-6">
+        <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Feature Comparison</h3>
+      </div>
       
       <div className="rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
         {/* Desktop Table */}
@@ -246,16 +248,16 @@ const PricingPlans = () => {
           <table className="min-w-full">
             <thead className="bg-gray-100 dark:bg-gray-900/50">
               <tr>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-800 dark:text-gray-200">Feature</th>
-                {plans.map((p) => (
-                  <th key={p.id} className="px-6 py-3 text-center text-sm font-semibold text-gray-800 dark:text-gray-200">{p.name}</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-800 dark:text-gray-200 w-64 rounded-tl-3xl">Feature</th>
+                {plans.map((p, index) => (
+                  <th key={p.id} className={cn("px-6 py-3 text-center text-sm font-semibold text-gray-800 dark:text-gray-200", index === plans.length -1 && "rounded-tr-3xl")}>{p.name}</th>
                 ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
               {features.map((f) => (
                 <tr key={f} className="hover:bg-gray-50 dark:hover:bg-gray-900/30 transition">
-                  <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 w-64">{f}</td>
+                  <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{f}</td>
                   {plans.map((p) => (
                     <td key={p.id} className="px-6 py-4 text-center">
                       {p.included.has(f) ? (
