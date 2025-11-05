@@ -66,10 +66,9 @@ type Branch = {
 };
 
 
-const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds }: { allBranches: Branch[], selectedBranchId: string | null, allBranchIds: string[] }) => {
+const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds, searchTerm, onSearchTermChange }: { allBranches: Branch[], selectedBranchId: string | null, allBranchIds: string[], searchTerm: string, onSearchTermChange: (term: string) => void }) => {
   const [employees, setEmployees] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const router = useRouter();
   const { toast } = useToast();
@@ -145,7 +144,7 @@ const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds }: { allBran
   
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="hidden md:flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="relative w-full flex-1">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
@@ -153,7 +152,7 @@ const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds }: { allBran
               placeholder="Search by name, role, or shop..."
               className="w-full rounded-lg bg-background pl-8"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => onSearchTermChange(e.target.value)}
               />
           </div>
           <div className="flex w-full sm:w-auto gap-2">
@@ -374,7 +373,7 @@ const LeaveRequests = ({ selectedBranchId, allBranchIds }: { selectedBranchId: s
 
     return (
         <div className="space-y-4">
-            <div>
+            <div className="hidden md:block">
                 <h3 className="text-xl font-bold">Incoming Requests</h3>
                 <p className="text-muted-foreground">Here are all the leave requests submitted by your employees in this branch.</p>
             </div>
@@ -455,6 +454,7 @@ export default function ManageEmployeesPage() {
     const [branches, setBranches] = useState<Branch[]>([]);
     const [selectedBranch, setSelectedBranch] = useState<Branch | null>(null);
     const [openBranchSelector, setOpenBranchSelector] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
     const router = useRouter();
 
     useEffect(() => {
@@ -494,62 +494,134 @@ export default function ManageEmployeesPage() {
             <h1 className="text-3xl font-bold tracking-tight">Employees & Leave</h1>
             <p className="text-muted-foreground">Manage your employees and their leave requests by branch.</p>
         </div>
-         <Card className="transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
-            <CardHeader>
-                <CardTitle>Select Branch</CardTitle>
-                 <Popover open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
-                    <PopoverTrigger asChild>
-                        <Button
-                            variant="outline"
-                            role="combobox"
-                            aria-expanded={openBranchSelector}
-                            className="w-full sm:w-[300px] justify-between mt-2"
-                        >
-                            {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
-                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-full sm:w-[300px] p-0">
-                        <Command>
-                            <CommandInput placeholder="Search branch..." />
-                            <CommandEmpty>No branches found.</CommandEmpty>
-                            <CommandGroup>
-                                <CommandList>
-                                {branches.map((branch) => (
-                                    <CommandItem
-                                        key={branch.id}
-                                        value={branch.shopName}
-                                        onSelect={() => {
-                                            setSelectedBranch(branch);
-                                            setOpenBranchSelector(false);
-                                        }}
-                                    >
-                                        {branch.shopName}
-                                    </CommandItem>
-                                ))}
-                                </CommandList>
-                            </CommandGroup>
-                        </Command>
-                    </PopoverContent>
-                </Popover>
-            </CardHeader>
-        </Card>
-         <Tabs defaultValue="employees" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 md:max-w-md bg-primary text-primary-foreground">
-                <TabsTrigger value="employees" className="data-[state=active]:bg-background data-[state=active]:text-foreground">All Employees</TabsTrigger>
-                <TabsTrigger value="leave" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Leave Requests</TabsTrigger>
-            </TabsList>
-            <TabsContent value="employees" className="mt-6">
-                <EmployeeList allBranches={memoizedBranches} selectedBranchId={selectedBranch?.id || null} allBranchIds={allBranchIds} />
-            </TabsContent>
-            <TabsContent value="leave" className="mt-6">
-                <LeaveRequests selectedBranchId={selectedBranch?.id || null} allBranchIds={allBranchIds} />
-            </TabsContent>
-        </Tabs>
+        
+        {/* Mobile Layout */}
+        <div className="md:hidden space-y-4">
+             <Tabs defaultValue="employees" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 bg-primary text-primary-foreground">
+                    <TabsTrigger value="employees" className="data-[state=active]:bg-background data-[state=active]:text-foreground">All Employees</TabsTrigger>
+                    <TabsTrigger value="leave" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Leave Requests</TabsTrigger>
+                </TabsList>
+
+                <Card className="transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
+                    <CardHeader>
+                        <CardTitle>Select Branch</CardTitle>
+                        <Popover open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    role="combobox"
+                                    aria-expanded={openBranchSelector}
+                                    className="w-full justify-between mt-2"
+                                >
+                                    {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
+                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-full p-0">
+                                <Command>
+                                    <CommandInput placeholder="Search branch..." />
+                                    <CommandEmpty>No branches found.</CommandEmpty>
+                                    <CommandGroup>
+                                        <CommandList>
+                                        {branches.map((branch) => (
+                                            <CommandItem
+                                                key={branch.id}
+                                                value={branch.shopName}
+                                                onSelect={() => {
+                                                    setSelectedBranch(branch);
+                                                    setOpenBranchSelector(false);
+                                                }}
+                                            >
+                                                {branch.shopName}
+                                            </CommandItem>
+                                        ))}
+                                        </CommandList>
+                                    </CommandGroup>
+                                </Command>
+                            </PopoverContent>
+                        </Popover>
+                    </CardHeader>
+                </Card>
+
+                <div className="relative w-full">
+                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                        type="search"
+                        placeholder="Search..."
+                        className="w-full rounded-lg bg-background pl-8"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
+                
+                <TabsContent value="employees" className="mt-6">
+                    <EmployeeList allBranches={memoizedBranches} selectedBranchId={selectedBranch?.id || null} allBranchIds={allBranchIds} searchTerm={searchTerm} onSearchTermChange={setSearchTerm} />
+                </TabsContent>
+                <TabsContent value="leave" className="mt-6">
+                    <LeaveRequests selectedBranchId={selectedBranch?.id || null} allBranchIds={allBranchIds} />
+                </TabsContent>
+            </Tabs>
+        </div>
+
+
+        {/* Desktop Layout */}
+         <div className="hidden md:flex flex-col gap-6">
+             <Card className="transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
+                <CardHeader>
+                    <CardTitle>Select Branch</CardTitle>
+                    <Popover open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
+                        <PopoverTrigger asChild>
+                            <Button
+                                variant="outline"
+                                role="combobox"
+                                aria-expanded={openBranchSelector}
+                                className="w-full sm:w-[300px] justify-between mt-2"
+                            >
+                                {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
+                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-full sm:w-[300px] p-0">
+                            <Command>
+                                <CommandInput placeholder="Search branch..." />
+                                <CommandEmpty>No branches found.</CommandEmpty>
+                                <CommandGroup>
+                                    <CommandList>
+                                    {branches.map((branch) => (
+                                        <CommandItem
+                                            key={branch.id}
+                                            value={branch.shopName}
+                                            onSelect={() => {
+                                                setSelectedBranch(branch);
+                                                setOpenBranchSelector(false);
+                                            }}
+                                        >
+                                            {branch.shopName}
+                                        </CommandItem>
+                                    ))}
+                                    </CommandList>
+                                </CommandGroup>
+                            </Command>
+                        </PopoverContent>
+                    </Popover>
+                </CardHeader>
+            </Card>
+             <Tabs defaultValue="employees" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 md:max-w-md bg-primary text-primary-foreground">
+                    <TabsTrigger value="employees" className="data-[state=active]:bg-background data-[state=active]:text-foreground">All Employees</TabsTrigger>
+                    <TabsTrigger value="leave" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Leave Requests</TabsTrigger>
+                </TabsList>
+                <TabsContent value="employees" className="mt-6">
+                    <EmployeeList allBranches={memoizedBranches} selectedBranchId={selectedBranch?.id || null} allBranchIds={allBranchIds} searchTerm={searchTerm} onSearchTermChange={setSearchTerm} />
+                </TabsContent>
+                <TabsContent value="leave" className="mt-6">
+                    <LeaveRequests selectedBranchId={selectedBranch?.id || null} allBranchIds={allBranchIds} />
+                </TabsContent>
+            </Tabs>
+        </div>
     </div>
   );
 }
-
-    
 
     
