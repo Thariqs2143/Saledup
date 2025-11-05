@@ -146,35 +146,7 @@ const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds, searchTerm,
     <div className="space-y-4">
       {/* Mobile View */}
       <div className="md:hidden space-y-4">
-        <div className="relative w-full">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-                type="search"
-                placeholder="Search..."
-                className="w-full rounded-lg bg-background pl-8"
-                value={searchTerm}
-                onChange={(e) => onSearchTermChange(e.target.value)}
-            />
-        </div>
-        <div className="flex gap-2">
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="Active">Active</SelectItem>
-                <SelectItem value="Inactive">Inactive</SelectItem>
-                <SelectItem value="Pending Onboarding">Pending Onboarding</SelectItem>
-              </SelectContent>
-            </Select>
-            <Link href="/admin/employees/add" className="w-full">
-              <Button className="w-full">
-                <UserPlus className="mr-2 h-4 w-4" />
-                Invite
-              </Button>
-            </Link>
-        </div>
+        
       </div>
       
       {/* Desktop View */}
@@ -548,60 +520,62 @@ export default function ManageEmployeesPage() {
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
-                    <div className="flex gap-2">
-                        <Select onValueChange={() => {}}>
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Filter by status" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="all">All Statuses</SelectItem>
-                            <SelectItem value="Active">Active</SelectItem>
-                            <SelectItem value="Inactive">Inactive</SelectItem>
-                            <SelectItem value="Pending Onboarding">Pending Onboarding</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <Link href="/admin/employees/add" className="w-full">
-                          <Button className="w-full">
-                            <UserPlus className="mr-2 h-4 w-4" />
-                            Invite
-                          </Button>
-                        </Link>
-                    </div>
-                     <Popover open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
-                        <PopoverTrigger asChild>
-                            <Button
-                                variant="outline"
-                                role="combobox"
-                                aria-expanded={openBranchSelector}
-                                className="w-full justify-between"
-                            >
-                                {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
-                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    <div className="flex flex-col gap-2">
+                         <div className="flex gap-2">
+                            <Select onValueChange={() => {}}>
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Filter by status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Statuses</SelectItem>
+                                <SelectItem value="Active">Active</SelectItem>
+                                <SelectItem value="Inactive">Inactive</SelectItem>
+                                <SelectItem value="Pending Onboarding">Pending Onboarding</SelectItem>
+                            </SelectContent>
+                            </Select>
+                            <Link href="/admin/employees/add" className="w-full">
+                            <Button className="w-full">
+                                <UserPlus className="mr-2 h-4 w-4" />
+                                Invite
                             </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-full p-0">
-                            <Command>
-                                <CommandInput placeholder="Search branch..." />
-                                <CommandEmpty>No branches found.</CommandEmpty>
-                                <CommandGroup>
-                                    <CommandList>
-                                    {branches.map((branch) => (
-                                        <CommandItem
-                                            key={branch.id}
-                                            value={branch.shopName}
-                                            onSelect={() => {
-                                                setSelectedBranch(branch);
-                                                setOpenBranchSelector(false);
-                                            }}
-                                        >
-                                            {branch.shopName}
-                                        </CommandItem>
-                                    ))}
-                                    </CommandList>
-                                </CommandGroup>
-                            </Command>
-                        </PopoverContent>
-                    </Popover>
+                            </Link>
+                        </div>
+                        <Popover open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    role="combobox"
+                                    aria-expanded={openBranchSelector}
+                                    className="w-full justify-between"
+                                >
+                                    {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
+                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-full p-0">
+                                <Command>
+                                    <CommandInput placeholder="Search branch..." />
+                                    <CommandEmpty>No branches found.</CommandEmpty>
+                                    <CommandGroup>
+                                        <CommandList>
+                                        {branches.map((branch) => (
+                                            <CommandItem
+                                                key={branch.id}
+                                                value={branch.shopName}
+                                                onSelect={() => {
+                                                    setSelectedBranch(branch);
+                                                    setOpenBranchSelector(false);
+                                                }}
+                                            >
+                                                {branch.shopName}
+                                            </CommandItem>
+                                        ))}
+                                        </CommandList>
+                                    </CommandGroup>
+                                </Command>
+                            </PopoverContent>
+                        </Popover>
+                    </div>
                 </div>
                 
                 <TabsContent value="employees" className="mt-6">
