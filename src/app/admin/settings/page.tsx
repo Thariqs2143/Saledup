@@ -254,7 +254,7 @@ function SettingsPageContent() {
             </div>
             
             <div className="md:grid md:grid-cols-[200px_1fr] md:gap-8">
-              <TabsList className="hidden md:flex md:flex-col md:h-auto md:items-start md:gap-2 md:bg-transparent md:p-0">
+              <TabsList className="hidden md:flex md:flex-col md:h-auto md:items-start md:gap-2 md:bg-transparent md:p-0 md:sticky md:top-24">
                   <TabsTrigger value="profile" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-border hover:bg-muted hover:border-primary">
                       Profile
                   </TabsTrigger>
@@ -265,7 +265,7 @@ function SettingsPageContent() {
                       General
                   </TabsTrigger>
                   <TabsTrigger value="business" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-border hover:bg-muted hover:border-primary">
-                      Settings
+                      Business
                   </TabsTrigger>
                    <Button onClick={handleSaveSettings} className="w-full mt-4" disabled={saving}>
                       {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
@@ -497,5 +497,3 @@ export default function AdminSettingsPage() {
     </Suspense>
   );
 }
-
-    
