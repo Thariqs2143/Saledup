@@ -811,7 +811,6 @@ export default function ReportsPage() {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     
-    // State for filters, lifted up
     const [employees, setEmployees] = useState<User[]>([]);
     const [date, setDate] = useState<DateRange | undefined>(undefined);
     const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>('all');
@@ -907,14 +906,37 @@ export default function ReportsPage() {
 
     return (
         <div className="space-y-6">
-            <div className="hidden md:block">
-                <h1 className="text-3xl font-bold tracking-tight">Reports & Payroll</h1>
-                <p className="text-muted-foreground">Filter records and generate monthly salary reports.</p>
+            {/* Page Header */}
+            <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
+                <div className="hidden md:block">
+                    <h1 className="text-3xl font-bold tracking-tight">Reports &amp; Payroll</h1>
+                    <p className="text-muted-foreground">Filter records and generate monthly salary reports.</p>
+                </div>
+                <div className="hidden lg:block">
+                     <Tabs defaultValue="attendance" className="w-full">
+                        <TabsList className="h-auto items-center justify-center rounded-md p-1 grid w-full grid-cols-3 bg-primary text-primary-foreground md:inline-flex md:w-auto md:max-w-md">
+                            <TabsTrigger value="attendance" className="data-[state=active]:bg-background data-[state=active]:text-foreground"><span className="text-center text-xs sm:text-sm leading-tight">Attendance Report</span></TabsTrigger>
+                            <TabsTrigger value="muster" className="data-[state=active]:bg-background data-[state=active]:text-foreground"><span className="text-center text-xs sm:text-sm leading-tight">Muster Roll</span></TabsTrigger>
+                            <TabsTrigger value="payroll" className="data-[state=active]:bg-background data-[state=active]:text-foreground" disabled={selectedBranch.id === 'all'}><span className="text-center text-xs sm:text-sm leading-tight">Payroll Report</span></TabsTrigger>
+                        </TabsList>
+                    </Tabs>
+                </div>
             </div>
+
+             {/* Tabs for Tablet/Mobile */}
+             <div className="lg:hidden">
+                 <Tabs defaultValue="attendance" className="w-full">
+                    <TabsList className="h-auto items-center justify-center rounded-md p-1 grid w-full grid-cols-3 bg-primary text-primary-foreground md:inline-flex md:w-auto md:max-w-md">
+                        <TabsTrigger value="attendance" className="data-[state=active]:bg-background data-[state=active]:text-foreground"><span className="text-center text-xs sm:text-sm leading-tight">Attendance Report</span></TabsTrigger>
+                        <TabsTrigger value="muster" className="data-[state=active]:bg-background data-[state=active]:text-foreground"><span className="text-center text-xs sm:text-sm leading-tight">Muster Roll</span></TabsTrigger>
+                        <TabsTrigger value="payroll" className="data-[state=active]:bg-background data-[state=active]:text-foreground" disabled={selectedBranch.id === 'all'}><span className="text-center text-xs sm:text-sm leading-tight">Payroll Report</span></TabsTrigger>
+                    </TabsList>
+                </Tabs>
+             </div>
             
             {/* Desktop Filters */}
-            <div className="hidden md:flex flex-col md:flex-row items-center gap-4">
-                 <div className="w-full md:w-auto md:min-w-[200px]">
+            <div className="hidden md:flex flex-wrap items-center gap-4 p-4 rounded-lg">
+                 <div className="flex-1 min-w-[200px]">
                      <Label className="text-xs font-semibold">Branch</Label>
                      <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
                         <DialogTrigger asChild>
@@ -938,7 +960,7 @@ export default function ReportsPage() {
                         </DialogContent>
                     </Dialog>
                  </div>
-                  <div className="w-full md:w-auto md:min-w-[250px]">
+                  <div className="flex-1 min-w-[250px]">
                      <Label className="text-xs font-semibold">Date Range</Label>
                      <Popover>
                         <PopoverTrigger asChild>
@@ -952,7 +974,7 @@ export default function ReportsPage() {
                         </PopoverContent>
                     </Popover>
                   </div>
-                  <div className="w-full md:w-auto md:min-w-[200px]">
+                  <div className="flex-1 min-w-[200px]">
                     <Label htmlFor="employee-desktop" className="text-xs font-semibold">Employee</Label>
                     <Select onValueChange={setSelectedEmployeeId} value={selectedEmployeeId}>
                         <SelectTrigger id="employee-desktop" className="mt-1"><SelectValue placeholder="All Employees" /></SelectTrigger>
@@ -962,7 +984,7 @@ export default function ReportsPage() {
                         </SelectContent>
                     </Select>
                   </div>
-                  <div className="w-full md:w-auto md:min-w-[150px]">
+                  <div className="flex-1 min-w-[150px]">
                      <Label htmlFor="status-desktop" className="text-xs font-semibold">Status</Label>
                      <Select onValueChange={setSelectedStatus} value={selectedStatus}>
                         <SelectTrigger id="status-desktop" className="mt-1"><SelectValue placeholder="All Statuses" /></SelectTrigger>
@@ -979,7 +1001,7 @@ export default function ReportsPage() {
             </div>
 
             {/* Mobile Filters */}
-            <div className="md:hidden space-y-4">
+            <div className="md:hidden flex items-center gap-4">
                 <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
                     <DialogTrigger asChild>
                          <Button variant="outline" className="w-full justify-between">
@@ -1055,21 +1077,10 @@ export default function ReportsPage() {
             </div>
             
             <Tabs defaultValue="attendance" className="w-full">
-                <TabsList className="h-auto items-center justify-center rounded-md p-1 grid w-full grid-cols-3 bg-primary text-primary-foreground md:inline-flex md:w-auto md:max-w-md">
-                    <TabsTrigger value="attendance" className="data-[state=active]:bg-background data-[state=active]:text-foreground">
-                        <span className="text-center text-xs sm:text-sm leading-tight">Attendance Report</span>
-                    </TabsTrigger>
-                    <TabsTrigger value="muster" className="data-[state=active]:bg-background data-[state=active]:text-foreground">
-                        <span className="text-center text-xs sm:text-sm leading-tight">Muster Roll</span>
-                    </TabsTrigger>
-                    <TabsTrigger value="payroll" className="data-[state=active]:bg-background data-[state=active]:text-foreground" disabled={selectedBranch.id === 'all'}>
-                        <span className="text-center text-xs sm:text-sm leading-tight">Payroll Report</span>
-                    </TabsTrigger>
-                </TabsList>
-                <TabsContent value="attendance" className="mt-6">
+                <TabsContent value="attendance" className="mt-0">
                     <AttendanceReportTab allBranches={allBranches} selectedBranch={selectedBranch} authUser={authUser} date={date} selectedEmployeeId={selectedEmployeeId} selectedStatus={selectedStatus} employees={employees} />
                 </TabsContent>
-                <TabsContent value="muster" className="mt-6">
+                <TabsContent value="muster" className="mt-0">
                     {selectedBranch.id === 'all' ? (
                         <div className="text-center py-12 text-muted-foreground border rounded-lg">
                             <p>Please select an individual branch to view its Muster Roll.</p>
@@ -1078,7 +1089,7 @@ export default function ReportsPage() {
                         <MusterRollTab authUser={authUser} />
                     )}
                 </TabsContent>
-                <TabsContent value="payroll" className="mt-6">
+                <TabsContent value="payroll" className="mt-0">
                     {selectedBranch.id === 'all' ? (
                         <div className="text-center py-12 text-muted-foreground border rounded-lg">
                             <p>Please select an individual branch to generate a Payroll Report.</p>
@@ -1091,4 +1102,3 @@ export default function ReportsPage() {
         </div>
     );
 }
-
