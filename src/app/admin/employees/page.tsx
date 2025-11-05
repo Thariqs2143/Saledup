@@ -558,23 +558,27 @@ export default function ManageEmployeesPage() {
             <p className="text-muted-foreground">Manage your employees and their leave requests by branch.</p>
         </div>
         
+        {/* MOBILE VIEW */}
         <div className="md:hidden space-y-4">
             <Tabs defaultValue="employees" className="w-full">
                  <TabsList className="grid w-full grid-cols-2 bg-primary text-primary-foreground p-1 h-auto rounded-lg">
                     <TabsTrigger value="employees" className="data-[state=active]:bg-background data-[state=active]:text-foreground rounded-md py-2 transition-all duration-300">All Employees</TabsTrigger>
                     <TabsTrigger value="leave" className="data-[state=active]:bg-background data-[state=active]:text-foreground rounded-md py-2 transition-all duration-300">Leave Requests</TabsTrigger>
                 </TabsList>
+                
                  <Sheet open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
                     <SheetTrigger asChild>
-                        <Button
-                            variant="outline"
-                            role="combobox"
-                            aria-expanded={openBranchSelector}
-                            className="w-full justify-between mt-4"
-                        >
-                            {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
-                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                        </Button>
+                         <PopoverTrigger asChild>
+                            <Button
+                                variant="outline"
+                                role="combobox"
+                                aria-expanded={openBranchSelector}
+                                className="w-full justify-between mt-4"
+                            >
+                                {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
+                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                        </PopoverTrigger>
                     </SheetTrigger>
                     <SheetContent side="bottom" className="p-0 rounded-t-lg">
                         <SheetHeader className="p-4 border-b">
@@ -603,6 +607,7 @@ export default function ManageEmployeesPage() {
                     </SheetContent>
                 </Sheet>
 
+
                 <TabsContent value="employees" className="mt-6">
                     <EmployeeList allBranches={memoizedBranches} selectedBranchId={selectedBranch?.id || null} allBranchIds={allBranchIds} />
                 </TabsContent>
@@ -613,6 +618,7 @@ export default function ManageEmployeesPage() {
             </Tabs>
         </div>
         
+        {/* DESKTOP VIEW */}
         <div className="hidden md:block">
             <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
                 <DialogTrigger asChild>
