@@ -22,6 +22,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 // Types
 type DayHours = {
@@ -227,34 +228,66 @@ const PricingPlans = () => {
         ))}
       </div>
 
-      <div className="bg-white dark:bg-gray-800/50 rounded-3xl border border-gray-200 dark:border-gray-700 overflow-x-auto shadow-sm">
-        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-          <thead className="bg-gray-100 dark:bg-gray-900/50">
-            <tr>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-800 dark:text-gray-200">Feature</th>
-              {plans.map((p) => (
-                <th key={p.id} className="px-6 py-3 text-center text-sm font-semibold text-gray-800 dark:text-gray-200">{p.name}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-            {features.map((f) => (
-              <tr key={f} className="hover:bg-gray-50 dark:hover:bg-gray-900/30 transition">
-                <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 w-64">{f}</td>
+      <h3 className="text-2xl font-bold text-center mb-6 text-gray-900 dark:text-gray-100">Feature Comparison</h3>
+
+      {/* Responsive Feature Table */}
+      <div className="bg-white dark:bg-gray-800/50 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm">
+        {/* Desktop Table */}
+        <div className="hidden lg:block overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead className="bg-gray-100 dark:bg-gray-900/50">
+              <tr>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-800 dark:text-gray-200">Feature</th>
                 {plans.map((p) => (
-                  <td key={p.id} className="px-6 py-4 text-center">
-                    {p.included.has(f) ? (
-                      <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-emerald-50 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400"><CheckIcon className="w-4 h-4" /></span>
-                    ) : (
-                      <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-50 dark:bg-gray-900/50 text-gray-300 dark:text-gray-600"><XMark className="w-4 h-4" /></span>
-                    )}
-                  </td>
+                  <th key={p.id} className="px-6 py-3 text-center text-sm font-semibold text-gray-800 dark:text-gray-200">{p.name}</th>
                 ))}
               </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+              {features.map((f) => (
+                <tr key={f} className="hover:bg-gray-50 dark:hover:bg-gray-900/30 transition">
+                  <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 w-64">{f}</td>
+                  {plans.map((p) => (
+                    <td key={p.id} className="px-6 py-4 text-center">
+                      {p.included.has(f) ? (
+                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-emerald-50 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400"><CheckIcon className="w-4 h-4" /></span>
+                      ) : (
+                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-50 dark:bg-gray-900/50 text-gray-300 dark:text-gray-600"><XMark className="w-4 h-4" /></span>
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Mobile Accordion */}
+        <div className="lg:hidden p-4">
+          <Accordion type="single" collapsible className="w-full">
+            {features.map((feature) => (
+              <AccordionItem value={feature} key={feature}>
+                <AccordionTrigger>{feature}</AccordionTrigger>
+                <AccordionContent>
+                  <div className="grid grid-cols-3 gap-2 text-center">
+                    {plans.map(plan => (
+                      <div key={plan.id} className="space-y-1">
+                        <p className="text-xs font-semibold text-muted-foreground">{plan.name}</p>
+                        {plan.included.has(feature) ? (
+                          <span className="mx-auto inline-flex items-center justify-center w-7 h-7 rounded-full bg-emerald-50 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400"><CheckIcon className="w-4 h-4" /></span>
+                        ) : (
+                          <span className="mx-auto inline-flex items-center justify-center w-7 h-7 rounded-full bg-gray-50 dark:bg-gray-900/50 text-gray-300 dark:text-gray-600"><XMark className="w-4 h-4" /></span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
             ))}
-          </tbody>
-        </table>
+          </Accordion>
+        </div>
       </div>
+
 
       <div className="mt-10 text-center text-sm text-gray-600 dark:text-gray-400">
         <p>Need a custom quote or on-premise version? <a href="#contact" className="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">Contact our team</a> — we’ll tailor it for your business.</p>
@@ -397,16 +430,16 @@ function SettingsPageContent() {
              <div className="lg:grid lg:grid-cols-[220px_1fr] lg:gap-8">
                 <aside className="hidden lg:sticky lg:top-0 lg:flex lg:flex-col lg:h-screen lg:py-6 lg:pr-6">
                     <TabsList className="flex-col h-auto items-start gap-2 bg-transparent p-0">
-                        <TabsTrigger value="profile" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-foreground/20 hover:bg-muted/50 hover:border-primary transition-all duration-300 ease-out">
+                        <TabsTrigger value="profile" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-foreground/20 hover:bg-muted/50 hover:text-primary-foreground/80 hover:border-primary transition-all duration-300 ease-out">
                             Profile
                         </TabsTrigger>
-                        <TabsTrigger value="subscription" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-foreground/20 hover:bg-muted/50 hover:border-primary transition-all duration-300 ease-out">
+                        <TabsTrigger value="subscription" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-foreground/20 hover:bg-muted/50 hover:text-primary-foreground/80 hover:border-primary transition-all duration-300 ease-out">
                             Subscription
                         </TabsTrigger>
-                        <TabsTrigger value="general" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-foreground/20 hover:bg-muted/50 hover:border-primary transition-all duration-300 ease-out">
+                        <TabsTrigger value="general" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-foreground/20 hover:bg-muted/50 hover:text-primary-foreground/80 hover:border-primary transition-all duration-300 ease-out">
                             General
                         </TabsTrigger>
-                        <TabsTrigger value="business" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-foreground/20 hover:bg-muted/50 hover:border-primary transition-all duration-300 ease-out">
+                        <TabsTrigger value="business" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-foreground/20 hover:bg-muted/50 hover:text-primary-foreground/80 hover:border-primary transition-all duration-300 ease-out">
                             Business
                         </TabsTrigger>
                         <Button onClick={handleSaveSettings} className="w-full mt-4" disabled={saving}>
@@ -597,3 +630,5 @@ export default function AdminSettingsPage() {
     </Suspense>
   );
 }
+
+    
