@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { Button } from "@/components/ui/button";
@@ -233,12 +232,12 @@ const PricingPlans = () => {
       <div className="bg-white dark:bg-gray-800/50 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
         {/* Desktop Table */}
         <div className="hidden lg:block">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          <table className="min-w-full">
             <thead className="bg-gray-100 dark:bg-gray-900/50">
               <tr>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-800 dark:text-gray-200">Feature</th>
-                {plans.map((p) => (
-                  <th key={p.id} className="px-6 py-3 text-center text-sm font-semibold text-gray-800 dark:text-gray-200">{p.name}</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-800 dark:text-gray-200 rounded-tl-3xl">Feature</th>
+                {plans.map((p, index) => (
+                  <th key={p.id} className={cn("px-6 py-3 text-center text-sm font-semibold text-gray-800 dark:text-gray-200", index === plans.length - 1 && "rounded-tr-3xl")}>{p.name}</th>
                 ))}
               </tr>
             </thead>
