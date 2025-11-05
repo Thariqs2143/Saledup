@@ -25,6 +25,11 @@ const adminNavItems: NavItem[] = [
   { href: '/admin/settings', label: 'Profile', iconName: 'User' },
 ];
 
+const mobileBottomNavItems: NavItem[] = adminNavItems.filter(
+    (item) => item.label !== 'Leaderboard'
+);
+
+
 type ShopProfile = {
   shopName?: string;
   fallback?: string;
@@ -131,7 +136,7 @@ export default function AdminLayout({ children }: PropsWithChildren) {
       </div>
 
       {/* Mobile Bottom Nav + PWA */}
-      <BottomNav navItems={adminNavItems} />
+      <BottomNav navItems={mobileBottomNavItems} />
       <InstallPWA />
     </div>
   );
