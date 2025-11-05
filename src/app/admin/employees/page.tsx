@@ -522,92 +522,90 @@ export default function ManageEmployeesPage() {
             </div>
             
             {activeTab === 'employees' && (
-                <div className="space-y-4">
-                  <div className="relative w-full">
-                      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                      <Input
-                      type="search"
-                      placeholder="Search by name, role, or shop..."
-                      className="w-full rounded-lg bg-background pl-8"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      />
-                  </div>
-                  <div className="flex flex-col md:flex-row items-center gap-2">
-                      <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
-                          <DialogTrigger asChild>
-                              <Button
-                                  variant="outline"
-                                  role="combobox"
-                                  aria-expanded={openBranchSelector}
-                                  className="w-full justify-between flex-1"
-                              >
-                                  {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
-                                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                              </Button>
-                          </DialogTrigger>
-                          <DialogContent className="p-0">
-                          <DialogHeader className="p-4 border-b sr-only">
-                              <DialogTitle>Select Branch</DialogTitle>
-                          </DialogHeader>
-                          <Command className="rounded-lg border-0 shadow-none">
-                              <CommandInput placeholder="Search branch..." />
-                              <CommandEmpty>No branches found. <Link href="/admin/add-branch" className="text-primary underline">Add one now</Link>.</CommandEmpty>
-                              <CommandGroup>
-                                  <CommandList>
-                                  {branches.map((branch) => (
-                                      <CommandItem
-                                          key={branch.id}
-                                          value={branch.shopName}
-                                          onSelect={() => {
-                                              setSelectedBranch(branch);
-                                              setOpenBranchSelector(false);
-                                          }}
-                                          className="py-3"
-                                      >
-                                          {branch.shopName}
-                                      </CommandItem>
-                                  ))}
-                                  </CommandList>
-                              </CommandGroup>
-                          </Command>
-                          </DialogContent>
-                      </Dialog>
-                      <div className="flex w-full md:w-auto items-center gap-2">
-                        <Sheet>
-                            <SheetTrigger asChild>
-                                <Button variant="outline" size="icon" className="w-full md:w-auto">
-                                    <Filter className="h-4 w-4" />
-                                    <span className="md:hidden ml-2">Filter</span>
-                                </Button>
-                            </SheetTrigger>
-                            <SheetContent side="bottom" className="h-auto">
-                                <SheetHeader>
-                                    <SheetTitle>Filter Employees</SheetTitle>
-                                </SheetHeader>
-                                <div className="py-4">
-                                  <Select value={statusFilter} onValueChange={setStatusFilter}>
-                                      <SelectTrigger className="w-full">
-                                          <SelectValue placeholder="Filter by status" />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                          <SelectItem value="all">All Statuses</SelectItem>
-                                          <SelectItem value="Active">Active</SelectItem>
-                                          <SelectItem value="Inactive">Inactive</SelectItem>
-                                          <SelectItem value="Pending Onboarding">Pending Onboarding</SelectItem>
-                                      </SelectContent>
-                                  </Select>
-                                </div>
-                            </SheetContent>
-                        </Sheet>
-                         <Link href="/admin/employees/add" className='w-full md:w-auto'>
-                            <Button className='w-full'>
-                                <UserPlus className="mr-2 h-4 w-4" />
-                                Invite
+                <div className="flex flex-col md:flex-row items-center gap-2">
+                    <div className="relative w-full flex-1">
+                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                        type="search"
+                        placeholder="Search by name, role, or shop..."
+                        className="w-full rounded-lg bg-background pl-8"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+                    <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
+                        <DialogTrigger asChild>
+                            <Button
+                                variant="outline"
+                                role="combobox"
+                                aria-expanded={openBranchSelector}
+                                className="w-full md:w-auto justify-between"
+                            >
+                                {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
+                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                             </Button>
-                        </Link>
-                      </div>
-                  </div>
+                        </DialogTrigger>
+                        <DialogContent className="p-0">
+                        <DialogHeader className="p-4 border-b sr-only">
+                            <DialogTitle>Select Branch</DialogTitle>
+                        </DialogHeader>
+                        <Command className="rounded-lg border-0 shadow-none">
+                            <CommandInput placeholder="Search branch..." />
+                            <CommandEmpty>No branches found. <Link href="/admin/add-branch" className="text-primary underline">Add one now</Link>.</CommandEmpty>
+                            <CommandGroup>
+                                <CommandList>
+                                {branches.map((branch) => (
+                                    <CommandItem
+                                        key={branch.id}
+                                        value={branch.shopName}
+                                        onSelect={() => {
+                                            setSelectedBranch(branch);
+                                            setOpenBranchSelector(false);
+                                        }}
+                                        className="py-3"
+                                    >
+                                        {branch.shopName}
+                                    </CommandItem>
+                                ))}
+                                </CommandList>
+                            </CommandGroup>
+                        </Command>
+                        </DialogContent>
+                    </Dialog>
+                    <div className="flex w-full md:w-auto items-center gap-2">
+                      <Sheet>
+                          <SheetTrigger asChild>
+                              <Button variant="outline" size="icon" className="w-full md:w-auto">
+                                  <Filter className="h-4 w-4" />
+                                  <span className="md:hidden ml-2">Filter</span>
+                              </Button>
+                          </SheetTrigger>
+                          <SheetContent side="bottom" className="h-auto">
+                              <SheetHeader>
+                                  <SheetTitle>Filter Employees</SheetTitle>
+                              </SheetHeader>
+                              <div className="py-4">
+                                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder="Filter by status" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">All Statuses</SelectItem>
+                                        <SelectItem value="Active">Active</SelectItem>
+                                        <SelectItem value="Inactive">Inactive</SelectItem>
+                                        <SelectItem value="Pending Onboarding">Pending Onboarding</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                              </div>
+                          </SheetContent>
+                      </Sheet>
+                       <Link href="/admin/employees/add" className='w-full md:w-auto'>
+                          <Button className='w-full'>
+                              <UserPlus className="mr-2 h-4 w-4" />
+                              Invite
+                          </Button>
+                      </Link>
+                    </div>
                 </div>
               )}
 
