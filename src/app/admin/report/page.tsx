@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Loader2, Calendar as CalendarIcon, Download, FileText, Check, X, Calculator, Clock4, Users, Receipt, ChevronDown, Building, ChevronsUpDown, Search, Filter, FileSpreadsheet } from "lucide-react";
+import { Loader2, Calendar as CalendarIcon, Download, FileText, Check, X, Calculator, Clock4, Users, Receipt, ChevronDown, Building, ChevronsUpDown, Search, Filter, FileSpreadsheet, Lock } from "lucide-react";
 import { collection, query, where, getDocs, orderBy, Timestamp, doc, getDoc, collectionGroup, onSnapshot } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
 import { format, subDays, getDaysInMonth, startOfMonth, endOfMonth, differenceInDays, eachDayOfInterval, startOfWeek, endOfWeek, setMonth, setYear } from 'date-fns';
@@ -31,6 +31,8 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import * as XLSX from 'xlsx';
+import { useSubscription } from '@/context/SubscriptionContext';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 
 // Extend jsPDF with autoTable
@@ -928,6 +930,10 @@ export default function ReportsPage() {
     const [selectedStatus, setSelectedStatus] = useState<string>('all');
     
     const [openBranchSelector, setOpenBranchSelector] = useState(false);
+    const { canAccessFeature } = useSubscription();
+    
+    const payrollLocked = !canAccessFeature('PAYROLL');
+    const musterLocked = !canAccessFeature('MUSTER_ROLL');
 
 
     useEffect(() => {
@@ -1025,8 +1031,12 @@ export default function ReportsPage() {
                     </div>
                      <TabsList className="h-auto items-center justify-center rounded-md p-1 grid grid-cols-3 bg-primary text-primary-foreground md:inline-flex md:max-w-md">
                         <TabsTrigger value="attendance" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Attendance</TabsTrigger>
-                        <TabsTrigger value="muster" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Muster Roll</TabsTrigger>
-                        <TabsTrigger value="payroll" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Payroll</TabsTrigger>
+                         <TabsTrigger value="muster" className="data-[state=active]:bg-background data-[state=active]:text-foreground">
+                             Muster Roll
+                         </TabsTrigger>
+                         <TabsTrigger value="payroll" className="data-[state=active]:bg-background data-[state=active]:text-foreground">
+                            Payroll
+                         </TabsTrigger>
                     </TabsList>
                 </div>
                 
@@ -1168,7 +1178,16 @@ export default function ReportsPage() {
                     <AttendanceReportTab allBranches={allBranches} selectedBranch={selectedBranch} authUser={authUser} date={date} selectedEmployeeId={selectedEmployeeId} selectedStatus={selectedStatus} employees={employees} />
                 </TabsContent>
                 <TabsContent value="muster" className="mt-6">
-                    {selectedBranch.id === 'all' ? (
+                    {musterLocked ? (
+                        <div className="text-center py-12 text-muted-foreground border rounded-lg">
+                             <Lock className="h-10 w-10 mx-auto mb-4 opacity-50"/>
+                             <p className="font-semibold">Muster Roll is a Growth Plan Feature</p>
+                             <p className="text-sm">Upgrade your plan to generate muster rolls.</p>
+                             <Link href="/admin/settings?tab=subscription">
+                                <Button variant="link" className="mt-2">View Plans</Button>
+                             </Link>
+                        </div>
+                    ) : selectedBranch.id === 'all' ? (
                         <div className="text-center py-12 text-muted-foreground border rounded-lg">
                             <p>Please select an individual branch to view its Muster Roll.</p>
                         </div>
@@ -1177,7 +1196,16 @@ export default function ReportsPage() {
                     )}
                 </TabsContent>
                 <TabsContent value="payroll" className="mt-6">
-                     {selectedBranch.id === 'all' ? (
+                     {payrollLocked ? (
+                        <div className="text-center py-12 text-muted-foreground border rounded-lg">
+                             <Lock className="h-10 w-10 mx-auto mb-4 opacity-50"/>
+                             <p className="font-semibold">Payroll is a Growth Plan Feature</p>
+                             <p className="text-sm">Upgrade your plan to generate payroll reports.</p>
+                             <Link href="/admin/settings?tab=subscription">
+                                <Button variant="link" className="mt-2">View Plans</Button>
+                             </Link>
+                        </div>
+                    ) : selectedBranch.id === 'all' ? (
                         <div className="text-center py-12 text-muted-foreground border rounded-lg">
                             <p>Please select an individual branch to generate a Payroll Report.</p>
                         </div>
