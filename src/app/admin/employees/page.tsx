@@ -144,7 +144,7 @@ const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds, searchTerm,
   
   return (
     <div className="space-y-4">
-      {/* Search and filter for Mobile */}
+      {/* Mobile View */}
       <div className="md:hidden space-y-4">
         <div className="relative w-full">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -177,7 +177,7 @@ const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds, searchTerm,
         </div>
       </div>
       
-      {/* Search and filter for Desktop */}
+      {/* Desktop View */}
       <div className="hidden md:flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="relative w-full flex-1">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -532,13 +532,42 @@ export default function ManageEmployeesPage() {
         {/* Mobile Layout */}
         <div className="md:hidden space-y-4">
              <Tabs defaultValue="employees" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 bg-primary text-primary-foreground">
-                    <TabsTrigger value="employees" className="data-[state=active]:bg-background data-[state=active]:text-foreground">All Employees</TabsTrigger>
-                    <TabsTrigger value="leave" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Leave Requests</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="employees">All Employees</TabsTrigger>
+                    <TabsTrigger value="leave">Leave Requests</TabsTrigger>
                 </TabsList>
                 
                 <div className="space-y-4 pt-4">
-                    <Popover open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
+                     <div className="relative w-full">
+                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            type="search"
+                            placeholder="Search..."
+                            className="w-full rounded-lg bg-background pl-8"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+                    <div className="flex gap-2">
+                        <Select onValueChange={() => {}}>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Filter by status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All Statuses</SelectItem>
+                            <SelectItem value="Active">Active</SelectItem>
+                            <SelectItem value="Inactive">Inactive</SelectItem>
+                            <SelectItem value="Pending Onboarding">Pending Onboarding</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Link href="/admin/employees/add" className="w-full">
+                          <Button className="w-full">
+                            <UserPlus className="mr-2 h-4 w-4" />
+                            Invite
+                          </Button>
+                        </Link>
+                    </div>
+                     <Popover open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
                         <PopoverTrigger asChild>
                             <Button
                                 variant="outline"
@@ -623,9 +652,9 @@ export default function ManageEmployeesPage() {
                 </PopoverContent>
             </Popover>
              <Tabs defaultValue="employees" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 md:max-w-md bg-primary text-primary-foreground">
-                    <TabsTrigger value="employees" className="data-[state=active]:bg-background data-[state=active]:text-foreground">All Employees</TabsTrigger>
-                    <TabsTrigger value="leave" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Leave Requests</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-2 md:max-w-md">
+                    <TabsTrigger value="employees">All Employees</TabsTrigger>
+                    <TabsTrigger value="leave">Leave Requests</TabsTrigger>
                 </TabsList>
                 <TabsContent value="employees" className="mt-6">
                     <EmployeeList allBranches={memoizedBranches} selectedBranchId={selectedBranch?.id || null} allBranchIds={allBranchIds} searchTerm={searchTerm} onSearchTermChange={setSearchTerm} />
@@ -638,5 +667,3 @@ export default function ManageEmployeesPage() {
     </div>
   );
 }
-
-    
