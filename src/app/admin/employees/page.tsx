@@ -544,12 +544,11 @@ export default function ManageEmployeesPage() {
                             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                     </DialogTrigger>
-                    <DialogContent className="p-0 bg-transparent border-0 shadow-none">
-                       <Command className="rounded-lg border shadow-md">
-                          <DialogHeader className="p-4 border-b">
-                              <DialogTitle>Select Branch</DialogTitle>
-                              <div className="sr-only">Select Branch</div>
-                          </DialogHeader>
+                    <DialogContent className="p-0">
+                       <DialogHeader className="p-4 border-b">
+                           <DialogTitle>Select Branch</DialogTitle>
+                       </DialogHeader>
+                       <Command className="rounded-lg border-0 shadow-none">
                           <CommandInput placeholder="Search branch..." />
                           <CommandEmpty>No branches found. <Link href="/admin/add-branch" className="text-primary underline">Add one now</Link>.</CommandEmpty>
                           <CommandGroup>
