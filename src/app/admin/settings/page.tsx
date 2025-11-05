@@ -191,7 +191,7 @@ const PricingPlans = () => {
 
       <div className="grid gap-8 lg:grid-cols-3 mb-14">
         {plans.map((p) => (
-          <div key={p.id} className={`relative rounded-3xl shadow-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 hover:shadow-xl transition-transform hover:-translate-y-1`}>
+          <div key={p.id} className={`relative rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 hover:shadow-xl transition-transform hover:-translate-y-1`}>
             {p.isPopular && <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10"><div className="px-4 py-1 text-sm font-semibold rounded-full bg-primary text-primary-foreground shadow-md">Most Popular</div></div>}
             <div className={`absolute top-px left-px right-px h-1.5 rounded-t-3xl bg-gradient-to-r ${p.accent}`}></div>
             <div className="p-8 flex flex-col h-full">
@@ -242,7 +242,7 @@ const PricingPlans = () => {
         <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Feature Comparison</h3>
       </div>
       
-      <div className="rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+      <div className="rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
         {/* Desktop Table */}
         <div className="hidden lg:block">
           <table className="min-w-full">

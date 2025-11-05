@@ -7,14 +7,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Store, ArrowLeft } from 'lucide-react';
+import { Loader2, Store, ArrowLeft, Lock } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { doc, setDoc, getDoc, collection } from 'firebase/firestore';
+import { doc, setDoc, getDoc, collection, getDocs, query, where } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
 import type { User } from '@/app/admin/employees/page';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { onAuthStateChanged, type User as AuthUser } from 'firebase/auth';
 import Link from 'next/link';
+import { useSubscription } from '@/context/SubscriptionContext';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export default function AddBranchPage() {
     const router = useRouter();
@@ -23,6 +25,10 @@ export default function AddBranchPage() {
     const [authUser, setAuthUser] = useState<AuthUser | null>(null);
     const [ownerProfile, setOwnerProfile] = useState<Partial<User>>({});
     const [businessType, setBusinessType] = useState('');
+    const { hasReachedBranchLimit, canAccessFeature } = useSubscription();
+    const [branchCount, setBranchCount] = useState(0);
+
+    const isLocked = !canAccessFeature('MULTI_BRANCH') || hasReachedBranchLimit(branchCount);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -34,6 +40,12 @@ export default function AddBranchPage() {
                 if (ownerSnap.exists()) {
                     setOwnerProfile(ownerSnap.data());
                 }
+
+                // Fetch current branch count
+                 const branchesQuery = query(collection(db, "shops"), where("ownerId", "==", user.uid));
+                 const branchesSnapshot = await getDocs(branchesQuery);
+                 setBranchCount(branchesSnapshot.size);
+
             } else {
                 router.replace('/admin/login');
             }
@@ -43,6 +55,16 @@ export default function AddBranchPage() {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+
+        if (isLocked) {
+            toast({
+                title: "Upgrade Required",
+                description: "You have reached your branch limit. Please upgrade your plan to add more.",
+                variant: "destructive"
+            });
+            return;
+        }
+
         setLoading(true);
 
         const formData = new FormData(e.currentTarget);
@@ -156,16 +178,33 @@ export default function AddBranchPage() {
                 </div>
             </div>
             <div className="flex justify-center pt-4">
-                <Button type="submit" size="lg" className="w-full max-w-sm" disabled={loading}>
-                    {loading && <Loader2 className="mr-2 animate-spin" />}
-                    <Store className="mr-2 h-4 w-4" />
-                    Create Branch
-                </Button>
+                {isLocked ? (
+                     <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button type="submit" size="lg" className="w-full max-w-sm" disabled>
+                                    <Lock className="mr-2 h-4 w-4" />
+                                    Create Branch
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                               <p>Upgrade your plan to add more branches.</p>
+                               <Link href="/admin/settings?tab=subscription">
+                                    <Button variant="link" size="sm" className="p-0 h-auto">View Plans</Button>
+                                </Link>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                ) : (
+                    <Button type="submit" size="lg" className="w-full max-w-sm" disabled={loading}>
+                        {loading && <Loader2 className="mr-2 animate-spin" />}
+                        <Store className="mr-2 h-4 w-4" />
+                        Create Branch
+                    </Button>
+                )}
             </div>
         </form>
       </div>
     </div>
   );
 }
-
-    

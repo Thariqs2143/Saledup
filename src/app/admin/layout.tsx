@@ -15,6 +15,8 @@ import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import type { User as AppUser } from './employees/page';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { SubscriptionProvider } from '@/context/SubscriptionContext';
+
 
 const adminNavItems: NavItem[] = [
   { href: '/admin', label: 'Home', iconName: 'LayoutDashboard' },
@@ -33,6 +35,8 @@ const mobileBottomNavItems: NavItem[] = adminNavItems.filter(
 type ShopProfile = {
   shopName?: string;
   fallback?: string;
+  subscriptionPlan?: string;
+  subscriptionStatus?: string;
 }
 
 type FullProfile = AppUser & ShopProfile;
@@ -61,7 +65,8 @@ export default function AdminLayout({ children }: PropsWithChildren) {
       if (user) {
         try {
           const userDocRef = doc(db, 'users', user.uid);
-          const shopDocRef = doc(db, 'shops', user.uid);
+          // For owner, shop ID is same as user UID
+          const shopDocRef = doc(db, 'shops', user.uid); 
 
           const [userSnap, shopSnap] = await Promise.all([
             getDoc(userDocRef),
@@ -98,46 +103,51 @@ export default function AdminLayout({ children }: PropsWithChildren) {
 
 
   return (
-    <div className="flex min-h-screen w-full">
-      {/* Sidebar (fixed) */}
-      <AdminNav navItems={adminNavItems} profile={profile} isDesktop={true} />
+    <SubscriptionProvider 
+        subscriptionPlan={profile.subscriptionPlan} 
+        subscriptionStatus={profile.subscriptionStatus}
+    >
+        <div className="flex min-h-screen w-full">
+        {/* Sidebar (fixed) */}
+        <AdminNav navItems={adminNavItems} profile={profile} isDesktop={true} />
 
-      {/* Main Content Area */}
-      <div className="flex flex-col flex-1 md:ml-64">
-        {/* Mobile Header */}
-        <header className="flex h-14 items-center gap-4 border-b bg-background px-4 md:hidden sticky top-0 z-40">
-           <Sheet>
-            <SheetTrigger asChild>
-              <Button size="icon" variant="ghost" className="sm:hidden">
-                <PanelLeft className="h-5 w-5" />
-                <span className="sr-only">Toggle Menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="sm:max-w-xs p-0">
-               <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-               <AdminNav navItems={adminNavItems} profile={profile} isDesktop={false} />
-            </SheetContent>
-          </Sheet>
-          <h1 className="font-bold text-xl text-primary">Attendry</h1>
-          <div className="ml-auto flex items-center gap-2">
-            <Link href="/admin/notifications">
-              <Button variant="ghost" size="icon">
-                <Bell className="h-5 w-5" />
-                <span className="sr-only">Notifications</span>
-              </Button>
-            </Link>
-          </div>
-        </header>
+        {/* Main Content Area */}
+        <div className="flex flex-col flex-1 md:ml-64">
+            {/* Mobile Header */}
+            <header className="flex h-14 items-center gap-4 border-b bg-background px-4 md:hidden sticky top-0 z-40">
+            <Sheet>
+                <SheetTrigger asChild>
+                <Button size="icon" variant="ghost" className="sm:hidden">
+                    <PanelLeft className="h-5 w-5" />
+                    <span className="sr-only">Toggle Menu</span>
+                </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="sm:max-w-xs p-0">
+                <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+                <AdminNav navItems={adminNavItems} profile={profile} isDesktop={false} />
+                </SheetContent>
+            </Sheet>
+            <h1 className="font-bold text-xl text-primary">Attendry</h1>
+            <div className="ml-auto flex items-center gap-2">
+                <Link href="/admin/notifications">
+                <Button variant="ghost" size="icon">
+                    <Bell className="h-5 w-5" />
+                    <span className="sr-only">Notifications</span>
+                </Button>
+                </Link>
+            </div>
+            </header>
 
-        {/* Main Page */}
-        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 pb-20 md:pb-6">
-          {children}
-        </main>
-      </div>
+            {/* Main Page */}
+            <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 pb-20 md:pb-6">
+            {children}
+            </main>
+        </div>
 
-      {/* Mobile Bottom Nav + PWA */}
-      <BottomNav navItems={mobileBottomNavItems} />
-      <InstallPWA />
-    </div>
+        {/* Mobile Bottom Nav + PWA */}
+        <BottomNav navItems={mobileBottomNavItems} />
+        <InstallPWA />
+        </div>
+    </SubscriptionProvider>
   );
 }
