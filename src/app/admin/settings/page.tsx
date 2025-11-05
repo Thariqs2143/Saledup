@@ -253,13 +253,13 @@ function SettingsPageContent() {
               </TabsList>
             </div>
             
-            <div className="hidden md:block">
+            <div className="hidden md:block mb-6">
                 <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
                 <p className="text-muted-foreground">Manage your account and shop preferences.</p>
             </div>
             
-            <div className="w-full md:grid md:grid-cols-[220px_1fr] md:gap-8">
-                <aside className="hidden md:flex md:flex-col md:sticky md:top-0 h-screen">
+            <div className="md:grid md:grid-cols-[220px_1fr] md:gap-8">
+                <aside className="hidden md:flex md:flex-col md:sticky md:top-24 h-fit">
                     <TabsList className="flex-col h-auto items-start gap-2 bg-transparent p-0">
                         <TabsTrigger value="profile" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-foreground/20 hover:bg-muted/50 hover:border-primary">
                             Profile
