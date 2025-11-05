@@ -351,29 +351,29 @@ const LeaveRequests = ({ selectedBranchId, allBranchIds }: { selectedBranchId: s
     return (
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row items-center gap-4">
-          <div className="relative flex-1 w-full">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search by employee name..."
-              className="w-full rounded-lg bg-background pl-8"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <div className="w-full sm:w-[180px]">
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="approved">Approved</SelectItem>
-                <SelectItem value="denied">Denied</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+            <div className="relative flex-1 w-full">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                type="search"
+                placeholder="Search by employee name..."
+                className="w-full rounded-lg bg-background pl-8"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                />
+            </div>
+            <div className="w-full sm:w-auto">
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full sm:w-[180px]">
+                    <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="all">All Statuses</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="approved">Approved</SelectItem>
+                    <SelectItem value="denied">Denied</SelectItem>
+                </SelectContent>
+                </Select>
+            </div>
         </div>
     
   
@@ -515,7 +515,7 @@ export default function ManageEmployeesPage() {
             <div className="mt-6">
               {activeTab === 'employees' && (
                 <div className="space-y-4">
-                  <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                  <div className="flex flex-col md:flex-row items-center justify-between gap-2">
                     <div className="relative w-full flex-1">
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input
@@ -540,7 +540,7 @@ export default function ManageEmployeesPage() {
                                 </Button>
                             </DialogTrigger>
                             <DialogContent className="p-0">
-                            <DialogHeader className="p-4 border-b">
+                            <DialogHeader className="p-4 border-b sr-only">
                                 <DialogTitle>Select Branch</DialogTitle>
                             </DialogHeader>
                             <Command className="rounded-lg border-0 shadow-none">
@@ -589,11 +589,11 @@ export default function ManageEmployeesPage() {
               )}
             </div>
 
-            <TabsContent value="employees" className="mt-6">
+            <TabsContent value="employees">
                 <EmployeeList allBranches={memoizedBranches} selectedBranchId={selectedBranch?.id || null} allBranchIds={allBranchIds} />
             </TabsContent>
 
-            <TabsContent value="leave" className="mt-6">
+            <TabsContent value="leave">
                 <LeaveRequests selectedBranchId={selectedBranch?.id || null} allBranchIds={allBranchIds} />
             </TabsContent>
         </Tabs>
@@ -604,3 +604,4 @@ export default function ManageEmployeesPage() {
     
 
     
+
