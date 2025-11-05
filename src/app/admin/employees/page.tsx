@@ -147,7 +147,6 @@ const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds }: { allBran
   
   return (
     <div className="space-y-4">
-        {/* Desktop Filters */}
         <div className="hidden md:flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="relative w-full flex-1">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -180,7 +179,6 @@ const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds }: { allBran
             </div>
         </div>
 
-        {/* Mobile Filters */}
         <div className="md:hidden space-y-4">
             <div className="relative w-full">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -192,7 +190,7 @@ const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds }: { allBran
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
             </div>
-            <div className="flex gap-2">
+             <div className="flex gap-2">
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
                     <SelectTrigger className="w-full">
                         <SelectValue placeholder="Filter by status" />
@@ -561,7 +559,7 @@ export default function ManageEmployeesPage() {
         
         <div className="md:hidden space-y-4">
             <Tabs defaultValue="employees" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 bg-primary text-primary-foreground p-1 h-auto rounded-lg">
+                 <TabsList className="grid w-full grid-cols-2 bg-primary text-primary-foreground p-1 h-auto rounded-lg">
                     <TabsTrigger value="employees" className="data-[state=active]:bg-background data-[state=active]:text-foreground rounded-md py-2 transition-all duration-300">All Employees</TabsTrigger>
                     <TabsTrigger value="leave" className="data-[state=active]:bg-background data-[state=active]:text-foreground rounded-md py-2 transition-all duration-300">Leave Requests</TabsTrigger>
                 </TabsList>
@@ -577,13 +575,13 @@ export default function ManageEmployeesPage() {
                             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                     </DialogTrigger>
-                    <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle>Select Branch</DialogTitle>
+                    <DialogContent className="p-0">
+                        <DialogHeader className="p-4 pb-0">
+                           <DialogTitle>Select Branch</DialogTitle>
                         </DialogHeader>
-                        <Command>
+                        <Command className="bg-transparent">
                             <CommandInput placeholder="Search branch..." />
-                            <CommandEmpty>No branches found.</CommandEmpty>
+                            <CommandEmpty>No branches found. <Link href="/admin/add-branch" className="text-primary underline">Add one now</Link>.</CommandEmpty>
                             <CommandGroup>
                                 <CommandList>
                                 {branches.map((branch) => (
@@ -629,9 +627,9 @@ export default function ManageEmployeesPage() {
                 </DialogTrigger>
                  <DialogContent className="p-0">
                     <DialogHeader className="p-4 pb-0">
-                        <DialogTitle className="sr-only">Select Branch</DialogTitle>
+                        <DialogTitle>Select Branch</DialogTitle>
                     </DialogHeader>
-                    <Command>
+                    <Command className="bg-transparent">
                         <CommandInput placeholder="Search branch..." />
                         <CommandEmpty>No branches found. <Link href="/admin/add-branch" className="text-primary underline">Add one now</Link>.</CommandEmpty>
                         <CommandGroup>
@@ -654,7 +652,7 @@ export default function ManageEmployeesPage() {
                 </DialogContent>
             </Dialog>
             <Tabs defaultValue="employees" className="w-full mt-4">
-                <TabsList className="grid w-full grid-cols-2 bg-primary text-primary-foreground p-1 h-auto rounded-lg md:max-w-xs">
+                 <TabsList className="grid w-full grid-cols-2 bg-primary text-primary-foreground p-1 h-auto rounded-lg md:max-w-xs">
                     <TabsTrigger value="employees" className="data-[state=active]:bg-background data-[state=active]:text-foreground rounded-md py-2 transition-all duration-300">All Employees</TabsTrigger>
                     <TabsTrigger value="leave" className="data-[state=active]:bg-background data-[state=active]:text-foreground rounded-md py-2 transition-all duration-300">Leave Requests</TabsTrigger>
                 </TabsList>
@@ -670,5 +668,3 @@ export default function ManageEmployeesPage() {
     </div>
   );
 }
-
-    
