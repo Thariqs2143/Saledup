@@ -523,7 +523,7 @@ export default function ManageEmployeesPage() {
             
             {activeTab === 'employees' && (
                 <div className="flex flex-col md:flex-row items-center gap-2">
-                    <div className="relative w-full flex-1">
+                    <div className="relative w-full">
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input
                         type="search"
@@ -539,7 +539,7 @@ export default function ManageEmployeesPage() {
                                 variant="outline"
                                 role="combobox"
                                 aria-expanded={openBranchSelector}
-                                className="w-full md:w-auto justify-between"
+                                className="w-full md:w-auto md:max-w-xs justify-between"
                             >
                                 {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
                                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
