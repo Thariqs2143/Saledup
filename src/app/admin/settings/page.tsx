@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Button } from "@/components/ui/button";
@@ -108,15 +109,16 @@ const PricingPlans = () => {
 
   const plans = [
     {
-      id: 'free',
-      name: 'Free Plan',
+      id: 'trial',
+      name: '14-Day Free Trial',
       monthly: 0,
       yearly: 0,
-      cta: 'Current Plan',
+      note: 'for 14 days',
+      cta: 'Start Free Trial',
       employees: 'Up to 5 employees',
       branches: '1 Branch',
       included: new Set(features.slice(0, 7)),
-      highlight: 'For new businesses to get started',
+      highlight: 'Try our core features, risk-free for 14 days.',
       accent: 'from-gray-500 to-gray-600 dark:from-gray-700 dark:to-gray-800'
     },
     {
@@ -124,6 +126,7 @@ const PricingPlans = () => {
       name: 'Growth',
       monthly: 499,
       yearly: 4990,
+      note: '',
       cta: 'Upgrade to Growth',
       employees: 'Up to 50 employees',
       branches: 'Up to 5 branches',
@@ -137,6 +140,7 @@ const PricingPlans = () => {
       name: 'Pro',
       monthly: 999,
       yearly: 9999,
+      note: '',
       cta: 'Upgrade to Pro',
       employees: 'Unlimited employees',
       branches: 'Unlimited branches',
@@ -184,7 +188,7 @@ const PricingPlans = () => {
                   <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{p.highlight}</p>
                 </div>
                 {p.isPopular && (
-                  <span className="px-3 py-1 text-xs font-semibold rounded-full bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary-foreground">Popular</span>
+                  <span className="px-3 py-1 text-xs font-semibold rounded-full bg-primary/10 text-primary dark:bg-primary/20">Popular</span>
                 )}
               </div>
 
@@ -195,7 +199,7 @@ const PricingPlans = () => {
                     ): (
                         <span className="text-4xl font-extrabold text-gray-900 dark:text-gray-100">₹{isYearly ? p.yearly : p.monthly}</span>
                     )}
-                    <span className="text-sm text-gray-500 dark:text-gray-400">{isYearly ? '/year' : '/month'}</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">{isYearly ? '/year' : '/month'}{p.note}</span>
                 </div>
                 {p.id === 'pro' && isYearly ? (
                   <p className="text-xs text-green-600 dark:text-green-400 font-medium mt-1">You save ₹1989 per year!</p>
@@ -225,8 +229,7 @@ const PricingPlans = () => {
       </div>
 
       <h3 className="text-2xl font-bold text-left mb-6 text-gray-900 dark:text-gray-100">Feature Comparison</h3>
-
-      {/* Responsive Feature Table */}
+      
       <div className="bg-white dark:bg-gray-800/50 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
         {/* Desktop Table */}
         <div className="hidden lg:block">
