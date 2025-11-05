@@ -349,32 +349,35 @@ const LeaveRequests = ({ selectedBranchId, allBranchIds }: { selectedBranchId: s
     };
 
     return (
-        <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row items-center gap-4">
-                <div className="relative w-full flex-1">
-                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                    type="search"
-                    placeholder="Search by employee name..."
-                    className="w-full rounded-lg bg-background pl-8"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                </div>
-                <div className="w-full sm:w-auto">
-                    <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="w-full sm:w-[180px]">
-                        <SelectValue placeholder="Filter by status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">All Statuses</SelectItem>
-                        <SelectItem value="pending">Pending</SelectItem>
-                        <SelectItem value="approved">Approved</SelectItem>
-                        <SelectItem value="denied">Denied</SelectItem>
-                    </SelectContent>
-                    </Select>
-                </div>
-            </div>
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row items-center gap-4">
+          <div className="relative flex-1 w-full">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Search by employee name..."
+              className="w-full rounded-lg bg-background pl-8"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <div className="w-full sm:w-[180px]">
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="approved">Approved</SelectItem>
+                <SelectItem value="denied">Denied</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+    
+  
+    
 
             {loading ? (
                 <div className="flex justify-center items-center h-48">
@@ -487,16 +490,27 @@ export default function ManageEmployeesPage() {
 
   return (
     <div className="flex flex-col gap-6">
-        <div className="hidden md:block">
-            <h1 className="text-3xl font-bold tracking-tight">Employees & Leave</h1>
-            <p className="text-muted-foreground">Manage your employees and their leave requests by branch.</p>
+        <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
+            <div className="hidden md:block">
+                <h1 className="text-3xl font-bold tracking-tight">Employees & Leave</h1>
+                <p className="text-muted-foreground">Manage your employees and their leave requests by branch.</p>
+            </div>
+            
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full md:w-auto">
+                <TabsList className="grid w-full grid-cols-2 bg-primary text-primary-foreground p-1 h-auto rounded-lg md:max-w-xs">
+                    <TabsTrigger value="employees" className="data-[state=active]:bg-background data-[state=active]:text-foreground rounded-md py-2 transition-all duration-300">All Employees</TabsTrigger>
+                    <TabsTrigger value="leave" className="data-[state=active]:bg-background data-[state=active]:text-foreground rounded-md py-2 transition-all duration-300">Leave Requests</TabsTrigger>
+                </TabsList>
+            </Tabs>
         </div>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 bg-primary text-primary-foreground p-1 h-auto rounded-lg md:max-w-xs">
-                <TabsTrigger value="employees" className="data-[state=active]:bg-background data-[state=active]:text-foreground rounded-md py-2 transition-all duration-300">All Employees</TabsTrigger>
-                <TabsTrigger value="leave" className="data-[state=active]:bg-background data-[state=active]:text-foreground rounded-md py-2 transition-all duration-300">Leave Requests</TabsTrigger>
-            </TabsList>
+            <div className="hidden">
+              <TabsList>
+                <TabsTrigger value="employees">All Employees</TabsTrigger>
+                <TabsTrigger value="leave">Leave Requests</TabsTrigger>
+              </TabsList>
+            </div>
             
             <div className="mt-6">
               {activeTab === 'employees' && (
@@ -532,45 +546,45 @@ export default function ManageEmployeesPage() {
                         </Link>
                     </div>
                   </div>
-                  <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
-                    <DialogTrigger asChild>
-                        <Button
-                            variant="outline"
-                            role="combobox"
-                            aria-expanded={openBranchSelector}
-                            className="w-full sm:w-[300px] justify-between"
-                        >
-                            {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
-                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="p-0">
-                       <DialogHeader className="p-4 border-b">
-                           <DialogTitle>Select Branch</DialogTitle>
-                       </DialogHeader>
-                       <Command className="rounded-lg border-0 shadow-none">
-                          <CommandInput placeholder="Search branch..." />
-                          <CommandEmpty>No branches found. <Link href="/admin/add-branch" className="text-primary underline">Add one now</Link>.</CommandEmpty>
-                          <CommandGroup>
-                              <CommandList>
-                              {branches.map((branch) => (
-                                  <CommandItem
-                                      key={branch.id}
-                                      value={branch.shopName}
-                                      onSelect={() => {
-                                          setSelectedBranch(branch);
-                                          setOpenBranchSelector(false);
-                                      }}
-                                      className="py-3"
-                                  >
-                                      {branch.shopName}
-                                  </CommandItem>
-                              ))}
-                              </CommandList>
-                          </CommandGroup>
-                      </Command>
-                    </DialogContent>
-                  </Dialog>
+                   <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
+                        <DialogTrigger asChild>
+                             <Button
+                                variant="outline"
+                                role="combobox"
+                                aria-expanded={openBranchSelector}
+                                className="w-full sm:w-[300px] justify-between"
+                            >
+                                {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
+                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className="p-0">
+                           <DialogHeader className="p-4 border-b">
+                               <DialogTitle>Select Branch</DialogTitle>
+                           </DialogHeader>
+                           <Command className="rounded-lg border-0 shadow-none">
+                              <CommandInput placeholder="Search branch..." />
+                              <CommandEmpty>No branches found. <Link href="/admin/add-branch" className="text-primary underline">Add one now</Link>.</CommandEmpty>
+                              <CommandGroup>
+                                  <CommandList>
+                                  {branches.map((branch) => (
+                                      <CommandItem
+                                          key={branch.id}
+                                          value={branch.shopName}
+                                          onSelect={() => {
+                                              setSelectedBranch(branch);
+                                              setOpenBranchSelector(false);
+                                          }}
+                                          className="py-3"
+                                      >
+                                          {branch.shopName}
+                                      </CommandItem>
+                                  ))}
+                                  </CommandList>
+                              </CommandGroup>
+                          </Command>
+                        </DialogContent>
+                    </Dialog>
                 </div>
               )}
             </div>
