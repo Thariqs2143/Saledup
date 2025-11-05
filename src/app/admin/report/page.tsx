@@ -913,72 +913,70 @@ export default function ReportsPage() {
             </div>
             
             {/* Desktop Filters */}
-            <Card className="hidden md:block">
-                 <CardContent className="p-4 flex flex-col md:flex-row items-center gap-4">
-                     <div className="w-full md:w-auto md:min-w-[200px]">
-                         <Label className="text-xs font-semibold">Branch</Label>
-                         <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
-                            <DialogTrigger asChild>
-                                <Button variant="outline" className="w-full justify-between mt-1">
-                                    <Building className="mr-2 h-4 w-4" />
-                                    {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
-                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                                <DialogHeader><DialogTitle>Select Branch</DialogTitle></DialogHeader>
-                                <BranchSelector 
-                                    open={openBranchSelector}
-                                    onOpenChange={setOpenBranchSelector}
-                                    selectedBranch={selectedBranch}
-                                    branches={allBranches}
-                                    setSelectedBranch={setSelectedBranch}
-                                    searchTerm={searchTerm}
-                                    setSearchTerm={setSearchTerm}
-                                />
-                            </DialogContent>
-                        </Dialog>
-                     </div>
-                      <div className="w-full md:w-auto md:min-w-[250px]">
-                         <Label className="text-xs font-semibold">Date Range</Label>
-                         <Popover>
-                            <PopoverTrigger asChild>
-                                <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal mt-1", !date && "text-muted-foreground")}>
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {date?.from ? (date.to ? `${format(date.from, "LLL dd, y")} - ${format(date.to, "LLL dd, y")}` : format(date.from, "LLL dd, y")) : <span>Pick a date</span>}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                                <Calendar initialFocus mode="range" defaultMonth={date?.from} selected={date} onSelect={setDate} numberOfMonths={1}/>
-                            </PopoverContent>
-                        </Popover>
-                      </div>
-                      <div className="w-full md:w-auto md:min-w-[200px]">
-                        <Label htmlFor="employee-desktop" className="text-xs font-semibold">Employee</Label>
-                        <Select onValueChange={setSelectedEmployeeId} value={selectedEmployeeId}>
-                            <SelectTrigger id="employee-desktop" className="mt-1"><SelectValue placeholder="All Employees" /></SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All Employees</SelectItem>
-                                {employees.map(emp => <SelectItem key={emp.id} value={emp.id!}>{emp.name}</SelectItem>)}
-                            </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="w-full md:w-auto md:min-w-[150px]">
-                         <Label htmlFor="status-desktop" className="text-xs font-semibold">Status</Label>
-                         <Select onValueChange={setSelectedStatus} value={selectedStatus}>
-                            <SelectTrigger id="status-desktop" className="mt-1"><SelectValue placeholder="All Statuses" /></SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All Statuses</SelectItem>
-                                <SelectItem value="On-time">On-time</SelectItem>
-                                <SelectItem value="Late">Late</SelectItem>
-                                <SelectItem value="Absent">Absent</SelectItem>
-                                <SelectItem value="Manual">Manual</SelectItem>
-                                <SelectItem value="Half-day">Half-day</SelectItem>
-                            </SelectContent>
-                        </Select>
-                      </div>
-                 </CardContent>
-            </Card>
+            <div className="hidden md:flex flex-col md:flex-row items-center gap-4 rounded-lg border bg-card text-card-foreground p-4">
+                 <div className="w-full md:w-auto md:min-w-[200px]">
+                     <Label className="text-xs font-semibold">Branch</Label>
+                     <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
+                        <DialogTrigger asChild>
+                            <Button variant="outline" className="w-full justify-between mt-1">
+                                <Building className="mr-2 h-4 w-4" />
+                                {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
+                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader><DialogTitle>Select Branch</DialogTitle></DialogHeader>
+                            <BranchSelector 
+                                open={openBranchSelector}
+                                onOpenChange={setOpenBranchSelector}
+                                selectedBranch={selectedBranch}
+                                branches={allBranches}
+                                setSelectedBranch={setSelectedBranch}
+                                searchTerm={searchTerm}
+                                setSearchTerm={setSearchTerm}
+                            />
+                        </DialogContent>
+                    </Dialog>
+                 </div>
+                  <div className="w-full md:w-auto md:min-w-[250px]">
+                     <Label className="text-xs font-semibold">Date Range</Label>
+                     <Popover>
+                        <PopoverTrigger asChild>
+                            <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal mt-1", !date && "text-muted-foreground")}>
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {date?.from ? (date.to ? `${format(date.from, "LLL dd, y")} - ${format(date.to, "LLL dd, y")}` : format(date.from, "LLL dd, y")) : <span>Pick a date</span>}
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar initialFocus mode="range" defaultMonth={date?.from} selected={date} onSelect={setDate} numberOfMonths={1}/>
+                        </PopoverContent>
+                    </Popover>
+                  </div>
+                  <div className="w-full md:w-auto md:min-w-[200px]">
+                    <Label htmlFor="employee-desktop" className="text-xs font-semibold">Employee</Label>
+                    <Select onValueChange={setSelectedEmployeeId} value={selectedEmployeeId}>
+                        <SelectTrigger id="employee-desktop" className="mt-1"><SelectValue placeholder="All Employees" /></SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Employees</SelectItem>
+                            {employees.map(emp => <SelectItem key={emp.id} value={emp.id!}>{emp.name}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="w-full md:w-auto md:min-w-[150px]">
+                     <Label htmlFor="status-desktop" className="text-xs font-semibold">Status</Label>
+                     <Select onValueChange={setSelectedStatus} value={selectedStatus}>
+                        <SelectTrigger id="status-desktop" className="mt-1"><SelectValue placeholder="All Statuses" /></SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Statuses</SelectItem>
+                            <SelectItem value="On-time">On-time</SelectItem>
+                            <SelectItem value="Late">Late</SelectItem>
+                            <SelectItem value="Absent">Absent</SelectItem>
+                            <SelectItem value="Manual">Manual</SelectItem>
+                            <SelectItem value="Half-day">Half-day</SelectItem>
+                        </SelectContent>
+                    </Select>
+                  </div>
+            </div>
 
             {/* Mobile Filters */}
             <div className="md:hidden space-y-4">
@@ -1057,7 +1055,7 @@ export default function ReportsPage() {
             </div>
             
             <Tabs defaultValue="attendance" className="w-full">
-                <TabsList className="h-auto items-center justify-center rounded-md p-1 grid w-full grid-cols-3 bg-primary text-primary-foreground">
+                <TabsList className="h-auto items-center justify-center rounded-md p-1 grid w-full grid-cols-3 bg-primary text-primary-foreground md:inline-flex md:w-auto md:max-w-md">
                     <TabsTrigger value="attendance" className="data-[state=active]:bg-background data-[state=active]:text-foreground">
                         <span className="text-center text-xs sm:text-sm leading-tight">Attendance Report</span>
                     </TabsTrigger>
@@ -1093,3 +1091,4 @@ export default function ReportsPage() {
         </div>
     );
 }
+
