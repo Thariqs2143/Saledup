@@ -69,7 +69,7 @@ type Branch = {
 };
 
 
-const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds }: { allBranches: Branch[], selectedBranchId: string | null, allBranchIds: string[]}) => {
+const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds, searchTerm, statusFilter }: { allBranches: Branch[], selectedBranchId: string | null, allBranchIds: string[], searchTerm: string, statusFilter: string }) => {
   const [employees, setEmployees] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
@@ -122,6 +122,20 @@ const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds }: { allBran
     return () => unsubscribe();
   }, [selectedBranchId, toast, allBranchIds, allBranches]);
 
+  const filteredEmployees = useMemo(() => {
+    return employees.filter(employee => {
+      const searchMatch = searchTerm.toLowerCase() 
+        ? employee.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          employee.role?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          employee.shopName?.toLowerCase().includes(searchTerm.toLowerCase())
+        : true;
+      
+      const statusMatch = statusFilter !== 'all' ? employee.status === statusFilter : true;
+      
+      return searchMatch && statusMatch;
+    });
+  }, [employees, searchTerm, statusFilter]);
+
 
   const getStatusVariant = (status: User['status']) => {
     switch (status) {
@@ -145,14 +159,14 @@ const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds }: { allBran
               </CardContent>
            ) : (
           <>
-          {employees.length === 0 ? (
+          {filteredEmployees.length === 0 ? (
                <CardContent className="text-center py-12 text-muted-foreground">
                   <p>No employees found. Invite an employee to get started.</p>
               </CardContent>
           ): (
             <>
                  <div className="grid gap-4 md:hidden">
-                  {employees.map((employee) => (
+                  {filteredEmployees.map((employee) => (
                     <Card key={employee.id} className="p-4 space-y-4 bg-muted/30 hover:bg-muted/70 transition-colors">
                       <div className="flex justify-between items-start">
                         <div className="flex items-center gap-4">
@@ -214,7 +228,7 @@ const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds }: { allBran
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {employees.map((employee) => (
+                      {filteredEmployees.map((employee) => (
                         <TableRow key={employee.id}>
                           <TableCell>
                             <div className="flex items-center gap-3">
@@ -483,11 +497,6 @@ export default function ManageEmployeesPage() {
     const allBranchIds = useMemo(() => branches.filter(b => b.id !== 'all').map(b => b.id), [branches]);
     const memoizedBranches = useMemo(() => branches, [branches]);
 
-    const filteredEmployees = useMemo(() => {
-        // This is a placeholder as the filtering logic is inside EmployeeList
-        return [];
-    }, []);
-
   return (
     <div className="flex flex-col gap-6">
         <div className="lg:flex lg:justify-between lg:items-start gap-4">
@@ -524,7 +533,7 @@ export default function ManageEmployeesPage() {
                       onChange={(e) => setSearchTerm(e.target.value)}
                       />
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-col md:flex-row items-center gap-2">
                       <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
                           <DialogTrigger asChild>
                               <Button
@@ -566,8 +575,9 @@ export default function ManageEmployeesPage() {
                       </Dialog>
                       <Sheet>
                           <SheetTrigger asChild>
-                              <Button variant="outline" size="icon">
+                              <Button variant="outline" size="icon" className="w-full md:w-auto">
                                   <Filter className="h-4 w-4" />
+                                  <span className="md:hidden ml-2">Filter</span>
                               </Button>
                           </SheetTrigger>
                           <SheetContent side="bottom" className="h-auto">
@@ -589,8 +599,8 @@ export default function ManageEmployeesPage() {
                               </div>
                           </SheetContent>
                       </Sheet>
-                       <Link href="/admin/employees/add">
-                          <Button>
+                       <Link href="/admin/employees/add" className='w-full md:w-auto'>
+                          <Button className='w-full'>
                               <UserPlus className="mr-2 h-4 w-4" />
                               Invite
                           </Button>
@@ -600,7 +610,7 @@ export default function ManageEmployeesPage() {
               )}
 
             <TabsContent value="employees">
-                <EmployeeList allBranches={memoizedBranches} selectedBranchId={selectedBranch?.id || null} allBranchIds={allBranchIds} />
+                <EmployeeList allBranches={memoizedBranches} selectedBranchId={selectedBranch?.id || null} allBranchIds={allBranchIds} searchTerm={searchTerm} statusFilter={statusFilter}/>
             </TabsContent>
 
             <TabsContent value="leave">
@@ -611,4 +621,5 @@ export default function ManageEmployeesPage() {
   );
 }
 
+    
     
