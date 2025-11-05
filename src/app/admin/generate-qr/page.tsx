@@ -495,8 +495,10 @@ export default function GenerateAndEntryPage() {
             </div>
             <div className="space-y-8 lg:col-span-1">
                 <RecentActivity />
-                <QrHistory />
             </div>
+        </div>
+        <div className="w-full mt-8">
+            <QrHistory />
         </div>
     </div>
   );
