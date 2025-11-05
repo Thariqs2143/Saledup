@@ -914,13 +914,13 @@ export default function ReportsPage() {
                         <p className="text-muted-foreground mt-2">Filter records and generate monthly salary reports.</p>
                     </div>
                      <TabsList className="h-auto items-center justify-center rounded-md p-1 grid w-full grid-cols-3 bg-primary text-primary-foreground md:inline-flex md:max-w-md">
-                        <TabsTrigger value="attendance">Attendance</TabsTrigger>
-                        <TabsTrigger value="muster">Muster Roll</TabsTrigger>
-                        <TabsTrigger value="payroll">Payroll</TabsTrigger>
+                        <TabsTrigger value="attendance" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Attendance</TabsTrigger>
+                        <TabsTrigger value="muster" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Muster Roll</TabsTrigger>
+                        <TabsTrigger value="payroll" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Payroll</TabsTrigger>
                     </TabsList>
                 </div>
                 
-                 <div className="md:hidden flex flex-col items-center gap-4">
+                 <div className="flex flex-col md:hidden items-center gap-4">
                     <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
                         <DialogTrigger asChild>
                              <Button variant="outline" className="w-full justify-between flex-1">
@@ -1085,3 +1085,4 @@ export default function ReportsPage() {
         </div>
     );
 }
+
