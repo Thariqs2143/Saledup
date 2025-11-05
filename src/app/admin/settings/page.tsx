@@ -90,10 +90,8 @@ const PricingPlans = () => {
     'QR Code Check-in/out (permanent & dynamic)',
     'Manual Attendance Entry',
     'Live Attendance Dashboard',
-    'Multi-Branch Support',
-    'Employee Profiles',
     'Easy Employee Onboarding (phone number invite)',
-    'Staff Transfer Between Branches',
+    'Employee Profiles',
     'Detailed Attendance Reports (daily/weekly/monthly)',
     'Muster Roll Generation',
     'Automated Payroll Calculation',
@@ -101,6 +99,8 @@ const PricingPlans = () => {
     'Points & Rewards System',
     'Punctuality Leaderboard',
     'Achievement Badges',
+    'Multi-Branch Support',
+    'Staff Transfer Between Branches',
     'AI-Powered Weekly Briefing',
     'Smart Staffing Advisor (AI)',
     'Customizable Alerts & Notifications'
@@ -116,7 +116,20 @@ const PricingPlans = () => {
       cta: 'Start Free Trial',
       employees: 'Up to 5 employees',
       branches: '1 Branch',
-      included: new Set(features.slice(0, 7)),
+      included: new Set([
+        'QR Code Check-in/out (permanent & dynamic)',
+        'Manual Attendance Entry',
+        'Live Attendance Dashboard',
+        'Employee Profiles',
+        'Easy Employee Onboarding (phone number invite)',
+        'Detailed Attendance Reports (daily/weekly/monthly)',
+        'Muster Roll Generation',
+        'Automated Payroll Calculation',
+        'Export Reports (PDF / Excel)',
+        'Points & Rewards System',
+        'Punctuality Leaderboard',
+        'Achievement Badges',
+      ]),
       highlight: 'Try our core features, risk-free for 14 days.',
       accent: 'from-gray-500 to-gray-600 dark:from-gray-700 dark:to-gray-800'
     },
@@ -129,7 +142,7 @@ const PricingPlans = () => {
       cta: 'Upgrade to Growth',
       employees: 'Up to 50 employees',
       branches: 'Up to 5 branches',
-      included: new Set(features.slice(0, 14)),
+      included: new Set(features.filter(f => !f.includes('AI'))),
       isPopular: true,
       highlight: 'For growing businesses that need more power.',
       accent: 'from-primary to-blue-500'
@@ -179,6 +192,7 @@ const PricingPlans = () => {
       <div className="grid gap-8 lg:grid-cols-3 mb-14">
         {plans.map((p) => (
           <div key={p.id} className={`relative rounded-3xl shadow-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 hover:shadow-xl transition-transform hover:-translate-y-1`}>
+            {p.isPopular && <div className="absolute -top-3.5 left-1/2 -translate-x-1/2"><div className="px-4 py-1 text-sm font-semibold rounded-full bg-primary text-primary-foreground shadow-md">Most Popular</div></div>}
             <div className={`absolute top-0 left-0 right-0 h-1.5 rounded-t-3xl bg-gradient-to-r ${p.accent}`}></div>
             <div className="p-8 flex flex-col h-full">
               <div className="flex items-start justify-between mb-6">
@@ -186,19 +200,16 @@ const PricingPlans = () => {
                   <h3 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">{p.name}</h3>
                   <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{p.highlight}</p>
                 </div>
-                {p.isPopular && (
-                  <span className="px-3 py-1 text-xs font-semibold rounded-full bg-primary/10 text-primary dark:bg-primary/20">Popular</span>
-                )}
               </div>
 
               <div className="mb-6">
                 <div className="flex items-baseline gap-x-2">
-                    {p.monthly === 0 ? (
+                    {p.id === 'trial' ? (
                         <span className="text-4xl font-extrabold text-gray-900 dark:text-gray-100">₹0</span>
                     ): (
                         <span className="text-4xl font-extrabold text-gray-900 dark:text-gray-100">₹{isYearly ? p.yearly : p.monthly}</span>
                     )}
-                    <span className="text-sm text-gray-500 dark:text-gray-400">{isYearly ? '/year' : '/month'}{p.note}</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">{isYearly && p.id !== 'trial' ? '/year' : p.id === 'trial' ? p.note : '/month'}</span>
                 </div>
                 {p.id === 'pro' && isYearly ? (
                   <p className="text-xs text-green-600 dark:text-green-400 font-medium mt-1">You save ₹1989 per year!</p>
@@ -248,9 +259,9 @@ const PricingPlans = () => {
                   {plans.map((p) => (
                     <td key={p.id} className="px-6 py-4 text-center">
                       {p.included.has(f) ? (
-                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-emerald-50 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400"><CheckIcon className="w-4 h-4" /></span>
+                        <span className="mx-auto inline-flex items-center justify-center w-8 h-8 rounded-full bg-emerald-50 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400"><CheckIcon className="w-4 h-4" /></span>
                       ) : (
-                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-50 dark:bg-gray-900/50 text-gray-300 dark:text-gray-600"><XMark className="w-4 h-4" /></span>
+                        <span className="mx-auto inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-50 dark:bg-gray-900/50 text-gray-300 dark:text-gray-600"><XMark className="w-4 h-4" /></span>
                       )}
                     </td>
                   ))}
