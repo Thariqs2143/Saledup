@@ -22,6 +22,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format } from 'date-fns';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 
 export type User = {
@@ -144,12 +145,7 @@ const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds, searchTerm,
   
   return (
     <div className="space-y-4">
-      {/* Mobile View */}
-      <div className="md:hidden space-y-4">
-        
-      </div>
       
-      {/* Desktop View */}
       <div className="hidden md:flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="relative w-full flex-1">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -195,7 +191,6 @@ const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds, searchTerm,
               </CardContent>
           ): (
             <>
-                {/* Mobile View */}
                  <div className="grid gap-4 md:hidden">
                   {filteredEmployees.map((employee) => (
                     <Card key={employee.id} className="p-4 space-y-4 bg-muted/30 hover:bg-muted/70 transition-colors">
@@ -247,7 +242,6 @@ const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds, searchTerm,
                   ))}
                 </div>
 
-                {/* Desktop View */}
                 <div className="hidden md:block rounded-lg border">
                   <Table>
                     <TableHeader>
@@ -501,12 +495,11 @@ export default function ManageEmployeesPage() {
             <p className="text-muted-foreground">Manage your employees and their leave requests by branch.</p>
         </div>
         
-        {/* Mobile Layout */}
         <div className="md:hidden space-y-4">
              <Tabs defaultValue="employees" className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="employees">All Employees</TabsTrigger>
-                    <TabsTrigger value="leave">Leave Requests</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-2 bg-primary text-primary-foreground p-1 h-auto">
+                    <TabsTrigger value="employees" className="data-[state=active]:bg-background data-[state=active]:text-foreground rounded-sm py-2">All Employees</TabsTrigger>
+                    <TabsTrigger value="leave" className="data-[state=active]:bg-background data-[state=active]:text-foreground rounded-sm py-2">Leave Requests</TabsTrigger>
                 </TabsList>
                 
                 <div className="space-y-4 pt-4">
@@ -540,8 +533,8 @@ export default function ManageEmployeesPage() {
                             </Button>
                             </Link>
                         </div>
-                        <Popover open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
-                            <PopoverTrigger asChild>
+                        <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
+                            <DialogTrigger asChild>
                                 <Button
                                     variant="outline"
                                     role="combobox"
@@ -551,8 +544,11 @@ export default function ManageEmployeesPage() {
                                     {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
                                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                 </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-full p-0">
+                            </DialogTrigger>
+                             <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>Select Branch</DialogTitle>
+                                </DialogHeader>
                                 <Command>
                                     <CommandInput placeholder="Search branch..." />
                                     <CommandEmpty>No branches found.</CommandEmpty>
@@ -573,8 +569,8 @@ export default function ManageEmployeesPage() {
                                         </CommandList>
                                     </CommandGroup>
                                 </Command>
-                            </PopoverContent>
-                        </Popover>
+                            </DialogContent>
+                        </Dialog>
                     </div>
                 </div>
                 
@@ -587,11 +583,9 @@ export default function ManageEmployeesPage() {
             </Tabs>
         </div>
 
-
-        {/* Desktop Layout */}
          <div className="hidden md:flex flex-col gap-6">
-             <Popover open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
-                <PopoverTrigger asChild>
+            <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
+                <DialogTrigger asChild>
                     <Button
                         variant="outline"
                         role="combobox"
@@ -601,8 +595,8 @@ export default function ManageEmployeesPage() {
                         {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-full sm:w-[300px] p-0">
+                </DialogTrigger>
+                 <DialogContent className="p-0">
                     <Command>
                         <CommandInput placeholder="Search branch..." />
                         <CommandEmpty>No branches found.</CommandEmpty>
@@ -623,12 +617,12 @@ export default function ManageEmployeesPage() {
                             </CommandList>
                         </CommandGroup>
                     </Command>
-                </PopoverContent>
-            </Popover>
+                </DialogContent>
+            </Dialog>
              <Tabs defaultValue="employees" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 md:max-w-md">
-                    <TabsTrigger value="employees">All Employees</TabsTrigger>
-                    <TabsTrigger value="leave">Leave Requests</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-2 md:max-w-md bg-primary text-primary-foreground p-1 h-auto">
+                    <TabsTrigger value="employees" className="data-[state=active]:bg-background data-[state=active]:text-foreground rounded-sm py-2">All Employees</TabsTrigger>
+                    <TabsTrigger value="leave" className="data-[state=active]:bg-background data-[state=active]:text-foreground rounded-sm py-2">Leave Requests</TabsTrigger>
                 </TabsList>
                 <TabsContent value="employees" className="mt-6">
                     <EmployeeList allBranches={memoizedBranches} selectedBranchId={selectedBranch?.id || null} allBranchIds={allBranchIds} searchTerm={searchTerm} onSearchTermChange={setSearchTerm} />
