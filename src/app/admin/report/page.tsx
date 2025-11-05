@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Loader2, Calendar as CalendarIcon, Download, FileText, Check, X, Calculator, Clock4, Users, Receipt, ChevronDown, Building, ChevronsUpDown, Search, Filter } from "lucide-react";
+import { Loader2, Calendar as CalendarIcon, Download, FileText, Check, X, Calculator, Clock4, Users, Receipt, ChevronDown, Building, ChevronsUpDown, Search, Filter, FileSpreadsheet } from "lucide-react";
 import { collection, query, where, getDocs, orderBy, Timestamp, doc, getDoc, collectionGroup, onSnapshot } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
 import { format, subDays, getDaysInMonth, startOfMonth, endOfMonth, differenceInDays, eachDayOfInterval, startOfWeek, endOfWeek, setMonth, setYear } from 'date-fns';
@@ -30,6 +30,7 @@ import Link from 'next/link';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList }from "@/components/ui/command";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import * as XLSX from 'xlsx';
 
 
 // Extend jsPDF with autoTable
@@ -154,6 +155,49 @@ const AttendanceReportTab = ({ allBranches, selectedBranch, authUser, date, sele
             default: return 'default';
         }
     };
+    
+    const handleExportPDF = () => {
+        if (filteredRecords.length === 0) {
+            toast({ title: "No Data", description: "No records to export.", variant: "destructive" });
+            return;
+        }
+
+        const doc = new jsPDF();
+        doc.text(`Attendance Report for ${selectedBranch.shopName}`, 14, 15);
+        doc.text(`Date Range: ${format(date!.from!, 'dd/MM/yyyy')} - ${date!.to ? format(date!.to, 'dd/MM/yyyy') : ''}`, 14, 22);
+
+        doc.autoTable({
+            startY: 30,
+            head: [['Date', 'Employee', 'Check-in', 'Check-out', 'Status']],
+            body: filteredRecords.map(r => [
+                format(r.checkInTime.toDate(), 'dd/MM/yyyy'),
+                r.userName || 'N/A',
+                format(r.checkInTime.toDate(), 'p'),
+                r.checkOutTime ? format(r.checkOutTime.toDate(), 'p') : 'N/A',
+                r.status,
+            ]),
+        });
+        doc.save('attendance_report.pdf');
+        toast({title: "PDF Exported", description: "Attendance report has been downloaded."});
+    };
+
+    const handleExportExcel = () => {
+         if (filteredRecords.length === 0) {
+            toast({ title: "No Data", description: "No records to export.", variant: "destructive" });
+            return;
+        }
+        const worksheet = XLSX.utils.json_to_sheet(filteredRecords.map(r => ({
+            Date: format(r.checkInTime.toDate(), 'yyyy-MM-dd'),
+            Employee: r.userName || 'N/A',
+            'Check-in': format(r.checkInTime.toDate(), 'p'),
+            'Check-out': r.checkOutTime ? format(r.checkOutTime.toDate(), 'p') : 'N/A',
+            Status: r.status,
+        })));
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Attendance");
+        XLSX.writeFile(workbook, "attendance_report.xlsx");
+        toast({title: "Excel Exported", description: "Attendance report has been downloaded."});
+    };
 
     return (
         <div className="space-y-6">
@@ -162,6 +206,10 @@ const AttendanceReportTab = ({ allBranches, selectedBranch, authUser, date, sele
                     <div>
                         <h3 className="text-xl font-bold">Report Results</h3>
                         <p className="text-sm text-muted-foreground">Found {filteredRecords.length} record(s) matching your criteria.</p>
+                    </div>
+                     <div className="flex gap-2">
+                        <Button onClick={handleExportPDF} variant="outline" disabled={filteredRecords.length === 0}><FileText className="mr-2 h-4 w-4"/>PDF</Button>
+                        <Button onClick={handleExportExcel} variant="outline" disabled={filteredRecords.length === 0}><FileSpreadsheet className="mr-2 h-4 w-4"/>Excel</Button>
                     </div>
                 </div>
                 <div>
@@ -376,6 +424,51 @@ const PayrollReportTab = ({ shopData, authUser }: { shopData: ShopData, authUser
         doc.save(`PaySlip_${employeeData.employeeName}_${format(selectedDate, 'MM-yyyy')}.pdf`);
     };
 
+    const handleExportPayrollPDF = () => {
+        if (payrollData.length === 0) {
+            toast({ title: "No Data", description: "No payroll data to export.", variant: "destructive" });
+            return;
+        }
+
+        const doc = new jsPDF();
+        doc.text(`Payroll Summary for ${format(selectedDate, 'MMMM yyyy')}`, 14, 15);
+
+        doc.autoTable({
+            startY: 22,
+            head: [['Employee', 'Base (₹)', 'Bonus (₹)', 'Unpaid Leave (₹)', 'Half Day (₹)', 'Advances (₹)', 'Net Salary (₹)']],
+            body: payrollData.map(p => [
+                p.employeeName,
+                p.earnings.base.toLocaleString(),
+                p.earnings.bonus.toLocaleString(),
+                p.deductions.unpaidLeave.toLocaleString(),
+                p.deductions.halfDay.toLocaleString(),
+                p.deductions.advances.toLocaleString(),
+                p.finalSalary.toLocaleString(),
+            ]),
+        });
+        doc.save('payroll_summary.pdf');
+        toast({title: "PDF Exported", description: "Payroll summary has been downloaded."});
+    };
+
+    const handleExportPayrollExcel = () => {
+        if (payrollData.length === 0) {
+            toast({ title: "No Data", description: "No payroll data to export.", variant: "destructive" });
+            return;
+        }
+        const worksheet = XLSX.utils.json_to_sheet(payrollData.map(p => ({
+            'Employee': p.employeeName,
+            'Base Salary': p.earnings.base,
+            'Bonus': p.earnings.bonus,
+            'Unpaid Leave Deduction': p.deductions.unpaidLeave,
+            'Half Day Deduction': p.deductions.halfDay,
+            'Other Deductions': p.deductions.advances,
+            'Final Salary': p.finalSalary,
+        })));
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Payroll");
+        XLSX.writeFile(workbook, "payroll_summary.xlsx");
+        toast({title: "Excel Exported", description: "Payroll summary has been downloaded."});
+    };
 
     return (
         <div className="space-y-6">
@@ -432,6 +525,10 @@ const PayrollReportTab = ({ shopData, authUser }: { shopData: ShopData, authUser
                     <div>
                         <h3 className="text-2xl font-semibold leading-none tracking-tight">Payroll Results for {format(selectedDate, 'MMMM yyyy')}</h3>
                         <p className="text-sm text-muted-foreground mt-2">Found {payrollData.length} employee(s). You can add bonuses or deductions below.</p>
+                    </div>
+                     <div className="flex gap-2">
+                        <Button onClick={handleExportPayrollPDF} variant="outline" disabled={payrollData.length === 0}><FileText className="mr-2 h-4 w-4"/>PDF</Button>
+                        <Button onClick={handleExportPayrollExcel} variant="outline" disabled={payrollData.length === 0}><FileSpreadsheet className="mr-2 h-4 w-4"/>Excel</Button>
                     </div>
                 </div>
                 <div className="mt-4">
@@ -649,6 +746,42 @@ const MusterRollTab = ({ authUser }: { authUser: AuthUser }) => {
             default: return '';
         }
     };
+    
+    const handleExportMusterPDF = () => {
+        if (musterData.length === 0) {
+            toast({ title: "No Data", description: "No muster data to export.", variant: "destructive" });
+            return;
+        }
+        const doc = new jsPDF({ orientation: 'landscape' });
+        doc.text(`Muster Roll for ${format(selectedDate, 'MMMM yyyy')}`, 14, 15);
+        const head = [['Employee', ...daysInMonth.map(d => format(d, 'd'))]];
+        const body = musterData.map(p => [
+            p.employeeName,
+            ...daysInMonth.map(d => p.dailyStatus[d.getDate()] || 'A')
+        ]);
+        doc.autoTable({ startY: 22, head, body, styles: { fontSize: 7, cellPadding: 1 } });
+        doc.save('muster_roll.pdf');
+        toast({title: "PDF Exported", description: "Muster roll has been downloaded."});
+    };
+
+    const handleExportMusterExcel = () => {
+        if (musterData.length === 0) {
+            toast({ title: "No Data", description: "No muster data to export.", variant: "destructive" });
+            return;
+        }
+        const dataForSheet = musterData.map(p => {
+            const row: { [key: string]: string } = { 'Employee': p.employeeName };
+            daysInMonth.forEach(d => {
+                row[format(d, 'yyyy-MM-dd')] = p.dailyStatus[d.getDate()] || 'A';
+            });
+            return row;
+        });
+        const worksheet = XLSX.utils.json_to_sheet(dataForSheet);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Muster Roll");
+        XLSX.writeFile(workbook, "muster_roll.xlsx");
+        toast({title: "Excel Exported", description: "Muster roll has been downloaded."});
+    };
 
     return (
         <div className="space-y-6">
@@ -705,6 +838,10 @@ const MusterRollTab = ({ authUser }: { authUser: AuthUser }) => {
                     <div>
                         <h3 className="text-2xl font-semibold leading-none tracking-tight">Muster Roll for {format(selectedDate, 'MMMM yyyy')}</h3>
                         <p className="text-sm text-muted-foreground mt-2">P = Present, A = Absent, H = Half-day, L = On Leave</p>
+                    </div>
+                     <div className="flex gap-2">
+                        <Button onClick={handleExportMusterPDF} variant="outline" disabled={musterData.length === 0}><FileText className="mr-2 h-4 w-4"/>PDF</Button>
+                        <Button onClick={handleExportMusterExcel} variant="outline" disabled={musterData.length === 0}><FileSpreadsheet className="mr-2 h-4 w-4"/>Excel</Button>
                     </div>
                 </div>
                 <div className="mt-4">
@@ -1052,4 +1189,5 @@ export default function ReportsPage() {
         </div>
     );
 }
+
 
