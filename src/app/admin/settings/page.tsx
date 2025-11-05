@@ -13,7 +13,7 @@ import { signOut, onAuthStateChanged, type User as AuthUser } from "firebase/aut
 import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect, useState, Suspense } from "react";
-import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { collection, getDocs, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { Switch } from "@/components/ui/switch";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import type { User as AppUser } from '@/app/admin/employees/page';
@@ -23,6 +23,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { useSubscription } from "@/context/SubscriptionContext";
+import { Progress } from "@/components/ui/progress";
 
 // Types
 type DayHours = {
@@ -319,6 +321,9 @@ function SettingsPageContent() {
   const [saving, setSaving] = useState(false);
   const [notifLoading, setNotifLoading] = useState(false);
   const defaultTab = searchParams.get('tab') || 'profile';
+  const { planDetails } = useSubscription();
+  const [employeeCount, setEmployeeCount] = useState(0);
+
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -339,6 +344,10 @@ function SettingsPageContent() {
             const shopData = shopSnap.exists() ? shopSnap.data() as ShopProfile : {};
             
             setUserProfile({ ...userData, ...shopData } as FullProfile);
+            
+            const employeesSnapshot = await getDocs(collection(db, 'shops', user.uid, 'employees'));
+            setEmployeeCount(employeesSnapshot.size - 1); // -1 to exclude owner
+
 
             const settingsDocRef = doc(db, 'shops', user.uid, 'config', 'main');
             const docSnap = await getDoc(settingsDocRef);
@@ -468,7 +477,7 @@ function SettingsPageContent() {
                 </TabsList>
                 
                 {/* Profile Tab */}
-                <TabsContent value="profile">
+                <TabsContent value="profile" className="space-y-6">
                     {userProfile && (
                         <Card className="transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/20 hover:border-primary">
                             <CardHeader className="flex flex-row justify-between items-start">
@@ -532,6 +541,30 @@ function SettingsPageContent() {
                             </CardContent>
                         </Card>
                     )}
+                     <Card className="transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/20 hover:border-primary">
+                        <CardHeader>
+                            <CardTitle>Usage</CardTitle>
+                            <CardDescription>Your current plan usage.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-4">
+                                <div>
+                                    <div className="flex justify-between items-center mb-2">
+                                        <h4 className="font-semibold">Employees</h4>
+                                        <p className="text-sm text-muted-foreground">
+                                            <span className="font-bold text-foreground">{employeeCount}</span> / {planDetails.maxEmployees === Infinity ? 'Unlimited' : planDetails.maxEmployees}
+                                        </p>
+                                    </div>
+                                    <Progress value={(employeeCount / (planDetails.maxEmployees === Infinity ? employeeCount : planDetails.maxEmployees)) * 100} />
+                                </div>
+                            </div>
+                        </CardContent>
+                        <CardFooter>
+                            <Link href="/admin/employees">
+                                <Button variant="outline">Manage Employees</Button>
+                            </Link>
+                        </CardFooter>
+                    </Card>
                 </TabsContent>
 
                 <TabsContent value="subscription">
