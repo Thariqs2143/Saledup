@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Button } from "@/components/ui/button";
@@ -90,8 +91,9 @@ const PricingPlans = () => {
     'QR Code Check-in/out (permanent & dynamic)',
     'Manual Attendance Entry',
     'Live Attendance Dashboard',
-    'Multi-Branch Support',
     'Employee Profiles',
+    'Basic Daily & Weekly Reports',
+    'Multi-Branch Support',
     'Easy Employee Onboarding (phone number invite)',
     'Staff Transfer Between Branches',
     'Detailed Attendance Reports (daily/weekly/monthly)',
@@ -109,41 +111,41 @@ const PricingPlans = () => {
   const plans = [
     {
       id: 'trial',
-      name: 'Free Trial',
+      name: '14-Day Free Trial',
       monthly: 0,
       yearly: 0,
-      note: '/14 days',
+      note: '',
       cta: 'Start Free Trial',
-      employees: 'Full access (14 days)',
-      branches: 'All features unlocked',
+      employees: 'Unlimited Employees',
+      branches: 'Unlimited Branches',
       included: new Set(features),
-      highlight: 'Try everything for 14 days',
-      accent: 'from-indigo-500 to-blue-500'
+      highlight: 'Try every feature, risk-free. No credit card required.',
+      accent: 'from-gray-500 to-gray-600'
+    },
+    {
+      id: 'growth',
+      name: 'Growth',
+      monthly: 499,
+      yearly: 4990,
+      note: '',
+      cta: 'Choose Growth',
+      employees: 'Up to 50 employees',
+      branches: 'Up to 5 branches',
+      included: new Set(features.slice(0, -3)), // Excludes the last 3 (AI/Pro features)
+      highlight: 'For growing businesses that need more power and control.',
+      accent: 'from-purple-500 to-indigo-500'
     },
     {
       id: 'pro',
       name: 'Pro',
-      monthly: 499,
-      yearly: 4990,
+      monthly: 999,
+      yearly: 9999,
       note: '',
-      cta: 'Upgrade Now',
-      employees: 'Up to 100 employees',
-      branches: 'Up to 5 branches',
-      included: new Set(features.filter((_, i) => i < features.length - 1)),
-      highlight: 'Most popular for SMBs',
-      accent: 'from-purple-500 to-indigo-500'
-    },
-    {
-      id: 'enterprise',
-      name: 'Enterprise',
-      monthly: null,
-      yearly: null,
-      note: '',
-      cta: 'Contact Sales',
+      cta: 'Choose Pro',
       employees: 'Unlimited employees',
       branches: 'Unlimited branches',
       included: new Set(features),
-      highlight: 'For large multi-branch organizations',
+      highlight: 'For large organizations that require advanced AI insights.',
       accent: 'from-emerald-500 to-teal-500'
     }
   ];
@@ -163,15 +165,15 @@ const PricingPlans = () => {
   return (
     <div className="max-w-7xl mx-auto py-16 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900/50 dark:to-background">
       <div className="text-center mb-12">
-        <h2 className="text-4xl font-extrabold text-gray-900 dark:text-gray-100 tracking-tight">Simple, Transparent Pricing</h2>
-        <p className="mt-3 text-lg text-gray-600 dark:text-gray-400">Start free, explore every feature, and upgrade when you’re ready.</p>
+        <h2 className="text-4xl font-extrabold text-gray-900 dark:text-gray-100 tracking-tight">Simple, Powerful Pricing</h2>
+        <p className="mt-3 text-lg text-gray-600 dark:text-gray-400">Choose the perfect plan for your business. Start free.</p>
         <div className="mt-6 flex justify-center items-center gap-3">
           <span className={`text-sm font-medium ${!isYearly ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400'}`}>Monthly</span>
           <label className="relative inline-flex items-center cursor-pointer">
             <input type="checkbox" checked={isYearly} onChange={() => setIsYearly(!isYearly)} className="sr-only peer" />
             <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-400 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
           </label>
-          <span className={`text-sm font-medium ${isYearly ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400'}`}>Yearly <span className="text-green-600 dark:text-green-400 font-semibold">(Save 15%)</span></span>
+          <span className={`text-sm font-medium ${isYearly ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400'}`}>Yearly <span className="text-green-600 dark:text-green-400 font-semibold">(Save 2 Months)</span></span>
         </div>
       </div>
 
@@ -185,7 +187,7 @@ const PricingPlans = () => {
                   <h3 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">{p.name}</h3>
                   <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{p.highlight}</p>
                 </div>
-                {p.id === 'pro' && (
+                {p.id === 'growth' && (
                   <span className="px-3 py-1 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300">Popular</span>
                 )}
               </div>
@@ -196,11 +198,15 @@ const PricingPlans = () => {
                 ) : (
                   <>
                     <div className="flex items-baseline gap-x-2">
-                      <span className="text-4xl font-extrabold text-gray-900 dark:text-gray-100">₹{isYearly ? p.yearly : p.monthly}</span>
-                      <span className="text-sm text-gray-500 dark:text-gray-400">{p.id === 'trial' ? p.note : isYearly ? '/year' : '/month'}</span>
+                       {p.id === 'trial' ? (
+                         <span className="text-4xl font-extrabold text-gray-900 dark:text-gray-100">₹0</span>
+                       ) : (
+                         <span className="text-4xl font-extrabold text-gray-900 dark:text-gray-100">₹{isYearly ? p.yearly : p.monthly}</span>
+                       )}
+                      <span className="text-sm text-gray-500 dark:text-gray-400">{p.id !== 'trial' && (isYearly ? '/year' : '/month')}</span>
                     </div>
-                    {p.id === 'pro' && isYearly && (
-                      <p className="text-xs text-green-600 dark:text-green-400 font-medium mt-1">You save ₹998 per year!</p>
+                    {p.id !== 'trial' && isYearly && (
+                      <p className="text-xs text-green-600 dark:text-green-400 font-medium mt-1">You save ₹{p.monthly*2} per year!</p>
                     )}
                   </>
                 )}
@@ -222,7 +228,7 @@ const PricingPlans = () => {
 
               <button className={`w-full py-3 rounded-xl font-semibold text-white bg-gradient-to-r ${p.accent} hover:opacity-90 transition-all shadow-md`}>{p.cta}</button>
 
-              <p className="mt-4 text-xs text-gray-500 dark:text-gray-400 text-center">Support: {p.id === 'trial' ? 'Email only' : p.id === 'pro' ? 'Priority email & chat' : 'Dedicated account manager'}</p>
+              <p className="mt-4 text-xs text-gray-500 dark:text-gray-400 text-center">Support: {p.id === 'trial' ? 'Email only' : p.id === 'growth' ? 'Priority email & chat' : 'Dedicated account manager'}</p>
             </div>
           </div>
         ))}
@@ -422,24 +428,24 @@ function SettingsPageContent() {
   return (
     <div className="space-y-6">
         <Tabs defaultValue={defaultTab} className="w-full">
-            <div className="mb-8 hidden lg:block">
+            <div className="mb-6 lg:mb-8 hidden lg:block">
                 <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
                 <p className="text-muted-foreground">Manage your account and shop preferences.</p>
             </div>
             
              <div className="lg:grid lg:grid-cols-[220px_1fr] lg:gap-8">
-                <aside className="hidden lg:sticky lg:top-0 lg:flex lg:flex-col lg:h-screen lg:py-6 lg:pr-6">
+                <aside className="hidden lg:flex lg:flex-col lg:h-screen lg:py-6 lg:pr-6 lg:sticky lg:top-0">
                     <TabsList className="flex-col h-auto items-start gap-2 bg-transparent p-0">
-                        <TabsTrigger value="profile" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-foreground/20 hover:bg-muted/50 hover:text-primary-foreground/80 hover:border-primary transition-all duration-300 ease-out">
+                        <TabsTrigger value="profile" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-foreground/20 hover:bg-muted/50 hover:border-primary transition-all duration-300 ease-out">
                             Profile
                         </TabsTrigger>
-                        <TabsTrigger value="subscription" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-foreground/20 hover:bg-muted/50 hover:text-primary-foreground/80 hover:border-primary transition-all duration-300 ease-out">
+                        <TabsTrigger value="subscription" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-foreground/20 hover:bg-muted/50 hover:border-primary transition-all duration-300 ease-out">
                             Subscription
                         </TabsTrigger>
-                        <TabsTrigger value="general" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-foreground/20 hover:bg-muted/50 hover:text-primary-foreground/80 hover:border-primary transition-all duration-300 ease-out">
+                        <TabsTrigger value="general" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-foreground/20 hover:bg-muted/50 hover:border-primary transition-all duration-300 ease-out">
                             General
                         </TabsTrigger>
-                        <TabsTrigger value="business" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-foreground/20 hover:bg-muted/50 hover:text-primary-foreground/80 hover:border-primary transition-all duration-300 ease-out">
+                        <TabsTrigger value="business" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-foreground/20 hover:bg-muted/50 hover:border-primary transition-all duration-300 ease-out">
                             Business
                         </TabsTrigger>
                         <Button onClick={handleSaveSettings} className="w-full mt-4" disabled={saving}>
