@@ -144,6 +144,40 @@ const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds, searchTerm,
   
   return (
     <div className="space-y-4">
+      {/* Search and filter for Mobile */}
+      <div className="md:hidden space-y-4">
+        <div className="relative w-full">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+                type="search"
+                placeholder="Search..."
+                className="w-full rounded-lg bg-background pl-8"
+                value={searchTerm}
+                onChange={(e) => onSearchTermChange(e.target.value)}
+            />
+        </div>
+        <div className="flex gap-2">
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="Active">Active</SelectItem>
+                <SelectItem value="Inactive">Inactive</SelectItem>
+                <SelectItem value="Pending Onboarding">Pending Onboarding</SelectItem>
+              </SelectContent>
+            </Select>
+            <Link href="/admin/employees/add" className="w-full">
+              <Button className="w-full">
+                <UserPlus className="mr-2 h-4 w-4" />
+                Invite
+              </Button>
+            </Link>
+        </div>
+      </div>
+      
+      {/* Search and filter for Desktop */}
       <div className="hidden md:flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="relative w-full flex-1">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -502,57 +536,48 @@ export default function ManageEmployeesPage() {
                     <TabsTrigger value="employees" className="data-[state=active]:bg-background data-[state=active]:text-foreground">All Employees</TabsTrigger>
                     <TabsTrigger value="leave" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Leave Requests</TabsTrigger>
                 </TabsList>
-
-                <Card className="transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
-                    <CardHeader>
-                        <CardTitle>Select Branch</CardTitle>
-                        <Popover open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
-                            <PopoverTrigger asChild>
-                                <Button
-                                    variant="outline"
-                                    role="combobox"
-                                    aria-expanded={openBranchSelector}
-                                    className="w-full justify-between mt-2"
-                                >
-                                    {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
-                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-full p-0">
-                                <Command>
-                                    <CommandInput placeholder="Search branch..." />
-                                    <CommandEmpty>No branches found.</CommandEmpty>
-                                    <CommandGroup>
-                                        <CommandList>
-                                        {branches.map((branch) => (
-                                            <CommandItem
-                                                key={branch.id}
-                                                value={branch.shopName}
-                                                onSelect={() => {
-                                                    setSelectedBranch(branch);
-                                                    setOpenBranchSelector(false);
-                                                }}
-                                            >
-                                                {branch.shopName}
-                                            </CommandItem>
-                                        ))}
-                                        </CommandList>
-                                    </CommandGroup>
-                                </Command>
-                            </PopoverContent>
-                        </Popover>
-                    </CardHeader>
-                </Card>
-
-                <div className="relative w-full">
-                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                        type="search"
-                        placeholder="Search..."
-                        className="w-full rounded-lg bg-background pl-8"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
+                
+                <div className="space-y-4 pt-4">
+                    <Card className="transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
+                        <CardHeader>
+                            <CardTitle>Select Branch</CardTitle>
+                            <Popover open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
+                                <PopoverTrigger asChild>
+                                    <Button
+                                        variant="outline"
+                                        role="combobox"
+                                        aria-expanded={openBranchSelector}
+                                        className="w-full justify-between mt-2"
+                                    >
+                                        {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
+                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-full p-0">
+                                    <Command>
+                                        <CommandInput placeholder="Search branch..." />
+                                        <CommandEmpty>No branches found.</CommandEmpty>
+                                        <CommandGroup>
+                                            <CommandList>
+                                            {branches.map((branch) => (
+                                                <CommandItem
+                                                    key={branch.id}
+                                                    value={branch.shopName}
+                                                    onSelect={() => {
+                                                        setSelectedBranch(branch);
+                                                        setOpenBranchSelector(false);
+                                                    }}
+                                                >
+                                                    {branch.shopName}
+                                                </CommandItem>
+                                            ))}
+                                            </CommandList>
+                                        </CommandGroup>
+                                    </Command>
+                                </PopoverContent>
+                            </Popover>
+                        </CardHeader>
+                    </Card>
                 </div>
                 
                 <TabsContent value="employees" className="mt-6">
