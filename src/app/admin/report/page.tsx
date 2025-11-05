@@ -969,132 +969,100 @@ export default function ReportsPage() {
     );
 
     return (
-        <div className="space-y-6">
-            {/* Mobile View */}
-            <div className="md:hidden space-y-4">
-                <Tabs defaultValue="attendance" className="w-full">
-                    <TabsList className="h-auto items-center justify-center rounded-md p-1 grid w-full grid-cols-3 bg-primary text-primary-foreground">
-                        <TabsTrigger value="attendance" className="data-[state=active]:bg-background data-[state=active]:text-foreground">
-                             <span className="text-center text-xs leading-tight">Attendance<br/>Report</span>
-                        </TabsTrigger>
-                        <TabsTrigger value="muster" className="data-[state=active]:bg-background data-[state=active]:text-foreground">
-                            <span className="text-center text-xs leading-tight">Muster<br/>Roll</span>
-                        </TabsTrigger>
-                        <TabsTrigger value="payroll" className="data-[state=active]:bg-background data-[state=active]:text-foreground" disabled={selectedBranch.id === 'all'}>
-                            <span className="text-center text-xs leading-tight">Payroll<br/>Report</span>
-                        </TabsTrigger>
-                    </TabsList>
+        <div className="flex flex-col md:flex-row gap-6">
+            {/* Desktop Sidebar */}
+            <div className="hidden md:block md:w-80 lg:w-96 flex-shrink-0">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Filters</CardTitle>
+                        <CardDescription>Refine your report results.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        <div className="space-y-2">
+                           <Label>Branch</Label>
+                           <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
+                                <DialogTrigger asChild>{branchSelectorButton}</DialogTrigger>
+                                <DialogContent>
+                                    <DialogHeader><DialogTitle>Select Branch</DialogTitle></DialogHeader>
+                                    {branchSelectorContent}
+                                </DialogContent>
+                            </Dialog>
+                        </div>
+                        <Separator />
+                        {filtersContent}
+                    </CardContent>
+                </Card>
+            </div>
+
+            {/* Main Content Area */}
+            <div className="flex-1 min-w-0">
+                <div className="space-y-6">
+                    {/* Mobile Filters */}
+                    <div className="md:hidden space-y-4">
+                        <div className="flex flex-col gap-4 pt-4">
+                            <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
+                                <DialogTrigger asChild>{branchSelectorButton}</DialogTrigger>
+                                <DialogContent>
+                                    <DialogHeader><DialogTitle>Select Branch</DialogTitle></DialogHeader>
+                                    {branchSelectorContent}
+                                </DialogContent>
+                            </Dialog>
+                            <Sheet>
+                                <SheetTrigger asChild>
+                                    <Button variant="outline" className="w-full">
+                                        <Filter className="mr-2 h-4 w-4" />
+                                        Filter Report
+                                    </Button>
+                                </SheetTrigger>
+                                <SheetContent side="bottom">
+                                    <SheetHeader className="p-4"><SheetTitle>Report Filters</SheetTitle></SheetHeader>
+                                    <div className="px-4 pb-4">{filtersContent}</div>
+                                </SheetContent>
+                            </Sheet>
+                        </div>
+                    </div>
                     
-                    <div className="flex flex-col gap-4 pt-4">
-                        <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
-                            <DialogTrigger asChild>{branchSelectorButton}</DialogTrigger>
-                            <DialogContent>
-                                <DialogHeader><DialogTitle>Select Branch</DialogTitle></DialogHeader>
-                                {branchSelectorContent}
-                            </DialogContent>
-                        </Dialog>
-                        <Sheet>
-                            <SheetTrigger asChild>
-                                <Button variant="outline" className="w-full">
-                                    <Filter className="mr-2 h-4 w-4" />
-                                    Filter Report
-                                </Button>
-                            </SheetTrigger>
-                            <SheetContent side="bottom">
-                                <SheetHeader className="p-4"><SheetTitle>Report Filters</SheetTitle></SheetHeader>
-                                {filtersContent}
-                            </SheetContent>
-                        </Sheet>
+                    <div className="hidden md:block">
+                        <h1 className="text-3xl font-bold tracking-tight">Reports & Payroll</h1>
+                        <p className="text-muted-foreground">Filter records and generate monthly salary reports.</p>
                     </div>
 
-                    <TabsContent value="attendance" className="mt-6">
-                        <AttendanceReportTab allBranches={allBranches} selectedBranch={selectedBranch} authUser={authUser} date={date} selectedEmployeeId={selectedEmployeeId} selectedStatus={selectedStatus} employees={employees} />
-                    </TabsContent>
-                    <TabsContent value="muster" className="mt-6">
-                         {selectedBranch.id === 'all' ? (
-                            <div className="text-center py-12 text-muted-foreground border rounded-lg">
-                                <p>Please select an individual branch to view its Muster Roll.</p>
-                            </div>
-                        ) : (
-                            <MusterRollTab authUser={authUser} />
-                        )}
-                    </TabsContent>
-                    <TabsContent value="payroll" className="mt-6">
-                        {selectedBranch.id === 'all' ? (
-                             <div className="text-center py-12 text-muted-foreground border rounded-lg">
-                                <p>Please select an individual branch to generate a Payroll Report.</p>
-                            </div>
-                        ) : (
-                            <PayrollReportTab shopData={selectedBranch} authUser={authUser} />
-                        )}
-                    </TabsContent>
-                </Tabs>
-            </div>
-            
-            {/* Desktop View */}
-            <div className="hidden md:block space-y-6">
-                <h1 className="text-3xl font-bold tracking-tight">Reports & Payroll</h1>
-                <p className="text-muted-foreground">Filter records and generate monthly salary reports.</p>
-
-                <div className="flex items-center gap-4">
-                    <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
-                        <DialogTrigger asChild>{branchSelectorButton}</DialogTrigger>
-                        <DialogContent>
-                            <DialogHeader><DialogTitle>Select Branch</DialogTitle></DialogHeader>
-                            {branchSelectorContent}
-                        </DialogContent>
-                    </Dialog>
-                    
-                    <Sheet>
-                        <SheetTrigger asChild>
-                            <Button variant="outline" className="w-full md:w-auto">
-                                <Filter className="mr-2 h-4 w-4" />
-                                Filter Report
-                            </Button>
-                        </SheetTrigger>
-                        <SheetContent>
-                            <SheetHeader className="p-6 pb-0"><SheetTitle>Report Filters</SheetTitle></SheetHeader>
-                            <div className="p-6">{filtersContent}</div>
-                        </SheetContent>
-                    </Sheet>
+                    <Tabs defaultValue="attendance" className="w-full">
+                        <TabsList className="h-auto items-center justify-center rounded-md p-1 grid w-full grid-cols-3 bg-primary text-primary-foreground">
+                            <TabsTrigger value="attendance" className="data-[state=active]:bg-background data-[state=active]:text-foreground">
+                                <span className="text-center text-xs sm:text-sm leading-tight">Attendance Report</span>
+                            </TabsTrigger>
+                            <TabsTrigger value="muster" className="data-[state=active]:bg-background data-[state=active]:text-foreground">
+                                <span className="text-center text-xs sm:text-sm leading-tight">Muster Roll</span>
+                            </TabsTrigger>
+                            <TabsTrigger value="payroll" className="data-[state=active]:bg-background data-[state=active]:text-foreground" disabled={selectedBranch.id === 'all'}>
+                                <span className="text-center text-xs sm:text-sm leading-tight">Payroll Report</span>
+                            </TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="attendance" className="mt-6">
+                            <AttendanceReportTab allBranches={allBranches} selectedBranch={selectedBranch} authUser={authUser} date={date} selectedEmployeeId={selectedEmployeeId} selectedStatus={selectedStatus} employees={employees} />
+                        </TabsContent>
+                        <TabsContent value="muster" className="mt-6">
+                            {selectedBranch.id === 'all' ? (
+                                <div className="text-center py-12 text-muted-foreground border rounded-lg">
+                                    <p>Please select an individual branch to view its Muster Roll.</p>
+                                </div>
+                            ) : (
+                                <MusterRollTab authUser={authUser} />
+                            )}
+                        </TabsContent>
+                        <TabsContent value="payroll" className="mt-6">
+                            {selectedBranch.id === 'all' ? (
+                                <div className="text-center py-12 text-muted-foreground border rounded-lg">
+                                    <p>Please select an individual branch to generate a Payroll Report.</p>
+                                </div>
+                            ) : (
+                                <PayrollReportTab shopData={selectedBranch} authUser={authUser} />
+                            )}
+                        </TabsContent>
+                    </Tabs>
                 </div>
-
-                <Tabs defaultValue="attendance" className="w-full">
-                    <TabsList className="h-auto items-center justify-center rounded-md p-1 grid w-full grid-cols-3 bg-primary text-primary-foreground">
-                         <TabsTrigger value="attendance" className="data-[state=active]:bg-background data-[state=active]:text-foreground">
-                           <span>Attendance Report</span>
-                        </TabsTrigger>
-                        <TabsTrigger value="muster" className="data-[state=active]:bg-background data-[state=active]:text-foreground">
-                            <span>Muster Roll</span>
-                        </TabsTrigger>
-                        <TabsTrigger value="payroll" className="data-[state=active]:bg-background data-[state=active]:text-foreground" disabled={selectedBranch.id === 'all'}>
-                            <span>Payroll Report</span>
-                        </TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="attendance" className="mt-6">
-                        <AttendanceReportTab allBranches={allBranches} selectedBranch={selectedBranch} authUser={authUser} date={date} selectedEmployeeId={selectedEmployeeId} selectedStatus={selectedStatus} employees={employees} />
-                    </TabsContent>
-                    <TabsContent value="muster" className="mt-6">
-                        {selectedBranch.id === 'all' ? (
-                            <div className="text-center py-12 text-muted-foreground border rounded-lg">
-                                <p>Please select an individual branch to view its Muster Roll.</p>
-                            </div>
-                        ) : (
-                            <MusterRollTab authUser={authUser} />
-                        )}
-                    </TabsContent>
-                    <TabsContent value="payroll" className="mt-6">
-                        {selectedBranch.id === 'all' ? (
-                             <div className="text-center py-12 text-muted-foreground border rounded-lg">
-                                <p>Please select an individual branch to generate a Payroll Report.</p>
-                            </div>
-                        ) : (
-                            <PayrollReportTab shopData={selectedBranch} authUser={authUser} />
-                        )}
-                    </TabsContent>
-                </Tabs>
             </div>
-
         </div>
     );
 }
