@@ -255,16 +255,16 @@ function SettingsPageContent() {
             
             <div className="md:grid md:grid-cols-[200px_1fr] md:gap-8">
               <TabsList className="hidden md:flex md:flex-col md:h-auto md:items-start md:gap-2 md:bg-transparent md:p-0">
-                  <TabsTrigger value="profile" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-border">
+                  <TabsTrigger value="profile" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-border hover:bg-muted hover:border-primary">
                       Profile
                   </TabsTrigger>
-                  <TabsTrigger value="subscription" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-border">
+                  <TabsTrigger value="subscription" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-border hover:bg-muted hover:border-primary">
                       Subscription
                   </TabsTrigger>
-                  <TabsTrigger value="general" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-border">
+                  <TabsTrigger value="general" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-border hover:bg-muted hover:border-primary">
                       General
                   </TabsTrigger>
-                  <TabsTrigger value="business" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-border">
+                  <TabsTrigger value="business" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-border hover:bg-muted hover:border-primary">
                       Settings
                   </TabsTrigger>
                    <Button onClick={handleSaveSettings} className="w-full mt-4" disabled={saving}>
@@ -497,3 +497,5 @@ export default function AdminSettingsPage() {
     </Suspense>
   );
 }
+
+    
