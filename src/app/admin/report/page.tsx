@@ -395,7 +395,7 @@ const PayrollReportTab = ({ shopData, authUser }: { shopData: ShopData, authUser
 
     return (
         <div className="space-y-6">
-            <div className="space-y-2">
+            <Card className="p-6 rounded-lg border-2 border-foreground hover:border-primary transition-all duration-300 ease-out">
                 <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
                     <div className="flex-1">
                         <h3 className="text-2xl font-semibold leading-none tracking-tight">Generate Payroll</h3>
@@ -438,12 +438,12 @@ const PayrollReportTab = ({ shopData, authUser }: { shopData: ShopData, authUser
                         </div>
                         <Button onClick={handleGeneratePayroll} disabled={loading} className="w-full md:w-auto mt-auto">
                             {loading ? <Loader2 className="mr-2 animate-spin"/> : <Calculator className="mr-2"/>}
-                            Generate
+                            Generate Report
                         </Button>
                     </div>
                 </div>
-            </div>
-            <div className="space-y-4">
+            </Card>
+            <div className="p-6 rounded-lg border-2 border-foreground hover:border-primary transition-all duration-300 ease-out">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
                         <h3 className="text-2xl font-semibold leading-none tracking-tight">Payroll Results for {format(selectedDate, 'MMMM yyyy')}</h3>
@@ -678,7 +678,7 @@ const MusterRollTab = ({ authUser }: { authUser: AuthUser }) => {
 
     return (
         <div className="space-y-6">
-            <div className="space-y-2">
+            <div className="p-6 rounded-lg border-2 border-foreground hover:border-primary transition-all duration-300 ease-out">
                 <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
                     <div className="flex-1">
                         <h3 className="text-2xl font-semibold leading-none tracking-tight">Generate Muster Roll</h3>
@@ -721,12 +721,12 @@ const MusterRollTab = ({ authUser }: { authUser: AuthUser }) => {
                         </div>
                         <Button onClick={handleGenerateMuster} disabled={loading} className="w-full md:w-auto mt-auto">
                             {loading ? <Loader2 className="mr-2 animate-spin"/> : <Users className="mr-2"/>}
-                            Generate
+                            Generate Muster
                         </Button>
                     </div>
                 </div>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 p-6 rounded-lg border-2 border-foreground hover:border-primary transition-all duration-300 ease-out">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
                         <h3 className="text-2xl font-semibold leading-none tracking-tight">Muster Roll for {format(selectedDate, 'MMMM yyyy')}</h3>
@@ -739,7 +739,7 @@ const MusterRollTab = ({ authUser }: { authUser: AuthUser }) => {
                             : (
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                     {musterData.map(p => (
-                                        <Card key={p.employeeId} className="overflow-hidden border-2 border-gray-300 shadow-lg rounded-xl">
+                                        <Card key={p.employeeId} className="overflow-hidden border-2 border-foreground/20 hover:border-primary transition-all shadow-lg rounded-xl">
                                             <CardHeader className="p-4 bg-muted/50">
                                                 <CardTitle className="text-base">{p.employeeName}</CardTitle>
                                             </CardHeader>
@@ -911,9 +911,9 @@ export default function ReportsPage() {
                  <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-6">
                     <div className="flex-1 md:hidden">
                         <TabsList className="h-auto items-center justify-center rounded-md p-1 grid w-full grid-cols-3 bg-primary text-primary-foreground">
-                            <TabsTrigger value="attendance" className="data-[state=active]:bg-background data-[state=active]:text-foreground whitespace-nowrap h-12 text-sm px-3 py-1.5"><span className="text-center text-xs sm:text-sm leading-tight">Attendance Report</span></TabsTrigger>
+                            <TabsTrigger value="attendance" className="data-[state=active]:bg-background data-[state=active]:text-foreground whitespace-nowrap h-12 text-sm px-3 py-1.5"><span className="text-center text-xs sm:text-sm leading-tight">Attendance</span></TabsTrigger>
                             <TabsTrigger value="muster" className="data-[state=active]:bg-background data-[state=active]:text-foreground whitespace-nowrap h-12 text-sm px-3 py-1.5"><span className="text-center text-xs sm:text-sm leading-tight">Muster Roll</span></TabsTrigger>
-                            <TabsTrigger value="payroll" className="data-[state=active]:bg-background data-[state=active]:text-foreground whitespace-nowrap h-12 text-sm px-3 py-1.5" disabled={selectedBranch.id === 'all'}><span className="text-center text-xs sm:text-sm leading-tight">Payroll Report</span></TabsTrigger>
+                            <TabsTrigger value="payroll" className="data-[state=active]:bg-background data-[state=active]:text-foreground whitespace-nowrap h-12 text-sm px-3 py-1.5" disabled={selectedBranch.id === 'all'}><span className="text-center text-xs sm:text-sm leading-tight">Payroll</span></TabsTrigger>
                         </TabsList>
                     </div>
                      <div className="flex-1 hidden md:block">
@@ -922,14 +922,14 @@ export default function ReportsPage() {
                     </div>
                     <div className="hidden md:block">
                          <TabsList className="h-auto items-center justify-center rounded-md p-1 grid w-full grid-cols-3 bg-primary text-primary-foreground md:inline-flex md:max-w-md">
-                            <TabsTrigger value="attendance" className="data-[state=active]:bg-background data-[state=active]:text-foreground whitespace-nowrap h-12 text-sm px-3 py-1.5"><span className="text-center text-xs sm:text-sm leading-tight">Attendance Report</span></TabsTrigger>
+                            <TabsTrigger value="attendance" className="data-[state=active]:bg-background data-[state=active]:text-foreground whitespace-nowrap h-12 text-sm px-3 py-1.5"><span className="text-center text-xs sm:text-sm leading-tight">Attendance</span></TabsTrigger>
                             <TabsTrigger value="muster" className="data-[state=active]:bg-background data-[state=active]:text-foreground whitespace-nowrap h-12 text-sm px-3 py-1.5"><span className="text-center text-xs sm:text-sm leading-tight">Muster Roll</span></TabsTrigger>
-                            <TabsTrigger value="payroll" className="data-[state=active]:bg-background data-[state=active]:text-foreground whitespace-nowrap h-12 text-sm px-3 py-1.5" disabled={selectedBranch.id === 'all'}><span className="text-center text-xs sm:text-sm leading-tight">Payroll Report</span></TabsTrigger>
+                            <TabsTrigger value="payroll" className="data-[state=active]:bg-background data-[state=active]:text-foreground whitespace-nowrap h-12 text-sm px-3 py-1.5" disabled={selectedBranch.id === 'all'}><span className="text-center text-xs sm:text-sm leading-tight">Payroll</span></TabsTrigger>
                         </TabsList>
                     </div>
                 </div>
 
-                <div className="md:hidden flex items-center gap-4">
+                <div className="md:hidden flex flex-col items-center gap-4">
                     <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
                         <DialogTrigger asChild>
                              <Button variant="outline" className="w-full justify-between flex-1">
@@ -953,7 +953,7 @@ export default function ReportsPage() {
                     </Dialog>
                     <Sheet>
                         <SheetTrigger asChild>
-                            <Button variant="outline" className="flex-initial">
+                            <Button variant="outline" className="w-full">
                                 <Filter className="mr-2 h-4 w-4" />
                                 Filter
                             </Button>
