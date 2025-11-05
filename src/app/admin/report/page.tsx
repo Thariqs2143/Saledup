@@ -908,37 +908,109 @@ export default function ReportsPage() {
         <div className="space-y-6">
             <Tabs defaultValue="attendance" className="w-full">
                 {/* Desktop and Tablet Header */}
-                <div className="hidden md:block">
-                     <div className="flex justify-between items-start">
-                        <div>
-                            <h1 className="text-3xl font-bold tracking-tight">Reports &amp; Payroll</h1>
-                            <p className="text-muted-foreground">Filter records and generate monthly salary reports.</p>
-                        </div>
-                        <TabsList className="hidden lg:inline-flex h-auto items-center justify-center rounded-md p-1 bg-primary text-primary-foreground">
-                            <TabsTrigger value="attendance" className="data-[state=active]:bg-background data-[state=active]:text-foreground"><span className="text-center text-xs sm:text-sm leading-tight">Attendance Report</span></TabsTrigger>
-                            <TabsTrigger value="muster" className="data-[state=active]:bg-background data-[state=active]:text-foreground"><span className="text-center text-xs sm:text-sm leading-tight">Muster Roll</span></TabsTrigger>
-                            <TabsTrigger value="payroll" className="data-[state=active]:bg-background data-[state=active]:text-foreground" disabled={selectedBranch.id === 'all'}><span className="text-center text-xs sm:text-sm leading-tight">Payroll Report</span></TabsTrigger>
-                        </TabsList>
+                 <div className="flex justify-between items-start">
+                    <div className="hidden md:block">
+                        <h1 className="text-3xl font-bold tracking-tight">Reports &amp; Payroll</h1>
+                        <p className="text-muted-foreground">Filter records and generate monthly salary reports.</p>
                     </div>
-                     <TabsList className="mt-4 hidden md:inline-flex lg:hidden h-auto items-center justify-center rounded-md p-1 bg-primary text-primary-foreground">
-                        <TabsTrigger value="attendance" className="data-[state=active]:bg-background data-[state=active]:text-foreground"><span className="text-center text-xs sm:text-sm leading-tight">Attendance Report</span></TabsTrigger>
-                        <TabsTrigger value="muster" className="data-[state=active]:bg-background data-[state=active]:text-foreground"><span className="text-center text-xs sm:text-sm leading-tight">Muster Roll</span></TabsTrigger>
-                        <TabsTrigger value="payroll" className="data-[state=active]:bg-background data-[state=active]:text-foreground" disabled={selectedBranch.id === 'all'}><span className="text-center text-xs sm:text-sm leading-tight">Payroll Report</span></TabsTrigger>
+                    <TabsList className="hidden lg:inline-flex h-auto items-center justify-center rounded-md p-1 bg-primary text-primary-foreground">
+                        <TabsTrigger value="attendance" className="data-[state=active]:bg-background data-[state=active]:text-foreground whitespace-nowrap px-3 py-1.5 h-auto text-sm font-medium"><span className="text-center text-xs sm:text-sm leading-tight">Attendance Report</span></TabsTrigger>
+                        <TabsTrigger value="muster" className="data-[state=active]:bg-background data-[state=active]:text-foreground whitespace-nowrap px-3 py-1.5 h-auto text-sm font-medium"><span className="text-center text-xs sm:text-sm leading-tight">Muster Roll</span></TabsTrigger>
+                        <TabsTrigger value="payroll" className="data-[state=active]:bg-background data-[state=active]:text-foreground whitespace-nowrap px-3 py-1.5 h-auto text-sm font-medium" disabled={selectedBranch.id === 'all'}><span className="text-center text-xs sm:text-sm leading-tight">Payroll Report</span></TabsTrigger>
                     </TabsList>
                 </div>
+                 <TabsList className="mt-4 hidden md:inline-flex lg:hidden h-auto items-center justify-center rounded-md p-1 bg-primary text-primary-foreground">
+                    <TabsTrigger value="attendance" className="data-[state=active]:bg-background data-[state=active]:text-foreground whitespace-nowrap px-3 py-1.5 h-auto text-sm font-medium"><span className="text-center text-xs sm:text-sm leading-tight">Attendance Report</span></TabsTrigger>
+                    <TabsTrigger value="muster" className="data-[state=active]:bg-background data-[state=active]:text-foreground whitespace-nowrap px-3 py-1.5 h-auto text-sm font-medium"><span className="text-center text-xs sm:text-sm leading-tight">Muster Roll</span></TabsTrigger>
+                    <TabsTrigger value="payroll" className="data-[state=active]:bg-background data-[state=active]:text-foreground whitespace-nowrap px-3 py-1.5 h-auto text-sm font-medium" disabled={selectedBranch.id === 'all'}><span className="text-center text-xs sm:text-sm leading-tight">Payroll Report</span></TabsTrigger>
+                </TabsList>
+                
 
                 {/* Mobile Header */}
-                <div className="md:hidden">
-                    <TabsList className="mb-6 h-auto items-center justify-center rounded-md p-1 grid w-full grid-cols-3 bg-primary text-primary-foreground">
+                <div className="md:hidden space-y-4">
+                     <TabsList className="mb-6 h-auto items-center justify-center rounded-md p-1 grid w-full grid-cols-3 bg-primary text-primary-foreground">
                         <TabsTrigger value="attendance" className="data-[state=active]:bg-background data-[state=active]:text-foreground text-center text-xs leading-tight whitespace-normal h-auto py-2.5">Attendance Report</TabsTrigger>
                         <TabsTrigger value="muster" className="data-[state=active]:bg-background data-[state=active]:text-foreground text-center text-xs leading-tight whitespace-normal h-auto py-2.5">Muster Roll</TabsTrigger>
                         <TabsTrigger value="payroll" className="data-[state=active]:bg-background data-[state=active]:text-foreground text-center text-xs leading-tight whitespace-normal h-auto py-2.5" disabled={selectedBranch.id === 'all'}>Payroll Report</TabsTrigger>
                     </TabsList>
+                    <div className="flex items-center gap-4">
+                        <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
+                            <DialogTrigger asChild>
+                                 <Button variant="outline" className="w-full justify-between flex-1">
+                                    <Building className="mr-2 h-4 w-4" />
+                                    <span className="truncate">{selectedBranch ? selectedBranch.shopName : "Select a branch..."}</span>
+                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                </Button>
+                            </DialogTrigger>
+                             <DialogContent>
+                                <DialogHeader><DialogTitle>Select Branch</DialogTitle></DialogHeader>
+                                <BranchSelector 
+                                    open={openBranchSelector}
+                                    onOpenChange={setOpenBranchSelector}
+                                    selectedBranch={selectedBranch}
+                                    branches={allBranches}
+                                    setSelectedBranch={setSelectedBranch}
+                                    searchTerm={searchTerm}
+                                    setSearchTerm={setSearchTerm}
+                                />
+                            </DialogContent>
+                        </Dialog>
+                        <Sheet>
+                            <SheetTrigger asChild>
+                                <Button variant="outline" className="flex-initial">
+                                    <Filter className="mr-2 h-4 w-4" />
+                                    Filter
+                                </Button>
+                            </SheetTrigger>
+                            <SheetContent side="bottom">
+                                <SheetHeader className="p-4"><SheetTitle>Report Filters</SheetTitle></SheetHeader>
+                                <div className="px-4 pb-4 space-y-6">
+                                    <div className="space-y-2">
+                                        <Label>Date Range</Label>
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}>
+                                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                                    {date?.from ? (date.to ? `${format(date.from, "LLL dd, y")} - ${format(date.to, "LLL dd, y")}` : format(date.from, "LLL dd, y")) : <span>Pick a date</span>}
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-auto p-0" align="start">
+                                                <Calendar initialFocus mode="range" defaultMonth={date?.from} selected={date} onSelect={setDate} numberOfMonths={1}/>
+                                            </PopoverContent>
+                                        </Popover>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="employee-mobile">Employee</Label>
+                                        <Select onValueChange={setSelectedEmployeeId} value={selectedEmployeeId}>
+                                            <SelectTrigger id="employee-mobile"><SelectValue placeholder="All Employees" /></SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="all">All Employees</SelectItem>
+                                                {employees.map(emp => <SelectItem key={emp.id} value={emp.id!}>{emp.name}</SelectItem>)}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="status-mobile">Status</Label>
+                                        <Select onValueChange={setSelectedStatus} value={selectedStatus}>
+                                            <SelectTrigger id="status-mobile"><SelectValue placeholder="All Statuses" /></SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="all">All Statuses</SelectItem>
+                                                <SelectItem value="On-time">On-time</SelectItem>
+                                                <SelectItem value="Late">Late</SelectItem>
+                                                <SelectItem value="Absent">Absent</SelectItem>
+                                                <SelectItem value="Manual">Manual</SelectItem>
+                                                <SelectItem value="Half-day">Half-day</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+                            </SheetContent>
+                        </Sheet>
+                    </div>
                 </div>
-                
+
                 {/* Filters */}
-                {/* Desktop Filters */}
-                <div className="hidden md:flex flex-wrap items-center gap-4 p-4 rounded-lg">
+                <div className="hidden md:flex flex-wrap items-end gap-4 p-4 rounded-lg">
                      <div className="flex-1 min-w-[200px]">
                          <Label className="text-xs font-semibold">Branch</Label>
                          <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
@@ -949,7 +1021,7 @@ export default function ReportsPage() {
                                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                 </Button>
                             </DialogTrigger>
-                            <DialogContent>
+                             <DialogContent>
                                 <DialogHeader><DialogTitle>Select Branch</DialogTitle></DialogHeader>
                                 <BranchSelector 
                                     open={openBranchSelector}
@@ -1001,82 +1073,6 @@ export default function ReportsPage() {
                             </SelectContent>
                         </Select>
                       </div>
-                </div>
-
-                {/* Mobile Filters */}
-                <div className="md:hidden flex items-center gap-4">
-                    <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
-                        <DialogTrigger asChild>
-                             <Button variant="outline" className="w-full justify-between">
-                                <Building className="mr-2 h-4 w-4" />
-                                {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
-                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                            <DialogHeader><DialogTitle>Select Branch</DialogTitle></DialogHeader>
-                            <BranchSelector 
-                                open={openBranchSelector}
-                                onOpenChange={setOpenBranchSelector}
-                                selectedBranch={selectedBranch}
-                                branches={allBranches}
-                                setSelectedBranch={setSelectedBranch}
-                                searchTerm={searchTerm}
-                                setSearchTerm={setSearchTerm}
-                            />
-                        </DialogContent>
-                    </Dialog>
-                    <Sheet>
-                        <SheetTrigger asChild>
-                            <Button variant="outline" className="w-full">
-                                <Filter className="mr-2 h-4 w-4" />
-                                Filter Report
-                            </Button>
-                        </SheetTrigger>
-                        <SheetContent side="bottom">
-                            <SheetHeader className="p-4"><SheetTitle>Report Filters</SheetTitle></SheetHeader>
-                            <div className="px-4 pb-4 space-y-6">
-                                <div className="space-y-2">
-                                    <Label>Date Range</Label>
-                                    <Popover>
-                                        <PopoverTrigger asChild>
-                                            <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}>
-                                                <CalendarIcon className="mr-2 h-4 w-4" />
-                                                {date?.from ? (date.to ? `${format(date.from, "LLL dd, y")} - ${format(date.to, "LLL dd, y")}` : format(date.from, "LLL dd, y")) : <span>Pick a date</span>}
-                                            </Button>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-auto p-0" align="start">
-                                            <Calendar initialFocus mode="range" defaultMonth={date?.from} selected={date} onSelect={setDate} numberOfMonths={1}/>
-                                        </PopoverContent>
-                                    </Popover>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="employee-mobile">Employee</Label>
-                                    <Select onValueChange={setSelectedEmployeeId} value={selectedEmployeeId}>
-                                        <SelectTrigger id="employee-mobile"><SelectValue placeholder="All Employees" /></SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="all">All Employees</SelectItem>
-                                            {employees.map(emp => <SelectItem key={emp.id} value={emp.id!}>{emp.name}</SelectItem>)}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="status-mobile">Status</Label>
-                                    <Select onValueChange={setSelectedStatus} value={selectedStatus}>
-                                        <SelectTrigger id="status-mobile"><SelectValue placeholder="All Statuses" /></SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="all">All Statuses</SelectItem>
-                                            <SelectItem value="On-time">On-time</SelectItem>
-                                            <SelectItem value="Late">Late</SelectItem>
-                                            <SelectItem value="Absent">Absent</SelectItem>
-                                            <SelectItem value="Manual">Manual</SelectItem>
-                                            <SelectItem value="Half-day">Half-day</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            </div>
-                        </SheetContent>
-                    </Sheet>
                 </div>
 
                 <TabsContent value="attendance" className="mt-6">
