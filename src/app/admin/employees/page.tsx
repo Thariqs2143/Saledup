@@ -165,7 +165,7 @@ const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds, searchTerm,
               </CardContent>
           ): (
             <>
-                 <div className="grid gap-4 md:hidden">
+                 <div className="grid gap-4 md:grid-cols-2 lg:hidden">
                   {filteredEmployees.map((employee) => (
                     <Card key={employee.id} className="p-4 space-y-4 bg-muted/30 hover:bg-muted/70 transition-colors">
                       <div className="flex justify-between items-start">
@@ -216,7 +216,7 @@ const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds, searchTerm,
                   ))}
                 </div>
 
-                <div className="hidden md:block rounded-lg border">
+                <div className="hidden lg:block rounded-lg border">
                   <Table>
                     <TableHeader>
                       <TableRow>
