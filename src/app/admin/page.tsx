@@ -1,11 +1,10 @@
 
-
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Users, QrCode, Clock, UserCheck, UserX, TrendingUp, Loader2, BarChart3, LogOut, Activity, Sparkles, ChevronsUpDown, Building, UserPlus, CalendarOff, BrainCircuit, Eye } from "lucide-react";
+import { Users, QrCode, Clock, UserCheck, UserX, TrendingUp, Loader2, BarChart3, LogOut, Activity, Sparkles, ChevronsUpDown, Building, UserPlus, CalendarOff, BrainCircuit, Eye, Lock } from "lucide-react";
 import Link from 'next/link';
 import { AnimatedCounter } from "@/components/animated-counter";
 import { useEffect, useState, useMemo, useCallback } from "react";
@@ -26,6 +25,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { getStaffingAdvice, type StaffingAdvice } from "@/lib/staffing-logic";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from 'recharts';
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useSubscription } from "@/context/SubscriptionContext";
+import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 
 type AttendanceRecord = {
@@ -238,6 +239,9 @@ export default function AdminDashboard() {
   const router = useRouter();
   const [statFilter, setStatFilter] = useState<StatFilter>('today');
   
+  const { canAccessFeature } = useSubscription();
+  const addBranchLocked = !canAccessFeature('MULTI_BRANCH');
+
   const selectedBranchId = useMemo(() => selectedBranch?.id, [selectedBranch]);
   const allBranchIds = useMemo(() => branches.filter(b => b.id !== 'all').map(b => b.id), [branches]);
   
@@ -637,11 +641,32 @@ export default function AdminDashboard() {
                         </PopoverContent>
                     </Popover>
                     <div className="grid grid-cols-2 md:flex md:flex-row gap-4 w-full md:w-auto">
-                        <Link href="/admin/add-branch" className="w-full">
-                            <Button className="w-full">
-                                Add Branch
-                            </Button>
-                        </Link>
+                        {addBranchLocked ? (
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <div className="w-full">
+                                            <Button className="w-full" disabled>
+                                                <Lock className="mr-2 h-4 w-4" />
+                                                Add Branch
+                                            </Button>
+                                        </div>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>Upgrade your plan to add more branches.</p>
+                                        <Link href="/admin/settings?tab=subscription">
+                                            <Button variant="link" size="sm" className="p-0 h-auto">View Plans</Button>
+                                        </Link>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                        ) : (
+                             <Link href="/admin/add-branch" className="w-full">
+                                <Button className="w-full">
+                                    Add Branch
+                                </Button>
+                            </Link>
+                        )}
                         <Link href="/admin/branches" className="w-full">
                             <Button variant="outline" className="w-full">
                                 View Branches
