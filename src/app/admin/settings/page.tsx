@@ -243,8 +243,16 @@ function SettingsPageContent() {
 
   return (
     <div className="space-y-6">
-        <Tabs defaultValue={defaultTab} className="w-full" orientation="vertical">
-            <div className="md:grid md:grid-cols-3 md:gap-8">
+        <Tabs defaultValue={defaultTab} className="w-full">
+            <div className="md:hidden">
+              <TabsList className="grid w-full grid-cols-4">
+                  <TabsTrigger value="profile"><UserIcon className="h-5 w-5"/></TabsTrigger>
+                  <TabsTrigger value="subscription"><Crown className="h-5 w-5"/></TabsTrigger>
+                  <TabsTrigger value="general"><SettingsIcon className="h-5 w-5"/></TabsTrigger>
+                  <TabsTrigger value="business"><Building className="h-5 w-5"/></TabsTrigger>
+              </TabsList>
+            </div>
+            <div className="hidden md:grid md:grid-cols-3 md:gap-8">
               <div className="md:col-span-1">
                 <TabsList className="w-full flex-col h-auto items-start gap-2 bg-transparent p-0">
                     <TabsTrigger value="profile" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-border">
@@ -490,5 +498,3 @@ export default function AdminSettingsPage() {
     </Suspense>
   );
 }
-
-    
