@@ -23,6 +23,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
 
 export type User = {
@@ -563,22 +564,22 @@ export default function ManageEmployeesPage() {
                     <TabsTrigger value="employees" className="data-[state=active]:bg-background data-[state=active]:text-foreground rounded-md py-2 transition-all duration-300">All Employees</TabsTrigger>
                     <TabsTrigger value="leave" className="data-[state=active]:bg-background data-[state=active]:text-foreground rounded-md py-2 transition-all duration-300">Leave Requests</TabsTrigger>
                 </TabsList>
-                 <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
-                    <DialogTrigger asChild>
+                 <Sheet open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
+                    <SheetTrigger asChild>
                         <Button
                             variant="outline"
                             role="combobox"
                             aria-expanded={openBranchSelector}
-                            className="w-full justify-between"
+                            className="w-full justify-between mt-4"
                         >
                             {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
                             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
-                    </DialogTrigger>
-                    <DialogContent className="p-0">
-                        <DialogHeader className="p-4 pb-0">
-                           <DialogTitle>Select Branch</DialogTitle>
-                        </DialogHeader>
+                    </SheetTrigger>
+                    <SheetContent side="bottom" className="p-0 rounded-t-lg">
+                        <SheetHeader className="p-4 border-b">
+                           <SheetTitle>Select Branch</SheetTitle>
+                        </SheetHeader>
                         <Command className="bg-transparent">
                             <CommandInput placeholder="Search branch..." />
                             <CommandEmpty>No branches found. <Link href="/admin/add-branch" className="text-primary underline">Add one now</Link>.</CommandEmpty>
@@ -599,8 +600,8 @@ export default function ManageEmployeesPage() {
                                 </CommandList>
                             </CommandGroup>
                         </Command>
-                    </DialogContent>
-                </Dialog>
+                    </SheetContent>
+                </Sheet>
 
                 <TabsContent value="employees" className="mt-6">
                     <EmployeeList allBranches={memoizedBranches} selectedBranchId={selectedBranch?.id || null} allBranchIds={allBranchIds} />
@@ -626,7 +627,7 @@ export default function ManageEmployeesPage() {
                     </Button>
                 </DialogTrigger>
                  <DialogContent className="p-0">
-                    <DialogHeader className="p-4 pb-0">
+                    <DialogHeader className="p-4 border-b">
                         <DialogTitle>Select Branch</DialogTitle>
                     </DialogHeader>
                     <Command className="bg-transparent">
