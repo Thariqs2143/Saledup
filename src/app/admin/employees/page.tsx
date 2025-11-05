@@ -193,7 +193,7 @@ const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds }: { allBran
                 {/* Mobile View */}
                  <div className="grid gap-4 md:hidden">
                   {filteredEmployees.map((employee) => (
-                    <Card key={employee.id} className="p-4 space-y-4 shadow-lg">
+                    <Card key={employee.id} className="p-4 space-y-4 bg-muted/30 hover:bg-muted/70 transition-colors">
                       <div className="flex justify-between items-start">
                         <div className="flex items-center gap-4">
                           <Avatar className="h-12 w-12 border-2 border-muted">
