@@ -394,12 +394,10 @@ const PayrollReportTab = ({ shopData, authUser }: { shopData: ShopData, authUser
 
     return (
         <div className="space-y-6">
-            <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
-                <div className="flex flex-col space-y-1.5 p-6">
-                    <h3 className="text-2xl font-semibold leading-none tracking-tight">Generate Payroll</h3>
-                    <p className="text-sm text-muted-foreground">Select a month to calculate salaries for all employees based on their base pay and leave.</p>
-                </div>
-                <div className="p-6 pt-0 flex flex-col sm:flex-row items-center gap-4">
+            <div className="p-6 rounded-lg border-2 border-foreground hover:border-primary transition-all duration-300 ease-out">
+                <h3 className="text-2xl font-semibold leading-none tracking-tight">Generate Payroll</h3>
+                <p className="text-sm text-muted-foreground mt-2">Select a month to calculate salaries for all employees based on their base pay and leave.</p>
+                <div className="mt-4 flex flex-col sm:flex-row items-center gap-4">
                     <div className="space-y-2 w-full">
                         <Label>Select Year</Label>
                         <Select
@@ -440,25 +438,23 @@ const PayrollReportTab = ({ shopData, authUser }: { shopData: ShopData, authUser
                     </Button>
                 </div>
             </div>
-            <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
-                <div className="p-6">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                        <div>
-                            <h3 className="text-2xl font-semibold leading-none tracking-tight">Payroll Results for {format(selectedDate, 'MMMM yyyy')}</h3>
-                            <p className="text-sm text-muted-foreground">Found {payrollData.length} employee(s). You can add bonuses or deductions below.</p>
-                        </div>
-                        {!isProTier && (
-                             <div className="w-full sm:w-auto text-sm text-muted-foreground border p-2 rounded-md flex items-center gap-2">
-                                <Lock className="h-4 w-4" />
-                                <div>
-                                    Export is a Pro feature.
-                                    <Link href="/admin/subscription" className="font-bold text-primary underline ml-1">Upgrade</Link>
-                                </div>
-                            </div>
-                        )}
+            <div className="p-6 rounded-lg border-2 border-foreground hover:border-primary transition-all duration-300 ease-out">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h3 className="text-2xl font-semibold leading-none tracking-tight">Payroll Results for {format(selectedDate, 'MMMM yyyy')}</h3>
+                        <p className="text-sm text-muted-foreground mt-2">Found {payrollData.length} employee(s). You can add bonuses or deductions below.</p>
                     </div>
+                    {!isProTier && (
+                         <div className="w-full sm:w-auto text-sm text-muted-foreground border p-2 rounded-md flex items-center gap-2">
+                            <Lock className="h-4 w-4" />
+                            <div>
+                                Export is a Pro feature.
+                                <Link href="/admin/subscription" className="font-bold text-primary underline ml-1">Upgrade</Link>
+                            </div>
+                        </div>
+                    )}
                 </div>
-                 <div className="p-6 pt-0">
+                <div className="mt-4">
                     {loading ? <div className="flex items-center justify-center h-48"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
                         : payrollData.length === 0 ? <div className="h-24 text-center flex flex-col items-center justify-center text-muted-foreground"><FileText className="h-8 w-8 mb-2" /><p>Generate a report to see results.</p></div>
                             : (
@@ -677,12 +673,10 @@ const MusterRollTab = ({ authUser }: { authUser: AuthUser }) => {
 
     return (
         <div className="space-y-6">
-            <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
-                <div className="flex flex-col space-y-1.5 p-6">
-                    <h3 className="text-2xl font-semibold leading-none tracking-tight">Generate Muster Roll</h3>
-                    <p className="text-sm text-muted-foreground">Select a month to generate a classic attendance muster grid for all active employees.</p>
-                </div>
-                 <div className="p-6 pt-0 flex flex-col gap-4">
+            <div className="p-6 rounded-lg border-2 border-foreground hover:border-primary transition-all duration-300 ease-out">
+                <h3 className="text-2xl font-semibold leading-none tracking-tight">Generate Muster Roll</h3>
+                <p className="text-sm text-muted-foreground mt-2">Select a month to generate a classic attendance muster grid for all active employees.</p>
+                 <div className="mt-4 flex flex-col gap-4">
                      <div className="space-y-2 w-full">
                         <Label>Select Year</Label>
                         <Select
@@ -723,16 +717,14 @@ const MusterRollTab = ({ authUser }: { authUser: AuthUser }) => {
                     </Button>
                 </div>
             </div>
-            <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
-                 <div className="p-6">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                        <div>
-                            <h3 className="text-2xl font-semibold leading-none tracking-tight">Muster Roll for {format(selectedDate, 'MMMM yyyy')}</h3>
-                            <p className="text-sm text-muted-foreground">P = Present, A = Absent, H = Half-day, L = On Leave</p>
-                        </div>
+            <div className="p-6 rounded-lg border-2 border-foreground hover:border-primary transition-all duration-300 ease-out">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h3 className="text-2xl font-semibold leading-none tracking-tight">Muster Roll for {format(selectedDate, 'MMMM yyyy')}</h3>
+                        <p className="text-sm text-muted-foreground mt-2">P = Present, A = Absent, H = Half-day, L = On Leave</p>
                     </div>
                 </div>
-                <div className="p-6 pt-0">
+                <div className="mt-4">
                      {loading ? <div className="flex items-center justify-center h-48"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
                         : musterData.length === 0 ? <div className="h-24 text-center flex flex-col items-center justify-center text-muted-foreground"><FileText className="h-8 w-8 mb-2" /><p>Generate a muster roll to see results.</p></div>
                             : (
@@ -907,7 +899,7 @@ export default function ReportsPage() {
     return (
         <div className="space-y-6">
             <Tabs defaultValue="attendance" className="w-full">
-                <div className="flex flex-col gap-4 md:flex-row md:justify-between md:items-start">
+                <div className="flex flex-col md:flex-row md:justify-between md:items-start">
                     <div className="md:hidden">
                         <TabsList className="mb-6 h-auto items-center justify-center rounded-md p-1 grid w-full grid-cols-3 bg-primary text-primary-foreground">
                             <TabsTrigger value="attendance" className="data-[state=active]:bg-background data-[state=active]:text-foreground whitespace-normal h-12 text-xs">Attendance</TabsTrigger>
@@ -989,18 +981,21 @@ export default function ReportsPage() {
                             </Sheet>
                         </div>
                     </div>
-                    <div className="hidden md:block flex-1">
-                        <h1 className="text-3xl font-bold tracking-tight">Reports &amp; Payroll</h1>
-                        <p className="text-muted-foreground">Filter records and generate monthly salary reports.</p>
+
+                    <div className="hidden md:flex flex-1 justify-between items-start">
+                        <div>
+                            <h1 className="text-3xl font-bold tracking-tight">Reports &amp; Payroll</h1>
+                            <p className="text-muted-foreground mt-2">Filter records and generate monthly salary reports.</p>
+                        </div>
+                        <TabsList className="inline-flex h-auto items-center justify-center rounded-md p-1 bg-primary text-primary-foreground md:max-w-md">
+                           <TabsTrigger value="attendance" className="data-[state=active]:bg-background data-[state=active]:text-foreground whitespace-nowrap h-12 text-sm px-3 py-1.5"><span className="text-center text-xs sm:text-sm leading-tight">Attendance Report</span></TabsTrigger>
+                            <TabsTrigger value="muster" className="data-[state=active]:bg-background data-[state=active]:text-foreground whitespace-nowrap h-12 text-sm px-3 py-1.5"><span className="text-center text-xs sm:text-sm leading-tight">Muster Roll</span></TabsTrigger>
+                            <TabsTrigger value="payroll" className="data-[state=active]:bg-background data-[state=active]:text-foreground whitespace-nowrap h-12 text-sm px-3 py-1.5" disabled={selectedBranch.id === 'all'}><span className="text-center text-xs sm:text-sm leading-tight">Payroll Report</span></TabsTrigger>
+                        </TabsList>
                     </div>
-                    <TabsList className="hidden md:inline-flex h-auto items-center justify-center rounded-md p-1 bg-primary text-primary-foreground md:max-w-md">
-                        <TabsTrigger value="attendance" className="data-[state=active]:bg-background data-[state=active]:text-foreground whitespace-nowrap h-12 text-sm px-3 py-1.5"><span className="text-center text-xs sm:text-sm leading-tight">Attendance Report</span></TabsTrigger>
-                        <TabsTrigger value="muster" className="data-[state=active]:bg-background data-[state=active]:text-foreground whitespace-nowrap h-12 text-sm px-3 py-1.5"><span className="text-center text-xs sm:text-sm leading-tight">Muster Roll</span></TabsTrigger>
-                        <TabsTrigger value="payroll" className="data-[state=active]:bg-background data-[state=active]:text-foreground whitespace-nowrap h-12 text-sm px-3 py-1.5" disabled={selectedBranch.id === 'all'}><span className="text-center text-xs sm:text-sm leading-tight">Payroll Report</span></TabsTrigger>
-                    </TabsList>
                 </div>
 
-                <div className="hidden md:flex flex-wrap items-end gap-4 p-4 rounded-lg">
+                <div className="hidden md:flex flex-wrap items-end gap-4 p-4">
                      <div className="flex-1 min-w-[200px]">
                          <Label className="text-xs font-semibold">Branch</Label>
                          <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
@@ -1065,7 +1060,7 @@ export default function ReportsPage() {
                       </div>
                 </div>
 
-                <TabsContent value="attendance" className="mt-6">
+                 <TabsContent value="attendance" className="mt-6">
                     <AttendanceReportTab allBranches={allBranches} selectedBranch={selectedBranch} authUser={authUser} date={date} selectedEmployeeId={selectedEmployeeId} selectedStatus={selectedStatus} employees={employees} />
                 </TabsContent>
                 <TabsContent value="muster" className="mt-6">
