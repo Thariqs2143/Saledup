@@ -364,8 +364,8 @@ const LeaveRequests = ({ selectedBranchId, allBranchIds }: { selectedBranchId: s
 
     return (
       <div className="space-y-4">
-        <div className="flex flex-row items-center gap-4">
-          <div className="relative flex-1">
+        <div className="flex flex-col sm:flex-row items-center gap-4">
+          <div className="relative flex-1 w-full">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
@@ -375,7 +375,7 @@ const LeaveRequests = ({ selectedBranchId, allBranchIds }: { selectedBranchId: s
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <div className="w-[180px]">
+          <div className="w-full sm:w-[180px]">
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Filter by status" />
@@ -573,38 +573,40 @@ export default function ManageEmployeesPage() {
                           </Command>
                           </DialogContent>
                       </Dialog>
-                      <Sheet>
-                          <SheetTrigger asChild>
-                              <Button variant="outline" size="icon" className="w-full md:w-auto">
-                                  <Filter className="h-4 w-4" />
-                                  <span className="md:hidden ml-2">Filter</span>
-                              </Button>
-                          </SheetTrigger>
-                          <SheetContent side="bottom" className="h-auto">
-                              <SheetHeader>
-                                  <SheetTitle>Filter Employees</SheetTitle>
-                              </SheetHeader>
-                              <div className="py-4">
-                                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                                    <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="Filter by status" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All Statuses</SelectItem>
-                                        <SelectItem value="Active">Active</SelectItem>
-                                        <SelectItem value="Inactive">Inactive</SelectItem>
-                                        <SelectItem value="Pending Onboarding">Pending Onboarding</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                              </div>
-                          </SheetContent>
-                      </Sheet>
-                       <Link href="/admin/employees/add" className='w-full md:w-auto'>
-                          <Button className='w-full'>
-                              <UserPlus className="mr-2 h-4 w-4" />
-                              Invite
-                          </Button>
-                      </Link>
+                      <div className="flex w-full md:w-auto items-center gap-2">
+                        <Sheet>
+                            <SheetTrigger asChild>
+                                <Button variant="outline" size="icon" className="w-full md:w-auto">
+                                    <Filter className="h-4 w-4" />
+                                    <span className="md:hidden ml-2">Filter</span>
+                                </Button>
+                            </SheetTrigger>
+                            <SheetContent side="bottom" className="h-auto">
+                                <SheetHeader>
+                                    <SheetTitle>Filter Employees</SheetTitle>
+                                </SheetHeader>
+                                <div className="py-4">
+                                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                                      <SelectTrigger className="w-full">
+                                          <SelectValue placeholder="Filter by status" />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                          <SelectItem value="all">All Statuses</SelectItem>
+                                          <SelectItem value="Active">Active</SelectItem>
+                                          <SelectItem value="Inactive">Inactive</SelectItem>
+                                          <SelectItem value="Pending Onboarding">Pending Onboarding</SelectItem>
+                                      </SelectContent>
+                                  </Select>
+                                </div>
+                            </SheetContent>
+                        </Sheet>
+                         <Link href="/admin/employees/add" className='w-full md:w-auto'>
+                            <Button className='w-full'>
+                                <UserPlus className="mr-2 h-4 w-4" />
+                                Invite
+                            </Button>
+                        </Link>
+                      </div>
                   </div>
                 </div>
               )}
@@ -620,6 +622,3 @@ export default function ManageEmployeesPage() {
     </div>
   );
 }
-
-    
-    
