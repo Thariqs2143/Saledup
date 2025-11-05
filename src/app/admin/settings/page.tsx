@@ -195,7 +195,7 @@ const PricingPlans = () => {
         {plans.map((p) => (
           <div key={p.id} className={`relative rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 hover:shadow-xl transition-transform hover:-translate-y-1`}>
             {p.isPopular && <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10"><div className="px-4 py-1 text-sm font-semibold rounded-full bg-primary text-primary-foreground shadow-md">Most Popular</div></div>}
-            <div className={`absolute top-px left-px right-px h-1.5 rounded-t-3xl bg-gradient-to-r ${p.accent}`}></div>
+            <div className={`absolute top-px left-px right-px h-1.5 rounded-t-2xl bg-gradient-to-r ${p.accent}`}></div>
             <div className="p-8 flex flex-col h-full">
               <div className="flex items-start justify-between mb-6">
                 <div>
@@ -244,15 +244,15 @@ const PricingPlans = () => {
         <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Feature Comparison</h3>
       </div>
       
-      <div className="rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+      <div className="rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
         {/* Desktop Table */}
         <div className="hidden lg:block">
           <table className="min-w-full">
             <thead className="bg-gray-100 dark:bg-gray-900/50">
               <tr>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-800 dark:text-gray-200 w-64 rounded-tl-xl">Feature</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-800 dark:text-gray-200 w-64 rounded-tl-3xl">Feature</th>
                 {plans.map((p, index) => (
-                  <th key={p.id} className={cn("px-6 py-3 text-center text-sm font-semibold text-gray-800 dark:text-gray-200", index === plans.length -1 && "rounded-tr-xl")}>{p.name}</th>
+                  <th key={p.id} className={cn("px-6 py-3 text-center text-sm font-semibold text-gray-800 dark:text-gray-200", index === plans.length -1 && "rounded-tr-3xl")}>{p.name}</th>
                 ))}
               </tr>
             </thead>
@@ -573,7 +573,7 @@ function SettingsPageContent() {
                             </div>
                         </CardContent>
                         <CardFooter className="flex-col items-start gap-4">
-                            <div className="flex gap-4 w-full">
+                            <div className="flex flex-col md:flex-row gap-4 w-full">
                                 <Link href="/admin/employees" className="flex-1">
                                     <Button variant="outline" className="w-full">Manage Employees</Button>
                                 </Link>
