@@ -907,38 +907,33 @@ export default function ReportsPage() {
     return (
         <div className="space-y-6">
             <Tabs defaultValue="attendance" className="w-full">
-                {/* Desktop Tabs */}
-                <div className="hidden lg:flex justify-between items-center">
-                    <div>
-                        <h1 className="text-3xl font-bold tracking-tight">Reports &amp; Payroll</h1>
-                        <p className="text-muted-foreground">Filter records and generate monthly salary reports.</p>
+                {/* Desktop and Tablet Header */}
+                <div className="hidden md:block">
+                     <div className="flex justify-between items-start">
+                        <div>
+                            <h1 className="text-3xl font-bold tracking-tight">Reports &amp; Payroll</h1>
+                            <p className="text-muted-foreground">Filter records and generate monthly salary reports.</p>
+                        </div>
+                        <TabsList className="hidden lg:inline-flex h-auto items-center justify-center rounded-md p-1 bg-primary text-primary-foreground">
+                            <TabsTrigger value="attendance" className="data-[state=active]:bg-background data-[state=active]:text-foreground"><span className="text-center text-xs sm:text-sm leading-tight">Attendance Report</span></TabsTrigger>
+                            <TabsTrigger value="muster" className="data-[state=active]:bg-background data-[state=active]:text-foreground"><span className="text-center text-xs sm:text-sm leading-tight">Muster Roll</span></TabsTrigger>
+                            <TabsTrigger value="payroll" className="data-[state=active]:bg-background data-[state=active]:text-foreground" disabled={selectedBranch.id === 'all'}><span className="text-center text-xs sm:text-sm leading-tight">Payroll Report</span></TabsTrigger>
+                        </TabsList>
                     </div>
-                    <TabsList className="h-auto items-center justify-center rounded-md p-1 grid grid-cols-3 bg-primary text-primary-foreground md:inline-flex md:w-auto md:max-w-md">
+                     <TabsList className="mt-4 hidden md:inline-flex lg:hidden h-auto items-center justify-center rounded-md p-1 bg-primary text-primary-foreground">
                         <TabsTrigger value="attendance" className="data-[state=active]:bg-background data-[state=active]:text-foreground"><span className="text-center text-xs sm:text-sm leading-tight">Attendance Report</span></TabsTrigger>
                         <TabsTrigger value="muster" className="data-[state=active]:bg-background data-[state=active]:text-foreground"><span className="text-center text-xs sm:text-sm leading-tight">Muster Roll</span></TabsTrigger>
                         <TabsTrigger value="payroll" className="data-[state=active]:bg-background data-[state=active]:text-foreground" disabled={selectedBranch.id === 'all'}><span className="text-center text-xs sm:text-sm leading-tight">Payroll Report</span></TabsTrigger>
                     </TabsList>
                 </div>
-                {/* Tablet/Mobile Tabs */}
-                <div className="lg:hidden">
-                    <div className="md:hidden">
-                        {/* Mobile: Tabs on top */}
-                         <TabsList className="h-auto items-center justify-center rounded-md p-1 grid w-full grid-cols-3 bg-primary text-primary-foreground">
-                            <TabsTrigger value="attendance" className="data-[state=active]:bg-background data-[state=active]:text-foreground"><span className="text-center text-xs sm:text-sm leading-tight">Attendance Report</span></TabsTrigger>
-                            <TabsTrigger value="muster" className="data-[state=active]:bg-background data-[state=active]:text-foreground"><span className="text-center text-xs sm:text-sm leading-tight">Muster Roll</span></TabsTrigger>
-                            <TabsTrigger value="payroll" className="data-[state=active]:bg-background data-[state=active]:text-foreground" disabled={selectedBranch.id === 'all'}><span className="text-center text-xs sm:text-sm leading-tight">Payroll Report</span></TabsTrigger>
-                        </TabsList>
-                    </div>
-                    <div className="hidden md:block lg:hidden">
-                        {/* Tablet: Title then Tabs */}
-                        <h1 className="text-3xl font-bold tracking-tight">Reports &amp; Payroll</h1>
-                        <p className="text-muted-foreground">Filter records and generate monthly salary reports.</p>
-                         <TabsList className="mt-4 h-auto items-center justify-center rounded-md p-1 grid w-full grid-cols-3 bg-primary text-primary-foreground md:inline-flex md:w-auto md:max-w-md">
-                            <TabsTrigger value="attendance" className="data-[state=active]:bg-background data-[state=active]:text-foreground"><span className="text-center text-xs sm:text-sm leading-tight">Attendance Report</span></TabsTrigger>
-                            <TabsTrigger value="muster" className="data-[state=active]:bg-background data-[state=active]:text-foreground"><span className="text-center text-xs sm:text-sm leading-tight">Muster Roll</span></TabsTrigger>
-                            <TabsTrigger value="payroll" className="data-[state=active]:bg-background data-[state=active]:text-foreground" disabled={selectedBranch.id === 'all'}><span className="text-center text-xs sm:text-sm leading-tight">Payroll Report</span></TabsTrigger>
-                        </TabsList>
-                    </div>
+
+                {/* Mobile Header */}
+                <div className="md:hidden">
+                    <TabsList className="mb-6 h-auto items-center justify-center rounded-md p-1 grid w-full grid-cols-3 bg-primary text-primary-foreground">
+                        <TabsTrigger value="attendance" className="data-[state=active]:bg-background data-[state=active]:text-foreground text-center text-xs leading-tight whitespace-normal h-auto py-2.5">Attendance Report</TabsTrigger>
+                        <TabsTrigger value="muster" className="data-[state=active]:bg-background data-[state=active]:text-foreground text-center text-xs leading-tight whitespace-normal h-auto py-2.5">Muster Roll</TabsTrigger>
+                        <TabsTrigger value="payroll" className="data-[state=active]:bg-background data-[state=active]:text-foreground text-center text-xs leading-tight whitespace-normal h-auto py-2.5" disabled={selectedBranch.id === 'all'}>Payroll Report</TabsTrigger>
+                    </TabsList>
                 </div>
                 
                 {/* Filters */}
@@ -1109,3 +1104,4 @@ export default function ReportsPage() {
         </div>
     );
 }
+
