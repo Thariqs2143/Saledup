@@ -913,7 +913,7 @@ export default function ReportsPage() {
             </div>
             
             {/* Desktop Filters */}
-            <div className="hidden md:flex flex-col md:flex-row items-center gap-4 rounded-lg border bg-card text-card-foreground p-4">
+            <div className="hidden md:flex flex-col md:flex-row items-center gap-4">
                  <div className="w-full md:w-auto md:min-w-[200px]">
                      <Label className="text-xs font-semibold">Branch</Label>
                      <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
