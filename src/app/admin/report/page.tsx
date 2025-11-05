@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
@@ -738,7 +739,7 @@ const MusterRollTab = ({ authUser }: { authUser: AuthUser }) => {
                             : (
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                     {musterData.map(p => (
-                                        <Card key={p.employeeId} className="overflow-hidden">
+                                        <Card key={p.employeeId} className="overflow-hidden border-2 border-gray-300 shadow-lg rounded-xl">
                                             <CardHeader className="p-4 bg-muted/50">
                                                 <CardTitle className="text-base">{p.employeeName}</CardTitle>
                                             </CardHeader>
