@@ -350,7 +350,7 @@ const LeaveRequests = ({ selectedBranchId, allBranchIds }: { selectedBranchId: s
 
     return (
         <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-row items-center gap-4">
                 <div className="relative w-full flex-1">
                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
