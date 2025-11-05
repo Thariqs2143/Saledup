@@ -568,17 +568,15 @@ export default function ManageEmployeesPage() {
                 
                  <Sheet open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
                     <SheetTrigger asChild>
-                         <PopoverTrigger asChild>
-                            <Button
-                                variant="outline"
-                                role="combobox"
-                                aria-expanded={openBranchSelector}
-                                className="w-full justify-between mt-4"
-                            >
-                                {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
-                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                            </Button>
-                        </PopoverTrigger>
+                        <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={openBranchSelector}
+                            className="w-full justify-between mt-4"
+                        >
+                            {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
                     </SheetTrigger>
                     <SheetContent side="bottom" className="p-0 rounded-t-lg">
                         <SheetHeader className="p-4 border-b">
@@ -632,11 +630,11 @@ export default function ManageEmployeesPage() {
                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                 </DialogTrigger>
-                 <DialogContent className="p-0">
-                    <DialogHeader className="p-4 border-b">
-                        <DialogTitle>Select Branch</DialogTitle>
-                    </DialogHeader>
-                    <Command className="bg-transparent">
+                 <DialogContent className="p-0 bg-transparent border-0 shadow-none">
+                    <Command className="rounded-lg border shadow-md">
+                        <DialogHeader className="p-4 border-b">
+                            <DialogTitle>Select Branch</DialogTitle>
+                        </DialogHeader>
                         <CommandInput placeholder="Search branch..." />
                         <CommandEmpty>No branches found. <Link href="/admin/add-branch" className="text-primary underline">Add one now</Link>.</CommandEmpty>
                         <CommandGroup>
