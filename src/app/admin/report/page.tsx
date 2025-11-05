@@ -394,12 +394,12 @@ const PayrollReportTab = ({ shopData, authUser }: { shopData: ShopData, authUser
 
     return (
         <div className="space-y-6">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Generate Payroll</CardTitle>
-                    <CardDescription>Select a month to calculate salaries for all employees based on their base pay and leave.</CardDescription>
-                </CardHeader>
-                <CardContent className="flex flex-col sm:flex-row items-center gap-4">
+            <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+                <div className="flex flex-col space-y-1.5 p-6">
+                    <h3 className="text-2xl font-semibold leading-none tracking-tight">Generate Payroll</h3>
+                    <p className="text-sm text-muted-foreground">Select a month to calculate salaries for all employees based on their base pay and leave.</p>
+                </div>
+                <div className="p-6 pt-0 flex flex-col sm:flex-row items-center gap-4">
                     <div className="space-y-2 w-full">
                         <Label>Select Year</Label>
                         <Select
@@ -438,14 +438,14 @@ const PayrollReportTab = ({ shopData, authUser }: { shopData: ShopData, authUser
                         {loading ? <Loader2 className="mr-2 animate-spin"/> : <Calculator className="mr-2"/>}
                         Generate Report
                     </Button>
-                </CardContent>
-            </Card>
-            <Card>
-                <CardHeader>
+                </div>
+            </div>
+            <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+                <div className="p-6">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div>
-                            <CardTitle>Payroll Results for {format(selectedDate, 'MMMM yyyy')}</CardTitle>
-                            <CardDescription>Found {payrollData.length} employee(s). You can add bonuses or deductions below.</CardDescription>
+                            <h3 className="text-2xl font-semibold leading-none tracking-tight">Payroll Results for {format(selectedDate, 'MMMM yyyy')}</h3>
+                            <p className="text-sm text-muted-foreground">Found {payrollData.length} employee(s). You can add bonuses or deductions below.</p>
                         </div>
                         {!isProTier && (
                              <div className="w-full sm:w-auto text-sm text-muted-foreground border p-2 rounded-md flex items-center gap-2">
@@ -457,8 +457,8 @@ const PayrollReportTab = ({ shopData, authUser }: { shopData: ShopData, authUser
                             </div>
                         )}
                     </div>
-                </CardHeader>
-                 <CardContent>
+                </div>
+                 <div className="p-6 pt-0">
                     {loading ? <div className="flex items-center justify-center h-48"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
                         : payrollData.length === 0 ? <div className="h-24 text-center flex flex-col items-center justify-center text-muted-foreground"><FileText className="h-8 w-8 mb-2" /><p>Generate a report to see results.</p></div>
                             : (
@@ -473,7 +473,7 @@ const PayrollReportTab = ({ shopData, authUser }: { shopData: ShopData, authUser
                                                         size="sm"
                                                         onClick={() => handleDownloadSlip(p)}
                                                         disabled={p.baseSalary === 0 || !isProTier}
-                                                        className="bg-blue-600 hover:bg-blue-700"
+                                                        className="bg-blue-600 hover:bg-blue-600"
                                                     >
                                                         <Receipt className="mr-2 h-4 w-4"/> Slip
                                                     </Button>
@@ -573,8 +573,8 @@ const PayrollReportTab = ({ shopData, authUser }: { shopData: ShopData, authUser
                                     </div>
                                 </>
                             )}
-                </CardContent>
-            </Card>
+                </div>
+            </div>
         </div>
     );
 };
@@ -677,12 +677,12 @@ const MusterRollTab = ({ authUser }: { authUser: AuthUser }) => {
 
     return (
         <div className="space-y-6">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Generate Muster Roll</CardTitle>
-                    <CardDescription>Select a month to generate a classic attendance muster grid for all active employees.</CardDescription>
-                </CardHeader>
-                 <CardContent className="flex flex-col gap-4">
+            <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+                <div className="flex flex-col space-y-1.5 p-6">
+                    <h3 className="text-2xl font-semibold leading-none tracking-tight">Generate Muster Roll</h3>
+                    <p className="text-sm text-muted-foreground">Select a month to generate a classic attendance muster grid for all active employees.</p>
+                </div>
+                 <div className="p-6 pt-0 flex flex-col gap-4">
                      <div className="space-y-2 w-full">
                         <Label>Select Year</Label>
                         <Select
@@ -721,18 +721,18 @@ const MusterRollTab = ({ authUser }: { authUser: AuthUser }) => {
                         {loading ? <Loader2 className="mr-2 animate-spin"/> : <Users className="mr-2"/>}
                         Generate Muster
                     </Button>
-                </CardContent>
-            </Card>
-            <Card>
-                 <CardHeader>
+                </div>
+            </div>
+            <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+                 <div className="p-6">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div>
-                            <CardTitle>Muster Roll for {format(selectedDate, 'MMMM yyyy')}</CardTitle>
-                            <CardDescription>P = Present, A = Absent, H = Half-day, L = On Leave</CardDescription>
+                            <h3 className="text-2xl font-semibold leading-none tracking-tight">Muster Roll for {format(selectedDate, 'MMMM yyyy')}</h3>
+                            <p className="text-sm text-muted-foreground">P = Present, A = Absent, H = Half-day, L = On Leave</p>
                         </div>
                     </div>
-                </CardHeader>
-                <CardContent>
+                </div>
+                <div className="p-6 pt-0">
                      {loading ? <div className="flex items-center justify-center h-48"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
                         : musterData.length === 0 ? <div className="h-24 text-center flex flex-col items-center justify-center text-muted-foreground"><FileText className="h-8 w-8 mb-2" /><p>Generate a muster roll to see results.</p></div>
                             : (
@@ -762,8 +762,8 @@ const MusterRollTab = ({ authUser }: { authUser: AuthUser }) => {
                                     ))}
                                 </div>
                             )}
-                </CardContent>
-            </Card>
+                </div>
+            </div>
         </div>
     );
 };
@@ -907,109 +907,99 @@ export default function ReportsPage() {
     return (
         <div className="space-y-6">
             <Tabs defaultValue="attendance" className="w-full">
-                {/* Desktop and Tablet Header */}
-                 <div className="flex justify-between items-start">
-                    <div className="hidden md:block">
+                <div className="flex flex-col gap-4 md:flex-row md:justify-between md:items-start">
+                    <div className="md:hidden">
+                        <TabsList className="mb-6 h-auto items-center justify-center rounded-md p-1 grid w-full grid-cols-3 bg-primary text-primary-foreground">
+                            <TabsTrigger value="attendance" className="data-[state=active]:bg-background data-[state=active]:text-foreground whitespace-normal h-12 text-xs">Attendance</TabsTrigger>
+                            <TabsTrigger value="muster" className="data-[state=active]:bg-background data-[state=active]:text-foreground whitespace-normal h-12 text-xs">Muster Roll</TabsTrigger>
+                            <TabsTrigger value="payroll" className="data-[state=active]:bg-background data-[state=active]:text-foreground whitespace-normal h-12 text-xs" disabled={selectedBranch.id === 'all'}>Payroll</TabsTrigger>
+                        </TabsList>
+                        <div className="flex items-center gap-4">
+                            <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
+                                <DialogTrigger asChild>
+                                    <Button variant="outline" className="w-full justify-between flex-1">
+                                        <Building className="mr-2 h-4 w-4" />
+                                        <span className="truncate">{selectedBranch ? selectedBranch.shopName : "Select a branch..."}</span>
+                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <DialogHeader><DialogTitle>Select Branch</DialogTitle></DialogHeader>
+                                    <BranchSelector 
+                                        open={openBranchSelector}
+                                        onOpenChange={setOpenBranchSelector}
+                                        selectedBranch={selectedBranch}
+                                        branches={allBranches}
+                                        setSelectedBranch={setSelectedBranch}
+                                        searchTerm={searchTerm}
+                                        setSearchTerm={setSearchTerm}
+                                    />
+                                </DialogContent>
+                            </Dialog>
+                            <Sheet>
+                                <SheetTrigger asChild>
+                                    <Button variant="outline" className="flex-initial">
+                                        <Filter className="mr-2 h-4 w-4" />
+                                        Filter
+                                    </Button>
+                                </SheetTrigger>
+                                <SheetContent side="bottom">
+                                    <SheetHeader className="p-4"><SheetTitle>Report Filters</SheetTitle></SheetHeader>
+                                    <div className="px-4 pb-4 space-y-6">
+                                        <div className="space-y-2">
+                                            <Label>Date Range</Label>
+                                            <Popover>
+                                                <PopoverTrigger asChild>
+                                                    <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}>
+                                                        <CalendarIcon className="mr-2 h-4 w-4" />
+                                                        {date?.from ? (date.to ? `${format(date.from, "LLL dd, y")} - ${format(date.to, "LLL dd, y")}` : format(date.from, "LLL dd, y")) : <span>Pick a date</span>}
+                                                    </Button>
+                                                </PopoverTrigger>
+                                                <PopoverContent className="w-auto p-0" align="start">
+                                                    <Calendar initialFocus mode="range" defaultMonth={date?.from} selected={date} onSelect={setDate} numberOfMonths={1}/>
+                                                </PopoverContent>
+                                            </Popover>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="employee-mobile">Employee</Label>
+                                            <Select onValueChange={setSelectedEmployeeId} value={selectedEmployeeId}>
+                                                <SelectTrigger id="employee-mobile"><SelectValue placeholder="All Employees" /></SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="all">All Employees</SelectItem>
+                                                    {employees.map(emp => <SelectItem key={emp.id} value={emp.id!}>{emp.name}</SelectItem>)}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="status-mobile">Status</Label>
+                                            <Select onValueChange={setSelectedStatus} value={selectedStatus}>
+                                                <SelectTrigger id="status-mobile"><SelectValue placeholder="All Statuses" /></SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="all">All Statuses</SelectItem>
+                                                    <SelectItem value="On-time">On-time</SelectItem>
+                                                    <SelectItem value="Late">Late</SelectItem>
+                                                    <SelectItem value="Absent">Absent</SelectItem>
+                                                    <SelectItem value="Manual">Manual</SelectItem>
+                                                    <SelectItem value="Half-day">Half-day</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    </div>
+                                </SheetContent>
+                            </Sheet>
+                        </div>
+                    </div>
+                    <div className="hidden md:block flex-1">
                         <h1 className="text-3xl font-bold tracking-tight">Reports &amp; Payroll</h1>
                         <p className="text-muted-foreground">Filter records and generate monthly salary reports.</p>
                     </div>
-                    <TabsList className="hidden lg:inline-flex h-auto items-center justify-center rounded-md p-1 bg-primary text-primary-foreground">
-                        <TabsTrigger value="attendance" className="data-[state=active]:bg-background data-[state=active]:text-foreground whitespace-nowrap px-3 py-1.5 h-auto text-sm font-medium"><span className="text-center text-xs sm:text-sm leading-tight">Attendance Report</span></TabsTrigger>
-                        <TabsTrigger value="muster" className="data-[state=active]:bg-background data-[state=active]:text-foreground whitespace-nowrap px-3 py-1.5 h-auto text-sm font-medium"><span className="text-center text-xs sm:text-sm leading-tight">Muster Roll</span></TabsTrigger>
-                        <TabsTrigger value="payroll" className="data-[state=active]:bg-background data-[state=active]:text-foreground whitespace-nowrap px-3 py-1.5 h-auto text-sm font-medium" disabled={selectedBranch.id === 'all'}><span className="text-center text-xs sm:text-sm leading-tight">Payroll Report</span></TabsTrigger>
+                    <TabsList className="hidden md:inline-flex h-auto items-center justify-center rounded-md p-1 bg-primary text-primary-foreground md:max-w-md">
+                        <TabsTrigger value="attendance" className="data-[state=active]:bg-background data-[state=active]:text-foreground whitespace-nowrap h-12 text-sm px-3 py-1.5"><span className="text-center text-xs sm:text-sm leading-tight">Attendance Report</span></TabsTrigger>
+                        <TabsTrigger value="muster" className="data-[state=active]:bg-background data-[state=active]:text-foreground whitespace-nowrap h-12 text-sm px-3 py-1.5"><span className="text-center text-xs sm:text-sm leading-tight">Muster Roll</span></TabsTrigger>
+                        <TabsTrigger value="payroll" className="data-[state=active]:bg-background data-[state=active]:text-foreground whitespace-nowrap h-12 text-sm px-3 py-1.5" disabled={selectedBranch.id === 'all'}><span className="text-center text-xs sm:text-sm leading-tight">Payroll Report</span></TabsTrigger>
                     </TabsList>
                 </div>
-                 <TabsList className="mt-4 hidden md:inline-flex lg:hidden h-auto items-center justify-center rounded-md p-1 bg-primary text-primary-foreground">
-                    <TabsTrigger value="attendance" className="data-[state=active]:bg-background data-[state=active]:text-foreground whitespace-nowrap px-3 py-1.5 h-auto text-sm font-medium"><span className="text-center text-xs sm:text-sm leading-tight">Attendance Report</span></TabsTrigger>
-                    <TabsTrigger value="muster" className="data-[state=active]:bg-background data-[state=active]:text-foreground whitespace-nowrap px-3 py-1.5 h-auto text-sm font-medium"><span className="text-center text-xs sm:text-sm leading-tight">Muster Roll</span></TabsTrigger>
-                    <TabsTrigger value="payroll" className="data-[state=active]:bg-background data-[state=active]:text-foreground whitespace-nowrap px-3 py-1.5 h-auto text-sm font-medium" disabled={selectedBranch.id === 'all'}><span className="text-center text-xs sm:text-sm leading-tight">Payroll Report</span></TabsTrigger>
-                </TabsList>
-                
 
-                {/* Mobile Header */}
-                <div className="md:hidden space-y-4">
-                     <TabsList className="mb-6 h-auto items-center justify-center rounded-md p-1 grid w-full grid-cols-3 bg-primary text-primary-foreground">
-                        <TabsTrigger value="attendance" className="data-[state=active]:bg-background data-[state=active]:text-foreground text-center text-xs leading-tight whitespace-normal h-auto py-2.5">Attendance Report</TabsTrigger>
-                        <TabsTrigger value="muster" className="data-[state=active]:bg-background data-[state=active]:text-foreground text-center text-xs leading-tight whitespace-normal h-auto py-2.5">Muster Roll</TabsTrigger>
-                        <TabsTrigger value="payroll" className="data-[state=active]:bg-background data-[state=active]:text-foreground text-center text-xs leading-tight whitespace-normal h-auto py-2.5" disabled={selectedBranch.id === 'all'}>Payroll Report</TabsTrigger>
-                    </TabsList>
-                    <div className="flex items-center gap-4">
-                        <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
-                            <DialogTrigger asChild>
-                                 <Button variant="outline" className="w-full justify-between flex-1">
-                                    <Building className="mr-2 h-4 w-4" />
-                                    <span className="truncate">{selectedBranch ? selectedBranch.shopName : "Select a branch..."}</span>
-                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                </Button>
-                            </DialogTrigger>
-                             <DialogContent>
-                                <DialogHeader><DialogTitle>Select Branch</DialogTitle></DialogHeader>
-                                <BranchSelector 
-                                    open={openBranchSelector}
-                                    onOpenChange={setOpenBranchSelector}
-                                    selectedBranch={selectedBranch}
-                                    branches={allBranches}
-                                    setSelectedBranch={setSelectedBranch}
-                                    searchTerm={searchTerm}
-                                    setSearchTerm={setSearchTerm}
-                                />
-                            </DialogContent>
-                        </Dialog>
-                        <Sheet>
-                            <SheetTrigger asChild>
-                                <Button variant="outline" className="flex-initial">
-                                    <Filter className="mr-2 h-4 w-4" />
-                                    Filter
-                                </Button>
-                            </SheetTrigger>
-                            <SheetContent side="bottom">
-                                <SheetHeader className="p-4"><SheetTitle>Report Filters</SheetTitle></SheetHeader>
-                                <div className="px-4 pb-4 space-y-6">
-                                    <div className="space-y-2">
-                                        <Label>Date Range</Label>
-                                        <Popover>
-                                            <PopoverTrigger asChild>
-                                                <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}>
-                                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                                    {date?.from ? (date.to ? `${format(date.from, "LLL dd, y")} - ${format(date.to, "LLL dd, y")}` : format(date.from, "LLL dd, y")) : <span>Pick a date</span>}
-                                                </Button>
-                                            </PopoverTrigger>
-                                            <PopoverContent className="w-auto p-0" align="start">
-                                                <Calendar initialFocus mode="range" defaultMonth={date?.from} selected={date} onSelect={setDate} numberOfMonths={1}/>
-                                            </PopoverContent>
-                                        </Popover>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="employee-mobile">Employee</Label>
-                                        <Select onValueChange={setSelectedEmployeeId} value={selectedEmployeeId}>
-                                            <SelectTrigger id="employee-mobile"><SelectValue placeholder="All Employees" /></SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="all">All Employees</SelectItem>
-                                                {employees.map(emp => <SelectItem key={emp.id} value={emp.id!}>{emp.name}</SelectItem>)}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="status-mobile">Status</Label>
-                                        <Select onValueChange={setSelectedStatus} value={selectedStatus}>
-                                            <SelectTrigger id="status-mobile"><SelectValue placeholder="All Statuses" /></SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="all">All Statuses</SelectItem>
-                                                <SelectItem value="On-time">On-time</SelectItem>
-                                                <SelectItem value="Late">Late</SelectItem>
-                                                <SelectItem value="Absent">Absent</SelectItem>
-                                                <SelectItem value="Manual">Manual</SelectItem>
-                                                <SelectItem value="Half-day">Half-day</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                </div>
-                            </SheetContent>
-                        </Sheet>
-                    </div>
-                </div>
-
-                {/* Filters */}
                 <div className="hidden md:flex flex-wrap items-end gap-4 p-4 rounded-lg">
                      <div className="flex-1 min-w-[200px]">
                          <Label className="text-xs font-semibold">Branch</Label>
@@ -1100,4 +1090,3 @@ export default function ReportsPage() {
         </div>
     );
 }
-
