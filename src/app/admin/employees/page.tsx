@@ -50,14 +50,15 @@ export type LeaveRequest = {
   id: string;
   userId: string;
   userName: string;
-  startDate: string;
-  endDate: string;
   reason: string;
   status: 'pending' | 'approved' | 'denied';
   requestedAt: {
     seconds: number;
     nanoseconds: number;
   };
+  shopId?: string;
+  startDate: string;
+  endDate: string;
 };
 
 type Branch = {
@@ -67,12 +68,13 @@ type Branch = {
 };
 
 
-const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds, searchTerm, onSearchTermChange }: { allBranches: Branch[], selectedBranchId: string | null, allBranchIds: string[], searchTerm: string, onSearchTermChange: (term: string) => void }) => {
+const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds }: { allBranches: Branch[], selectedBranchId: string | null, allBranchIds: string[]}) => {
   const [employees, setEmployees] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('all');
   const router = useRouter();
   const { toast } = useToast();
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     if (!selectedBranchId) {
@@ -154,7 +156,7 @@ const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds, searchTerm,
                 placeholder="Search by name, role, or shop..."
                 className="w-full rounded-lg bg-background pl-8"
                 value={searchTerm}
-                onChange={(e) => onSearchTermChange(e.target.value)}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 />
             </div>
             <div className="flex w-full sm:w-auto gap-2">
@@ -187,7 +189,7 @@ const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds, searchTerm,
                     placeholder="Search..."
                     className="w-full rounded-lg bg-background pl-8"
                     value={searchTerm}
-                    onChange={(e) => onSearchTermChange(e.target.value)}
+                    onChange={(e) => setSearchTerm(e.target.value)}
                 />
             </div>
             <div className="flex gap-2">
@@ -412,6 +414,14 @@ const LeaveRequests = ({ selectedBranchId, allBranchIds }: { selectedBranchId: s
         setUpdatingId(null);
       }
     };
+    
+    const getStatusVariant = (status: LeaveRequest['status']) => {
+        switch (status) {
+            case 'approved': return 'secondary';
+            case 'denied': return 'destructive';
+            case 'pending': default: return 'outline';
+        }
+    };
 
     return (
         <div className="space-y-4">
@@ -458,9 +468,10 @@ const LeaveRequests = ({ selectedBranchId, allBranchIds }: { selectedBranchId: s
                         <div className="flex-1 space-y-2">
                         <div className="flex items-center gap-4">
                             <p className="font-bold">{request.userName}</p>
+                             <Badge variant={getStatusVariant(request.status)}>{request.status}</Badge>
                         </div>
                         <p className="text-sm font-medium text-primary">
-                            {new Date(request.startDate).toLocaleDateString()} to {new Date(request.endDate).toLocaleDateString()}
+                           {format(new Date(request.startDate), 'dd MMM')} - {format(new Date(request.endDate), 'dd MMM, yyyy')}
                         </p>
                         <p className="text-sm text-muted-foreground">{request.reason}</p>
                         <p className="text-xs text-muted-foreground/70">
@@ -468,7 +479,7 @@ const LeaveRequests = ({ selectedBranchId, allBranchIds }: { selectedBranchId: s
                         </p>
                         </div>
                         <div className="flex flex-col sm:flex-row gap-2 shrink-0 w-full sm:w-auto">
-                           {request.status === 'pending' ? (
+                           {request.status === 'pending' && (
                                 <>
                                     <Button
                                     variant="outline"
@@ -491,16 +502,6 @@ const LeaveRequests = ({ selectedBranchId, allBranchIds }: { selectedBranchId: s
                                     <span className="ml-2">Deny</span>
                                     </Button>
                                 </>
-                            ) : request.status === 'approved' ? (
-                                <Button size="sm" className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white" disabled>
-                                    <Check className="h-4 w-4 mr-2" />
-                                    Approved
-                                </Button>
-                            ) : (
-                                 <Button variant="destructive" size="sm" className="w-full sm:w-auto" disabled>
-                                    <X className="h-4 w-4 mr-2" />
-                                    Denied
-                                </Button>
                             )}
                         </div>
                     </CardContent>
@@ -518,7 +519,6 @@ export default function ManageEmployeesPage() {
     const [branches, setBranches] = useState<Branch[]>([]);
     const [selectedBranch, setSelectedBranch] = useState<Branch | null>(null);
     const [openBranchSelector, setOpenBranchSelector] = useState(false);
-    const [searchTerm, setSearchTerm] = useState('');
     const router = useRouter();
 
     useEffect(() => {
@@ -559,7 +559,62 @@ export default function ManageEmployeesPage() {
             <p className="text-muted-foreground">Manage your employees and their leave requests by branch.</p>
         </div>
         
-         <div className="hidden md:block">
+        <div className="md:hidden space-y-4">
+            <Tabs defaultValue="employees" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 bg-primary text-primary-foreground p-1 h-auto rounded-lg">
+                    <TabsTrigger value="employees" className="data-[state=active]:bg-background data-[state=active]:text-foreground rounded-md py-2 transition-all duration-300">All Employees</TabsTrigger>
+                    <TabsTrigger value="leave" className="data-[state=active]:bg-background data-[state=active]:text-foreground rounded-md py-2 transition-all duration-300">Leave Requests</TabsTrigger>
+                </TabsList>
+                 <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
+                    <DialogTrigger asChild>
+                        <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={openBranchSelector}
+                            className="w-full justify-between"
+                        >
+                            {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Select Branch</DialogTitle>
+                        </DialogHeader>
+                        <Command>
+                            <CommandInput placeholder="Search branch..." />
+                            <CommandEmpty>No branches found.</CommandEmpty>
+                            <CommandGroup>
+                                <CommandList>
+                                {branches.map((branch) => (
+                                    <CommandItem
+                                        key={branch.id}
+                                        value={branch.shopName}
+                                        onSelect={() => {
+                                            setSelectedBranch(branch);
+                                            setOpenBranchSelector(false);
+                                        }}
+                                    >
+                                        {branch.shopName}
+                                    </CommandItem>
+                                ))}
+                                </CommandList>
+                            </CommandGroup>
+                        </Command>
+                    </DialogContent>
+                </Dialog>
+
+                <TabsContent value="employees" className="mt-6">
+                    <EmployeeList allBranches={memoizedBranches} selectedBranchId={selectedBranch?.id || null} allBranchIds={allBranchIds} />
+                </TabsContent>
+
+                <TabsContent value="leave" className="mt-6">
+                    <LeaveRequests selectedBranchId={selectedBranch?.id || null} allBranchIds={allBranchIds} />
+                </TabsContent>
+            </Tabs>
+        </div>
+        
+        <div className="hidden md:block">
             <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
                 <DialogTrigger asChild>
                     <Button
@@ -573,9 +628,12 @@ export default function ManageEmployeesPage() {
                     </Button>
                 </DialogTrigger>
                  <DialogContent className="p-0">
+                    <DialogHeader className="p-4 pb-0">
+                        <DialogTitle className="sr-only">Select Branch</DialogTitle>
+                    </DialogHeader>
                     <Command>
                         <CommandInput placeholder="Search branch..." />
-                        <CommandEmpty>No branches found.</CommandEmpty>
+                        <CommandEmpty>No branches found. <Link href="/admin/add-branch" className="text-primary underline">Add one now</Link>.</CommandEmpty>
                         <CommandGroup>
                             <CommandList>
                             {branches.map((branch) => (
@@ -595,63 +653,20 @@ export default function ManageEmployeesPage() {
                     </Command>
                 </DialogContent>
             </Dialog>
+            <Tabs defaultValue="employees" className="w-full mt-4">
+                <TabsList className="grid w-full grid-cols-2 bg-primary text-primary-foreground p-1 h-auto rounded-lg md:max-w-xs">
+                    <TabsTrigger value="employees" className="data-[state=active]:bg-background data-[state=active]:text-foreground rounded-md py-2 transition-all duration-300">All Employees</TabsTrigger>
+                    <TabsTrigger value="leave" className="data-[state=active]:bg-background data-[state=active]:text-foreground rounded-md py-2 transition-all duration-300">Leave Requests</TabsTrigger>
+                </TabsList>
+                <TabsContent value="employees" className="mt-6">
+                    <EmployeeList allBranches={memoizedBranches} selectedBranchId={selectedBranch?.id || null} allBranchIds={allBranchIds} />
+                </TabsContent>
+
+                <TabsContent value="leave" className="mt-6">
+                    <LeaveRequests selectedBranchId={selectedBranch?.id || null} allBranchIds={allBranchIds} />
+                </TabsContent>
+            </Tabs>
         </div>
-        
-        <Tabs defaultValue="employees" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 bg-primary text-primary-foreground p-1 h-auto rounded-lg">
-                <TabsTrigger value="employees" className="data-[state=active]:bg-background data-[state=active]:text-foreground rounded-md py-2 transition-all duration-300">All Employees</TabsTrigger>
-                <TabsTrigger value="leave" className="data-[state=active]:bg-background data-[state=active]:text-foreground rounded-md py-2 transition-all duration-300">Leave Requests</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="employees" className="mt-6">
-                 {/* Mobile Branch Selector */}
-                <div className="md:hidden space-y-4 mb-4">
-                     <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
-                        <DialogTrigger asChild>
-                            <Button
-                                variant="outline"
-                                role="combobox"
-                                aria-expanded={openBranchSelector}
-                                className="w-full justify-between"
-                            >
-                                {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
-                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                            <DialogHeader>
-                                <DialogTitle>Select Branch</DialogTitle>
-                            </DialogHeader>
-                            <Command>
-                                <CommandInput placeholder="Search branch..." />
-                                <CommandEmpty>No branches found.</CommandEmpty>
-                                <CommandGroup>
-                                    <CommandList>
-                                    {branches.map((branch) => (
-                                        <CommandItem
-                                            key={branch.id}
-                                            value={branch.shopName}
-                                            onSelect={() => {
-                                                setSelectedBranch(branch);
-                                                setOpenBranchSelector(false);
-                                            }}
-                                        >
-                                            {branch.shopName}
-                                        </CommandItem>
-                                    ))}
-                                    </CommandList>
-                                </CommandGroup>
-                            </Command>
-                        </DialogContent>
-                    </Dialog>
-                </div>
-                <EmployeeList allBranches={memoizedBranches} selectedBranchId={selectedBranch?.id || null} allBranchIds={allBranchIds} searchTerm={searchTerm} onSearchTermChange={setSearchTerm} />
-            </TabsContent>
-
-            <TabsContent value="leave" className="mt-6">
-                <LeaveRequests selectedBranchId={selectedBranch?.id || null} allBranchIds={allBranchIds} />
-            </TabsContent>
-        </Tabs>
     </div>
   );
 }
