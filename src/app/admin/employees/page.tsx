@@ -24,6 +24,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Label } from '@/components/ui/label';
 
 
 export type User = {
@@ -497,6 +498,23 @@ export default function ManageEmployeesPage() {
     const allBranchIds = useMemo(() => branches.filter(b => b.id !== 'all').map(b => b.id), [branches]);
     const memoizedBranches = useMemo(() => branches, [branches]);
 
+    const FilterContent = () => (
+        <div className="p-4 space-y-4">
+            <Label htmlFor="status-filter">Filter by status</Label>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger id="status-filter" className="w-full">
+                    <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="all">All Statuses</SelectItem>
+                    <SelectItem value="Active">Active</SelectItem>
+                    <SelectItem value="Inactive">Inactive</SelectItem>
+                    <SelectItem value="Pending Onboarding">Pending Onboarding</SelectItem>
+                </SelectContent>
+            </Select>
+        </div>
+    );
+
   return (
     <div className="flex flex-col gap-6">
         <div className="lg:flex lg:justify-between lg:items-start gap-4">
@@ -528,7 +546,7 @@ export default function ManageEmployeesPage() {
                         <Input
                         type="search"
                         placeholder="Search by name, role, or shop..."
-                        className="w-full rounded-lg bg-background pl-8"
+                        className="rounded-lg bg-background pl-8"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         />
@@ -539,7 +557,7 @@ export default function ManageEmployeesPage() {
                                 variant="outline"
                                 role="combobox"
                                 aria-expanded={openBranchSelector}
-                                className="w-full md:w-auto md:max-w-xs justify-between"
+                                className="w-full md:w-auto justify-between"
                             >
                                 {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
                                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -573,32 +591,33 @@ export default function ManageEmployeesPage() {
                         </DialogContent>
                     </Dialog>
                     <div className="flex w-full md:w-auto items-center gap-2">
+                      {/* Mobile Filter: Sheet */}
                       <Sheet>
                           <SheetTrigger asChild>
-                              <Button variant="outline" size="icon" className="w-full md:w-auto">
-                                  <Filter className="h-4 w-4" />
-                                  <span className="md:hidden ml-2">Filter</span>
+                              <Button variant="outline" className="w-full md:hidden">
+                                  <Filter className="h-4 w-4 mr-2" />
+                                  Filter
                               </Button>
                           </SheetTrigger>
                           <SheetContent side="bottom" className="h-auto">
                               <SheetHeader>
                                   <SheetTitle>Filter Employees</SheetTitle>
                               </SheetHeader>
-                              <div className="py-4">
-                                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                                    <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="Filter by status" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All Statuses</SelectItem>
-                                        <SelectItem value="Active">Active</SelectItem>
-                                        <SelectItem value="Inactive">Inactive</SelectItem>
-                                        <SelectItem value="Pending Onboarding">Pending Onboarding</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                              </div>
+                              <FilterContent />
                           </SheetContent>
                       </Sheet>
+                      {/* Desktop Filter: Popover */}
+                      <Popover>
+                          <PopoverTrigger asChild>
+                              <Button variant="outline" className="hidden md:flex">
+                                  <Filter className="h-4 w-4 mr-2" />
+                                  Filter
+                              </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-64 p-0" align="end">
+                            <FilterContent />
+                          </PopoverContent>
+                      </Popover>
                        <Link href="/admin/employees/add" className='w-full md:w-auto'>
                           <Button className='w-full'>
                               <UserPlus className="mr-2 h-4 w-4" />
