@@ -350,8 +350,8 @@ const LeaveRequests = ({ selectedBranchId, allBranchIds }: { selectedBranchId: s
 
     return (
       <div className="space-y-4">
-        <div className="flex flex-row items-center gap-4">
-          <div className="relative flex-1">
+        <div className="flex flex-col sm:flex-row items-center gap-4">
+          <div className="relative flex-1 w-full">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
@@ -361,7 +361,7 @@ const LeaveRequests = ({ selectedBranchId, allBranchIds }: { selectedBranchId: s
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <div className="w-[180px]">
+          <div className="w-full sm:w-[180px]">
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Filter by status" />
@@ -515,7 +515,7 @@ export default function ManageEmployeesPage() {
             <div className="space-y-4">
               {activeTab === 'employees' && (
                 <div className="space-y-4">
-                  <div className="flex flex-col md:flex-row items-center justify-between gap-2">
+                  <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
                     <div className="relative w-full flex-1">
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input
@@ -526,14 +526,14 @@ export default function ManageEmployeesPage() {
                         onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
-                    <div className="flex w-full md:w-auto items-center gap-2">
-                         <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
+                    <div className="flex w-full flex-col sm:flex-row items-center gap-2">
+                        <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
                             <DialogTrigger asChild>
                                 <Button
                                     variant="outline"
                                     role="combobox"
                                     aria-expanded={openBranchSelector}
-                                    className="w-full justify-between"
+                                    className="w-full sm:w-auto justify-between"
                                 >
                                     {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
                                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -567,7 +567,7 @@ export default function ManageEmployeesPage() {
                             </DialogContent>
                         </Dialog>
                         <Select value={statusFilter} onValueChange={setStatusFilter}>
-                            <SelectTrigger className="w-full">
+                            <SelectTrigger className="w-full sm:w-auto">
                                 <SelectValue placeholder="Filter by status" />
                             </SelectTrigger>
                             <SelectContent>
@@ -577,13 +577,23 @@ export default function ManageEmployeesPage() {
                                 <SelectItem value="Pending Onboarding">Pending Onboarding</SelectItem>
                             </SelectContent>
                         </Select>
-                        <Link href="/admin/employees/add" className="w-full md:w-auto">
-                            <Button className="w-full">
-                                <UserPlus className="mr-2 h-4 w-4" />
-                                Invite
-                            </Button>
-                        </Link>
+                        <div className="hidden lg:block">
+                             <Link href="/admin/employees/add">
+                                <Button className="w-full">
+                                    <UserPlus className="mr-2 h-4 w-4" />
+                                    Invite
+                                </Button>
+                            </Link>
+                        </div>
                     </div>
+                  </div>
+                   <div className="lg:hidden w-full">
+                     <Link href="/admin/employees/add">
+                        <Button className="w-full">
+                            <UserPlus className="mr-2 h-4 w-4" />
+                            Invite Employee
+                        </Button>
+                    </Link>
                   </div>
                 </div>
               )}
