@@ -28,7 +28,7 @@ export default function AddBranchPage() {
     const { hasReachedBranchLimit, canAccessFeature } = useSubscription();
     const [branchCount, setBranchCount] = useState(0);
 
-    const isLocked = !canAccessFeature('MULTI_BRANCH') || hasReachedBranchLimit(branchCount);
+    const isLocked = !canAccessFeature('MULTI_BRANCH') || hasReachedBranchLimit(branchCount + 1); // +1 to account for the new branch
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
