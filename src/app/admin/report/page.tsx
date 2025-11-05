@@ -444,7 +444,7 @@ const PayrollReportTab = ({ shopData, authUser }: { shopData: ShopData, authUser
                 </div>
             </div>
             <div className="space-y-4">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-10 gap-4">
                     <div>
                         <h3 className="text-2xl font-semibold leading-none tracking-tight">Payroll Results for {format(selectedDate, 'MMMM yyyy')}</h3>
                         <p className="text-sm text-muted-foreground mt-2">Found {payrollData.length} employee(s). You can add bonuses or deductions below.</p>
@@ -727,7 +727,7 @@ const MusterRollTab = ({ authUser }: { authUser: AuthUser }) => {
                 </div>
             </div>
             <div className="space-y-2">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-10 gap-4">
                     <div>
                         <h3 className="text-2xl font-semibold leading-none tracking-tight">Muster Roll for {format(selectedDate, 'MMMM yyyy')}</h3>
                         <p className="text-sm text-muted-foreground mt-2">P = Present, A = Absent, H = Half-day, L = On Leave</p>
@@ -913,7 +913,7 @@ export default function ReportsPage() {
                         <h1 className="text-3xl font-bold tracking-tight">Reports &amp; Payroll</h1>
                         <p className="text-muted-foreground mt-2">Filter records and generate monthly salary reports.</p>
                     </div>
-                     <TabsList className="h-auto items-center justify-center rounded-md p-1 grid w-full grid-cols-3 bg-primary text-primary-foreground md:inline-flex md:max-w-md">
+                     <TabsList className="h-auto items-center justify-center rounded-md p-1 grid grid-cols-3 bg-primary text-primary-foreground md:inline-flex md:max-w-md">
                         <TabsTrigger value="attendance" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Attendance</TabsTrigger>
                         <TabsTrigger value="muster" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Muster Roll</TabsTrigger>
                         <TabsTrigger value="payroll" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Payroll</TabsTrigger>
