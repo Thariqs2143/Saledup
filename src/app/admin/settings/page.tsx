@@ -244,22 +244,20 @@ function SettingsPageContent() {
   return (
     <div className="space-y-6">
         <Tabs defaultValue={defaultTab} className="w-full">
-            <div className="md:hidden">
-              <TabsList className="grid w-full grid-cols-4">
-                  <TabsTrigger value="profile"><UserIcon className="h-5 w-5"/></TabsTrigger>
-                  <TabsTrigger value="subscription"><Crown className="h-5 w-5"/></TabsTrigger>
-                  <TabsTrigger value="general"><SettingsIcon className="h-5 w-5"/></TabsTrigger>
-                  <TabsTrigger value="business"><Building className="h-5 w-5"/></TabsTrigger>
-              </TabsList>
-            </div>
-            
-            <div className="hidden md:block mb-6">
+            <div className="hidden lg:block mb-8">
                 <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
                 <p className="text-muted-foreground">Manage your account and shop preferences.</p>
             </div>
             
-            <div className="md:grid md:grid-cols-[220px_1fr] md:gap-8">
-                <aside className="hidden md:flex md:flex-col md:sticky md:top-24 h-fit">
+            <div className="lg:grid lg:grid-cols-[220px_1fr] lg:gap-8">
+                <TabsList className="grid w-full grid-cols-4 lg:hidden">
+                  <TabsTrigger value="profile"><UserIcon className="h-5 w-5"/></TabsTrigger>
+                  <TabsTrigger value="subscription"><Crown className="h-5 w-5"/></TabsTrigger>
+                  <TabsTrigger value="general"><SettingsIcon className="h-5 w-5"/></TabsTrigger>
+                  <TabsTrigger value="business"><Building className="h-5 w-5"/></TabsTrigger>
+                </TabsList>
+
+                <aside className="hidden lg:flex lg:flex-col lg:sticky lg:top-24 h-fit">
                     <TabsList className="flex-col h-auto items-start gap-2 bg-transparent p-0">
                         <TabsTrigger value="profile" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-foreground/20 hover:bg-muted/50 hover:border-primary">
                             Profile
@@ -280,7 +278,7 @@ function SettingsPageContent() {
                     </TabsList>
                 </aside>
             
-              <div className="mt-8 md:mt-0">
+              <div className="mt-8 lg:mt-0">
                 {/* Profile Tab */}
                 <TabsContent value="profile">
                     {userProfile && (
