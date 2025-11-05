@@ -168,7 +168,7 @@ const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds, searchTerm,
             <>
                  <div className="grid gap-4 md:grid-cols-2 lg:hidden">
                   {filteredEmployees.map((employee) => (
-                    <Card key={employee.id} className="p-4 space-y-4 bg-muted/30 hover:bg-muted/70 transition-colors">
+                    <Card key={employee.id} className="p-4 space-y-4 rounded-lg border-2 border-border hover:border-primary hover:shadow-lg transition-all">
                       <div className="flex justify-between items-start">
                         <div className="flex items-center gap-4">
                           <Avatar className="h-12 w-12 border-2 border-muted">
@@ -217,7 +217,7 @@ const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds, searchTerm,
                   ))}
                 </div>
 
-                <div className="hidden lg:block rounded-lg border">
+                <div className="hidden lg:block rounded-lg border-2 border-border">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -230,7 +230,7 @@ const EmployeeList = ({ allBranches, selectedBranchId, allBranchIds, searchTerm,
                     </TableHeader>
                     <TableBody>
                       {filteredEmployees.map((employee) => (
-                        <TableRow key={employee.id}>
+                        <TableRow key={employee.id} className="transition-all duration-300 ease-out hover:shadow-md hover:border-primary border-y-2 border-transparent">
                           <TableCell>
                             <div className="flex items-center gap-3">
                               <Avatar>
