@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Button } from "@/components/ui/button";
@@ -245,7 +246,7 @@ function SettingsPageContent() {
   return (
     <div className="space-y-6">
         <Tabs defaultValue={defaultTab} className="w-full">
-          <TabsList className="w-full md:grid md:w-full md:grid-cols-5">
+          <TabsList className="w-full md:grid md:w-full md:grid-cols-4">
             {/* Mobile carousel with 2-column tabs */}
             <Carousel opts={{ align: "start", dragFree: true }} className="w-full md:hidden">
               <CarouselContent className="-ml-1">
@@ -265,12 +266,6 @@ function SettingsPageContent() {
                   </div>
                 </CarouselItem>
 
-                {/* Third slide with last tab (alone, but still inside grid) */}
-                <CarouselItem className="pl-1 basis-full">
-                  <div className="grid grid-cols-2 gap-2">
-                    <TabsTrigger value="gamification">Gamification</TabsTrigger>
-                  </div>
-                </CarouselItem>
               </CarouselContent>
             </Carousel>
 
@@ -280,7 +275,6 @@ function SettingsPageContent() {
               <TabsTrigger value="subscription">Subscription</TabsTrigger>
               <TabsTrigger value="general">General</TabsTrigger>
               <TabsTrigger value="business">Settings</TabsTrigger>
-              <TabsTrigger value="gamification">Gamification</TabsTrigger>
             </div>
           </TabsList>
 
@@ -489,14 +483,6 @@ function SettingsPageContent() {
                             </Label>
                         </RadioGroup>
                     </CardContent>
-                </Card>
-            </TabsContent>
-
-            {/* Gamification Tab */}
-            <TabsContent value="gamification" className="mt-6">
-                <Card>
-                    <CardHeader><CardTitle>Leaderboard</CardTitle><CardDescription>View top-performing employees and their rankings.</CardDescription></CardHeader>
-                    <CardContent><Link href="/admin/leaderboard"><Button><Trophy className="mr-2 h-4 w-4" />View Leaderboard</Button></Link></CardContent>
                 </Card>
             </TabsContent>
              <CardFooter className="pt-6 w-full">
