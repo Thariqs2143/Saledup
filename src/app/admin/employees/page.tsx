@@ -490,8 +490,8 @@ export default function ManageEmployeesPage() {
 
   return (
     <div className="flex flex-col gap-6">
-        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
-            <div className="hidden lg:block">
+        <div className="lg:flex lg:justify-between lg:items-start gap-4">
+            <div className='hidden lg:block'>
                 <h1 className="text-3xl font-bold tracking-tight">Employees & Leave</h1>
                 <p className="text-muted-foreground">Manage your employees and their leave requests by branch.</p>
             </div>
@@ -526,65 +526,65 @@ export default function ManageEmployeesPage() {
                         onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
-                    <div className="flex w-full md:w-auto gap-2">
+                    <div className="flex w-full md:w-auto items-center gap-2">
+                         <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
+                            <DialogTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    role="combobox"
+                                    aria-expanded={openBranchSelector}
+                                    className="w-full sm:w-[200px] justify-between"
+                                >
+                                    {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
+                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className="p-0">
+                            <DialogHeader className="p-4 border-b">
+                                <DialogTitle>Select Branch</DialogTitle>
+                            </DialogHeader>
+                            <Command className="rounded-lg border-0 shadow-none">
+                                <CommandInput placeholder="Search branch..." />
+                                <CommandEmpty>No branches found. <Link href="/admin/add-branch" className="text-primary underline">Add one now</Link>.</CommandEmpty>
+                                <CommandGroup>
+                                    <CommandList>
+                                    {branches.map((branch) => (
+                                        <CommandItem
+                                            key={branch.id}
+                                            value={branch.shopName}
+                                            onSelect={() => {
+                                                setSelectedBranch(branch);
+                                                setOpenBranchSelector(false);
+                                            }}
+                                            className="py-3"
+                                        >
+                                            {branch.shopName}
+                                        </CommandItem>
+                                    ))}
+                                    </CommandList>
+                                </CommandGroup>
+                            </Command>
+                            </DialogContent>
+                        </Dialog>
                         <Select value={statusFilter} onValueChange={setStatusFilter}>
-                        <SelectTrigger className="w-full md:w-[180px]">
-                            <SelectValue placeholder="Filter by status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">All Statuses</SelectItem>
-                            <SelectItem value="Active">Active</SelectItem>
-                            <SelectItem value="Inactive">Inactive</SelectItem>
-                            <SelectItem value="Pending Onboarding">Pending Onboarding</SelectItem>
-                        </SelectContent>
+                            <SelectTrigger className="w-full md:w-[180px]">
+                                <SelectValue placeholder="Filter by status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Statuses</SelectItem>
+                                <SelectItem value="Active">Active</SelectItem>
+                                <SelectItem value="Inactive">Inactive</SelectItem>
+                                <SelectItem value="Pending Onboarding">Pending Onboarding</SelectItem>
+                            </SelectContent>
                         </Select>
                         <Link href="/admin/employees/add" className="w-full md:w-auto">
-                        <Button className="w-full md:w-auto">
-                            <UserPlus className="mr-2 h-4 w-4" />
-                            Invite
-                        </Button>
+                            <Button className="w-full md:w-auto">
+                                <UserPlus className="mr-2 h-4 w-4" />
+                                Invite
+                            </Button>
                         </Link>
                     </div>
                   </div>
-                   <Dialog open={openBranchSelector} onOpenChange={setOpenBranchSelector}>
-                        <DialogTrigger asChild>
-                             <Button
-                                variant="outline"
-                                role="combobox"
-                                aria-expanded={openBranchSelector}
-                                className="w-full sm:w-[300px] justify-between"
-                            >
-                                {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
-                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent className="p-0">
-                           <DialogHeader className="p-4 border-b">
-                               <DialogTitle>Select Branch</DialogTitle>
-                           </DialogHeader>
-                           <Command className="rounded-lg border-0 shadow-none">
-                              <CommandInput placeholder="Search branch..." />
-                              <CommandEmpty>No branches found. <Link href="/admin/add-branch" className="text-primary underline">Add one now</Link>.</CommandEmpty>
-                              <CommandGroup>
-                                  <CommandList>
-                                  {branches.map((branch) => (
-                                      <CommandItem
-                                          key={branch.id}
-                                          value={branch.shopName}
-                                          onSelect={() => {
-                                              setSelectedBranch(branch);
-                                              setOpenBranchSelector(false);
-                                          }}
-                                          className="py-3"
-                                      >
-                                          {branch.shopName}
-                                      </CommandItem>
-                                  ))}
-                                  </CommandList>
-                              </CommandGroup>
-                          </Command>
-                        </DialogContent>
-                    </Dialog>
                 </div>
               )}
             </div>
@@ -600,5 +600,7 @@ export default function ManageEmployeesPage() {
     </div>
   );
 }
+
+    
 
     
