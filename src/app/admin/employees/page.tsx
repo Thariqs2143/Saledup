@@ -491,7 +491,7 @@ export default function ManageEmployeesPage() {
   return (
     <div className="flex flex-col gap-6">
         <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
-            <div className="hidden md:block">
+            <div className="hidden lg:block">
                 <h1 className="text-3xl font-bold tracking-tight">Employees & Leave</h1>
                 <p className="text-muted-foreground">Manage your employees and their leave requests by branch.</p>
             </div>
@@ -515,7 +515,7 @@ export default function ManageEmployeesPage() {
             <div className="mt-6">
               {activeTab === 'employees' && (
                 <div className="space-y-4">
-                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                     <div className="relative w-full flex-1">
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input
@@ -526,9 +526,9 @@ export default function ManageEmployeesPage() {
                         onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
-                    <div className="flex w-full sm:w-auto gap-2">
+                    <div className="flex w-full md:w-auto gap-2">
                         <Select value={statusFilter} onValueChange={setStatusFilter}>
-                        <SelectTrigger className="w-full sm:w-[180px]">
+                        <SelectTrigger className="w-full md:w-[180px]">
                             <SelectValue placeholder="Filter by status" />
                         </SelectTrigger>
                         <SelectContent>
@@ -538,8 +538,8 @@ export default function ManageEmployeesPage() {
                             <SelectItem value="Pending Onboarding">Pending Onboarding</SelectItem>
                         </SelectContent>
                         </Select>
-                        <Link href="/admin/employees/add" className="w-full sm:w-auto">
-                        <Button className="w-full sm:w-auto">
+                        <Link href="/admin/employees/add" className="w-full md:w-auto">
+                        <Button className="w-full md:w-auto">
                             <UserPlus className="mr-2 h-4 w-4" />
                             Invite
                         </Button>
@@ -600,3 +600,5 @@ export default function ManageEmployeesPage() {
     </div>
   );
 }
+
+    
