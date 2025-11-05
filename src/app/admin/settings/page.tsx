@@ -253,25 +253,27 @@ function SettingsPageContent() {
               </TabsList>
             </div>
             
-            <div className="md:grid md:grid-cols-[200px_1fr] md:gap-8">
-              <TabsList className="hidden md:flex md:flex-col md:h-auto md:items-start md:gap-2 md:bg-transparent md:p-0 md:sticky md:top-24">
-                  <TabsTrigger value="profile" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-border hover:bg-muted hover:border-primary">
-                      Profile
-                  </TabsTrigger>
-                  <TabsTrigger value="subscription" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-border hover:bg-muted hover:border-primary">
-                      Subscription
-                  </TabsTrigger>
-                  <TabsTrigger value="general" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-border hover:bg-muted hover:border-primary">
-                      General
-                  </TabsTrigger>
-                  <TabsTrigger value="business" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-border hover:bg-muted hover:border-primary">
-                      Business
-                  </TabsTrigger>
-                   <Button onClick={handleSaveSettings} className="w-full mt-4" disabled={saving}>
-                      {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                      Save All Settings
-                  </Button>
-              </TabsList>
+            <div className="md:grid md:grid-cols-[220px_1fr] md:gap-8">
+                <div className="hidden md:block">
+                    <TabsList className="flex-col h-auto items-start gap-2 bg-transparent p-0 sticky top-4">
+                        <TabsTrigger value="profile" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-border hover:bg-muted hover:border-primary">
+                            Profile
+                        </TabsTrigger>
+                        <TabsTrigger value="subscription" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-border hover:bg-muted hover:border-primary">
+                            Subscription
+                        </TabsTrigger>
+                        <TabsTrigger value="general" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-border hover:bg-muted hover:border-primary">
+                            General
+                        </TabsTrigger>
+                        <TabsTrigger value="business" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-border hover:bg-muted hover:border-primary">
+                            Business
+                        </TabsTrigger>
+                        <Button onClick={handleSaveSettings} className="w-full mt-4" disabled={saving}>
+                            {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                            Save All Settings
+                        </Button>
+                    </TabsList>
+                </div>
             
               <div className="mt-8 md:mt-0">
                 {/* Profile Tab */}
