@@ -456,6 +456,40 @@ const LeaveRequests = ({ selectedBranchId, allBranchIds }: { selectedBranchId: s
     );
 };
 
+const BranchSelector = ({ open, onOpenChange, branches, setSelectedBranch }: { open: boolean, onOpenChange: (open: boolean) => void, branches: Branch[], setSelectedBranch: (branch: Branch) => void }) => {
+    const [searchTerm, setSearchTerm] = useState('');
+    const filteredBranches = useMemo(() => {
+        return branches.filter(branch => branch.shopName?.toLowerCase().includes(searchTerm.toLowerCase()));
+    }, [branches, searchTerm]);
+    
+    return (
+        <Command>
+            <CommandInput 
+                placeholder="Search branch..."
+                value={searchTerm}
+                onValueChange={setSearchTerm}
+            />
+            <CommandList>
+                <CommandEmpty>No branches found.</CommandEmpty>
+                <CommandGroup>
+                    {filteredBranches.map((branch) => (
+                        <CommandItem
+                            key={branch.id}
+                            value={branch.shopName}
+                            onSelect={() => {
+                                setSelectedBranch(branch);
+                                onOpenChange(false);
+                            }}
+                        >
+                            {branch.shopName}
+                        </CommandItem>
+                    ))}
+                </CommandGroup>
+            </CommandList>
+        </Command>
+    );
+};
+
 
 export default function ManageEmployeesPage() {
     const [authUser, setAuthUser] = useState<AuthUser | null>(null);
@@ -557,37 +591,22 @@ export default function ManageEmployeesPage() {
                                 variant="outline"
                                 role="combobox"
                                 aria-expanded={openBranchSelector}
-                                className="w-full md:w-auto justify-between"
+                                className="w-full md:w-auto md:max-w-xs justify-between"
                             >
-                                {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
+                                {selectedBranch ? <span className="truncate">{selectedBranch.shopName}</span> : "Select a branch..."}
                                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                             </Button>
                         </DialogTrigger>
-                        <DialogContent className="p-0">
-                        <DialogHeader className="p-4 border-b sr-only">
-                            <DialogTitle>Select Branch</DialogTitle>
-                        </DialogHeader>
-                        <Command className="rounded-lg border-0 shadow-none">
-                            <CommandInput placeholder="Search branch..." />
-                            <CommandEmpty>No branches found. <Link href="/admin/add-branch" className="text-primary underline">Add one now</Link>.</CommandEmpty>
-                            <CommandGroup>
-                                <CommandList>
-                                {branches.map((branch) => (
-                                    <CommandItem
-                                        key={branch.id}
-                                        value={branch.shopName}
-                                        onSelect={() => {
-                                            setSelectedBranch(branch);
-                                            setOpenBranchSelector(false);
-                                        }}
-                                        className="py-3"
-                                    >
-                                        {branch.shopName}
-                                    </CommandItem>
-                                ))}
-                                </CommandList>
-                            </CommandGroup>
-                        </Command>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Select Branch</DialogTitle>
+                            </DialogHeader>
+                            <BranchSelector 
+                                open={openBranchSelector}
+                                onOpenChange={setOpenBranchSelector}
+                                branches={branches}
+                                setSelectedBranch={setSelectedBranch}
+                            />
                         </DialogContent>
                     </Dialog>
                     <div className="flex w-full md:w-auto items-center gap-2">

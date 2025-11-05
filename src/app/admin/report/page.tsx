@@ -769,8 +769,8 @@ const MusterRollTab = ({ authUser }: { authUser: AuthUser }) => {
     );
 };
 
-const BranchSelector = ({ open, onOpenChange, selectedBranch, branches, setSelectedBranch, searchTerm, setSearchTerm }: { open: boolean, onOpenChange: (open: boolean) => void, selectedBranch: ShopData, branches: ShopData[], setSelectedBranch: (branch: ShopData) => void, searchTerm: string, setSearchTerm: (term: string) => void }) => {
-    
+const BranchSelector = ({ open, onOpenChange, branches, setSelectedBranch }: { open: boolean, onOpenChange: (open: boolean) => void, branches: ShopData[], setSelectedBranch: (branch: ShopData) => void }) => {
+    const [searchTerm, setSearchTerm] = useState('');
     const filteredBranches = useMemo(() => {
         return branches.filter(branch => branch.shopName?.toLowerCase().includes(searchTerm.toLowerCase()));
     }, [branches, searchTerm]);
@@ -782,26 +782,26 @@ const BranchSelector = ({ open, onOpenChange, selectedBranch, branches, setSelec
                 value={searchTerm}
                 onValueChange={setSearchTerm}
             />
-            <CommandEmpty>No branches found.</CommandEmpty>
-            <CommandGroup>
-                <CommandList>
-                {filteredBranches.map((branch) => (
-                    <CommandItem
-                        key={branch.id}
-                        value={branch.shopName!}
-                        onSelect={() => {
-                            setSelectedBranch(branch);
-                            onOpenChange(false);
-                        }}
-                    >
-                        {branch.shopName}
-                    </CommandItem>
-                ))}
-                </CommandList>
-            </CommandGroup>
+            <CommandList>
+                <CommandEmpty>No branches found.</CommandEmpty>
+                <CommandGroup>
+                    {filteredBranches.map((branch) => (
+                        <CommandItem
+                            key={branch.id}
+                            value={branch.shopName!}
+                            onSelect={() => {
+                                setSelectedBranch(branch);
+                                onOpenChange(false);
+                            }}
+                        >
+                            {branch.shopName}
+                        </CommandItem>
+                    ))}
+                </CommandGroup>
+            </CommandList>
         </Command>
-    )
-}
+    );
+};
 
 
 export default function ReportsPage() {
@@ -810,7 +810,6 @@ export default function ReportsPage() {
     const [allBranches, setAllBranches] = useState<ShopData[]>([]);
     const [selectedBranch, setSelectedBranch] = useState<ShopData | null>(null);
     const [loading, setLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState('');
     
     const [employees, setEmployees] = useState<User[]>([]);
     const [date, setDate] = useState<DateRange | undefined>(undefined);
@@ -934,11 +933,8 @@ export default function ReportsPage() {
                             <BranchSelector 
                                 open={openBranchSelector}
                                 onOpenChange={setOpenBranchSelector}
-                                selectedBranch={selectedBranch}
                                 branches={allBranches}
                                 setSelectedBranch={setSelectedBranch}
-                                searchTerm={searchTerm}
-                                setSearchTerm={setSearchTerm}
                             />
                         </DialogContent>
                     </Dialog>
@@ -1002,7 +998,7 @@ export default function ReportsPage() {
                             <DialogTrigger asChild>
                                 <Button variant="outline" className="w-full justify-between mt-1">
                                     <Building className="mr-2 h-4 w-4" />
-                                    {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
+                                    <span className="truncate">{selectedBranch ? selectedBranch.shopName : "Select a branch..."}</span>
                                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                 </Button>
                             </DialogTrigger>
@@ -1011,11 +1007,8 @@ export default function ReportsPage() {
                                 <BranchSelector 
                                     open={openBranchSelector}
                                     onOpenChange={setOpenBranchSelector}
-                                    selectedBranch={selectedBranch}
                                     branches={allBranches}
                                     setSelectedBranch={setSelectedBranch}
-                                    searchTerm={searchTerm}
-                                    setSearchTerm={setSearchTerm}
                                 />
                             </DialogContent>
                         </Dialog>
