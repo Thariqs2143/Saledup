@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { Button } from "@/components/ui/button";
@@ -91,9 +90,8 @@ const PricingPlans = () => {
     'QR Code Check-in/out (permanent & dynamic)',
     'Manual Attendance Entry',
     'Live Attendance Dashboard',
-    'Employee Profiles',
-    'Basic Daily & Weekly Reports',
     'Multi-Branch Support',
+    'Employee Profiles',
     'Easy Employee Onboarding (phone number invite)',
     'Staff Transfer Between Branches',
     'Detailed Attendance Reports (daily/weekly/monthly)',
@@ -111,15 +109,15 @@ const PricingPlans = () => {
   const plans = [
     {
       id: 'trial',
-      name: '14-Day Free Trial',
+      name: 'Free Plan',
       monthly: 0,
       yearly: 0,
-      note: '',
-      cta: 'Start Free Trial',
-      employees: 'Unlimited Employees',
-      branches: 'Unlimited Branches',
-      included: new Set(features),
-      highlight: 'Try every feature, risk-free. No credit card required.',
+      note: '/ perpetual',
+      cta: 'Current Plan',
+      employees: 'Up to 5 employees',
+      branches: '1 Branch',
+      included: new Set(features.slice(0, 7)),
+      highlight: 'For new businesses to get started',
       accent: 'from-gray-500 to-gray-600'
     },
     {
@@ -128,10 +126,10 @@ const PricingPlans = () => {
       monthly: 499,
       yearly: 4990,
       note: '',
-      cta: 'Choose Growth',
+      cta: 'Upgrade to Growth',
       employees: 'Up to 50 employees',
       branches: 'Up to 5 branches',
-      included: new Set(features.slice(0, -3)), // Excludes the last 3 (AI/Pro features)
+      included: new Set(features.slice(0, 14)), // Excludes the last 3 (AI/Pro features)
       highlight: 'For growing businesses that need more power and control.',
       accent: 'from-purple-500 to-indigo-500'
     },
@@ -141,7 +139,7 @@ const PricingPlans = () => {
       monthly: 999,
       yearly: 9999,
       note: '',
-      cta: 'Choose Pro',
+      cta: 'Upgrade to Pro',
       employees: 'Unlimited employees',
       branches: 'Unlimited branches',
       included: new Set(features),
@@ -205,9 +203,11 @@ const PricingPlans = () => {
                        )}
                       <span className="text-sm text-gray-500 dark:text-gray-400">{p.id !== 'trial' && (isYearly ? '/year' : '/month')}</span>
                     </div>
-                    {p.id !== 'trial' && isYearly && (
-                      <p className="text-xs text-green-600 dark:text-green-400 font-medium mt-1">You save ₹{p.monthly*2} per year!</p>
-                    )}
+                    {p.id === 'pro' && isYearly ? (
+                      <p className="text-xs text-green-600 dark:text-green-400 font-medium mt-1">You save ₹1989 per year!</p>
+                    ) : p.id === 'growth' && isYearly ? (
+                      <p className="text-xs text-green-600 dark:text-green-400 font-medium mt-1">You save ₹998 per year!</p>
+                    ): null }
                   </>
                 )}
                 <div className="mt-2 text-sm text-gray-600 dark:text-gray-300">{p.employees} • {p.branches}</div>
@@ -428,9 +428,9 @@ function SettingsPageContent() {
   return (
     <div className="space-y-6">
         <Tabs defaultValue={defaultTab} className="w-full">
-            <div className="mb-6 lg:mb-8 hidden lg:block">
-                <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
-                <p className="text-muted-foreground">Manage your account and shop preferences.</p>
+            <div className="mb-6 lg:mb-8">
+                <h1 className="text-3xl font-bold tracking-tight hidden lg:block">Settings</h1>
+                <p className="text-muted-foreground hidden lg:block">Manage your account and shop preferences.</p>
             </div>
             
              <div className="lg:grid lg:grid-cols-[220px_1fr] lg:gap-8">
@@ -637,4 +637,3 @@ export default function AdminSettingsPage() {
   );
 }
 
-    
