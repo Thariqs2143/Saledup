@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from 'next/image';
-import { Expand, QrCode, Loader2, History, Download, X, UserPlus, Calendar as CalendarIcon, Save, RefreshCw, Activity, Edit } from 'lucide-react';
+import { Expand, QrCode, Loader2, History, Download, X, UserPlus, Calendar as CalendarIcon, Save, RefreshCw, Activity, Edit, ChevronDown } from 'lucide-react';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
 import { doc, getDoc, addDoc, collection, onSnapshot, query, orderBy, Timestamp, where, getDocs, setDoc, limit } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
@@ -354,6 +354,7 @@ const ManualEntryForm = () => {
 const RecentActivity = () => {
     const [activities, setActivities] = useState<ActivityRecord[]>([]);
     const [loading, setLoading] = useState(true);
+    const [showAll, setShowAll] = useState(false);
     const [authUser, setAuthUser] = useState<AuthUser | null>(null);
     const [allEmployees, setAllEmployees] = useState<User[]>([]);
 
@@ -377,7 +378,7 @@ const RecentActivity = () => {
         if (allEmployees.length === 0 && authUser) { setLoading(false); return; }
         setLoading(true);
         const attendanceRef = collection(db, 'shops', authUser.uid, 'attendance');
-        const q = query(attendanceRef, orderBy('checkInTime', 'desc'), limit(5));
+        const q = query(attendanceRef, orderBy('checkInTime', 'desc'), limit(25));
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const fetchedActivities = snapshot.docs.map(doc => {
                 const data = doc.data() as ActivityRecord;
@@ -390,14 +391,19 @@ const RecentActivity = () => {
         return () => unsubscribe();
     }, [authUser, allEmployees]);
 
+    const displayedActivities = showAll ? activities : activities.slice(0, 8);
+
     return (
          <Card className="transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
-            <CardHeader><CardTitle className="flex items-center gap-2"><Activity className="h-5 w-5" />Recent Activity</CardTitle><CardDescription>A live log of the most recent attendance scans.</CardDescription></CardHeader>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Activity className="h-5 w-5" />Recent Activity</CardTitle>
+                <CardDescription>A live log of the most recent attendance scans.</CardDescription>
+            </CardHeader>
             <CardContent>
                 {loading ? <div className="flex items-center justify-center p-8"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
                     : activities.length > 0 ? (
                         <div className="space-y-4">
-                            {activities.map((item) => (
+                            {displayedActivities.map((item) => (
                                 <div key={item.id} className="flex items-start gap-4">
                                     <Avatar className="h-9 w-9 border"><AvatarImage src={item.userImageUrl} /><AvatarFallback>{item.userFallback || '?'}</AvatarFallback></Avatar>
                                     <div className="flex-1 text-sm">
@@ -410,6 +416,18 @@ const RecentActivity = () => {
                     ) : <p className="text-sm text-muted-foreground text-center py-4">No attendance activity yet.</p>
                 }
             </CardContent>
+             {activities.length > 8 && (
+                <CardFooter>
+                    <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => setShowAll(!showAll)}
+                    >
+                        <ChevronDown className={cn("mr-2 h-4 w-4 transition-transform", showAll && "rotate-180")} />
+                        {showAll ? 'Show Less' : 'Show More'}
+                    </Button>
+                </CardFooter>
+            )}
         </Card>
     )
 }
