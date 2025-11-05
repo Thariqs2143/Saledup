@@ -108,42 +108,40 @@ const PricingPlans = () => {
 
   const plans = [
     {
-      id: 'trial',
+      id: 'free',
       name: 'Free Plan',
       monthly: 0,
       yearly: 0,
-      note: '/ perpetual',
       cta: 'Current Plan',
       employees: 'Up to 5 employees',
       branches: '1 Branch',
       included: new Set(features.slice(0, 7)),
       highlight: 'For new businesses to get started',
-      accent: 'from-gray-500 to-gray-600'
+      accent: 'from-gray-500 to-gray-600 dark:from-gray-700 dark:to-gray-800'
     },
     {
       id: 'growth',
       name: 'Growth',
       monthly: 499,
       yearly: 4990,
-      note: '',
       cta: 'Upgrade to Growth',
       employees: 'Up to 50 employees',
       branches: 'Up to 5 branches',
-      included: new Set(features.slice(0, 14)), // Excludes the last 3 (AI/Pro features)
-      highlight: 'For growing businesses that need more power and control.',
-      accent: 'from-purple-500 to-indigo-500'
+      included: new Set(features.slice(0, 14)),
+      isPopular: true,
+      highlight: 'For growing businesses that need more power.',
+      accent: 'from-primary to-blue-500'
     },
     {
       id: 'pro',
       name: 'Pro',
       monthly: 999,
       yearly: 9999,
-      note: '',
       cta: 'Upgrade to Pro',
       employees: 'Unlimited employees',
       branches: 'Unlimited branches',
       included: new Set(features),
-      highlight: 'For large organizations that require advanced AI insights.',
+      highlight: 'For large organizations that require advanced AI.',
       accent: 'from-emerald-500 to-teal-500'
     }
   ];
@@ -166,50 +164,44 @@ const PricingPlans = () => {
         <h2 className="text-4xl font-extrabold text-gray-900 dark:text-gray-100 tracking-tight">Simple, Powerful Pricing</h2>
         <p className="mt-3 text-lg text-gray-600 dark:text-gray-400">Choose the perfect plan for your business. Start free.</p>
         <div className="mt-6 flex justify-center items-center gap-3">
-          <span className={`text-sm font-medium ${!isYearly ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400'}`}>Monthly</span>
+          <span className={`text-sm font-medium ${!isYearly ? 'text-primary' : 'text-gray-500 dark:text-gray-400'}`}>Monthly</span>
           <label className="relative inline-flex items-center cursor-pointer">
             <input type="checkbox" checked={isYearly} onChange={() => setIsYearly(!isYearly)} className="sr-only peer" />
-            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-400 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
+            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-ring rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
           </label>
-          <span className={`text-sm font-medium ${isYearly ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400'}`}>Yearly <span className="text-green-600 dark:text-green-400 font-semibold">(Save 2 Months)</span></span>
+          <span className={`text-sm font-medium ${isYearly ? 'text-primary' : 'text-gray-500 dark:text-gray-400'}`}>Yearly <span className="text-green-600 dark:text-green-400 font-semibold">(Save 2 Months)</span></span>
         </div>
       </div>
 
       <div className="grid gap-8 lg:grid-cols-3 mb-14">
         {plans.map((p) => (
           <div key={p.id} className={`relative rounded-3xl shadow-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 hover:shadow-xl transition-transform hover:-translate-y-1`}>
-            <div className={`absolute top-0 left-0 right-0 h-1 rounded-t-3xl bg-gradient-to-r ${p.accent}`}></div>
+            <div className={`absolute top-0 left-0 right-0 h-1.5 rounded-t-3xl bg-gradient-to-r ${p.accent}`}></div>
             <div className="p-8 flex flex-col h-full">
               <div className="flex items-start justify-between mb-6">
                 <div>
                   <h3 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">{p.name}</h3>
                   <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{p.highlight}</p>
                 </div>
-                {p.id === 'growth' && (
-                  <span className="px-3 py-1 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300">Popular</span>
+                {p.isPopular && (
+                  <span className="px-3 py-1 text-xs font-semibold rounded-full bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary-foreground">Popular</span>
                 )}
               </div>
 
               <div className="mb-6">
-                {p.monthly === null ? (
-                  <span className="text-4xl font-extrabold text-gray-900 dark:text-gray-100">Custom</span>
-                ) : (
-                  <>
-                    <div className="flex items-baseline gap-x-2">
-                       {p.id === 'trial' ? (
-                         <span className="text-4xl font-extrabold text-gray-900 dark:text-gray-100">₹0</span>
-                       ) : (
-                         <span className="text-4xl font-extrabold text-gray-900 dark:text-gray-100">₹{isYearly ? p.yearly : p.monthly}</span>
-                       )}
-                      <span className="text-sm text-gray-500 dark:text-gray-400">{p.id !== 'trial' && (isYearly ? '/year' : '/month')}</span>
-                    </div>
-                    {p.id === 'pro' && isYearly ? (
-                      <p className="text-xs text-green-600 dark:text-green-400 font-medium mt-1">You save ₹1989 per year!</p>
-                    ) : p.id === 'growth' && isYearly ? (
-                      <p className="text-xs text-green-600 dark:text-green-400 font-medium mt-1">You save ₹998 per year!</p>
-                    ): null }
-                  </>
-                )}
+                <div className="flex items-baseline gap-x-2">
+                    {p.monthly === 0 ? (
+                        <span className="text-4xl font-extrabold text-gray-900 dark:text-gray-100">₹0</span>
+                    ): (
+                        <span className="text-4xl font-extrabold text-gray-900 dark:text-gray-100">₹{isYearly ? p.yearly : p.monthly}</span>
+                    )}
+                    <span className="text-sm text-gray-500 dark:text-gray-400">{isYearly ? '/year' : '/month'}</span>
+                </div>
+                {p.id === 'pro' && isYearly ? (
+                  <p className="text-xs text-green-600 dark:text-green-400 font-medium mt-1">You save ₹1989 per year!</p>
+                ) : p.id === 'growth' && isYearly ? (
+                  <p className="text-xs text-green-600 dark:text-green-400 font-medium mt-1">You save ₹998 per year!</p>
+                ): null }
                 <div className="mt-2 text-sm text-gray-600 dark:text-gray-300">{p.employees} • {p.branches}</div>
               </div>
 
@@ -226,20 +218,18 @@ const PricingPlans = () => {
                 ))}
               </ul>
 
-              <button className={`w-full py-3 rounded-xl font-semibold text-white bg-gradient-to-r ${p.accent} hover:opacity-90 transition-all shadow-md`}>{p.cta}</button>
-
-              <p className="mt-4 text-xs text-gray-500 dark:text-gray-400 text-center">Support: {p.id === 'trial' ? 'Email only' : p.id === 'growth' ? 'Priority email & chat' : 'Dedicated account manager'}</p>
+              <button className={`w-full mt-auto py-3 rounded-xl font-semibold text-white bg-gradient-to-r ${p.accent} hover:opacity-90 transition-all shadow-md`}>{p.cta}</button>
             </div>
           </div>
         ))}
       </div>
 
-      <h3 className="text-2xl font-bold text-center mb-6 text-gray-900 dark:text-gray-100">Feature Comparison</h3>
+      <h3 className="text-2xl font-bold text-left mb-6 text-gray-900 dark:text-gray-100">Feature Comparison</h3>
 
       {/* Responsive Feature Table */}
-      <div className="bg-white dark:bg-gray-800/50 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm">
+      <div className="bg-white dark:bg-gray-800/50 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
         {/* Desktop Table */}
-        <div className="hidden lg:block overflow-x-auto">
+        <div className="hidden lg:block">
           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead className="bg-gray-100 dark:bg-gray-900/50">
               <tr>
@@ -294,9 +284,8 @@ const PricingPlans = () => {
         </div>
       </div>
 
-
       <div className="mt-10 text-center text-sm text-gray-600 dark:text-gray-400">
-        <p>Need a custom quote or on-premise version? <a href="#contact" className="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">Contact our team</a> — we’ll tailor it for your business.</p>
+        <p>Need a custom quote or on-premise version? <a href="#contact" className="text-primary font-semibold hover:underline">Contact our team</a> — we’ll tailor it for your business.</p>
       </div>
     </div>
   );
@@ -636,4 +625,3 @@ export default function AdminSettingsPage() {
     </Suspense>
   );
 }
-
