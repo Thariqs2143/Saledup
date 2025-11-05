@@ -394,12 +394,12 @@ const RecentActivity = () => {
     const displayedActivities = showAll ? activities : activities.slice(0, 8);
 
     return (
-         <Card className="transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
+         <Card className="h-full flex flex-col transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Activity className="h-5 w-5" />Recent Activity</CardTitle>
                 <CardDescription>A live log of the most recent attendance scans.</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex-1">
                 {loading ? <div className="flex items-center justify-center p-8"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
                     : activities.length > 0 ? (
                         <div className="space-y-4">
@@ -507,15 +507,15 @@ export default function GenerateAndEntryPage() {
             </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-            <div className="lg:col-span-2 space-y-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
+            <div className="lg:col-span-2">
                 {viewMode === 'qr' ? <QrGeneratorCard /> : <ManualEntryForm />}
             </div>
-            <div className="space-y-8 lg:col-span-1">
+            <div className="lg:col-span-1">
                 <RecentActivity />
             </div>
         </div>
-        <div className="w-full mt-8">
+        <div className="w-full">
             <QrHistory />
         </div>
     </div>
