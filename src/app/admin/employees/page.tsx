@@ -350,30 +350,30 @@ const LeaveRequests = ({ selectedBranchId, allBranchIds }: { selectedBranchId: s
 
     return (
       <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row items-center gap-4">
-            <div className="relative flex-1 w-full">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                type="search"
-                placeholder="Search by employee name..."
-                className="w-full rounded-lg bg-background pl-8"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                />
-            </div>
-            <div className="w-full sm:w-auto">
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full sm:w-[180px]">
-                    <SelectValue placeholder="Filter by status" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="all">All Statuses</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="approved">Approved</SelectItem>
-                    <SelectItem value="denied">Denied</SelectItem>
-                </SelectContent>
-                </Select>
-            </div>
+        <div className="flex flex-row items-center gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Search by employee name..."
+              className="w-full rounded-lg bg-background pl-8"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <div className="w-[180px]">
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="approved">Approved</SelectItem>
+                <SelectItem value="denied">Denied</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
     
   
@@ -512,7 +512,7 @@ export default function ManageEmployeesPage() {
               </TabsList>
             </div>
             
-            <div className="mt-6">
+            <div className="space-y-4">
               {activeTab === 'employees' && (
                 <div className="space-y-4">
                   <div className="flex flex-col md:flex-row items-center justify-between gap-2">
@@ -533,7 +533,7 @@ export default function ManageEmployeesPage() {
                                     variant="outline"
                                     role="combobox"
                                     aria-expanded={openBranchSelector}
-                                    className="w-full sm:w-[200px] justify-between"
+                                    className="w-full justify-between"
                                 >
                                     {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
                                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -567,7 +567,7 @@ export default function ManageEmployeesPage() {
                             </DialogContent>
                         </Dialog>
                         <Select value={statusFilter} onValueChange={setStatusFilter}>
-                            <SelectTrigger className="w-full md:w-[180px]">
+                            <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Filter by status" />
                             </SelectTrigger>
                             <SelectContent>
@@ -578,7 +578,7 @@ export default function ManageEmployeesPage() {
                             </SelectContent>
                         </Select>
                         <Link href="/admin/employees/add" className="w-full md:w-auto">
-                            <Button className="w-full md:w-auto">
+                            <Button className="w-full">
                                 <UserPlus className="mr-2 h-4 w-4" />
                                 Invite
                             </Button>
@@ -600,8 +600,3 @@ export default function ManageEmployeesPage() {
     </div>
   );
 }
-
-    
-
-    
-
