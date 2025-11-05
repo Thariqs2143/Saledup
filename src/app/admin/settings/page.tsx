@@ -250,9 +250,9 @@ const PricingPlans = () => {
           <table className="min-w-full">
             <thead className="bg-gray-100 dark:bg-gray-900/50">
               <tr>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-800 dark:text-gray-200 w-64 rounded-tl-3xl">Feature</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-800 dark:text-gray-200 w-64 rounded-tl-xl">Feature</th>
                 {plans.map((p, index) => (
-                  <th key={p.id} className={cn("px-6 py-3 text-center text-sm font-semibold text-gray-800 dark:text-gray-200", index === plans.length -1 && "rounded-tr-3xl")}>{p.name}</th>
+                  <th key={p.id} className={cn("px-6 py-3 text-center text-sm font-semibold text-gray-800 dark:text-gray-200", index === plans.length -1 && "rounded-tr-xl")}>{p.name}</th>
                 ))}
               </tr>
             </thead>
@@ -548,7 +548,7 @@ function SettingsPageContent() {
                      <Card className="transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/20 hover:border-primary">
                         <CardHeader>
                             <CardTitle>Usage</CardTitle>
-                            <CardDescription>Your current plan usage.</CardDescription>
+                            <CardDescription>Your current plan usage. Upgrade to increase limits.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
                             <div className="space-y-4">
@@ -572,12 +572,20 @@ function SettingsPageContent() {
                                 </div>
                             </div>
                         </CardContent>
-                        <CardFooter className="flex gap-4">
-                            <Link href="/admin/employees" className="flex-1">
-                                <Button variant="outline" className="w-full">Manage Employees</Button>
-                            </Link>
-                             <Link href="/admin/branches" className="flex-1">
-                                <Button variant="outline" className="w-full">Manage Branches</Button>
+                        <CardFooter className="flex-col items-start gap-4">
+                            <div className="flex gap-4 w-full">
+                                <Link href="/admin/employees" className="flex-1">
+                                    <Button variant="outline" className="w-full">Manage Employees</Button>
+                                </Link>
+                                <Link href="/admin/branches" className="flex-1">
+                                    <Button variant="outline" className="w-full">Manage Branches</Button>
+                                </Link>
+                            </div>
+                             <Link href="/admin/settings?tab=subscription" className="w-full">
+                                <Button className="w-full">
+                                    <Crown className="mr-2 h-4 w-4"/>
+                                    Upgrade Plan
+                                </Button>
                             </Link>
                         </CardFooter>
                     </Card>
