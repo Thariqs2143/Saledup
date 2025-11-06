@@ -599,46 +599,34 @@ function SettingsPageContent() {
     <div className="space-y-6">
         <Tabs defaultValue={defaultTab} className="w-full">
             <div className="mb-6 lg:mb-8">
-                <h1 className="text-3xl font-bold tracking-tight hidden lg:block">Settings</h1>
-                <p className="text-muted-foreground hidden lg:block">Manage your account and shop preferences.</p>
+                <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+                <p className="text-muted-foreground">Manage your account and shop preferences.</p>
             </div>
             
-             <div className="lg:grid lg:grid-cols-[220px_1fr] lg:gap-8">
-                <aside className="hidden lg:flex lg:flex-col lg:h-screen lg:py-6 lg:pr-6 lg:sticky lg:top-0">
-                    <TabsList className="flex-col h-auto items-start gap-2 bg-transparent p-0">
-                        <TabsTrigger value="profile" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-foreground/20 hover:bg-muted/50 hover:border-primary transition-all duration-300 ease-out">
-                            Profile
-                        </TabsTrigger>
-                        <TabsTrigger value="subscription" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-foreground/20 hover:bg-muted/50 hover:border-primary transition-all duration-300 ease-out">
-                            Subscription
-                        </TabsTrigger>
-                         <TabsTrigger value="shifts" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-foreground/20 hover:bg-muted/50 hover:border-primary transition-all duration-300 ease-out">
-                            Shifts
-                        </TabsTrigger>
-                        <TabsTrigger value="business" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-foreground/20 hover:bg-muted/50 hover:border-primary transition-all duration-300 ease-out">
-                            Business
-                        </TabsTrigger>
-                         <TabsTrigger value="general" className="w-full justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-base font-semibold py-3 px-4 rounded-lg border-2 border-foreground/20 hover:bg-muted/50 hover:border-primary transition-all duration-300 ease-out">
-                            General
-                        </TabsTrigger>
-                        <Button onClick={handleSaveSettings} className="w-full mt-4" disabled={saving}>
-                            {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                            Save All Settings
-                        </Button>
-                    </TabsList>
-                </aside>
+            <div className="sticky top-14 md:top-0 z-30 bg-background/80 backdrop-blur-sm -mx-6 px-6 py-4 mb-6 border-b">
+                 <TabsList className="grid w-full grid-cols-5 lg:grid-cols-5 h-auto p-1 border-2 border-border bg-muted">
+                    <TabsTrigger value="profile" className="text-xs sm:text-sm py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                        <UserIcon className="h-5 w-5 lg:mr-2" /><span className="hidden lg:inline">Profile</span>
+                    </TabsTrigger>
+                     <TabsTrigger value="subscription" className="text-xs sm:text-sm py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                        <Trophy className="h-5 w-5 lg:mr-2"/><span className="hidden lg:inline">Subscription</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="shifts" className="text-xs sm:text-sm py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                        <Clock className="h-5 w-5 lg:mr-2"/><span className="hidden lg:inline">Shifts</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="business" className="text-xs sm:text-sm py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                        <Building className="h-5 w-5 lg:mr-2"/><span className="hidden lg:inline">Business</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="general" className="text-xs sm:text-sm py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                        <SettingsIcon className="h-5 w-5 lg:mr-2"/><span className="hidden lg:inline">General</span>
+                    </TabsTrigger>
+                </TabsList>
+            </div>
             
               <div className="lg:col-span-1">
-                <TabsList className="grid w-full grid-cols-5 lg:hidden">
-                  <TabsTrigger value="profile"><UserIcon className="h-5 w-5"/></TabsTrigger>
-                   <TabsTrigger value="subscription"><Trophy className="h-5 w-5"/></TabsTrigger>
-                   <TabsTrigger value="shifts"><Clock className="h-5 w-5"/></TabsTrigger>
-                  <TabsTrigger value="business"><Building className="h-5 w-5"/></TabsTrigger>
-                  <TabsTrigger value="general"><SettingsIcon className="h-5 w-5"/></TabsTrigger>
-                </TabsList>
                 
                 {/* Profile Tab */}
-                <TabsContent value="profile" className="space-y-6">
+                <TabsContent value="profile" className="space-y-6 mt-0">
                     {userProfile && (
                         <Card className="transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/20 hover:border-primary">
                             <CardHeader className="flex flex-row justify-between items-start">
@@ -748,11 +736,11 @@ function SettingsPageContent() {
                     </Card>
                 </TabsContent>
 
-                <TabsContent value="subscription">
+                <TabsContent value="subscription" className="mt-0">
                     <PricingPlans profile={userProfile} />
                 </TabsContent>
                 
-                <TabsContent value="shifts" className="space-y-6">
+                <TabsContent value="shifts" className="space-y-6 mt-0">
                     <Card>
                         <CardHeader>
                             <CardTitle>Shift Management</CardTitle>
@@ -819,7 +807,7 @@ function SettingsPageContent() {
                 </TabsContent>
 
                 {/* General Settings Tab */}
-                <TabsContent value="general" className="space-y-6">
+                <TabsContent value="general" className="space-y-6 mt-0">
                     <Card className="transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground/20 hover:border-primary">
                         <CardHeader><CardTitle>Appearance</CardTitle></CardHeader>
                         <CardContent><div className="flex items-center justify-between"><Label className="font-medium">Theme</Label><ThemeSwitcher /></div></CardContent>
@@ -847,10 +835,16 @@ function SettingsPageContent() {
                             <Button variant="destructive" className="w-full max-w-xs" onClick={handleLogout}><LogOut className="mr-2 h-4 w-4"/>Logout</Button>
                         </CardContent>
                     </Card>
+                     <div className="pt-6 flex justify-end">
+                        <Button onClick={handleSaveSettings} className="w-full md:w-auto" disabled={saving}>
+                            {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                            Save All Settings
+                        </Button>
+                    </div>
                 </TabsContent>
 
                 {/* Business Settings Tab */}
-                <TabsContent value="business" className="space-y-6">
+                <TabsContent value="business" className="space-y-6 mt-0">
                     <div>
                         <h3 className="text-lg font-medium">Business Hours</h3>
                         <p className="text-sm text-muted-foreground">Set the working hours for each day.</p>
@@ -905,8 +899,13 @@ function SettingsPageContent() {
                             </RadioGroup>
                         </CardContent>
                     </Card>
+                     <div className="pt-6 flex justify-end">
+                        <Button onClick={handleSaveSettings} className="w-full md:w-auto" disabled={saving}>
+                            {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                            Save All Settings
+                        </Button>
+                    </div>
                 </TabsContent>
-              </div>
             </div>
         </Tabs>
     </div>
@@ -920,6 +919,3 @@ export default function AdminSettingsPage() {
     </Suspense>
   );
 }
-
-
-
