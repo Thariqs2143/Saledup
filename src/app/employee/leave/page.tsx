@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Textarea } from '@/components/ui/textarea';
@@ -20,14 +20,28 @@ import { addDoc, collection, query, where, onSnapshot, orderBy, Timestamp, doc, 
 import { onAuthStateChanged, type User as AuthUser } from 'firebase/auth';
 import type { User as AppUser } from '@/app/admin/employees/page';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import { Input } from '@/components/ui/input';
 
 const leaveFormSchema = z.object({
   dateRange: z.object({
     from: z.date({ required_error: "A start date is required." }),
-    to: z.date({ required_error: "An end date is required." }),
+    to: z.date().optional(),
   }),
+  isPartialDay: z.boolean().default(false),
+  startTime: z.string().optional(),
+  endTime: z.string().optional(),
   reason: z.string().min(10, { message: "Reason must be at least 10 characters." }).max(200, { message: "Reason cannot exceed 200 characters." }),
+}).refine(data => {
+    if (data.isPartialDay) {
+        return !!data.startTime && !!data.endTime;
+    }
+    return true;
+}, {
+    message: "Start and end times are required for partial day leave.",
+    path: ["startTime"], // You can point this to a more appropriate field if you like
 });
+
 
 type LeaveFormValues = z.infer<typeof leaveFormSchema>;
 
@@ -35,6 +49,8 @@ export type LeaveRequest = {
   id: string;
   startDate: string;
   endDate: string;
+  startTime?: string;
+  endTime?: string;
   reason: string;
   status: 'pending' | 'approved' | 'denied';
 };
@@ -50,8 +66,11 @@ export default function LeavePage() {
     resolver: zodResolver(leaveFormSchema),
     defaultValues: {
       reason: '',
+      isPartialDay: false,
     },
   });
+
+  const isPartialDay = form.watch('isPartialDay');
 
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
@@ -97,6 +116,13 @@ export default function LeavePage() {
       toast({ title: "Error", description: "You must be logged in to submit a request.", variant: "destructive" });
       return;
     }
+    
+    // If it's a partial day, the end date is the same as the start date
+    const endDate = data.isPartialDay ? data.dateRange.from : data.dateRange.to;
+    if (!endDate) {
+         toast({ title: "Error", description: "Please select an end date for multi-day leave.", variant: "destructive" });
+         return;
+    }
 
     try {
       await addDoc(collection(db, 'shops', userProfile.shopId, 'leaveRequests'), {
@@ -104,7 +130,9 @@ export default function LeavePage() {
         userName: userProfile.name,
         shopId: userProfile.shopId,
         startDate: format(data.dateRange.from, 'yyyy-MM-dd'),
-        endDate: format(data.dateRange.to, 'yyyy-MM-dd'),
+        endDate: format(endDate, 'yyyy-MM-dd'),
+        startTime: data.isPartialDay ? data.startTime : null,
+        endTime: data.isPartialDay ? data.endTime : null,
         reason: data.reason,
         status: 'pending',
         requestedAt: Timestamp.now(),
@@ -151,10 +179,31 @@ export default function LeavePage() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               <FormField
                 control={form.control}
+                name="isPartialDay"
+                render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                        <div className="space-y-0.5">
+                            <FormLabel className="text-base">Request for a few hours?</FormLabel>
+                            <FormDescription>
+                                Enable this for partial-day leave requests.
+                            </FormDescription>
+                        </div>
+                        <FormControl>
+                            <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                            />
+                        </FormControl>
+                    </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
                 name="dateRange"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Leave Dates *</FormLabel>
+                    <FormLabel>Leave Date(s) *</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -167,13 +216,13 @@ export default function LeavePage() {
                           >
                             <CalendarIcon className="mr-2 h-4 w-4" />
                             {field.value?.from ? (
-                              field.value.to ? (
+                              isPartialDay || !field.value.to ? (
+                                format(field.value.from, "LLL dd, y")
+                              ) : (
                                 <>
                                   {format(field.value.from, "LLL dd, y")} -{" "}
                                   {format(field.value.to, "LLL dd, y")}
                                 </>
-                              ) : (
-                                format(field.value.from, "LLL dd, y")
                               )
                             ) : (
                               <span>Pick a date range</span>
@@ -184,10 +233,11 @@ export default function LeavePage() {
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
                           initialFocus
-                          mode="range"
+                          mode={isPartialDay ? 'single' : 'range'}
                           defaultMonth={field.value?.from}
-                          selected={{ from: field.value?.from, to: field.value?.to }}
-                          onSelect={field.onChange}
+                          selected={isPartialDay ? field.value?.from : { from: field.value?.from, to: field.value?.to }}
+                          onSelect={isPartialDay ? (day) => field.onChange({from: day, to: day}) : field.onChange}
+                          numberOfMonths={isPartialDay ? 1 : 2}
                         />
                       </PopoverContent>
                     </Popover>
@@ -195,6 +245,37 @@ export default function LeavePage() {
                   </FormItem>
                 )}
               />
+
+              {isPartialDay && (
+                <div className="grid grid-cols-2 gap-4 animate-in fade-in-50">
+                     <FormField
+                        control={form.control}
+                        name="startTime"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Start Time *</FormLabel>
+                                <FormControl>
+                                    <Input type="time" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="endTime"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>End Time *</FormLabel>
+                                <FormControl>
+                                    <Input type="time" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
+              )}
 
               <FormField
                 control={form.control}
@@ -243,7 +324,11 @@ export default function LeavePage() {
                 {leaveHistory.map(req => (
                     <div key={req.id} className="p-3 rounded-lg border bg-muted/50 flex justify-between items-center">
                         <div>
-                            <p className="font-semibold">{format(new Date(req.startDate), 'MMM d')} - {format(new Date(req.endDate), 'MMM d, yyyy')}</p>
+                             <p className="font-semibold">
+                                {req.startTime && req.endTime
+                                    ? `${format(new Date(req.startDate), 'MMM d, yyyy')} from ${req.startTime} to ${req.endTime}`
+                                    : `${format(new Date(req.startDate), 'MMM d')} - ${format(new Date(req.endDate), 'MMM d, yyyy')}`}
+                            </p>
                             <p className="text-xs text-muted-foreground">{req.reason}</p>
                         </div>
                         <Badge variant={getStatusVariant(req.status)}>{req.status}</Badge>
@@ -256,7 +341,3 @@ export default function LeavePage() {
     </div>
   );
 }
-
-    
-
-    

@@ -61,6 +61,8 @@ export type LeaveRequest = {
   shopId?: string;
   startDate: string;
   endDate: string;
+  startTime?: string;
+  endTime?: string;
 };
 
 type Branch = {
@@ -363,6 +365,14 @@ const LeaveRequests = ({ selectedBranchId, allBranchIds }: { selectedBranchId: s
         }
     };
 
+    const formatTime = (time: string) => {
+        const [hours, minutes] = time.split(':');
+        const date = new Date();
+        date.setHours(parseInt(hours, 10));
+        date.setMinutes(parseInt(minutes, 10));
+        return format(date, 'p');
+    };
+
     return (
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row items-center gap-4">
@@ -414,7 +424,10 @@ const LeaveRequests = ({ selectedBranchId, allBranchIds }: { selectedBranchId: s
                              <Badge variant={getStatusVariant(request.status)}>{request.status}</Badge>
                         </div>
                         <p className="text-sm font-medium text-primary">
-                           {format(new Date(request.startDate), 'dd MMM')} - {format(new Date(request.endDate), 'dd MMM, yyyy')}
+                          {request.startTime && request.endTime
+                            ? `${format(new Date(request.startDate), 'dd MMM, yyyy')} from ${formatTime(request.startTime)} to ${formatTime(request.endTime)}`
+                            : `${format(new Date(request.startDate), 'dd MMM')} - ${format(new Date(request.endDate), 'dd MMM, yyyy')}`
+                          }
                         </p>
                         <p className="text-sm text-muted-foreground">{request.reason}</p>
                         <p className="text-xs text-muted-foreground/70">
