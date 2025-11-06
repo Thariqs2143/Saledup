@@ -119,23 +119,22 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
   const router = useRouter();
 
   const features = [
-    'QR Code Check-in/out (permanent & dynamic)',
+    'QR Code Check-in/out',
     'Manual Attendance Entry',
     'Live Attendance Dashboard',
-    'Easy Employee Onboarding (phone number invite)',
+    'Easy Employee Onboarding',
     'Employee Profiles',
-    'Detailed Attendance Reports (daily/weekly/monthly)',
-    'Export Reports (PDF / Excel)',
+    'Leave Management',
+    'Detailed Attendance Reports',
+    'Export Reports (PDF/Excel)',
     'Muster Roll Generation',
     'Automated Payroll Calculation',
     'Points & Rewards System',
     'Punctuality Leaderboard',
-    'Achievement Badges',
     'Multi-Branch Support',
     'Staff Transfer Between Branches',
     'AI-Powered Weekly Briefing',
     'Smart Staffing Advisor (AI)',
-    'Customizable Alerts & Notifications'
   ];
 
   const plans = [
@@ -156,20 +155,12 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
       cta: 'Start Free Trial',
       employees: 'Up to 5 employees',
       branches: '1 Branch',
-      perStaffCharge: null,
       included: new Set([
-        'QR Code Check-in/out (permanent & dynamic)',
+        'QR Code Check-in/out',
         'Manual Attendance Entry',
         'Live Attendance Dashboard',
-        'Easy Employee Onboarding (phone number invite)',
+        'Easy Employee Onboarding',
         'Employee Profiles',
-        'Detailed Attendance Reports (daily/weekly/monthly)',
-        'Export Reports (PDF / Excel)',
-        'Muster Roll Generation',
-        'Automated Payroll Calculation',
-        'Points & Rewards System',
-        'Punctuality Leaderboard',
-        'Achievement Badges'
       ]),
       highlight: 'Try our core features, risk-free for 14 days.',
       accent: 'from-gray-500 to-gray-600 dark:from-gray-700 dark:to-gray-800'
@@ -187,19 +178,20 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
         yearly: { inr: 'plan_starter_inr_yearly', usd: 'plan_starter_usd_yearly' },
         threeYearly: { inr: 'plan_starter_inr_3y', usd: 'plan_starter_usd_3y' },
       },
-      note: ' / staff',
+      note: '/ staff',
       cta: 'Choose Starter',
       employees: 'Pay per employee',
       branches: '1 Branch',
-      included: new Set(features.filter(f => ![
-        'Muster Roll Generation',
-        'Automated Payroll Calculation',
-        'Multi-Branch Support',
-        'Staff Transfer Between Branches',
-        'AI-Powered Weekly Briefing',
-        'Smart Staffing Advisor (AI)',
-        'Customizable Alerts & Notifications'
-      ].includes(f))),
+      included: new Set([
+          ...features.filter(f => ![
+            'Muster Roll Generation',
+            'Automated Payroll Calculation',
+            'Multi-Branch Support',
+            'Staff Transfer Between Branches',
+            'AI-Powered Weekly Briefing',
+            'Smart Staffing Advisor (AI)',
+          ].includes(f))
+      ]),
       highlight: 'For new businesses and small teams.',
       accent: 'from-blue-500 to-sky-500'
     },
@@ -207,21 +199,20 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
       id: 'growth',
       name: 'Growth',
       price: { // PER STAFF
-        monthly: { inr: 39, usd: 0.79 },
-        yearly: { inr: 390, usd: 7.9 },
-        threeYearly: { inr: 999, usd: 19 },
+        monthly: { inr: 29, usd: 0.59 },
+        yearly: { inr: 290, usd: 5.9 },
+        threeYearly: { inr: 799, usd: 15 },
       },
       plan_id: {
         monthly: { inr: 'plan_growth_inr_monthly', usd: 'plan_growth_usd_monthly' },
         yearly: { inr: 'plan_growth_inr_yearly', usd: 'plan_growth_usd_yearly' },
         threeYearly: { inr: 'plan_growth_inr_3y', usd: 'plan_growth_usd_3y' },
       },
-      note: ' / staff',
+      note: '/ staff',
       cta: 'Upgrade to Growth',
       employees: 'Up to 50 employees',
       branches: 'Up to 5 branches',
-      perStaffCharge: null,
-      included: new Set(features.filter(f => !f.includes('AI') && !f.includes('Customizable Alerts'))),
+      included: new Set(features.filter(f => !f.includes('AI'))),
       isPopular: true,
       highlight: 'For growing businesses that need more power.',
       accent: 'from-primary to-blue-500'
@@ -230,20 +221,19 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
       id: 'pro',
       name: 'Pro',
       price: { // PER STAFF
-        monthly: { inr: 29, usd: 0.59 },
-        yearly: { inr: 290, usd: 5.9 },
-        threeYearly: { inr: 799, usd: 15 },
+        monthly: { inr: 39, usd: 0.79 },
+        yearly: { inr: 390, usd: 7.9 },
+        threeYearly: { inr: 999, usd: 19 },
       },
       plan_id: {
         monthly: { inr: 'plan_pro_inr_monthly', usd: 'plan_pro_usd_monthly' },
         yearly: { inr: 'plan_pro_inr_yearly', usd: 'plan_pro_usd_yearly' },
         threeYearly: { inr: 'plan_pro_inr_3y', usd: 'plan_pro_usd_3y' },
       },
-      note: ' / staff',
+      note: '/ staff',
       cta: 'Upgrade to Pro',
       employees: 'Unlimited employees',
       branches: 'Unlimited branches',
-      perStaffCharge: null,
       included: new Set(features),
       highlight: 'For large organizations that require advanced AI.',
       accent: 'from-emerald-500 to-teal-500'
@@ -369,6 +359,8 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
                     )}
                     <span className="text-sm text-gray-500 dark:text-gray-400">{p.id === 'trial' ? p.note : `${p.note}${cycleText}`}</span>
                 </div>
+                 {p.id !== 'trial' && <p className="text-xs text-muted-foreground mt-1">(billed per employee)</p>}
+
                 {billingCycle === 'yearly' && p.id !== 'trial' && (
                     <p className="text-xs text-green-600 dark:text-green-400 font-medium mt-1">Save 2 months vs. monthly!</p>
                 )}
