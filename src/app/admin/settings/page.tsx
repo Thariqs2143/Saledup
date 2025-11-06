@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Link from "next/link";
-import { Trophy, LogOut, Save, Loader2, Bell, Edit, Building, Mail, Check, Crown, ArrowRight, CalendarDays, ShieldCheck, Gift, Upload, Copy, Share2, CheckCircle, Users, Briefcase, MapPin, Percent, Phone, User as UserIcon, Settings as SettingsIcon, PlusCircle, Trash2, Clock, X } from "lucide-react";
+import { Trophy, LogOut, Save, Loader2, Bell, Edit, Building, Mail, Check, Crown, ArrowRight, CalendarDays, ShieldCheck, Gift, Upload, Copy, Share2, CheckCircle, Users, Briefcase, MapPin, Percent, Phone, User as UserIcon, Settings as SettingsIcon, PlusCircle, Trash2, Clock, X, XCircle } from "lucide-react";
 import { auth, db, requestForToken, functions } from "@/lib/firebase";
 import { signOut, onAuthStateChanged, type User as AuthUser } from "firebase/auth";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -141,7 +141,7 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
       highlight: 'For new & small businesses just getting started.',
       accent: 'from-blue-500 to-sky-500',
       mainFeatures: ['QR Code Check-in/out', 'Manual Attendance Entry', 'Live Attendance Dashboard', 'Easy Employee Onboarding'],
-      usageLimits: { employees: 'Up to 20', branches: '1 Branch' }
+      usageLimits: { employees: 'Up to 20 employees', branches: '1 Branch' }
     },
     {
       id: 'growth',
@@ -153,7 +153,7 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
       accent: 'from-primary to-blue-500',
       isPopular: true,
       mainFeatures: ['All Starter features', 'Priority Support', 'Advanced Reports & Analytics', 'Multi-branch Dashboard'],
-      usageLimits: { employees: 'Up to 50', branches: 'Up to 5' }
+      usageLimits: { employees: 'Up to 50 employees', branches: 'Up to 5 Branches' }
     },
     {
       id: 'pro',
@@ -174,13 +174,13 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
     { name: 'Live Attendance Dashboard', trial: true, starter: true, growth: true, pro: true },
     { name: 'Easy Employee Onboarding', trial: true, starter: true, growth: true, pro: true },
     { name: 'Employee Profiles', trial: true, starter: true, growth: true, pro: true },
-    { name: 'Detailed Attendance Reports', trial: true, starter: true, growth: true, pro: true },
+    { name: 'Detailed Attendance Reports', trial: false, starter: true, growth: true, pro: true },
     { name: 'Export Reports (PDF / Excel)', trial: false, starter: false, growth: true, pro: true },
     { name: 'Muster Roll Generation', trial: false, starter: false, growth: true, pro: true },
     { name: 'Automated Payroll Calculation', trial: false, starter: false, growth: true, pro: true },
-    { name: 'Points & Rewards System', trial: true, starter: true, growth: true, pro: true },
-    { name: 'Punctuality Leaderboard', trial: true, starter: true, growth: true, pro: true },
-    { name: 'Multi-Branch Support', trial: false, starter: false, growth: 'Up to 5 Branches', pro: true },
+    { name: 'Points & Rewards System', trial: false, starter: true, growth: true, pro: true },
+    { name: 'Punctuality Leaderboard', trial: false, starter: true, growth: true, pro: true },
+    { name: 'Multi-Branch Support', trial: false, starter: false, growth: true, pro: true },
     { name: 'Staff Transfer Between Branches', trial: false, starter: false, growth: true, pro: true },
     { name: 'AI-Powered Weekly Briefing', trial: false, starter: false, growth: false, pro: true },
     { name: 'Smart Staffing Advisor (AI)', trial: false, starter: false, growth: false, pro: true },
@@ -250,8 +250,8 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
 
   const currencySymbol = currency === 'inr' ? '₹' : '$';
   const cycleText = billingCycle === 'monthly' ? '/month' : billingCycle === 'yearly' ? '/year' : '/3-years';
-  const CheckIcon = ({ className = 'w-5 h-5' }) => <Check className={cn("text-emerald-500", className)} />;
-  const XMark = ({ className = 'w-5 h-5' }) => <X className={cn("text-gray-400 dark:text-gray-600", className)} />;
+  const CheckIcon = ({ className = 'w-5 h-5' }) => <CheckCircle className={cn("text-emerald-500", className)} />;
+  const XMark = ({ className = 'w-5 h-5' }) => <XCircle className={cn("text-gray-400 dark:text-gray-600", className)} />;
 
 
   return (
@@ -330,6 +330,22 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
                     </div>
                      {p.id !== 'trial' && <p className="text-xs text-slate-500 mt-1">(billed per employee)</p>}
                   </div>
+                  
+                  <div className="space-y-2 text-sm text-slate-300">
+                    <div className="flex items-center gap-2"><Users className="h-4 w-4"/><span>{p.usageLimits.employees}</span></div>
+                    <div className="flex items-center gap-2"><Building className="h-4 w-4"/><span>{p.usageLimits.branches}</span></div>
+                  </div>
+
+                  <Separator className="my-6 bg-slate-700" />
+                  
+                  <ul className="space-y-3 text-sm mb-8">
+                    {p.mainFeatures.map((feature, i) => (
+                        <li key={i} className="flex items-start gap-x-3 text-slate-400">
+                            <CheckIcon className="w-5 h-5 text-green-400 mt-0.5" />
+                            <span>{feature}</span>
+                        </li>
+                    ))}
+                  </ul>
 
                   <Button
                     onClick={() => handlePayment(p)}
@@ -342,31 +358,6 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
                       {loadingPlan === p.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : null}
                       {!isWithinLimit ? 'Staff limit exceeded' : p.cta}
                   </Button>
-                  
-                  <Separator className="my-8 bg-slate-700" />
-
-                  <div className="space-y-4">
-                    <p className="text-sm font-semibold text-slate-300 uppercase tracking-wider">Features</p>
-                    <ul className="space-y-3 text-sm">
-                      {p.mainFeatures.map((feature, i) => (
-                          <li key={i} className="flex items-start gap-x-3 text-slate-400">
-                              <CheckIcon className="w-5 h-5 text-green-400 mt-0.5" />
-                              <span>{feature}</span>
-                          </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                   <Separator className="my-8 bg-slate-700" />
-                   
-                   <div className="space-y-4">
-                    <p className="text-sm font-semibold text-slate-300 uppercase tracking-wider">Usage Limits</p>
-                    <ul className="space-y-3 text-sm">
-                        <li className="flex items-start gap-x-3 text-slate-400"><Users className="w-5 h-5 text-slate-500 mt-0.5" /><span>{p.usageLimits.employees}</span></li>
-                        <li className="flex items-start gap-x-3 text-slate-400"><Building className="w-5 h-5 text-slate-500 mt-0.5" /><span>{p.usageLimits.branches}</span></li>
-                    </ul>
-                  </div>
-
                 </div>
               </div>
             )
@@ -391,16 +382,16 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
                 <tr key={index} className="border-b border-slate-800">
                   <td className="py-4 px-4 text-sm text-slate-400">{feature.name}</td>
                   <td className="py-4 px-4 text-center">
-                    {feature.trial === true ? <CheckIcon /> : feature.trial === false ? <XMark /> : <span className="text-xs text-slate-400">{feature.trial}</span>}
+                    {feature.trial ? <CheckIcon /> : <XMark />}
                   </td>
                   <td className="py-4 px-4 text-center">
-                    {feature.starter === true ? <CheckIcon /> : feature.starter === false ? <XMark /> : <span className="text-xs text-slate-400">{feature.starter}</span>}
+                    {feature.starter ? <CheckIcon /> : <XMark />}
                   </td>
                   <td className="py-4 px-4 text-center">
-                    {feature.growth === true ? <CheckIcon /> : feature.growth === false ? <XMark /> : <span className="text-xs text-slate-400">{feature.growth}</span>}
+                    {feature.growth ? <CheckIcon /> : <XMark />}
                   </td>
                   <td className="py-4 px-4 text-center">
-                    {feature.pro === true ? <CheckIcon /> : feature.pro === false ? <XMark /> : <span className="text-xs text-slate-400">{feature.pro}</span>}
+                    {feature.pro ? <CheckIcon /> : <XMark />}
                   </td>
                 </tr>
               ))}
