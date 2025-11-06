@@ -38,6 +38,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Separator } from "@/components/ui/separator";
+import { Slider } from "@/components/ui/slider";
 
 // Types
 export type Shift = {
@@ -117,6 +118,7 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const { toast } = useToast();
   const router = useRouter();
+  const [staffCount, setStaffCount] = useState(10);
 
   const plans = [
     {
@@ -136,6 +138,7 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
       cta: 'Start Free Trial',
       employees: 'Up to 5 employees',
       branches: '1 Branch',
+      maxEmployees: 5,
       features: [
         'QR Code Check-in/out',
         'Manual Attendance Entry',
@@ -162,6 +165,7 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
       cta: 'Choose Starter',
       employees: 'Up to 20 employees',
       branches: '1 Branch',
+      maxEmployees: 20,
       features: [
         'QR Code Check-in/out',
         'Manual Attendance Entry',
@@ -188,6 +192,7 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
       cta: 'Upgrade to Growth',
       employees: 'Up to 50 employees',
       branches: 'Up to 5 branches',
+      maxEmployees: 50,
       features: [
         'All Starter features',
         'Advanced Reports & Analytics',
@@ -216,6 +221,7 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
       cta: 'Upgrade to Pro',
       employees: 'Unlimited employees',
       branches: 'Unlimited branches',
+      maxEmployees: Infinity,
       features: [
         'All Growth features',
         'AI-powered Insights',
@@ -245,6 +251,7 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
     const options = {
       key: process.env.NEXT_PUBLIC_DODO_KEY_ID, // Placeholder for Dodo Key
       subscription_id: planId,
+      quantity: staffCount,
       name: "Attendry Subscription",
       description: `Billing for ${plan.name} - ${billingCycle} (${currency.toUpperCase()})`,
       image: "https://res.cloudinary.com/dnkghymx5/image/upload/v1721992194/logo-sm_scak0f.png",
@@ -294,8 +301,8 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
   return (
     <div className="max-w-7xl mx-auto py-16 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900/50 dark:to-background">
       <div className="text-center mb-12">
-        <h2 className="text-4xl font-extrabold text-gray-900 dark:text-gray-100 tracking-tight">Simple, Powerful Pricing</h2>
-        <p className="mt-3 text-lg text-gray-600 dark:text-gray-400">Choose the perfect plan for your business. Start free.</p>
+        <h2 className="text-4xl font-extrabold text-gray-900 dark:text-gray-100 tracking-tight">Flexible Plans for Every Team</h2>
+        <p className="mt-3 text-lg text-gray-600 dark:text-gray-400">Choose your billing cycle and select the number of staff you need.</p>
         <div className="mt-6 flex flex-col sm:flex-row justify-center items-center gap-4">
             <div className="flex items-center gap-2 text-sm font-medium">
                 <span className={cn(currency === 'inr' ? 'text-primary' : 'text-gray-500 dark:text-gray-400')}>INR (₹)</span>
@@ -306,64 +313,94 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
              <Tabs value={billingCycle} onValueChange={(value) => setBillingCycle(value as any)} className="w-full sm:w-auto">
                 <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="monthly">Monthly</TabsTrigger>
-                    <TabsTrigger value="yearly">Yearly (Save 20%)</TabsTrigger>
-                    <TabsTrigger value="threeYearly">3 Years (Save 40%)</TabsTrigger>
+                    <TabsTrigger value="yearly">Yearly <span className="hidden sm:inline ml-1 text-green-600">(Save 20%)</span></TabsTrigger>
+                    <TabsTrigger value="threeYearly">3-Year <span className="hidden sm:inline ml-1 text-green-600">(Save 40%)</span></TabsTrigger>
                 </TabsList>
             </Tabs>
         </div>
       </div>
+      
+       <Card className="mb-12">
+          <CardContent className="p-6">
+              <div className="flex flex-col md:flex-row md:items-center gap-4">
+                  <div className="flex-1 space-y-2">
+                      <Label htmlFor="staff-slider" className="text-lg font-semibold">How many staff members do you have?</Label>
+                      <p className="text-sm text-muted-foreground">Slide to calculate your price. The slider is capped at 200 for Pro.</p>
+                  </div>
+                  <div className="flex items-center gap-4 w-full md:w-auto">
+                      <Slider
+                          id="staff-slider"
+                          value={[staffCount]}
+                          onValueChange={(value) => setStaffCount(value[0])}
+                          max={200}
+                          min={1}
+                          step={1}
+                          className="w-full md:w-64"
+                      />
+                      <div className="flex h-10 w-24 items-center justify-center rounded-md border border-input bg-transparent px-3 text-lg font-bold">
+                          {staffCount}
+                      </div>
+                  </div>
+              </div>
+          </CardContent>
+      </Card>
+
 
       <div className="grid gap-8 lg:grid-cols-2 xl:grid-cols-4 mb-14">
-        {plans.map((p) => (
-          <div key={p.id} className={`relative rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 hover:shadow-xl transition-transform hover:-translate-y-1`}>
-            {p.isPopular && <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10"><div className="px-4 py-1 text-sm font-semibold rounded-full bg-primary text-primary-foreground shadow-md">Most Popular</div></div>}
-            <div className={`absolute top-px left-px right-px h-1.5 rounded-t-2xl bg-gradient-to-r ${p.accent}`}></div>
-            <div className="p-8 flex flex-col h-full">
-              <div className="flex items-start justify-between mb-6">
-                <div>
-                  <h3 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">{p.name}</h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{p.highlight}</p>
+        {plans.map((p) => {
+            const pricePerStaff = p.price[billingCycle][currency];
+            const isWithinLimit = p.maxEmployees === Infinity || staffCount <= p.maxEmployees;
+            const finalPrice = p.id === 'trial' ? 0 : pricePerStaff * staffCount;
+
+            return (
+              <div key={p.id} className={`relative rounded-2xl shadow-lg border-2 bg-white dark:bg-gray-800/50 hover:shadow-xl transition-transform hover:-translate-y-1 ${!isWithinLimit ? 'opacity-50' : ''} ${p.isPopular ? 'border-primary' : 'border-gray-200 dark:border-gray-700'}`}>
+                {p.isPopular && <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10"><div className="px-4 py-1 text-sm font-semibold rounded-full bg-primary text-primary-foreground shadow-md">Most Popular</div></div>}
+                <div className={`absolute top-px left-px right-px h-1.5 rounded-t-2xl bg-gradient-to-r ${p.accent}`}></div>
+                <div className="p-8 flex flex-col h-full">
+                  <div className="flex items-start justify-between mb-6">
+                    <div>
+                      <h3 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">{p.name}</h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 h-10">{p.highlight}</p>
+                    </div>
+                  </div>
+
+                  <div className="mb-6 h-20">
+                    <div className="flex items-baseline gap-x-2">
+                        {p.id === 'trial' ? (
+                            <span className="text-4xl font-extrabold text-gray-900 dark:text-gray-100">{currencySymbol}0</span>
+                        ): (
+                            <>
+                               <span className="text-4xl font-extrabold text-gray-900 dark:text-gray-100">{currencySymbol}{finalPrice.toFixed(2)}</span>
+                               <span className="text-sm text-gray-500 dark:text-gray-400">{cycleText}</span>
+                            </>
+                        )}
+                    </div>
+                     {p.id !== 'trial' && <p className="text-xs text-muted-foreground mt-1">(billed per employee)</p>}
+
+                    <div className="mt-2 text-sm text-gray-600 dark:text-gray-300">{p.employees} • {p.branches}</div>
+                  </div>
+
+                  <ul className="space-y-3 mb-8 text-sm flex-1">
+                    {p.features.map((feature, i) => (
+                      <li key={i} className="flex items-center gap-x-3">
+                        <Check className="text-emerald-500 w-5 h-5" />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Button
+                    onClick={() => handlePayment(p)}
+                    disabled={loadingPlan === p.id || p.id === 'trial' || !isWithinLimit}
+                    className={`w-full mt-auto py-3 rounded-xl font-semibold text-white bg-gradient-to-r ${p.accent} hover:opacity-90 transition-all shadow-md`}
+                  >
+                      {loadingPlan === p.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : null}
+                      {!isWithinLimit ? 'Staff limit exceeded' : p.cta}
+                  </Button>
                 </div>
               </div>
-
-              <div className="mb-6">
-                <div className="flex items-baseline gap-x-2">
-                    {p.id === 'trial' ? (
-                        <span className="text-4xl font-extrabold text-gray-900 dark:text-gray-100">{currencySymbol}0</span>
-                    ): (
-                        <span className="text-4xl font-extrabold text-gray-900 dark:text-gray-100">{currencySymbol}{p.price[billingCycle][currency]}</span>
-                    )}
-                    <span className="text-sm text-gray-500 dark:text-gray-400">{p.id === 'trial' ? p.note : `${p.note}${cycleText}`}</span>
-                </div>
-                 {p.id !== 'trial' && <p className="text-xs text-muted-foreground mt-1">(billed per employee)</p>}
-
-                <div className="mt-2 text-sm text-gray-600 dark:text-gray-300">{p.employees} • {p.branches}</div>
-              </div>
-
-              <ul className="space-y-3 mb-8 text-sm">
-                {p.features.map((feature, i) => (
-                  <li key={i} className="flex items-center gap-x-3">
-                    <Check className="text-emerald-500 w-5 h-5" />
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <Button
-                onClick={() => handlePayment(p)}
-                disabled={loadingPlan === p.id || p.id === 'trial'}
-                className={`w-full mt-auto py-3 rounded-xl font-semibold text-white bg-gradient-to-r ${p.accent} hover:opacity-90 transition-all shadow-md`}
-              >
-                  {loadingPlan === p.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : null}
-                  {p.cta}
-              </Button>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="mt-10 text-center text-sm text-gray-600 dark:text-gray-400">
-        <p>Need a custom quote or on-premise version? <a href="#contact" className="text-primary font-semibold hover:underline">Contact our team</a> — we’ll tailor it for your business.</p>
+            )
+        })}
       </div>
     </div>
   );
