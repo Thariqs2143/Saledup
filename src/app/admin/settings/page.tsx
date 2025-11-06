@@ -347,7 +347,7 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
                       
                       <div className="space-y-2 text-sm">
                           <p className="font-semibold text-slate-300">Features:</p>
-                          <ul className="space-y-3 text-sm mb-8">
+                          <ul className="space-y-3 text-sm mb-4">
                               {p.mainFeatures.map((feature, i) => (
                                   <li key={i} className="flex items-start gap-x-3 text-slate-400">
                                       <CheckIcon className="w-5 h-5 text-green-400 mt-0.5" />
@@ -355,8 +355,9 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
                                   </li>
                               ))}
                           </ul>
+                          <Separator className="my-6 bg-slate-700" />
                           <p className="font-semibold text-slate-300">Usage Limits:</p>
-                          <ul className="space-y-3 text-sm mb-8">
+                          <ul className="space-y-3 text-sm">
                               <li className="flex items-start gap-x-3 text-slate-400">
                                   <Users className="h-4 w-4 mt-1" />
                                   <span>{p.usageLimits.employees}</span>
@@ -380,10 +381,9 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
             <thead>
               <tr className="border-b border-slate-700">
                 <th className="py-4 px-4 font-semibold text-slate-300 min-w-[250px]">Feature</th>
-                <th className="py-4 px-4 font-semibold text-center text-slate-300">Free Trial</th>
-                <th className="py-4 px-4 font-semibold text-center text-slate-300">Starter</th>
-                <th className="py-4 px-4 font-semibold text-center text-slate-300">Growth</th>
-                <th className="py-4 px-4 font-semibold text-center text-slate-300">Pro</th>
+                {plans.map((p) => (
+                  <th key={p.id} className="py-4 px-4 font-semibold text-center text-slate-300">{p.name}</th>
+                ))}
               </tr>
             </thead>
             <tbody>
@@ -393,7 +393,7 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
                   <td className="py-4 px-4 text-center">
                     {feature.trial ? <CheckIcon /> : <XMark />}
                   </td>
-                  <td className="py-4 px-4 text-center">
+                   <td className="py-4 px-4 text-center">
                     {feature.starter ? <CheckIcon /> : <XMark />}
                   </td>
                   <td className="py-4 px-4 text-center">
@@ -925,3 +925,4 @@ export default function AdminSettingsPage() {
     </Suspense>
   );
 }
+
