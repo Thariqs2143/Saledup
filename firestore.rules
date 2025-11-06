@@ -1,3 +1,4 @@
+
 rules_version = '2';
 
 service cloud.firestore {
@@ -222,6 +223,11 @@ service cloud.firestore {
 
       // QR History Subcollection
       match /qr-history/{docId} {
+        allow read, write: if isShopOwner(shopId) || isSuperAdmin();
+      }
+      
+      // Shifts Subcollection
+      match /shifts/{shiftId} {
         allow read, write: if isShopOwner(shopId) || isSuperAdmin();
       }
 

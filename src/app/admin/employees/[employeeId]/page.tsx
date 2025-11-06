@@ -11,10 +11,10 @@ import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { differenceInMonths, differenceInYears } from 'date-fns';
-import { ArrowLeft, Trash2, Loader2, History, Save, GitBranch } from 'lucide-react';
+import { ArrowLeft, Trash2, Loader2, History, Save, GitBranch, Clock } from 'lucide-react';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
-import { doc, getDoc, deleteDoc, updateDoc, writeBatch, collection, getDocs, where, query } from 'firebase/firestore';
+import { doc, getDoc, deleteDoc, updateDoc, writeBatch, collection, getDocs, where, query, onSnapshot } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
 import { onAuthStateChanged, type User as AuthUser } from 'firebase/auth';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -30,6 +30,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import type { Shift } from '@/app/admin/settings/page';
+
 
 type Branch = {
     id: string;
@@ -78,6 +80,8 @@ export default function EmployeeDetailPage() {
   
   const [branches, setBranches] = useState<Branch[]>([]);
   const [selectedBranch, setSelectedBranch] = useState('');
+  const [shifts, setShifts] = useState<Shift[]>([]);
+  const [selectedShift, setSelectedShift] = useState('');
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -93,6 +97,15 @@ export default function EmployeeDetailPage() {
             setBranches(fetchedBranches);
         };
         fetchBranches();
+
+        // Fetch shifts for the main branch
+        const shiftsRef = collection(db, 'shops', user.uid, 'shifts');
+        const unsubscribeShifts = onSnapshot(shiftsRef, (snapshot) => {
+            const fetchedShifts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Shift));
+            setShifts(fetchedShifts);
+        });
+
+        return () => unsubscribeShifts();
 
       } else {
         router.push('/admin/login');
@@ -114,6 +127,7 @@ export default function EmployeeDetailPage() {
                 const fetchedEmployee = { id: docSnap.id, ...docSnap.data() } as User;
                  setEmployee(fetchedEmployee);
                  setEditableEmployee(fetchedEmployee);
+                 setSelectedShift(fetchedEmployee.shiftId || 'default');
                  setTenure(calculateTenure(fetchedEmployee.joinDate));
             } else {
                  toast({ title: "Error", description: "Employee not found in this branch.", variant: 'destructive' });
@@ -148,12 +162,13 @@ export default function EmployeeDetailPage() {
             role: editableEmployee.role,
             aadhaar: editableEmployee.aadhaar || '',
             baseSalary: Number(editableEmployee.baseSalary) || 0,
+            shiftId: selectedShift,
         });
         toast({
             title: "Employee Updated",
             description: `${editableEmployee.name}'s details have been updated.`,
         });
-        setEmployee(prev => ({...prev!, ...editableEmployee}));
+        setEmployee(prev => ({...prev!, ...editableEmployee, shiftId: selectedShift}));
     } catch (error) {
         console.error("Error updating document: ", error);
         toast({
@@ -370,6 +385,22 @@ export default function EmployeeDetailPage() {
                 <Label htmlFor="joinDate">Date Joined</Label>
                 <Input id="joinDate" type="date" value={editableEmployee.joinDate || ''} readOnly disabled/>
             </div>
+            <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="shift">Assign Shift</Label>
+                <Select value={selectedShift} onValueChange={setSelectedShift}>
+                    <SelectTrigger id="shift">
+                        <SelectValue placeholder="Select a shift" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="default">Default Business Hours</SelectItem>
+                        {shifts.map(shift => (
+                            <SelectItem key={shift.id} value={shift.id}>
+                                {shift.name} ({shift.startTime} - {shift.endTime})
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
           </div>
         </CardContent>
         <CardFooter className="border-t pt-6 justify-start">
@@ -412,9 +443,3 @@ export default function EmployeeDetailPage() {
     </div>
   );
 }
-
-    
-
-    
-
-    

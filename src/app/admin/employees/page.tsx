@@ -44,6 +44,7 @@ export type User = {
   imageUrl?: string;
   isProfileComplete?: boolean;
   shopId?: string; // Links user to a shop
+  shiftId?: string; // Links user to a shift
   shopName?: string; // Added for "All Branches" view
   baseSalary?: number;
 };
