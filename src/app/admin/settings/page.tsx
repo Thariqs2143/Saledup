@@ -148,6 +148,7 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
       cta: 'Start Free Trial',
       employees: 'Up to 5 employees',
       branches: '1 Branch',
+      perStaffCharge: null,
       included: new Set([
         'QR Code Check-in/out (permanent & dynamic)',
         'Manual Attendance Entry',
@@ -166,6 +167,29 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
       accent: 'from-gray-500 to-gray-600 dark:from-gray-700 dark:to-gray-800'
     },
     {
+      id: 'starter',
+      name: 'Starter',
+      monthly: 299,
+      yearly: 2990,
+      plan_id: { monthly: 'plan_RDqdgneYWt6c8y', yearly: 'plan_RDqfTZ41RgBju4' },
+      note: '',
+      cta: 'Choose Starter',
+      employees: 'Up to 5 employees',
+      branches: '1 Branch',
+      perStaffCharge: 49,
+      included: new Set(features.filter(f => ![
+        'Muster Roll Generation',
+        'Automated Payroll Calculation',
+        'Multi-Branch Support',
+        'Staff Transfer Between Branches',
+        'AI-Powered Weekly Briefing',
+        'Smart Staffing Advisor (AI)',
+        'Customizable Alerts & Notifications'
+      ].includes(f))),
+      highlight: 'For new businesses and small teams.',
+      accent: 'from-blue-500 to-sky-500'
+    },
+    {
       id: 'growth',
       name: 'Growth',
       monthly: 499,
@@ -175,6 +199,7 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
       cta: 'Upgrade to Growth',
       employees: 'Up to 50 employees',
       branches: 'Up to 5 branches',
+      perStaffCharge: null,
       included: new Set(features.filter(f => !f.includes('AI') && !f.includes('Customizable Alerts'))),
       isPopular: true,
       highlight: 'For growing businesses that need more power.',
@@ -190,6 +215,7 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
       cta: 'Upgrade to Pro',
       employees: 'Unlimited employees',
       branches: 'Unlimited branches',
+      perStaffCharge: null,
       included: new Set(features),
       highlight: 'For large organizations that require advanced AI.',
       accent: 'from-emerald-500 to-teal-500'
@@ -284,7 +310,7 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
         </div>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-3 mb-14">
+      <div className="grid gap-8 lg:grid-cols-2 xl:grid-cols-4 mb-14">
         {plans.map((p) => (
           <div key={p.id} className={`relative rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 hover:shadow-xl transition-transform hover:-translate-y-1`}>
             {p.isPopular && <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10"><div className="px-4 py-1 text-sm font-semibold rounded-full bg-primary text-primary-foreground shadow-md">Most Popular</div></div>}
@@ -306,6 +332,9 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
                     )}
                     <span className="text-sm text-gray-500 dark:text-gray-400">{isYearly && p.id !== 'trial' ? '/year' : p.id === 'trial' ? p.note : '/month'}</span>
                 </div>
+                {p.perStaffCharge && (
+                  <p className="text-xs text-amber-600 dark:text-amber-400 font-medium mt-1">+ ₹{p.perStaffCharge} per additional staff/month</p>
+                )}
                 {p.id === 'pro' && isYearly ? (
                   <p className="text-xs text-green-600 dark:text-green-400 font-medium mt-1">You save ₹1989 per year!</p>
                 ) : p.id === 'growth' && isYearly ? (
@@ -315,7 +344,7 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
               </div>
 
               <ul className="space-y-3 mb-8">
-                {features.slice(0, 6).map((f) => (
+                {features.slice(0, 4).map((f) => (
                   <li key={f} className="flex items-start gap-x-3 text-sm">
                     {p.included.has(f) ? (
                       <CheckIcon className="text-emerald-500 w-5 h-5 mt-0.5" />
@@ -382,12 +411,12 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
               <AccordionItem value={feature} key={feature}>
                 <AccordionTrigger>{feature}</AccordionTrigger>
                 <AccordionContent>
-                  <div className="grid grid-cols-3 gap-2 text-center">
+                  <div className="grid grid-cols-4 gap-2 text-center">
                     {plans.map(plan => (
                       <div key={plan.id} className="space-y-1">
                         <p className="text-xs font-semibold text-muted-foreground">{plan.name}</p>
                         {plan.included.has(feature) ? (
-                          <span className="mx-auto inline-flex items-center justify-center w-7 h-7 rounded-full bg-emerald-50 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400"><CheckIcon className="w-4 h-4" /></span>
+                          <span className="mx-auto inline-flex items-center justify-center w-7 h-7 rounded-full bg-emerald-50 dark:bg-emerald-900/ ৫০ text-emerald-600 dark:text-emerald-400"><CheckIcon className="w-4 h-4" /></span>
                         ) : (
                           <span className="mx-auto inline-flex items-center justify-center w-7 h-7 rounded-full bg-gray-50 dark:bg-gray-900/50 text-gray-300 dark:text-gray-600"><XMark className="w-4 h-4" /></span>
                         )}
