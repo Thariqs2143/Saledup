@@ -135,7 +135,7 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
     {
       id: 'starter',
       name: 'Starter',
-      price: { monthly: { inr: 49, usd: 0.99 }, yearly: { inr: 490, usd: 9.9 }, threeYearly: { inr: 1199, usd: 24.9 } },
+      price: { monthly: { inr: 29, usd: 0.49 }, yearly: { inr: 290, usd: 4.9 }, threeYearly: { inr: 699, usd: 11.9 } },
       plan_id: { monthly: { inr: 'plan_starter_inr_monthly_v3', usd: 'plan_starter_usd_monthly_v3' }, yearly: { inr: 'plan_starter_inr_yearly_v3', usd: 'plan_starter_usd_yearly_v3' }, threeYearly: { inr: 'plan_starter_inr_3y_v3', usd: 'plan_starter_usd_3y_v3' } },
       cta: 'Choose Starter',
       highlight: 'For new & small businesses just getting started.',
@@ -146,7 +146,7 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
     {
       id: 'growth',
       name: 'Growth',
-      price: { monthly: { inr: 79, usd: 1.49 }, yearly: { inr: 790, usd: 14.9 }, threeYearly: { inr: 1899, usd: 35.9 } },
+      price: { monthly: { inr: 49, usd: 0.79 }, yearly: { inr: 490, usd: 7.9 }, threeYearly: { inr: 999, usd: 15.9 } },
       plan_id: { monthly: { inr: 'plan_growth_inr_monthly_v3', usd: 'plan_growth_usd_monthly_v3' }, yearly: { inr: 'plan_growth_inr_yearly_v3', usd: 'plan_growth_usd_yearly_v3' }, threeYearly: { inr: 'plan_growth_inr_3y_v3', usd: 'plan_growth_usd_3y_v3' } },
       cta: 'Upgrade to Growth',
       highlight: 'For growing businesses that need more control.',
@@ -158,7 +158,7 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
     {
       id: 'pro',
       name: 'Pro',
-      price: { monthly: { inr: 129, usd: 2.49 }, yearly: { inr: 1290, usd: 24.9 }, threeYearly: { inr: 2999, usd: 59.9 } },
+      price: { monthly: { inr: 79, usd: 1.29 }, yearly: { inr: 790, usd: 12.9 }, threeYearly: { inr: 1899, usd: 29.9 } },
       plan_id: { monthly: { inr: 'plan_pro_inr_monthly_v3', usd: 'plan_pro_usd_monthly_v3' }, yearly: { inr: 'plan_pro_inr_yearly_v3', usd: 'plan_pro_usd_yearly_v3' }, threeYearly: { inr: 'plan_pro_inr_3y_v3', usd: 'plan_pro_usd_3y_v3' } },
       cta: 'Upgrade to Pro',
       highlight: 'For large organizations needing enterprise-grade power.',
@@ -166,6 +166,26 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
       mainFeatures: ['All Growth features', 'AI-powered Insights', 'Custom Branding & Reports', 'API Access + Integrations'],
       usageLimits: { employees: 'Unlimited', branches: 'Unlimited' }
     }
+  ];
+
+  const featureComparison = [
+    { name: 'QR Code Check-in/out (permanent & dynamic)', trial: true, growth: true, pro: true },
+    { name: 'Manual Attendance Entry', trial: true, growth: true, pro: true },
+    { name: 'Live Attendance Dashboard', trial: true, growth: true, pro: true },
+    { name: 'Easy Employee Onboarding (phone number invite)', trial: true, growth: true, pro: true },
+    { name: 'Employee Profiles', trial: true, growth: true, pro: true },
+    { name: 'Detailed Attendance Reports (daily/weekly/monthly)', trial: true, growth: true, pro: true },
+    { name: 'Export Reports (PDF / Excel)', trial: false, growth: true, pro: true },
+    { name: 'Muster Roll Generation', trial: false, growth: true, pro: true },
+    { name: 'Automated Payroll Calculation', trial: false, growth: true, pro: true },
+    { name: 'Points & Rewards System', trial: true, growth: true, pro: true },
+    { name: 'Punctuality Leaderboard', trial: true, growth: true, pro: true },
+    { name: 'Achievement Badges', trial: true, growth: true, pro: true },
+    { name: 'Multi-Branch Support', trial: false, growth: true, pro: true },
+    { name: 'Staff Transfer Between Branches', trial: false, growth: true, pro: true },
+    { name: 'AI-Powered Weekly Briefing', trial: false, growth: false, pro: true },
+    { name: 'Smart Staffing Advisor (AI)', trial: false, growth: false, pro: true },
+    { name: 'Customizable Alerts & Notifications', trial: false, growth: false, pro: true },
   ];
 
   const handlePayment = async (plan: typeof plans[0]) => {
@@ -232,6 +252,8 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
   const currencySymbol = currency === 'inr' ? '₹' : '$';
   const cycleText = billingCycle === 'monthly' ? '/month' : billingCycle === 'yearly' ? '/year' : '/3-years';
   const CheckIcon = ({ className = 'w-5 h-5' }) => <Check className={cn("text-emerald-500", className)} />;
+  const XMark = ({ className = 'w-5 h-5' }) => <X className={cn("text-gray-400 dark:text-gray-600", className)} />;
+
 
   return (
     <div className="max-w-7xl mx-auto py-16">
@@ -351,6 +373,40 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
             )
         })}
       </div>
+      
+      <div className="mt-16 bg-slate-900 text-white p-8 rounded-2xl">
+        <h2 className="text-3xl font-bold text-center mb-8">Feature Comparison</h2>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="border-b border-slate-700">
+                <th className="py-4 px-4 font-semibold text-slate-300">Feature</th>
+                <th className="py-4 px-4 font-semibold text-center text-slate-300">14-Day Free Trial</th>
+                <th className="py-4 px-4 font-semibold text-center text-slate-300">Growth</th>
+                <th className="py-4 px-4 font-semibold text-center text-slate-300">Pro</th>
+              </tr>
+            </thead>
+            <tbody>
+              {featureComparison.map((feature, index) => (
+                <tr key={index} className="border-b border-slate-800">
+                  <td className="py-4 px-4 text-sm text-slate-400">{feature.name}</td>
+                  <td className="py-4 px-4 text-center">
+                    {feature.trial ? <CheckIcon /> : <XMark />}
+                  </td>
+                  <td className="py-4 px-4 text-center">
+                    {feature.growth ? <CheckIcon /> : <XMark />}
+                  </td>
+                  <td className="py-4 px-4 text-center">
+                    {feature.pro ? <CheckIcon /> : <XMark />}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="text-center text-sm text-slate-400 mt-8">Need a custom quote or on-premise version? <Link href="#" className="font-semibold text-primary hover:underline">Contact our team</Link> — we'll tailor it for your business.</p>
+      </div>
+
     </div>
   );
 };
