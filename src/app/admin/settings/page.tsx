@@ -189,9 +189,8 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
       },
       note: ' / staff',
       cta: 'Choose Starter',
-      employees: 'Min. 5 employees',
+      employees: 'Pay per employee',
       branches: '1 Branch',
-      baseFee: { inr: 99, usd: 1.5 },
       included: new Set(features.filter(f => ![
         'Muster Roll Generation',
         'Automated Payroll Calculation',
@@ -370,10 +369,7 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
                     )}
                     <span className="text-sm text-gray-500 dark:text-gray-400">{p.id === 'trial' ? p.note : `${p.note}${cycleText}`}</span>
                 </div>
-                 {p.id === 'starter' && p.baseFee && (
-                  <p className="text-xs text-amber-600 dark:text-amber-400 font-medium mt-1">+ {currencySymbol}{p.baseFee[currency]} base fee/month</p>
-                )}
-                 {billingCycle === 'yearly' && p.id !== 'trial' && (
+                {billingCycle === 'yearly' && p.id !== 'trial' && (
                     <p className="text-xs text-green-600 dark:text-green-400 font-medium mt-1">Save 2 months vs. monthly!</p>
                 )}
                  {billingCycle === 'threeYearly' && p.id !== 'trial' && (
@@ -974,7 +970,7 @@ function SettingsPageContent() {
                         </Button>
                     </div>
                 </TabsContent>
-            </div>
+              </div>
         </Tabs>
     </div>
   );
