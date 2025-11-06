@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -39,7 +40,7 @@ const initialTiers: Tier[] = [
         'Daily attendance reports',
         'Email notifications to managers'
     ],
-    plan_id: { monthly: 'plan_RDqdgneYWt6c8y', yearly: 'plan_RDqfTZ41RgBju4' },
+    plan_id: { monthly: 'plan_starter_inr_monthly', yearly: 'plan_starter_inr_yearly' },
   },
   {
     name: 'Growth',
@@ -52,7 +53,7 @@ const initialTiers: Tier[] = [
         'Export reports to Excel/CSV for payroll',
         'Push notifications & reminders for employees'
     ],
-    plan_id: { monthly: 'plan_RDqefndhTG7HFx', yearly: 'plan_RDqfkAfYP2owme' },
+    plan_id: { monthly: 'plan_growth_inr_monthly', yearly: 'plan_growth_inr_yearly' },
   },
   {
     name: 'Pro',
@@ -66,7 +67,7 @@ const initialTiers: Tier[] = [
         'Multi-location support',
         'Priority support'
     ],
-    plan_id: { monthly: 'plan_RDqf6nOgfKgrj4', yearly: 'plan_RDqfwlOZgKeEiQ' },
+    plan_id: { monthly: 'plan_pro_inr_monthly', yearly: 'plan_pro_inr_yearly' },
     isPopular: true,
   },
 ];
@@ -218,7 +219,7 @@ export default function SuperAdminSubscriptionsPage() {
                                                 />
                                             </div>
                                              <div className="space-y-1 mt-4">
-                                                 <Label htmlFor={`${tier.name}-plan-monthly`} className="text-xs">Razorpay Plan ID (Monthly)</Label>
+                                                 <Label htmlFor={`${tier.name}-plan-monthly`} className="text-xs">Dodo Payments Plan ID (Monthly)</Label>
                                                  <Input
                                                     id={`${tier.name}-plan-monthly`}
                                                     value={tier.plan_id.monthly}
@@ -226,7 +227,7 @@ export default function SuperAdminSubscriptionsPage() {
                                                 />
                                             </div>
                                              <div className="space-y-1">
-                                                 <Label htmlFor={`${tier.name}-plan-yearly`} className="text-xs">Razorpay Plan ID (Yearly)</Label>
+                                                 <Label htmlFor={`${tier.name}-plan-yearly`} className="text-xs">Dodo Payments Plan ID (Yearly)</Label>
                                                  <Input
                                                     id={`${tier.name}-plan-yearly`}
                                                     value={tier.plan_id.yearly}

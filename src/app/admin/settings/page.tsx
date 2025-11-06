@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { Button } from "@/components/ui/button";
@@ -113,6 +112,7 @@ const defaultSettings: Settings = {
 
 const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
   const [isYearly, setIsYearly] = useState(false);
+  const [currency, setCurrency] = useState<'inr' | 'usd'>('inr');
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const { toast } = useToast();
   const router = useRouter();
@@ -141,9 +141,14 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
     {
       id: 'trial',
       name: '14-Day Free Trial',
-      monthly: 0,
-      yearly: 0,
-      plan_id: { monthly: '', yearly: ''},
+      price: {
+        monthly: { inr: 0, usd: 0 },
+        yearly: { inr: 0, usd: 0 },
+      },
+      plan_id: {
+        monthly: { inr: '', usd: '' },
+        yearly: { inr: '', usd: '' },
+      },
       note: 'for 14 days',
       cta: 'Start Free Trial',
       employees: 'Up to 5 employees',
@@ -169,14 +174,19 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
     {
       id: 'starter',
       name: 'Starter',
-      monthly: 299,
-      yearly: 2990,
-      plan_id: { monthly: 'plan_RDqdgneYWt6c8y', yearly: 'plan_RDqfTZ41RgBju4' },
+       price: {
+        monthly: { inr: 299, usd: 4 },
+        yearly: { inr: 2990, usd: 40 },
+      },
+      plan_id: {
+        monthly: { inr: 'plan_starter_inr_monthly', usd: 'plan_starter_usd_monthly' },
+        yearly: { inr: 'plan_starter_inr_yearly', usd: 'plan_starter_usd_yearly' },
+      },
       note: '',
       cta: 'Choose Starter',
       employees: 'Up to 5 employees',
       branches: '1 Branch',
-      perStaffCharge: 49,
+      perStaffCharge: { inr: 49, usd: 1 },
       included: new Set(features.filter(f => ![
         'Muster Roll Generation',
         'Automated Payroll Calculation',
@@ -192,9 +202,14 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
     {
       id: 'growth',
       name: 'Growth',
-      monthly: 499,
-      yearly: 4990,
-      plan_id: { monthly: 'plan_RDqefndhTG7HFx', yearly: 'plan_RDqfTZ41RgBju4' },
+      price: {
+        monthly: { inr: 499, usd: 7 },
+        yearly: { inr: 4990, usd: 70 },
+      },
+      plan_id: {
+        monthly: { inr: 'plan_growth_inr_monthly', usd: 'plan_growth_usd_monthly' },
+        yearly: { inr: 'plan_growth_inr_yearly', usd: 'plan_growth_usd_yearly' },
+      },
       note: '',
       cta: 'Upgrade to Growth',
       employees: 'Up to 50 employees',
@@ -208,9 +223,14 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
     {
       id: 'pro',
       name: 'Pro',
-      monthly: 999,
-      yearly: 9999,
-      plan_id: { monthly: 'plan_RDqf6nOgfKgrj4', yearly: 'plan_RDqfwlOZgKeEiQ' },
+      price: {
+        monthly: { inr: 999, usd: 12 },
+        yearly: { inr: 9999, usd: 120 },
+      },
+      plan_id: {
+        monthly: { inr: 'plan_pro_inr_monthly', usd: 'plan_pro_usd_monthly' },
+        yearly: { inr: 'plan_pro_inr_yearly', usd: 'plan_pro_usd_yearly' },
+      },
       note: '',
       cta: 'Upgrade to Pro',
       employees: 'Unlimited employees',
@@ -228,7 +248,7 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
         return;
     }
     
-    const planId = isYearly ? plan.plan_id.yearly : plan.plan_id.monthly;
+    const planId = isYearly ? plan.plan_id.yearly[currency] : plan.plan_id.monthly[currency];
     if (!planId) {
         toast({ title: "Error", description: "This plan is not available for purchase yet.", variant: "destructive" });
         return;
@@ -236,19 +256,20 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
 
     setLoadingPlan(plan.id);
 
+    // This is now a placeholder for "Dodo Payments"
     const options = {
-      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+      key: process.env.NEXT_PUBLIC_DODO_KEY_ID, // Placeholder for Dodo Key
       subscription_id: planId,
       name: "Attendry Subscription",
-      description: `Billing for ${plan.name} - ${isYearly ? 'Yearly' : 'Monthly'}`,
+      description: `Billing for ${plan.name} - ${isYearly ? 'Yearly' : 'Monthly'} (${currency.toUpperCase()})`,
       image: "https://res.cloudinary.com/dnkghymx5/image/upload/v1721992194/logo-sm_scak0f.png",
       handler: async (response: any) => {
           try {
-              const verifySubscription = httpsCallable(functions, 'verifyRazorpaySubscription');
+              const verifySubscription = httpsCallable(functions, 'verifySubscriptionPayment'); // Generic name
               await verifySubscription({
-                  razorpay_payment_id: response.razorpay_payment_id,
-                  razorpay_subscription_id: response.razorpay_subscription_id,
-                  razorpay_signature: response.razorpay_signature,
+                  paymentId: response.dodo_payment_id, // Placeholder
+                  subscriptionId: response.dodo_subscription_id, // Placeholder
+                  signature: response.dodo_signature, // Placeholder
                   shopId: profile.id,
                   planName: plan.name,
               });
@@ -275,12 +296,16 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
       }
     };
     
-    const rzp = new window.Razorpay(options);
-    rzp.on('payment.failed', function (response: any){
-        toast({ title: "Payment Failed", description: response.error.description, variant: "destructive"});
+    // Placeholder for Dodo's payment modal opening
+    // const dodoPay = new window.DodoPay(options);
+    // dodoPay.open();
+    
+    // Since we don't have DodoPay, we'll just log and stop loading
+    console.log("Initiating DodoPay with options:", options);
+    setTimeout(() => {
+        toast({ title: "Demo Flow", description: "Payment gateway would open here."});
         setLoadingPlan(null);
-    });
-    rzp.open();
+    }, 1500);
   }
 
   const CheckIcon = ({ className = 'w-5 h-5' }) => (
@@ -295,18 +320,25 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
     </svg>
   );
 
+  const currencySymbol = currency === 'inr' ? '₹' : '$';
+
   return (
     <div className="max-w-7xl mx-auto py-16 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900/50 dark:to-background">
       <div className="text-center mb-12">
         <h2 className="text-4xl font-extrabold text-gray-900 dark:text-gray-100 tracking-tight">Simple, Powerful Pricing</h2>
         <p className="mt-3 text-lg text-gray-600 dark:text-gray-400">Choose the perfect plan for your business. Start free.</p>
-        <div className="mt-6 flex justify-center items-center gap-3">
-          <span className={`text-sm font-medium ${!isYearly ? 'text-primary' : 'text-gray-500 dark:text-gray-400'}`}>Monthly</span>
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input type="checkbox" checked={isYearly} onChange={() => setIsYearly(!isYearly)} className="sr-only peer" />
-            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-ring rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
-          </label>
-          <span className={`text-sm font-medium ${isYearly ? 'text-primary' : 'text-gray-500 dark:text-gray-400'}`}>Yearly <span className="text-green-600 dark:text-green-400 font-semibold">(Save 2 Months)</span></span>
+        <div className="mt-6 flex justify-center items-center gap-4">
+            <div className="flex items-center gap-2 text-sm font-medium">
+                <span className={cn(currency === 'inr' ? 'text-primary' : 'text-gray-500 dark:text-gray-400')}>INR (₹)</span>
+                 <Switch checked={currency === 'usd'} onCheckedChange={(checked) => setCurrency(checked ? 'usd' : 'inr')} />
+                <span className={cn(currency === 'usd' ? 'text-primary' : 'text-gray-500 dark:text-gray-400')}>USD ($)</span>
+            </div>
+            <Separator orientation="vertical" className="h-6" />
+            <div className="flex items-center gap-2 text-sm font-medium">
+                <span className={cn(!isYearly ? 'text-primary' : 'text-gray-500 dark:text-gray-400')}>Monthly</span>
+                <Switch checked={isYearly} onCheckedChange={setIsYearly} />
+                <span className={cn(isYearly ? 'text-primary' : 'text-gray-500 dark:text-gray-400')}>Yearly <span className="text-green-600 dark:text-green-400 font-semibold">(Save 2 Months)</span></span>
+            </div>
         </div>
       </div>
 
@@ -326,19 +358,19 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
               <div className="mb-6">
                 <div className="flex items-baseline gap-x-2">
                     {p.id === 'trial' ? (
-                        <span className="text-4xl font-extrabold text-gray-900 dark:text-gray-100">₹0</span>
+                        <span className="text-4xl font-extrabold text-gray-900 dark:text-gray-100">{currencySymbol}0</span>
                     ): (
-                        <span className="text-4xl font-extrabold text-gray-900 dark:text-gray-100">₹{isYearly ? p.yearly : p.monthly}</span>
+                        <span className="text-4xl font-extrabold text-gray-900 dark:text-gray-100">{currencySymbol}{isYearly ? p.price.yearly[currency] : p.price.monthly[currency]}</span>
                     )}
                     <span className="text-sm text-gray-500 dark:text-gray-400">{isYearly && p.id !== 'trial' ? '/year' : p.id === 'trial' ? p.note : '/month'}</span>
                 </div>
                 {p.perStaffCharge && (
-                  <p className="text-xs text-amber-600 dark:text-amber-400 font-medium mt-1">+ ₹{p.perStaffCharge} per additional staff/month</p>
+                  <p className="text-xs text-amber-600 dark:text-amber-400 font-medium mt-1">+ {currencySymbol}{p.perStaffCharge[currency]} per additional staff/month</p>
                 )}
                 {p.id === 'pro' && isYearly ? (
-                  <p className="text-xs text-green-600 dark:text-green-400 font-medium mt-1">You save ₹1989 per year!</p>
+                  <p className="text-xs text-green-600 dark:text-green-400 font-medium mt-1">You save {currencySymbol}{(p.price.monthly[currency]*12 - p.price.yearly[currency])} per year!</p>
                 ) : p.id === 'growth' && isYearly ? (
-                  <p className="text-xs text-green-600 dark:text-green-400 font-medium mt-1">You save ₹998 per year!</p>
+                  <p className="text-xs text-green-600 dark:text-green-400 font-medium mt-1">You save {currencySymbol}{(p.price.monthly[currency]*12 - p.price.yearly[currency])} per year!</p>
                 ): null }
                 <div className="mt-2 text-sm text-gray-600 dark:text-gray-300">{p.employees} • {p.branches}</div>
               </div>
@@ -634,19 +666,19 @@ function SettingsPageContent() {
             
             <div className="sticky top-14 md:top-0 z-30 bg-background/80 backdrop-blur-sm -mx-6 px-6 py-4 mb-6 border-b">
                  <TabsList className="grid w-full grid-cols-5 lg:grid-cols-5 h-auto p-1 border-2 border-border bg-muted">
-                    <TabsTrigger value="profile" className="text-xs sm:text-sm py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                    <TabsTrigger value="profile" className="text-xs sm:text-sm py-2 data-[state=active]:bg-background data-[state=active]:text-foreground rounded-md transition-all duration-300">
                         <UserIcon className="h-5 w-5 lg:mr-2" /><span className="hidden lg:inline">Profile</span>
                     </TabsTrigger>
-                     <TabsTrigger value="subscription" className="text-xs sm:text-sm py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                     <TabsTrigger value="subscription" className="text-xs sm:text-sm py-2 data-[state=active]:bg-background data-[state=active]:text-foreground rounded-md transition-all duration-300">
                         <Trophy className="h-5 w-5 lg:mr-2"/><span className="hidden lg:inline">Subscription</span>
                     </TabsTrigger>
-                    <TabsTrigger value="shifts" className="text-xs sm:text-sm py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                    <TabsTrigger value="shifts" className="text-xs sm:text-sm py-2 data-[state=active]:bg-background data-[state=active]:text-foreground rounded-md transition-all duration-300">
                         <Clock className="h-5 w-5 lg:mr-2"/><span className="hidden lg:inline">Shifts</span>
                     </TabsTrigger>
-                    <TabsTrigger value="business" className="text-xs sm:text-sm py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                    <TabsTrigger value="business" className="text-xs sm:text-sm py-2 data-[state=active]:bg-background data-[state=active]:text-foreground rounded-md transition-all duration-300">
                         <Building className="h-5 w-5 lg:mr-2"/><span className="hidden lg:inline">Business</span>
                     </TabsTrigger>
-                    <TabsTrigger value="general" className="text-xs sm:text-sm py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                    <TabsTrigger value="general" className="text-xs sm:text-sm py-2 data-[state=active]:bg-background data-[state=active]:text-foreground rounded-md transition-all duration-300">
                         <SettingsIcon className="h-5 w-5 lg:mr-2"/><span className="hidden lg:inline">General</span>
                     </TabsTrigger>
                 </TabsList>

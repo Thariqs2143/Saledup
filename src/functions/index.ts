@@ -1,5 +1,4 @@
 
-
 'use strict';
 
 import * as functions from 'firebase-functions';
@@ -154,18 +153,18 @@ export const scheduledLateCheckAlert = functions.pubsub.schedule('every 30 minut
 
 
 /**
- * Verifies a Razorpay subscription payment and updates the user's plan in Firestore.
+ * Verifies a Dodo Payments subscription and updates the user's plan in Firestore.
  */
-export const verifyRazorpaySubscription = functions.https.onCall(async (data, context) => {
+export const verifySubscriptionPayment = functions.https.onCall(async (data, context) => {
     // Check authentication
     if (!context.auth) {
         throw new functions.https.HttpsError('unauthenticated', 'The function must be called while authenticated.');
     }
     
-    const { razorpay_payment_id, razorpay_subscription_id, razorpay_signature, shopId, planName } = data;
+    const { paymentId, subscriptionId, signature, shopId, planName } = data;
     
     // Validate required data
-    if (!razorpay_payment_id || !razorpay_subscription_id || !razorpay_signature || !shopId || !planName) {
+    if (!paymentId || !subscriptionId || !signature || !shopId || !planName) {
         throw new functions.https.HttpsError('invalid-argument', 'Missing required payment information.');
     }
     
@@ -174,19 +173,19 @@ export const verifyRazorpaySubscription = functions.https.onCall(async (data, co
         throw new functions.https.HttpsError('permission-denied', 'You can only update your own shop.');
     }
     
-    const secret = functions.config().razorpay.key_secret;
+    const secret = functions.config().dodo.key_secret; // Using dodo secret
     if (!secret) {
-        throw new functions.https.HttpsError('internal', 'Razorpay secret key is not configured.');
+        throw new functions.https.HttpsError('internal', 'Payment provider secret key is not configured.');
     }
 
-    const body = `${razorpay_payment_id}|${razorpay_subscription_id}`;
+    const body = `${paymentId}|${subscriptionId}`;
 
     const expectedSignature = crypto
         .createHmac('sha256', secret)
         .update(body.toString())
         .digest('hex');
     
-    if (expectedSignature !== razorpay_signature) {
+    if (expectedSignature !== signature) {
         throw new functions.https.HttpsError('unauthenticated', 'Request signature verification failed.');
     }
     
@@ -195,8 +194,8 @@ export const verifyRazorpaySubscription = functions.https.onCall(async (data, co
         const shopDocRef = db.collection('shops').doc(shopId);
         await shopDocRef.update({
             subscriptionPlan: planName,
-            razorpayPaymentId: razorpay_payment_id,
-            razorpaySubscriptionId: razorpay_subscription_id,
+            paymentId: paymentId,
+            subscriptionId: subscriptionId,
             subscriptionStatus: 'active',
             updatedAt: Timestamp.now(),
         });
@@ -208,4 +207,3 @@ export const verifyRazorpaySubscription = functions.https.onCall(async (data, co
         throw new functions.https.HttpsError('internal', 'Failed to update subscription in the database.');
     }
 });
-
