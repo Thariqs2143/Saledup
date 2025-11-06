@@ -321,9 +321,15 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
                       <div className="mb-6 text-center">
                           <div className="flex flex-col items-center">
                               {p.id === 'trial' ? (
-                                  <span className="text-5xl font-extrabold">{currencySymbol}0</span>
-                              ): (
-                                  <span className="text-5xl font-extrabold">{currencySymbol}{finalPrice.toFixed(2)}</span>
+                                  <span className="text-5xl font-extrabold">
+                                      <span className="text-3xl align-top">{currencySymbol}</span>
+                                      <span className="break-all">0</span>
+                                  </span>
+                              ) : (
+                                  <span className="text-5xl font-extrabold">
+                                      <span className="text-3xl align-top">{currencySymbol}</span>
+                                      <span className="break-all">{finalPrice.toFixed(2)}</span>
+                                  </span>
                               )}
                               <p className="text-sm text-slate-400">{cycleText}</p>
                           </div>
@@ -926,3 +932,5 @@ export default function AdminSettingsPage() {
   );
 }
 
+
+    
