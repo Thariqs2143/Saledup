@@ -128,29 +128,26 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
       plan_id: { monthly: { inr: 'dodo_trial_inr_monthly', usd: 'dodo_trial_usd_monthly' }, yearly: { inr: 'dodo_trial_inr_yearly', usd: 'dodo_trial_usd_yearly' }, threeYearly: { inr: 'dodo_trial_inr_3y', usd: 'dodo_trial_usd_3y' } },
       cta: 'Start Free Trial',
       highlight: 'Try our core features — absolutely free for 14 days.',
-      accent: 'from-gray-500 to-gray-600 dark:from-gray-700 dark:to-gray-800',
       mainFeatures: ['QR Code Check-in/out', 'Manual Attendance Entry', 'Live Attendance Dashboard', 'Easy Employee Onboarding'],
       usageLimits: { employees: 'Up to 5', branches: '1 Branch' }
     },
     {
       id: 'starter',
       name: 'Starter',
-      price: { monthly: { inr: 29, usd: 0.49 }, yearly: { inr: 290, usd: 4.9 }, threeYearly: { inr: 699, usd: 11.9 } },
-      plan_id: { monthly: { inr: 'plan_starter_inr_monthly_v3', usd: 'plan_starter_usd_monthly_v3' }, yearly: { inr: 'plan_starter_inr_yearly_v3', usd: 'plan_starter_usd_yearly_v3' }, threeYearly: { inr: 'plan_starter_inr_3y_v3', usd: 'plan_starter_usd_3y_v3' } },
+      price: { monthly: { inr: 49, usd: 0.99 }, yearly: { inr: 490, usd: 9.9 }, threeYearly: { inr: 999, usd: 19.9 } },
+      plan_id: { monthly: { inr: 'plan_starter_inr_monthly_v4', usd: 'plan_starter_usd_monthly_v4' }, yearly: { inr: 'plan_starter_inr_yearly_v4', usd: 'plan_starter_usd_yearly_v4' }, threeYearly: { inr: 'plan_starter_inr_3y_v4', usd: 'plan_starter_usd_3y_v4' } },
       cta: 'Choose Starter',
       highlight: 'For new & small businesses just getting started.',
-      accent: 'from-blue-500 to-sky-500',
       mainFeatures: ['QR Code Check-in/out', 'Manual Attendance Entry', 'Live Attendance Dashboard', 'Easy Employee Onboarding'],
       usageLimits: { employees: 'Up to 20 employees', branches: '1 Branch' }
     },
     {
       id: 'growth',
       name: 'Growth',
-      price: { monthly: { inr: 49, usd: 0.79 }, yearly: { inr: 490, usd: 7.9 }, threeYearly: { inr: 999, usd: 15.9 } },
-      plan_id: { monthly: { inr: 'plan_growth_inr_monthly_v3', usd: 'plan_growth_usd_monthly_v3' }, yearly: { inr: 'plan_growth_inr_yearly_v3', usd: 'plan_growth_usd_yearly_v3' }, threeYearly: { inr: 'plan_growth_inr_3y_v3', usd: 'plan_growth_usd_3y_v3' } },
+      price: { monthly: { inr: 79, usd: 1.49 }, yearly: { inr: 790, usd: 14.9 }, threeYearly: { inr: 1599, usd: 29.9 } },
+      plan_id: { monthly: { inr: 'plan_growth_inr_monthly_v4', usd: 'plan_growth_usd_monthly_v4' }, yearly: { inr: 'plan_growth_inr_yearly_v4', usd: 'plan_growth_usd_yearly_v4' }, threeYearly: { inr: 'plan_growth_inr_3y_v4', usd: 'plan_growth_usd_3y_v4' } },
       cta: 'Upgrade to Growth',
       highlight: 'For growing businesses that need more control.',
-      accent: 'from-primary to-blue-500',
       isPopular: true,
       mainFeatures: ['All Starter features', 'Priority Support', 'Advanced Reports & Analytics', 'Multi-branch Dashboard'],
       usageLimits: { employees: 'Up to 50 employees', branches: 'Up to 5 Branches' }
@@ -158,11 +155,11 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
     {
       id: 'pro',
       name: 'Pro',
-      price: { monthly: { inr: 79, usd: 1.29 }, yearly: { inr: 790, usd: 12.9 }, threeYearly: { inr: 1899, usd: 29.9 } },
-      plan_id: { monthly: { inr: 'plan_pro_inr_monthly_v3', usd: 'plan_pro_usd_monthly_v3' }, yearly: { inr: 'plan_pro_inr_yearly_v3', usd: 'plan_pro_usd_yearly_v3' }, threeYearly: { inr: 'plan_pro_inr_3y_v3', usd: 'plan_pro_usd_3y_v3' } },
+      price: { monthly: { inr: 129, usd: 2.49 }, yearly: { inr: 1290, usd: 24.9 }, threeYearly: { inr: 2999, usd: 49.9 } },
+      plan_id: { monthly: { inr: 'plan_pro_inr_monthly_v4', usd: 'plan_pro_usd_monthly_v4' }, yearly: { inr: 'plan_pro_inr_yearly_v4', usd: 'plan_pro_usd_yearly_v4' }, threeYearly: { inr: 'plan_pro_inr_3y_v4', usd: 'plan_pro_usd_3y_v4' } },
       cta: 'Upgrade to Pro',
       highlight: 'For large organizations needing enterprise-grade power.',
-      accent: 'from-emerald-500 to-teal-500',
+      isBestValue: true,
       mainFeatures: ['All Growth features', 'AI-powered Insights', 'Custom Branding & Reports', 'API Access + Integrations'],
       usageLimits: { employees: 'Unlimited', branches: 'Unlimited' }
     }
@@ -174,10 +171,10 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
     { name: 'Live Attendance Dashboard', trial: true, starter: true, growth: true, pro: true },
     { name: 'Easy Employee Onboarding', trial: true, starter: true, growth: true, pro: true },
     { name: 'Employee Profiles', trial: true, starter: true, growth: true, pro: true },
-    { name: 'Detailed Attendance Reports', trial: false, starter: true, growth: true, pro: true },
-    { name: 'Export Reports (PDF / Excel)', trial: false, starter: false, growth: true, pro: true },
-    { name: 'Muster Roll Generation', trial: false, starter: false, growth: true, pro: true },
-    { name: 'Automated Payroll Calculation', trial: false, starter: false, growth: true, pro: true },
+    { name: 'Detailed Attendance Reports', trial: true, starter: true, growth: true, pro: true },
+    { name: 'Export Reports (PDF / Excel)', trial: true, starter: true, growth: true, pro: true },
+    { name: 'Muster Roll Generation', trial: true, starter: true, growth: true, pro: true },
+    { name: 'Automated Payroll Calculation', trial: true, starter: true, growth: true, pro: true },
     { name: 'Points & Rewards System', trial: false, starter: true, growth: true, pro: true },
     { name: 'Punctuality Leaderboard', trial: false, starter: true, growth: true, pro: true },
     { name: 'Multi-Branch Support', trial: false, starter: false, growth: true, pro: true },
@@ -250,8 +247,8 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
 
   const currencySymbol = currency === 'inr' ? '₹' : '$';
   const cycleText = billingCycle === 'monthly' ? '/month' : billingCycle === 'yearly' ? '/year' : '/3-years';
-  const CheckIcon = ({ className = 'w-5 h-5' }) => <CheckCircle className={cn("text-emerald-500", className)} />;
-  const XMark = ({ className = 'w-5 h-5' }) => <XCircle className={cn("text-gray-400 dark:text-gray-600", className)} />;
+  const CheckIcon = ({ className = 'w-5 h-5' }) => <Check className={cn("text-emerald-500", className)} />;
+  const XMark = ({ className = 'w-5 h-5' }) => <X className={cn("text-gray-400 dark:text-gray-600", className)} />;
 
 
   return (
@@ -309,69 +306,81 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
             const finalPrice = p.id === 'trial' ? 0 : pricePerStaff * (p.id === 'starter' || p.id === 'growth' ? Math.min(staffCount, maxEmployees) : staffCount);
 
             return (
-              <div key={p.id} className={cn(
-                  'relative rounded-2xl p-8 flex flex-col h-full bg-slate-900 border border-slate-700 shadow-lg',
-                  !isWithinLimit && 'opacity-60',
-                  p.isPopular && 'border-primary shadow-primary/20'
-              )}>
-                {p.isPopular && <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10"><div className="px-4 py-1 text-sm font-semibold rounded-full bg-primary text-primary-foreground shadow-md">Most Popular</div></div>}
-                <div className="flex-1">
-                  <h3 className="text-2xl font-semibold text-white">{p.name}</h3>
-                  <p className="text-sm text-slate-400 mt-2 mb-6 h-10">{p.highlight}</p>
-                  
-                  <div className="mb-6">
-                    <div className="flex flex-col">
-                        {p.id === 'trial' ? (
-                            <span className="text-4xl font-extrabold text-white">{currencySymbol}0</span>
-                        ): (
-                            <span className="text-4xl font-extrabold text-white">{currencySymbol}{finalPrice.toFixed(2)}</span>
+                <div key={p.id} className={cn(
+                    'relative rounded-2xl p-6 flex flex-col h-full bg-slate-800 border-2 shadow-lg transition-all duration-300',
+                    !isWithinLimit && 'opacity-60 bg-slate-900',
+                    p.isPopular ? 'border-blue-500 shadow-blue-500/20' : 'border-slate-700',
+                    p.isBestValue ? 'border-green-500 shadow-green-500/20' : 'border-slate-700',
+                )}>
+                  {p.isPopular && <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10"><div className="px-4 py-1 text-sm font-semibold rounded-full bg-blue-500 text-white shadow-md">TOP CHOICE</div></div>}
+                  {p.isBestValue && <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10"><div className="px-4 py-1 text-sm font-semibold rounded-full bg-green-500 text-white shadow-md">SPECIAL OFFER</div></div>}
+                  <div className="flex-1 text-white">
+                      <h3 className="text-2xl font-semibold text-center">{p.name}</h3>
+                      <p className="text-sm text-slate-400 mt-2 mb-6 h-10 text-center">{p.highlight}</p>
+                      
+                      <div className="mb-6 text-center">
+                          <div className="flex flex-col items-center">
+                              {p.id === 'trial' ? (
+                                  <span className="text-5xl font-extrabold">{currencySymbol}0</span>
+                              ): (
+                                  <span className="text-5xl font-extrabold">{currencySymbol}{finalPrice.toFixed(2)}</span>
+                              )}
+                              <p className="text-sm text-slate-400">{cycleText}</p>
+                          </div>
+                          {p.id !== 'trial' && <p className="text-xs text-slate-500 mt-1">(billed per employee)</p>}
+                      </div>
+                      
+                      <Button
+                        onClick={() => handlePayment(p)}
+                        disabled={loadingPlan === p.id || p.id === 'trial' || !isWithinLimit}
+                        className={cn(
+                          'w-full mt-auto py-3 rounded-lg font-semibold text-slate-900 transition-all shadow-md text-base',
+                          p.isPopular ? 'bg-blue-400 hover:bg-blue-500' : 'bg-slate-200 hover:bg-white',
+                          p.isBestValue ? 'bg-green-400 hover:bg-green-500' : ''
                         )}
-                         <p className="text-sm text-slate-400 -mt-1">{cycleText}</p>
-                    </div>
-                     {p.id !== 'trial' && <p className="text-xs text-slate-500 mt-1">(billed per employee)</p>}
-                  </div>
-                  
-                  <div className="space-y-2 text-sm text-slate-300">
-                    <div className="flex items-center gap-2"><Users className="h-4 w-4"/><span>{p.usageLimits.employees}</span></div>
-                    <div className="flex items-center gap-2"><Building className="h-4 w-4"/><span>{p.usageLimits.branches}</span></div>
-                  </div>
+                      >
+                          {loadingPlan === p.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : null}
+                          {!isWithinLimit ? 'Staff limit exceeded' : p.cta}
+                      </Button>
 
-                  <Separator className="my-6 bg-slate-700" />
-                  
-                  <ul className="space-y-3 text-sm mb-8">
-                    {p.mainFeatures.map((feature, i) => (
-                        <li key={i} className="flex items-start gap-x-3 text-slate-400">
-                            <CheckIcon className="w-5 h-5 text-green-400 mt-0.5" />
-                            <span>{feature}</span>
-                        </li>
-                    ))}
-                  </ul>
-
-                  <Button
-                    onClick={() => handlePayment(p)}
-                    disabled={loadingPlan === p.id || p.id === 'trial' || !isWithinLimit}
-                    className={cn(
-                      'w-full mt-auto py-3 rounded-lg font-semibold text-slate-900 transition-all shadow-md text-base',
-                      p.isPopular ? 'bg-green-400 hover:bg-green-500' : 'bg-slate-200 hover:bg-white'
-                    )}
-                  >
-                      {loadingPlan === p.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : null}
-                      {!isWithinLimit ? 'Staff limit exceeded' : p.cta}
-                  </Button>
+                      <Separator className="my-6 bg-slate-700" />
+                      
+                      <div className="space-y-2 text-sm">
+                          <p className="font-semibold text-slate-300">Features:</p>
+                          <ul className="space-y-3 text-sm mb-8">
+                              {p.mainFeatures.map((feature, i) => (
+                                  <li key={i} className="flex items-start gap-x-3 text-slate-400">
+                                      <CheckIcon className="w-5 h-5 text-green-400 mt-0.5" />
+                                      <span>{feature}</span>
+                                  </li>
+                              ))}
+                          </ul>
+                          <p className="font-semibold text-slate-300">Usage Limits:</p>
+                          <ul className="space-y-3 text-sm mb-8">
+                              <li className="flex items-start gap-x-3 text-slate-400">
+                                  <Users className="h-4 w-4 mt-1" />
+                                  <span>{p.usageLimits.employees}</span>
+                              </li>
+                              <li className="flex items-start gap-x-3 text-slate-400">
+                                  <Building className="h-4 w-4 mt-1"/>
+                                  <span>{p.usageLimits.branches}</span>
+                              </li>
+                          </ul>
+                      </div>
+                  </div>
                 </div>
-              </div>
             )
         })}
       </div>
       
       <div className="mt-16 bg-slate-900 text-white p-8 rounded-2xl">
-        <h2 className="text-3xl font-bold text-center mb-8">Feature Comparison</h2>
+        <h2 className="text-3xl font-bold text-center mb-8">Full Feature Comparison</h2>
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-slate-700">
-                <th className="py-4 px-4 font-semibold text-slate-300">Feature</th>
-                <th className="py-4 px-4 font-semibold text-center text-slate-300">14-Day Free Trial</th>
+                <th className="py-4 px-4 font-semibold text-slate-300 min-w-[250px]">Feature</th>
+                <th className="py-4 px-4 font-semibold text-center text-slate-300">Free Trial</th>
                 <th className="py-4 px-4 font-semibold text-center text-slate-300">Starter</th>
                 <th className="py-4 px-4 font-semibold text-center text-slate-300">Growth</th>
                 <th className="py-4 px-4 font-semibold text-center text-slate-300">Pro</th>
