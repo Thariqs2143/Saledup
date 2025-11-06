@@ -120,105 +120,51 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
   const router = useRouter();
   const [staffCount, setStaffCount] = useState(10);
 
-  const allFeatures = [
-    { name: 'QR Code Check-in/out', id: 'qr' },
-    { name: 'Manual Attendance Entry', id: 'manual' },
-    { name: 'Live Attendance Dashboard', id: 'dashboard' },
-    { name: 'Easy Employee Onboarding', id: 'onboarding' },
-    { name: 'Advanced Reports & Analytics', id: 'reports' },
-    { name: 'Leave Management', id: 'leave' },
-    { name: 'Priority Support', id: 'support' },
-    { name: 'Multi-branch Dashboard', id: 'multi_branch' },
-    { name: 'AI-powered Insights', id: 'ai' },
-    { name: 'Custom Branding & Reports', id: 'custom_branding' },
-    { name: 'API Access + Integrations', id: 'api' },
-  ];
-
   const plans = [
     {
       id: 'trial',
       name: '14-Day Free Trial',
-      price: {
-        monthly: { inr: 0, usd: 0 },
-        yearly: { inr: 0, usd: 0 },
-        threeYearly: { inr: 0, usd: 0 },
-      },
-      plan_id: {
-        monthly: { inr: 'dodo_trial_inr_monthly', usd: 'dodo_trial_usd_monthly' },
-        yearly: { inr: 'dodo_trial_inr_yearly', usd: 'dodo_trial_usd_yearly' },
-        threeYearly: { inr: 'dodo_trial_inr_3y', usd: 'dodo_trial_usd_3y' },
-      },
+      price: { monthly: { inr: 0, usd: 0 }, yearly: { inr: 0, usd: 0 }, threeYearly: { inr: 0, usd: 0 } },
+      plan_id: { monthly: { inr: 'dodo_trial_inr_monthly', usd: 'dodo_trial_usd_monthly' }, yearly: { inr: 'dodo_trial_inr_yearly', usd: 'dodo_trial_usd_yearly' }, threeYearly: { inr: 'dodo_trial_inr_3y', usd: 'dodo_trial_usd_3y' } },
       cta: 'Start Free Trial',
-      employees: 'Up to 5 employees',
-      branches: '1 Branch',
-      maxEmployees: 5,
-      features: new Set(['qr', 'manual', 'dashboard', 'onboarding']),
       highlight: 'Try our core features — absolutely free for 14 days.',
-      accent: 'from-gray-500 to-gray-600 dark:from-gray-700 dark:to-gray-800'
+      accent: 'from-gray-500 to-gray-600 dark:from-gray-700 dark:to-gray-800',
+      mainFeatures: ['QR Code Check-in/out', 'Manual Attendance Entry', 'Live Attendance Dashboard', 'Easy Employee Onboarding'],
+      usageLimits: { employees: 'Up to 5', branches: '1 Branch' }
     },
     {
       id: 'starter',
       name: 'Starter',
-      price: {
-        monthly: { inr: 49, usd: 0.99 },
-        yearly: { inr: 490, usd: 9.9 },
-        threeYearly: { inr: 1199, usd: 24.9 },
-      },
-      plan_id: {
-        monthly: { inr: 'plan_starter_inr_monthly_v3', usd: 'plan_starter_usd_monthly_v3' },
-        yearly: { inr: 'plan_starter_inr_yearly_v3', usd: 'plan_starter_usd_yearly_v3' },
-        threeYearly: { inr: 'plan_starter_inr_3y_v3', usd: 'plan_starter_usd_3y_v3' },
-      },
+      price: { monthly: { inr: 49, usd: 0.99 }, yearly: { inr: 490, usd: 9.9 }, threeYearly: { inr: 1199, usd: 24.9 } },
+      plan_id: { monthly: { inr: 'plan_starter_inr_monthly_v3', usd: 'plan_starter_usd_monthly_v3' }, yearly: { inr: 'plan_starter_inr_yearly_v3', usd: 'plan_starter_usd_yearly_v3' }, threeYearly: { inr: 'plan_starter_inr_3y_v3', usd: 'plan_starter_usd_3y_v3' } },
       cta: 'Choose Starter',
-      employees: 'Up to 20 employees',
-      branches: '1 Branch',
-      maxEmployees: 20,
-      features: new Set(['qr', 'manual', 'dashboard', 'onboarding']),
       highlight: 'For new & small businesses just getting started.',
-      accent: 'from-blue-500 to-sky-500'
+      accent: 'from-blue-500 to-sky-500',
+      mainFeatures: ['QR Code Check-in/out', 'Manual Attendance Entry', 'Live Attendance Dashboard', 'Easy Employee Onboarding'],
+      usageLimits: { employees: 'Up to 20', branches: '1 Branch' }
     },
     {
       id: 'growth',
       name: 'Growth',
-      price: {
-        monthly: { inr: 79, usd: 1.49 },
-        yearly: { inr: 790, usd: 14.9 },
-        threeYearly: { inr: 1899, usd: 35.9 },
-      },
-      plan_id: {
-        monthly: { inr: 'plan_growth_inr_monthly_v3', usd: 'plan_growth_usd_monthly_v3' },
-        yearly: { inr: 'plan_growth_inr_yearly_v3', usd: 'plan_growth_usd_yearly_v3' },
-        threeYearly: { inr: 'plan_growth_inr_3y_v3', usd: 'plan_growth_usd_3y_v3' },
-      },
+      price: { monthly: { inr: 79, usd: 1.49 }, yearly: { inr: 790, usd: 14.9 }, threeYearly: { inr: 1899, usd: 35.9 } },
+      plan_id: { monthly: { inr: 'plan_growth_inr_monthly_v3', usd: 'plan_growth_usd_monthly_v3' }, yearly: { inr: 'plan_growth_inr_yearly_v3', usd: 'plan_growth_usd_yearly_v3' }, threeYearly: { inr: 'plan_growth_inr_3y_v3', usd: 'plan_growth_usd_3y_v3' } },
       cta: 'Upgrade to Growth',
-      employees: 'Up to 50 employees',
-      branches: 'Up to 5 branches',
-      maxEmployees: 50,
-      features: new Set(['qr', 'manual', 'dashboard', 'onboarding', 'reports', 'leave', 'support', 'multi_branch']),
+      highlight: 'For growing businesses that need more control.',
+      accent: 'from-primary to-blue-500',
       isPopular: true,
-      highlight: 'For growing businesses that need more control and scalability.',
-      accent: 'from-primary to-blue-500'
+      mainFeatures: ['All Starter features', 'Priority Support', 'Advanced Reports & Analytics', 'Multi-branch Dashboard'],
+      usageLimits: { employees: 'Up to 50', branches: 'Up to 5' }
     },
     {
       id: 'pro',
       name: 'Pro',
-      price: {
-        monthly: { inr: 129, usd: 2.49 },
-        yearly: { inr: 1290, usd: 24.9 },
-        threeYearly: { inr: 2999, usd: 59.9 },
-      },
-       plan_id: {
-        monthly: { inr: 'plan_pro_inr_monthly_v3', usd: 'plan_pro_usd_monthly_v3' },
-        yearly: { inr: 'plan_pro_inr_yearly_v3', usd: 'plan_pro_usd_yearly_v3' },
-        threeYearly: { inr: 'plan_pro_inr_3y_v3', usd: 'plan_pro_usd_3y_v3' },
-      },
+      price: { monthly: { inr: 129, usd: 2.49 }, yearly: { inr: 1290, usd: 24.9 }, threeYearly: { inr: 2999, usd: 59.9 } },
+      plan_id: { monthly: { inr: 'plan_pro_inr_monthly_v3', usd: 'plan_pro_usd_monthly_v3' }, yearly: { inr: 'plan_pro_inr_yearly_v3', usd: 'plan_pro_usd_yearly_v3' }, threeYearly: { inr: 'plan_pro_inr_3y_v3', usd: 'plan_pro_usd_3y_v3' } },
       cta: 'Upgrade to Pro',
-      employees: 'Unlimited employees',
-      branches: 'Unlimited branches',
-      maxEmployees: Infinity,
-      features: new Set(['qr', 'manual', 'dashboard', 'onboarding', 'reports', 'leave', 'support', 'multi_branch', 'ai', 'custom_branding', 'api']),
       highlight: 'For large organizations needing enterprise-grade power.',
-      accent: 'from-emerald-500 to-teal-500'
+      accent: 'from-emerald-500 to-teal-500',
+      mainFeatures: ['All Growth features', 'AI-powered Insights', 'Custom Branding & Reports', 'API Access + Integrations'],
+      usageLimits: { employees: 'Unlimited', branches: 'Unlimited' }
     }
   ];
 
@@ -276,7 +222,6 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
       }
     };
     
-    // This is a placeholder for the actual DodoPay call
     console.log("Initiating DodoPay with options:", options);
     setTimeout(() => {
         toast({ title: "Demo Flow", description: "Payment gateway would open here."});
@@ -287,11 +232,9 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
   const currencySymbol = currency === 'inr' ? '₹' : '$';
   const cycleText = billingCycle === 'monthly' ? '/month' : billingCycle === 'yearly' ? '/year' : '/3-years';
   const CheckIcon = ({ className = 'w-5 h-5' }) => <Check className={cn("text-emerald-500", className)} />;
-  const XMark = ({ className = 'w-5 h-5' }) => <X className={cn("text-gray-400 dark:text-gray-600", className)} />;
-
 
   return (
-    <div className="max-w-7xl mx-auto py-16 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900/50 dark:to-background">
+    <div className="max-w-7xl mx-auto py-16">
       <div className="text-center mb-12">
         <h2 className="text-4xl font-extrabold text-gray-900 dark:text-gray-100 tracking-tight">Flexible Plans for Every Team</h2>
         <p className="mt-3 text-lg text-gray-600 dark:text-gray-400">Choose your billing cycle and select the number of staff you need.</p>
@@ -337,91 +280,76 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
           </CardContent>
       </Card>
 
-
       <div className="grid gap-8 lg:grid-cols-2 xl:grid-cols-4 mb-14">
         {plans.map((p) => {
             const pricePerStaff = p.price[billingCycle][currency];
-            const isWithinLimit = p.maxEmployees === Infinity || staffCount <= p.maxEmployees;
-            const finalPrice = p.id === 'trial' ? 0 : pricePerStaff * staffCount;
+            const maxEmployees = p.id === 'pro' || p.id === 'trial' ? Infinity : p.id === 'starter' ? 20 : 50;
+            const isWithinLimit = staffCount <= maxEmployees;
+            const finalPrice = p.id === 'trial' ? 0 : pricePerStaff * (p.id === 'starter' || p.id === 'growth' ? Math.min(staffCount, maxEmployees) : staffCount);
 
             return (
-              <div key={p.id} className={`relative rounded-2xl shadow-lg border-2 bg-white dark:bg-gray-800/50 hover:shadow-xl transition-transform hover:-translate-y-1 ${!isWithinLimit ? 'opacity-50' : ''} ${p.isPopular ? 'border-primary' : 'border-gray-200 dark:border-gray-700'}`}>
+              <div key={p.id} className={cn(
+                  'relative rounded-2xl p-8 flex flex-col h-full bg-slate-900 border border-slate-700 shadow-lg',
+                  !isWithinLimit && 'opacity-60',
+                  p.isPopular && 'border-primary shadow-primary/20'
+              )}>
                 {p.isPopular && <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10"><div className="px-4 py-1 text-sm font-semibold rounded-full bg-primary text-primary-foreground shadow-md">Most Popular</div></div>}
-                <div className={`absolute top-px left-px right-px h-1.5 rounded-t-2xl bg-gradient-to-r ${p.accent}`}></div>
-                <div className="p-8 flex flex-col h-full">
-                  <div className="flex items-start justify-between mb-6">
-                    <div>
-                      <h3 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">{p.name}</h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 h-10">{p.highlight}</p>
-                    </div>
-                  </div>
-
-                  <div className="mb-6 h-24">
+                <div className="flex-1">
+                  <h3 className="text-2xl font-semibold text-white">{p.name}</h3>
+                  <p className="text-sm text-slate-400 mt-2 mb-6 h-10">{p.highlight}</p>
+                  
+                  <div className="mb-6">
                     <div>
                         {p.id === 'trial' ? (
-                            <span className="text-4xl font-extrabold text-gray-900 dark:text-gray-100">{currencySymbol}0</span>
+                            <span className="text-4xl font-extrabold text-white">{currencySymbol}0</span>
                         ): (
-                            <>
-                               <span className="text-4xl font-extrabold text-gray-900 dark:text-gray-100">{currencySymbol}{finalPrice.toFixed(2)}</span>
-                            </>
+                            <span className="text-4xl font-extrabold text-white">{currencySymbol}{finalPrice.toFixed(2)}</span>
                         )}
-                         <p className="text-sm text-gray-500 dark:text-gray-400">{cycleText}</p>
+                         <p className="text-sm text-slate-400 -mt-1">{cycleText}</p>
                     </div>
-                     {p.id !== 'trial' && <p className="text-xs text-muted-foreground mt-1">(billed per employee)</p>}
-
-                    <div className="mt-2 text-sm text-gray-600 dark:text-gray-300">{p.employees} • {p.branches}</div>
+                     {p.id !== 'trial' && <p className="text-xs text-slate-500 mt-1">(billed per employee)</p>}
                   </div>
-
-                  <ul className="space-y-3 mb-8 text-sm flex-1">
-                    {p.features.size > 0 && allFeatures.filter(f => p.features.has(f.id)).slice(0, 4).map((feature) => (
-                        <li key={feature.id} className="flex items-center gap-x-3">
-                            <CheckIcon className="w-5 h-5" />
-                            <span>{feature.name}</span>
-                        </li>
-                    ))}
-                  </ul>
 
                   <Button
                     onClick={() => handlePayment(p)}
                     disabled={loadingPlan === p.id || p.id === 'trial' || !isWithinLimit}
-                    className={`w-full mt-auto py-3 rounded-xl font-semibold text-white bg-gradient-to-r ${p.accent} hover:opacity-90 transition-all shadow-md`}
+                    className={cn(
+                      'w-full mt-auto py-3 rounded-lg font-semibold text-slate-900 transition-all shadow-md text-base',
+                      p.isPopular ? 'bg-green-400 hover:bg-green-500' : 'bg-slate-200 hover:bg-white'
+                    )}
                   >
                       {loadingPlan === p.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : null}
                       {!isWithinLimit ? 'Staff limit exceeded' : p.cta}
                   </Button>
+                  
+                  <Separator className="my-8 bg-slate-700" />
+
+                  <div className="space-y-4">
+                    <p className="text-sm font-semibold text-slate-300 uppercase tracking-wider">Features</p>
+                    <ul className="space-y-3 text-sm">
+                      {p.mainFeatures.map((feature, i) => (
+                          <li key={i} className="flex items-start gap-x-3 text-slate-400">
+                              <CheckIcon className="w-5 h-5 text-green-400 mt-0.5" />
+                              <span>{feature}</span>
+                          </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                   <Separator className="my-8 bg-slate-700" />
+                   
+                   <div className="space-y-4">
+                    <p className="text-sm font-semibold text-slate-300 uppercase tracking-wider">Usage Limits</p>
+                    <ul className="space-y-3 text-sm">
+                        <li className="flex items-start gap-x-3 text-slate-400"><Users className="w-5 h-5 text-slate-500 mt-0.5" /><span>{p.usageLimits.employees} employees</span></li>
+                        <li className="flex items-start gap-x-3 text-slate-400"><Building className="w-5 h-5 text-slate-500 mt-0.5" /><span>{p.usageLimits.branches}</span></li>
+                    </ul>
+                  </div>
+
                 </div>
               </div>
             )
         })}
-      </div>
-      
-       <div className="bg-white dark:bg-gray-800/50 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-x-auto shadow-sm">
-        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-          <thead className="bg-gray-100 dark:bg-gray-900/50">
-            <tr>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-800 dark:text-gray-200">Feature</th>
-              {plans.map((p) => (
-                <th key={p.id} className="px-6 py-4 text-center text-sm font-semibold text-gray-800 dark:text-gray-200">{p.name}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-            {allFeatures.map((f) => (
-              <tr key={f.id} className="hover:bg-gray-50 dark:hover:bg-gray-900/30 transition">
-                <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 w-64">{f.name}</td>
-                {plans.map((p) => (
-                  <td key={p.id} className="px-6 py-4 text-center">
-                    {p.features.has(f.id) ? (
-                      <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-emerald-50 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400"><CheckIcon className="w-5 h-5" /></span>
-                    ) : (
-                      <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-50 dark:bg-gray-900/50 text-gray-400 dark:text-gray-600"><XMark className="w-5 h-5" /></span>
-                    )}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
       </div>
     </div>
   );
