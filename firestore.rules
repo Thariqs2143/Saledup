@@ -1,4 +1,3 @@
-
 rules_version = '2';
 
 service cloud.firestore {
@@ -10,19 +9,17 @@ service cloud.firestore {
     function isSignedIn() {
       return request.auth != null;
     }
-
-    function isOwnerOfResourceShop() {
-      return isSignedIn() &&
-             resource.data.shopId != null &&
-             isShopOwner(resource.data.shopId);
-    }
+ function isOwnerOfResourceShop() {
+  return isSignedIn() &&
+         resource.data.shopId != null &&
+         isShopOwner(resource.data.shopId);
+}
     
     // Shop owner check (merged logic from both versions)
     function isShopOwner(shopId) {
       return (isSignedIn() &&
               (request.auth.uid == shopId ||
-               (exists(/databases/$(database)/documents/shops/$(shopId)) &&
-                get(/databases/$(database)/documents/shops/$(shopId)).data.ownerId == request.auth.uid)));
+               request.auth.uid == get(/databases/$(database)/documents/shops/$(shopId)).data.ownerId));
     }
 
     function isSelf(docId, collection) {
@@ -111,7 +108,7 @@ service cloud.firestore {
     match /users/{userId} {
       allow list: if true;
       allow read: if request.auth.uid == userId ||
-                     (resource.data.shopId != null && isShopOwner(resource.data.shopId)) ||
+                     isShopOwner(resource.data.shopId) ||
                      isSuperAdmin();
       allow create: if request.auth.uid == userId ||
                        isShopOwner(userId) ||
@@ -225,17 +222,18 @@ service cloud.firestore {
       match /qr-history/{docId} {
         allow read, write: if isShopOwner(shopId) || isSuperAdmin();
       }
-      
-      // Shifts Subcollection
-      match /shifts/{shiftId} {
-        allow read, write: if isShopOwner(shopId) || isSuperAdmin();
-      }
 
       // Config Subcollection
       match /config/{docId} {
         allow read, write: if isShopOwner(shopId) || isSuperAdmin();
       }
+       // Shifts Subcollection
+      match /shifts/{shiftId} {
+          allow read, write: if isShopOwner(shopId) || isSuperAdmin();
+      }
     }
+    
+          
 
     
 
@@ -246,17 +244,30 @@ service cloud.firestore {
 // and leaveRequests across all their owned shops.
 
 match /{path=**}/employees/{employeeId} {
-  allow get, list: if isOwnerOfResourceShop();
+  allow get, list: if isOwnerOfResourceShop() || request.auth.uid == resource.data.ownerId;
 }
 
 match /{path=**}/attendance/{attendanceId} {
-  allow get, list: if isOwnerOfResourceShop();
+  allow get, list: if isOwnerOfResourceShop() || request.auth.uid == resource.data.ownerId;
 }
 
 match /{path=**}/leaveRequests/{leaveId} {
-  allow get, list: if isOwnerOfResourceShop();
+  allow get, list: if isOwnerOfResourceShop() || request.auth.uid == resource.data.ownerId;
+}
+// For the Dashboard & Attendance Reports
+match /{path=**}/attendance/{attendanceId} {
+  allow list: if isOwnerOfResourceShop();
 }
 
+// For the "Leave Requests" tab
+match /{path=**}/leaveRequests/{leaveRequestId} {
+  allow list: if isOwnerOfResourceShop();
+}
+
+// For fetching shifts in employee profile page
+match /{path=**}/shifts/{shiftId} {
+    allow get, list: if isOwnerOfResourceShop();
+}
 
   }
 

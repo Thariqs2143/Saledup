@@ -84,35 +84,41 @@ export default function EmployeeDetailPage() {
   const [selectedShift, setSelectedShift] = useState('');
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       if (user) {
         setAuthUser(user);
-        
-        const fetchBranches = async () => {
-            const q = query(collection(db, 'shops'), where('ownerId', '==', user.uid));
-            const querySnapshot = await getDocs(q);
-            const fetchedBranches = querySnapshot.docs
-                .map(doc => ({ id: doc.id, shopName: doc.data().shopName }))
-                .filter(b => b.id !== branchId); // Exclude current branch
-            setBranches(fetchedBranches);
-        };
-        fetchBranches();
-
-        // Fetch shifts for the main branch
-        const shiftsRef = collection(db, 'shops', user.uid, 'shifts');
-        const unsubscribeShifts = onSnapshot(shiftsRef, (snapshot) => {
-            const fetchedShifts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Shift));
-            setShifts(fetchedShifts);
-        });
-
-        return () => unsubscribeShifts();
-
       } else {
         router.push('/admin/login');
       }
     });
-    return () => unsubscribe();
-  }, [router, branchId]);
+    return () => unsubscribeAuth();
+  }, [router]);
+
+  useEffect(() => {
+    if (!authUser || !branchId) return;
+
+    const fetchBranches = async () => {
+        const q = query(collection(db, 'shops'), where('ownerId', '==', authUser.uid));
+        const querySnapshot = await getDocs(q);
+        const fetchedBranches = querySnapshot.docs
+            .map(doc => ({ id: doc.id, shopName: doc.data().shopName }))
+            .filter(b => b.id !== branchId); // Exclude current branch
+        setBranches(fetchedBranches);
+    };
+    fetchBranches();
+
+    // Fetch shifts for the specific branch of the employee being viewed
+    const shiftsRef = collection(db, 'shops', branchId, 'shifts');
+    const unsubscribeShifts = onSnapshot(shiftsRef, (snapshot) => {
+        const fetchedShifts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Shift));
+        setShifts(fetchedShifts);
+    }, (error) => {
+        console.error("Error fetching shifts: ", error);
+        toast({ title: "Error", description: "Could not fetch shifts for this branch. Check permissions.", variant: "destructive"});
+    });
+    
+    return () => unsubscribeShifts();
+  }, [router, branchId, authUser, toast]);
   
   useEffect(() => {
     
