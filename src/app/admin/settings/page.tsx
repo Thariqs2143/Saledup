@@ -116,26 +116,7 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
   const [currency, setCurrency] = useState<'inr' | 'usd'>('inr');
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const { toast } = useToast();
-  const router = useRouter();
-
-  const features = [
-    'QR Code Check-in/out',
-    'Manual Attendance Entry',
-    'Live Attendance Dashboard',
-    'Easy Employee Onboarding',
-    'Employee Profiles',
-    'Leave Management',
-    'Detailed Attendance Reports',
-    'Export Reports (PDF/Excel)',
-    'Muster Roll Generation',
-    'Automated Payroll Calculation',
-    'Points & Rewards System',
-    'Punctuality Leaderboard',
-    'Multi-Branch Support',
-    'Staff Transfer Between Branches',
-    'AI-Powered Weekly Briefing',
-    'Smart Staffing Advisor (AI)',
-  ];
+  router = useRouter();
 
   const plans = [
     {
@@ -151,27 +132,26 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
         yearly: { inr: '', usd: '' },
         threeYearly: { inr: '', usd: '' },
       },
-      note: 'for 14 days',
+      note: 'Try our core features',
       cta: 'Start Free Trial',
       employees: 'Up to 5 employees',
       branches: '1 Branch',
-      included: new Set([
+      features: [
         'QR Code Check-in/out',
         'Manual Attendance Entry',
         'Live Attendance Dashboard',
         'Easy Employee Onboarding',
-        'Employee Profiles',
-      ]),
-      highlight: 'Try our core features, risk-free for 14 days.',
+      ],
+      highlight: 'Absolutely free for 14 days.',
       accent: 'from-gray-500 to-gray-600 dark:from-gray-700 dark:to-gray-800'
     },
     {
       id: 'starter',
       name: 'Starter',
-       price: { // This is now PER STAFF
-        monthly: { inr: 49, usd: 0.99 },
-        yearly: { inr: 490, usd: 9.9 },
-        threeYearly: { inr: 1199, usd: 24 },
+      price: {
+        monthly: { inr: 29, usd: 0.49 },
+        yearly: { inr: 290, usd: 4.9 },
+        threeYearly: { inr: 699, usd: 11.9 },
       },
       plan_id: {
         monthly: { inr: 'plan_starter_inr_monthly', usd: 'plan_starter_usd_monthly' },
@@ -180,28 +160,24 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
       },
       note: '/ staff',
       cta: 'Choose Starter',
-      employees: 'Pay per employee',
+      employees: 'Up to 20 employees',
       branches: '1 Branch',
-      included: new Set([
-          ...features.filter(f => ![
-            'Muster Roll Generation',
-            'Automated Payroll Calculation',
-            'Multi-Branch Support',
-            'Staff Transfer Between Branches',
-            'AI-Powered Weekly Briefing',
-            'Smart Staffing Advisor (AI)',
-          ].includes(f))
-      ]),
-      highlight: 'For new businesses and small teams.',
+      features: [
+        'QR Code Check-in/out',
+        'Manual Attendance Entry',
+        'Live Attendance Dashboard',
+        'Easy Employee Onboarding',
+      ],
+      highlight: 'For new & small businesses just getting started.',
       accent: 'from-blue-500 to-sky-500'
     },
     {
       id: 'growth',
       name: 'Growth',
-      price: { // PER STAFF
-        monthly: { inr: 29, usd: 0.59 },
-        yearly: { inr: 290, usd: 5.9 },
-        threeYearly: { inr: 799, usd: 15 },
+      price: {
+        monthly: { inr: 49, usd: 0.79 },
+        yearly: { inr: 490, usd: 7.9 },
+        threeYearly: { inr: 999, usd: 15.9 },
       },
       plan_id: {
         monthly: { inr: 'plan_growth_inr_monthly', usd: 'plan_growth_usd_monthly' },
@@ -212,18 +188,24 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
       cta: 'Upgrade to Growth',
       employees: 'Up to 50 employees',
       branches: 'Up to 5 branches',
-      included: new Set(features.filter(f => !f.includes('AI'))),
+      features: [
+        'All Starter features',
+        'Advanced Reports & Analytics',
+        'Multi-branch Dashboard',
+        'Leave Management',
+        'Priority Support',
+      ],
       isPopular: true,
-      highlight: 'For growing businesses that need more power.',
+      highlight: 'For growing businesses that need more control.',
       accent: 'from-primary to-blue-500'
     },
     {
       id: 'pro',
       name: 'Pro',
-      price: { // PER STAFF
-        monthly: { inr: 39, usd: 0.79 },
-        yearly: { inr: 390, usd: 7.9 },
-        threeYearly: { inr: 999, usd: 19 },
+      price: {
+        monthly: { inr: 79, usd: 1.29 },
+        yearly: { inr: 790, usd: 12.9 },
+        threeYearly: { inr: 1899, usd: 29.9 },
       },
       plan_id: {
         monthly: { inr: 'plan_pro_inr_monthly', usd: 'plan_pro_usd_monthly' },
@@ -234,8 +216,14 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
       cta: 'Upgrade to Pro',
       employees: 'Unlimited employees',
       branches: 'Unlimited branches',
-      included: new Set(features),
-      highlight: 'For large organizations that require advanced AI.',
+      features: [
+        'All Growth features',
+        'AI-powered Insights',
+        'Custom Branding & Reports',
+        'API Access + Integrations',
+        'Dedicated Account Manager',
+      ],
+      highlight: 'For large organizations needing enterprise-grade power.',
       accent: 'from-emerald-500 to-teal-500'
     }
   ];
@@ -300,18 +288,6 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
     }, 1500);
   }
 
-  const CheckIcon = ({ className = 'w-5 h-5' }) => (
-    <svg className={className} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-      <path d="M4.5 10.5L8.2 14.2L15.5 6.9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-
-  const XMark = ({ className = 'w-5 h-5' }) => (
-    <svg className={className} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-      <path d="M5 5L15 15M15 5L5 15" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-
   const currencySymbol = currency === 'inr' ? '₹' : '$';
   const cycleText = billingCycle === 'monthly' ? '/month' : billingCycle === 'yearly' ? '/year' : '/3-years';
 
@@ -330,8 +306,8 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
              <Tabs value={billingCycle} onValueChange={(value) => setBillingCycle(value as any)} className="w-full sm:w-auto">
                 <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="monthly">Monthly</TabsTrigger>
-                    <TabsTrigger value="yearly">Yearly</TabsTrigger>
-                    <TabsTrigger value="threeYearly">3 Years</TabsTrigger>
+                    <TabsTrigger value="yearly">Yearly (Save 20%)</TabsTrigger>
+                    <TabsTrigger value="threeYearly">3 Years (Save 40%)</TabsTrigger>
                 </TabsList>
             </Tabs>
         </div>
@@ -361,24 +337,14 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
                 </div>
                  {p.id !== 'trial' && <p className="text-xs text-muted-foreground mt-1">(billed per employee)</p>}
 
-                {billingCycle === 'yearly' && p.id !== 'trial' && (
-                    <p className="text-xs text-green-600 dark:text-green-400 font-medium mt-1">Save 2 months vs. monthly!</p>
-                )}
-                 {billingCycle === 'threeYearly' && p.id !== 'trial' && (
-                    <p className="text-xs text-green-600 dark:text-green-400 font-medium mt-1">Save over a year vs. monthly!</p>
-                )}
                 <div className="mt-2 text-sm text-gray-600 dark:text-gray-300">{p.employees} • {p.branches}</div>
               </div>
 
-              <ul className="space-y-3 mb-8">
-                {features.slice(0, 4).map((f) => (
-                  <li key={f} className="flex items-start gap-x-3 text-sm">
-                    {p.included.has(f) ? (
-                      <CheckIcon className="text-emerald-500 w-5 h-5 mt-0.5" />
-                    ) : (
-                      <XMark className="text-gray-300 dark:text-gray-600 w-5 h-5 mt-0.5" />
-                    )}
-                    <span className={`${p.included.has(f) ? 'text-gray-800 dark:text-gray-200' : 'text-gray-400 dark:text-gray-500'}`}>{f}</span>
+              <ul className="space-y-3 mb-8 text-sm">
+                {p.features.map((feature, i) => (
+                  <li key={i} className="flex items-center gap-x-3">
+                    <Check className="text-emerald-500 w-5 h-5" />
+                    <span>{feature}</span>
                   </li>
                 ))}
               </ul>
@@ -394,67 +360,6 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
             </div>
           </div>
         ))}
-      </div>
-
-      <div className="text-left mb-6">
-        <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Feature Comparison</h3>
-      </div>
-      
-      <div className="rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
-        {/* Desktop Table */}
-        <div className="hidden lg:block">
-          <table className="min-w-full">
-            <thead className="bg-gray-100 dark:bg-gray-900/50">
-              <tr>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-800 dark:text-gray-200 w-64 rounded-tl-3xl">Feature</th>
-                {plans.map((p, index) => (
-                  <th key={p.id} className={cn("px-6 py-3 text-center text-sm font-semibold text-gray-800 dark:text-gray-200", index === plans.length -1 && "rounded-tr-3xl")}>{p.name}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-              {features.map((f) => (
-                <tr key={f} className="hover:bg-gray-50 dark:hover:bg-gray-900/30 transition">
-                  <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{f}</td>
-                  {plans.map((p) => (
-                    <td key={p.id} className="px-6 py-4 text-center">
-                      {p.included.has(f) ? (
-                        <span className="mx-auto inline-flex items-center justify-center w-8 h-8 rounded-full bg-emerald-50 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400"><CheckIcon className="w-4 h-4" /></span>
-                      ) : (
-                        <span className="mx-auto inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-50 dark:bg-gray-900/50 text-gray-300 dark:text-gray-600"><XMark className="w-4 h-4" /></span>
-                      )}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Mobile Accordion */}
-        <div className="lg:hidden p-4">
-          <Accordion type="single" collapsible className="w-full">
-            {features.map((feature) => (
-              <AccordionItem value={feature} key={feature}>
-                <AccordionTrigger>{feature}</AccordionTrigger>
-                <AccordionContent>
-                  <div className="grid grid-cols-4 gap-2 text-center">
-                    {plans.map(plan => (
-                      <div key={plan.id} className="space-y-1">
-                        <p className="text-xs font-semibold text-muted-foreground">{plan.name}</p>
-                        {plan.included.has(feature) ? (
-                          <span className="mx-auto inline-flex items-center justify-center w-7 h-7 rounded-full bg-emerald-50 dark:bg-emerald-900/ ৫০ text-emerald-600 dark:text-emerald-400"><CheckIcon className="w-4 h-4" /></span>
-                        ) : (
-                          <span className="mx-auto inline-flex items-center justify-center w-7 h-7 rounded-full bg-gray-50 dark:bg-gray-900/50 text-gray-300 dark:text-gray-600"><XMark className="w-4 h-4" /></span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-        </div>
       </div>
 
       <div className="mt-10 text-center text-sm text-gray-600 dark:text-gray-400">
@@ -654,13 +559,13 @@ function SettingsPageContent() {
   return (
     <div className="space-y-6">
         <Tabs defaultValue={defaultTab} className="w-full">
-            <div className="mb-6 lg:mb-8">
+            <div className="mb-6">
                 <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
                 <p className="text-muted-foreground">Manage your account and shop preferences.</p>
             </div>
             
             <div className="sticky top-14 md:top-0 z-30 bg-background/80 backdrop-blur-sm -mx-6 px-6 py-4 mb-6 border-b">
-                 <TabsList className="grid w-full grid-cols-5 lg:grid-cols-5 h-auto p-1 border-2 border-border bg-muted">
+                 <TabsList className="grid w-full grid-cols-5 h-auto p-1 border-2 border-border bg-muted">
                     <TabsTrigger value="profile" className="text-xs sm:text-sm py-2 data-[state=active]:bg-background data-[state=active]:text-foreground rounded-md transition-all duration-300">
                         <UserIcon className="h-5 w-5 lg:mr-2" /><span className="hidden lg:inline">Profile</span>
                     </TabsTrigger>
