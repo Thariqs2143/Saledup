@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Button } from "@/components/ui/button";
@@ -175,12 +176,12 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
     { name: 'Export Reports (PDF / Excel)', trial: true, starter: true, growth: true, pro: true },
     { name: 'Muster Roll Generation', trial: true, starter: true, growth: true, pro: true },
     { name: 'Automated Payroll Calculation', trial: true, starter: true, growth: true, pro: true },
-    { name: 'Points & Rewards System', trial: false, starter: true, growth: true, pro: true },
-    { name: 'Punctuality Leaderboard', trial: false, starter: true, growth: true, pro: true },
+    { name: 'Points & Rewards System', trial: true, starter: true, growth: true, pro: true },
+    { name: 'Punctuality Leaderboard', trial: true, starter: true, growth: true, pro: true },
     { name: 'Multi-Branch Support', trial: false, starter: false, growth: true, pro: true },
     { name: 'Staff Transfer Between Branches', trial: false, starter: false, growth: true, pro: true },
-    { name: 'AI-Powered Weekly Briefing', trial: false, starter: false, growth: false, pro: true },
-    { name: 'Smart Staffing Advisor (AI)', trial: false, starter: false, growth: false, pro: true },
+    { name: 'AI-Powered Weekly Briefing', trial: true, starter: false, growth: false, pro: true },
+    { name: 'Smart Staffing Advisor (AI)', trial: true, starter: false, growth: false, pro: true },
     { name: 'Customizable Alerts & Notifications', trial: false, starter: false, growth: false, pro: true },
   ];
 
@@ -328,7 +329,7 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
                               ) : (
                                   <span className="text-5xl font-extrabold">
                                       <span className="text-3xl align-top">{currencySymbol}</span>
-                                      <span className="break-all">{finalPrice.toFixed(2)}</span>
+                                      <span className="break-all">{currency === 'inr' ? Math.round(finalPrice) : finalPrice.toFixed(2)}</span>
                                   </span>
                               )}
                               <p className="text-sm text-slate-400">{cycleText}</p>
