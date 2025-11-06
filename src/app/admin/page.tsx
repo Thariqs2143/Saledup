@@ -274,7 +274,7 @@ export default function AdminDashboard() {
     const unsubscribeBranches = onSnapshot(q, (querySnapshot) => {
         const fetchedBranches = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Branch));
         
-        const allBranchesOption: Branch = { id: 'all', shopName: 'All Branches', ownerId: authUser.uid };
+        const allBranchesOption: Branch = { id: 'all', shopName: 'All Shop/Business Branches', ownerId: authUser.uid };
         const fullBranchList = [allBranchesOption, ...fetchedBranches];
         setBranches(fullBranchList);
         
@@ -613,7 +613,7 @@ export default function AdminDashboard() {
                                 className="w-full md:max-w-xs justify-between border-black dark:border-white"
                                 disabled={branches.length <= 1}
                             >
-                                {selectedBranch ? selectedBranch.shopName : "Select a branch..."}
+                                {selectedBranch ? <span className="truncate">{selectedBranch.shopName}</span> : "Select a branch..."}
                                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                             </Button>
                         </PopoverTrigger>

@@ -120,7 +120,7 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
   const router = useRouter();
   const [staffCount, setStaffCount] = useState(10);
 
-  const plans = [
+ const plans = [
     {
       id: 'trial',
       name: '14-Day Free Trial',
@@ -169,23 +169,22 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
   ];
 
   const featureComparison = [
-    { name: 'QR Code Check-in/out (permanent & dynamic)', trial: true, growth: true, pro: true },
-    { name: 'Manual Attendance Entry', trial: true, growth: true, pro: true },
-    { name: 'Live Attendance Dashboard', trial: true, growth: true, pro: true },
-    { name: 'Easy Employee Onboarding (phone number invite)', trial: true, growth: true, pro: true },
-    { name: 'Employee Profiles', trial: true, growth: true, pro: true },
-    { name: 'Detailed Attendance Reports (daily/weekly/monthly)', trial: true, growth: true, pro: true },
-    { name: 'Export Reports (PDF / Excel)', trial: false, growth: true, pro: true },
-    { name: 'Muster Roll Generation', trial: false, growth: true, pro: true },
-    { name: 'Automated Payroll Calculation', trial: false, growth: true, pro: true },
-    { name: 'Points & Rewards System', trial: true, growth: true, pro: true },
-    { name: 'Punctuality Leaderboard', trial: true, growth: true, pro: true },
-    { name: 'Achievement Badges', trial: true, growth: true, pro: true },
-    { name: 'Multi-Branch Support', trial: false, growth: true, pro: true },
-    { name: 'Staff Transfer Between Branches', trial: false, growth: true, pro: true },
-    { name: 'AI-Powered Weekly Briefing', trial: false, growth: false, pro: true },
-    { name: 'Smart Staffing Advisor (AI)', trial: false, growth: false, pro: true },
-    { name: 'Customizable Alerts & Notifications', trial: false, growth: false, pro: true },
+    { name: 'QR Code Check-in/out', trial: true, starter: true, growth: true, pro: true },
+    { name: 'Manual Attendance Entry', trial: true, starter: true, growth: true, pro: true },
+    { name: 'Live Attendance Dashboard', trial: true, starter: true, growth: true, pro: true },
+    { name: 'Easy Employee Onboarding', trial: true, starter: true, growth: true, pro: true },
+    { name: 'Employee Profiles', trial: true, starter: true, growth: true, pro: true },
+    { name: 'Detailed Attendance Reports', trial: true, starter: true, growth: true, pro: true },
+    { name: 'Export Reports (PDF / Excel)', trial: false, starter: false, growth: true, pro: true },
+    { name: 'Muster Roll Generation', trial: false, starter: false, growth: true, pro: true },
+    { name: 'Automated Payroll Calculation', trial: false, starter: false, growth: true, pro: true },
+    { name: 'Points & Rewards System', trial: true, starter: true, growth: true, pro: true },
+    { name: 'Punctuality Leaderboard', trial: true, starter: true, growth: true, pro: true },
+    { name: 'Multi-Branch Support', trial: false, starter: false, growth: 'Up to 5 Branches', pro: true },
+    { name: 'Staff Transfer Between Branches', trial: false, starter: false, growth: true, pro: true },
+    { name: 'AI-Powered Weekly Briefing', trial: false, starter: false, growth: false, pro: true },
+    { name: 'Smart Staffing Advisor (AI)', trial: false, starter: false, growth: false, pro: true },
+    { name: 'Customizable Alerts & Notifications', trial: false, starter: false, growth: false, pro: true },
   ];
 
   const handlePayment = async (plan: typeof plans[0]) => {
@@ -321,7 +320,7 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
                   <p className="text-sm text-slate-400 mt-2 mb-6 h-10">{p.highlight}</p>
                   
                   <div className="mb-6">
-                    <div>
+                    <div className="flex flex-col">
                         {p.id === 'trial' ? (
                             <span className="text-4xl font-extrabold text-white">{currencySymbol}0</span>
                         ): (
@@ -363,7 +362,7 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
                    <div className="space-y-4">
                     <p className="text-sm font-semibold text-slate-300 uppercase tracking-wider">Usage Limits</p>
                     <ul className="space-y-3 text-sm">
-                        <li className="flex items-start gap-x-3 text-slate-400"><Users className="w-5 h-5 text-slate-500 mt-0.5" /><span>{p.usageLimits.employees} employees</span></li>
+                        <li className="flex items-start gap-x-3 text-slate-400"><Users className="w-5 h-5 text-slate-500 mt-0.5" /><span>{p.usageLimits.employees}</span></li>
                         <li className="flex items-start gap-x-3 text-slate-400"><Building className="w-5 h-5 text-slate-500 mt-0.5" /><span>{p.usageLimits.branches}</span></li>
                     </ul>
                   </div>
@@ -382,6 +381,7 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
               <tr className="border-b border-slate-700">
                 <th className="py-4 px-4 font-semibold text-slate-300">Feature</th>
                 <th className="py-4 px-4 font-semibold text-center text-slate-300">14-Day Free Trial</th>
+                <th className="py-4 px-4 font-semibold text-center text-slate-300">Starter</th>
                 <th className="py-4 px-4 font-semibold text-center text-slate-300">Growth</th>
                 <th className="py-4 px-4 font-semibold text-center text-slate-300">Pro</th>
               </tr>
@@ -391,13 +391,16 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
                 <tr key={index} className="border-b border-slate-800">
                   <td className="py-4 px-4 text-sm text-slate-400">{feature.name}</td>
                   <td className="py-4 px-4 text-center">
-                    {feature.trial ? <CheckIcon /> : <XMark />}
+                    {feature.trial === true ? <CheckIcon /> : feature.trial === false ? <XMark /> : <span className="text-xs text-slate-400">{feature.trial}</span>}
                   </td>
                   <td className="py-4 px-4 text-center">
-                    {feature.growth ? <CheckIcon /> : <XMark />}
+                    {feature.starter === true ? <CheckIcon /> : feature.starter === false ? <XMark /> : <span className="text-xs text-slate-400">{feature.starter}</span>}
                   </td>
                   <td className="py-4 px-4 text-center">
-                    {feature.pro ? <CheckIcon /> : <XMark />}
+                    {feature.growth === true ? <CheckIcon /> : feature.growth === false ? <XMark /> : <span className="text-xs text-slate-400">{feature.growth}</span>}
+                  </td>
+                  <td className="py-4 px-4 text-center">
+                    {feature.pro === true ? <CheckIcon /> : feature.pro === false ? <XMark /> : <span className="text-xs text-slate-400">{feature.pro}</span>}
                   </td>
                 </tr>
               ))}

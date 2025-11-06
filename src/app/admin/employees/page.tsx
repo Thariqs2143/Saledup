@@ -527,7 +527,7 @@ export default function ManageEmployeesPage() {
             
             const unsubscribeBranches = onSnapshot(q, (querySnapshot) => {
                 const fetchedBranches = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Branch));
-                const allBranchesOption: Branch = { id: 'all', shopName: 'All Branches', ownerId: user.uid };
+                const allBranchesOption: Branch = { id: 'all', shopName: 'All Shop/Business Branches', ownerId: user.uid };
                 const fullBranchList = [allBranchesOption, ...fetchedBranches];
                 
                 setBranches(fullBranchList);
