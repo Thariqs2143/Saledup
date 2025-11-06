@@ -148,7 +148,6 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
         yearly: { inr: 'dodo_trial_inr_yearly', usd: 'dodo_trial_usd_yearly' },
         threeYearly: { inr: 'dodo_trial_inr_3y', usd: 'dodo_trial_usd_3y' },
       },
-      note: '',
       cta: 'Start Free Trial',
       employees: 'Up to 5 employees',
       branches: '1 Branch',
@@ -170,7 +169,6 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
         yearly: { inr: 'plan_starter_inr_yearly_v3', usd: 'plan_starter_usd_yearly_v3' },
         threeYearly: { inr: 'plan_starter_inr_3y_v3', usd: 'plan_starter_usd_3y_v3' },
       },
-      note: '/ staff',
       cta: 'Choose Starter',
       employees: 'Up to 20 employees',
       branches: '1 Branch',
@@ -192,7 +190,6 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
         yearly: { inr: 'plan_growth_inr_yearly_v3', usd: 'plan_growth_usd_yearly_v3' },
         threeYearly: { inr: 'plan_growth_inr_3y_v3', usd: 'plan_growth_usd_3y_v3' },
       },
-      note: '/ staff',
       cta: 'Upgrade to Growth',
       employees: 'Up to 50 employees',
       branches: 'Up to 5 branches',
@@ -215,7 +212,6 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
         yearly: { inr: 'plan_pro_inr_yearly_v3', usd: 'plan_pro_usd_yearly_v3' },
         threeYearly: { inr: 'plan_pro_inr_3y_v3', usd: 'plan_pro_usd_3y_v3' },
       },
-      note: '/ staff',
       cta: 'Upgrade to Pro',
       employees: 'Unlimited employees',
       branches: 'Unlimited branches',
@@ -361,15 +357,15 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
                   </div>
 
                   <div className="mb-6 h-24">
-                    <div className="flex items-baseline gap-x-2">
+                    <div>
                         {p.id === 'trial' ? (
                             <span className="text-4xl font-extrabold text-gray-900 dark:text-gray-100">{currencySymbol}0</span>
                         ): (
                             <>
                                <span className="text-4xl font-extrabold text-gray-900 dark:text-gray-100">{currencySymbol}{finalPrice.toFixed(2)}</span>
-                               <span className="text-sm text-gray-500 dark:text-gray-400">{cycleText}</span>
                             </>
                         )}
+                         <p className="text-sm text-gray-500 dark:text-gray-400">{cycleText}</p>
                     </div>
                      {p.id !== 'trial' && <p className="text-xs text-muted-foreground mt-1">(billed per employee)</p>}
 
