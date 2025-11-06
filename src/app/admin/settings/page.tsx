@@ -120,6 +120,20 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
   const router = useRouter();
   const [staffCount, setStaffCount] = useState(10);
 
+  const allFeatures = [
+    { name: 'QR Code Check-in/out', id: 'qr' },
+    { name: 'Manual Attendance Entry', id: 'manual' },
+    { name: 'Live Attendance Dashboard', id: 'dashboard' },
+    { name: 'Easy Employee Onboarding', id: 'onboarding' },
+    { name: 'Advanced Reports & Analytics', id: 'reports' },
+    { name: 'Leave Management', id: 'leave' },
+    { name: 'Priority Support', id: 'support' },
+    { name: 'Multi-branch Dashboard', id: 'multi_branch' },
+    { name: 'AI-powered Insights', id: 'ai' },
+    { name: 'Custom Branding & Reports', id: 'custom_branding' },
+    { name: 'API Access + Integrations', id: 'api' },
+  ];
+
   const plans = [
     {
       id: 'trial',
@@ -130,22 +144,17 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
         threeYearly: { inr: 0, usd: 0 },
       },
       plan_id: {
-        monthly: { inr: '', usd: '' },
-        yearly: { inr: '', usd: '' },
-        threeYearly: { inr: '', usd: '' },
+        monthly: { inr: 'dodo_trial_inr_monthly', usd: 'dodo_trial_usd_monthly' },
+        yearly: { inr: 'dodo_trial_inr_yearly', usd: 'dodo_trial_usd_yearly' },
+        threeYearly: { inr: 'dodo_trial_inr_3y', usd: 'dodo_trial_usd_3y' },
       },
-      note: 'Try our core features',
+      note: '',
       cta: 'Start Free Trial',
       employees: 'Up to 5 employees',
       branches: '1 Branch',
       maxEmployees: 5,
-      features: [
-        'QR Code Check-in/out',
-        'Manual Attendance Entry',
-        'Live Attendance Dashboard',
-        'Easy Employee Onboarding',
-      ],
-      highlight: 'Absolutely free for 14 days.',
+      features: new Set(['qr', 'manual', 'dashboard', 'onboarding']),
+      highlight: 'Try our core features — absolutely free for 14 days.',
       accent: 'from-gray-500 to-gray-600 dark:from-gray-700 dark:to-gray-800'
     },
     {
@@ -157,21 +166,16 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
         threeYearly: { inr: 1199, usd: 24.9 },
       },
       plan_id: {
-        monthly: { inr: 'plan_starter_inr_monthly_v2', usd: 'plan_starter_usd_monthly_v2' },
-        yearly: { inr: 'plan_starter_inr_yearly_v2', usd: 'plan_starter_usd_yearly_v2' },
-        threeYearly: { inr: 'plan_starter_inr_3y_v2', usd: 'plan_starter_usd_3y_v2' },
+        monthly: { inr: 'plan_starter_inr_monthly_v3', usd: 'plan_starter_usd_monthly_v3' },
+        yearly: { inr: 'plan_starter_inr_yearly_v3', usd: 'plan_starter_usd_yearly_v3' },
+        threeYearly: { inr: 'plan_starter_inr_3y_v3', usd: 'plan_starter_usd_3y_v3' },
       },
       note: '/ staff',
       cta: 'Choose Starter',
       employees: 'Up to 20 employees',
       branches: '1 Branch',
       maxEmployees: 20,
-      features: [
-        'QR Code Check-in/out',
-        'Manual Attendance Entry',
-        'Live Attendance Dashboard',
-        'Easy Employee Onboarding',
-      ],
+      features: new Set(['qr', 'manual', 'dashboard', 'onboarding']),
       highlight: 'For new & small businesses just getting started.',
       accent: 'from-blue-500 to-sky-500'
     },
@@ -184,24 +188,18 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
         threeYearly: { inr: 1899, usd: 35.9 },
       },
       plan_id: {
-        monthly: { inr: 'plan_growth_inr_monthly_v2', usd: 'plan_growth_usd_monthly_v2' },
-        yearly: { inr: 'plan_growth_inr_yearly_v2', usd: 'plan_growth_usd_yearly_v2' },
-        threeYearly: { inr: 'plan_growth_inr_3y_v2', usd: 'plan_growth_usd_3y_v2' },
+        monthly: { inr: 'plan_growth_inr_monthly_v3', usd: 'plan_growth_usd_monthly_v3' },
+        yearly: { inr: 'plan_growth_inr_yearly_v3', usd: 'plan_growth_usd_yearly_v3' },
+        threeYearly: { inr: 'plan_growth_inr_3y_v3', usd: 'plan_growth_usd_3y_v3' },
       },
       note: '/ staff',
       cta: 'Upgrade to Growth',
       employees: 'Up to 50 employees',
       branches: 'Up to 5 branches',
       maxEmployees: 50,
-      features: [
-        'All Starter features',
-        'Advanced Reports & Analytics',
-        'Leave Management',
-        'Priority Support',
-        'Multi-branch Dashboard',
-      ],
+      features: new Set(['qr', 'manual', 'dashboard', 'onboarding', 'reports', 'leave', 'support', 'multi_branch']),
       isPopular: true,
-      highlight: 'For growing businesses that need more control.',
+      highlight: 'For growing businesses that need more control and scalability.',
       accent: 'from-primary to-blue-500'
     },
     {
@@ -212,23 +210,17 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
         yearly: { inr: 1290, usd: 24.9 },
         threeYearly: { inr: 2999, usd: 59.9 },
       },
-      plan_id: {
-        monthly: { inr: 'plan_pro_inr_monthly_v2', usd: 'plan_pro_usd_monthly_v2' },
-        yearly: { inr: 'plan_pro_inr_yearly_v2', usd: 'plan_pro_usd_yearly_v2' },
-        threeYearly: { inr: 'plan_pro_inr_3y_v2', usd: 'plan_pro_usd_3y_v2' },
+       plan_id: {
+        monthly: { inr: 'plan_pro_inr_monthly_v3', usd: 'plan_pro_usd_monthly_v3' },
+        yearly: { inr: 'plan_pro_inr_yearly_v3', usd: 'plan_pro_usd_yearly_v3' },
+        threeYearly: { inr: 'plan_pro_inr_3y_v3', usd: 'plan_pro_usd_3y_v3' },
       },
       note: '/ staff',
       cta: 'Upgrade to Pro',
       employees: 'Unlimited employees',
       branches: 'Unlimited branches',
       maxEmployees: Infinity,
-      features: [
-        'All Growth features',
-        'AI-powered Insights',
-        'Payroll Export',
-        'API Access + Integrations',
-        'Dedicated Account Manager',
-      ],
+      features: new Set(['qr', 'manual', 'dashboard', 'onboarding', 'reports', 'leave', 'support', 'multi_branch', 'ai', 'custom_branding', 'api']),
       highlight: 'For large organizations needing enterprise-grade power.',
       accent: 'from-emerald-500 to-teal-500'
     }
@@ -249,7 +241,7 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
     setLoadingPlan(plan.id);
     
     const options = {
-      key: process.env.NEXT_PUBLIC_DODO_KEY_ID, // Placeholder for Dodo Key
+      key: process.env.NEXT_PUBLIC_DODO_KEY_ID,
       subscription_id: planId,
       quantity: staffCount,
       name: "Attendry Subscription",
@@ -257,11 +249,11 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
       image: "https://res.cloudinary.com/dnkghymx5/image/upload/v1721992194/logo-sm_scak0f.png",
       handler: async (response: any) => {
           try {
-              const verifySubscription = httpsCallable(functions, 'verifySubscriptionPayment'); // Generic name
+              const verifySubscription = httpsCallable(functions, 'verifySubscriptionPayment');
               await verifySubscription({
-                  paymentId: response.dodo_payment_id, // Placeholder
-                  subscriptionId: response.dodo_subscription_id, // Placeholder
-                  signature: response.dodo_signature, // Placeholder
+                  paymentId: response.dodo_payment_id,
+                  subscriptionId: response.dodo_subscription_id,
+                  signature: response.dodo_signature,
                   shopId: profile.id,
                   planName: plan.name,
               });
@@ -270,7 +262,7 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
                   title: "Subscription Activated!",
                   description: `You are now on the ${plan.name} plan.`,
               });
-               router.refresh(); // Refresh page to update context
+               router.refresh();
           } catch (error: any) {
               console.error("Verification failed:", error);
               toast({ title: "Verification Failed", description: error.message || "Could not verify your payment. Please contact support.", variant: "destructive" });
@@ -288,6 +280,7 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
       }
     };
     
+    // This is a placeholder for the actual DodoPay call
     console.log("Initiating DodoPay with options:", options);
     setTimeout(() => {
         toast({ title: "Demo Flow", description: "Payment gateway would open here."});
@@ -297,6 +290,9 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
 
   const currencySymbol = currency === 'inr' ? '₹' : '$';
   const cycleText = billingCycle === 'monthly' ? '/month' : billingCycle === 'yearly' ? '/year' : '/3-years';
+  const CheckIcon = ({ className = 'w-5 h-5' }) => <Check className={cn("text-emerald-500", className)} />;
+  const XMark = ({ className = 'w-5 h-5' }) => <X className={cn("text-gray-400 dark:text-gray-600", className)} />;
+
 
   return (
     <div className="max-w-7xl mx-auto py-16 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900/50 dark:to-background">
@@ -313,8 +309,8 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
              <Tabs value={billingCycle} onValueChange={(value) => setBillingCycle(value as any)} className="w-full sm:w-auto">
                 <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="monthly">Monthly</TabsTrigger>
-                    <TabsTrigger value="yearly">Yearly <span className="hidden sm:inline ml-1 text-green-600">(Save 20%)</span></TabsTrigger>
-                    <TabsTrigger value="threeYearly">3-Year <span className="hidden sm:inline ml-1 text-green-600">(Save 40%)</span></TabsTrigger>
+                    <TabsTrigger value="yearly">Yearly <Badge variant="secondary" className="ml-2 bg-green-100 text-green-700">Save 20%</Badge></TabsTrigger>
+                    <TabsTrigger value="threeYearly">3-Year <Badge variant="secondary" className="ml-2 bg-green-100 text-green-700">Save 40%</Badge></TabsTrigger>
                 </TabsList>
             </Tabs>
         </div>
@@ -364,7 +360,7 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
                     </div>
                   </div>
 
-                  <div className="mb-6 h-20">
+                  <div className="mb-6 h-24">
                     <div className="flex items-baseline gap-x-2">
                         {p.id === 'trial' ? (
                             <span className="text-4xl font-extrabold text-gray-900 dark:text-gray-100">{currencySymbol}0</span>
@@ -381,11 +377,11 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
                   </div>
 
                   <ul className="space-y-3 mb-8 text-sm flex-1">
-                    {p.features.map((feature, i) => (
-                      <li key={i} className="flex items-center gap-x-3">
-                        <Check className="text-emerald-500 w-5 h-5" />
-                        <span>{feature}</span>
-                      </li>
+                    {p.features.size > 0 && allFeatures.filter(f => p.features.has(f.id)).slice(0, 4).map((feature) => (
+                        <li key={feature.id} className="flex items-center gap-x-3">
+                            <CheckIcon className="w-5 h-5" />
+                            <span>{feature.name}</span>
+                        </li>
                     ))}
                   </ul>
 
@@ -401,6 +397,35 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
               </div>
             )
         })}
+      </div>
+      
+       <div className="bg-white dark:bg-gray-800/50 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-x-auto shadow-sm">
+        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          <thead className="bg-gray-100 dark:bg-gray-900/50">
+            <tr>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-800 dark:text-gray-200">Feature</th>
+              {plans.map((p) => (
+                <th key={p.id} className="px-6 py-4 text-center text-sm font-semibold text-gray-800 dark:text-gray-200">{p.name}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+            {allFeatures.map((f) => (
+              <tr key={f.id} className="hover:bg-gray-50 dark:hover:bg-gray-900/30 transition">
+                <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 w-64">{f.name}</td>
+                {plans.map((p) => (
+                  <td key={p.id} className="px-6 py-4 text-center">
+                    {p.features.has(f.id) ? (
+                      <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-emerald-50 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400"><CheckIcon className="w-5 h-5" /></span>
+                    ) : (
+                      <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-50 dark:bg-gray-900/50 text-gray-400 dark:text-gray-600"><XMark className="w-5 h-5" /></span>
+                    )}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
