@@ -37,6 +37,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { Separator } from "@/components/ui/separator";
 
 // Types
 export type Shift = {
@@ -111,7 +112,7 @@ const defaultSettings: Settings = {
 };
 
 const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
-  const [isYearly, setIsYearly] = useState(false);
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly' | 'threeYearly'>('monthly');
   const [currency, setCurrency] = useState<'inr' | 'usd'>('inr');
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const { toast } = useToast();
@@ -144,10 +145,12 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
       price: {
         monthly: { inr: 0, usd: 0 },
         yearly: { inr: 0, usd: 0 },
+        threeYearly: { inr: 0, usd: 0 },
       },
       plan_id: {
         monthly: { inr: '', usd: '' },
         yearly: { inr: '', usd: '' },
+        threeYearly: { inr: '', usd: '' },
       },
       note: 'for 14 days',
       cta: 'Start Free Trial',
@@ -174,19 +177,21 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
     {
       id: 'starter',
       name: 'Starter',
-       price: {
-        monthly: { inr: 299, usd: 4 },
-        yearly: { inr: 2990, usd: 40 },
+       price: { // This is now PER STAFF
+        monthly: { inr: 49, usd: 0.99 },
+        yearly: { inr: 490, usd: 9.9 },
+        threeYearly: { inr: 1199, usd: 24 },
       },
       plan_id: {
         monthly: { inr: 'plan_starter_inr_monthly', usd: 'plan_starter_usd_monthly' },
         yearly: { inr: 'plan_starter_inr_yearly', usd: 'plan_starter_usd_yearly' },
+        threeYearly: { inr: 'plan_starter_inr_3y', usd: 'plan_starter_usd_3y' },
       },
-      note: '',
+      note: ' / staff',
       cta: 'Choose Starter',
-      employees: 'Up to 5 employees',
+      employees: 'Min. 5 employees',
       branches: '1 Branch',
-      perStaffCharge: { inr: 49, usd: 1 },
+      baseFee: { inr: 99, usd: 1.5 },
       included: new Set(features.filter(f => ![
         'Muster Roll Generation',
         'Automated Payroll Calculation',
@@ -202,15 +207,17 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
     {
       id: 'growth',
       name: 'Growth',
-      price: {
-        monthly: { inr: 499, usd: 7 },
-        yearly: { inr: 4990, usd: 70 },
+      price: { // PER STAFF
+        monthly: { inr: 39, usd: 0.79 },
+        yearly: { inr: 390, usd: 7.9 },
+        threeYearly: { inr: 999, usd: 19 },
       },
       plan_id: {
         monthly: { inr: 'plan_growth_inr_monthly', usd: 'plan_growth_usd_monthly' },
         yearly: { inr: 'plan_growth_inr_yearly', usd: 'plan_growth_usd_yearly' },
+        threeYearly: { inr: 'plan_growth_inr_3y', usd: 'plan_growth_usd_3y' },
       },
-      note: '',
+      note: ' / staff',
       cta: 'Upgrade to Growth',
       employees: 'Up to 50 employees',
       branches: 'Up to 5 branches',
@@ -223,15 +230,17 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
     {
       id: 'pro',
       name: 'Pro',
-      price: {
-        monthly: { inr: 999, usd: 12 },
-        yearly: { inr: 9999, usd: 120 },
+      price: { // PER STAFF
+        monthly: { inr: 29, usd: 0.59 },
+        yearly: { inr: 290, usd: 5.9 },
+        threeYearly: { inr: 799, usd: 15 },
       },
       plan_id: {
         monthly: { inr: 'plan_pro_inr_monthly', usd: 'plan_pro_usd_monthly' },
         yearly: { inr: 'plan_pro_inr_yearly', usd: 'plan_pro_usd_yearly' },
+        threeYearly: { inr: 'plan_pro_inr_3y', usd: 'plan_pro_usd_3y' },
       },
-      note: '',
+      note: ' / staff',
       cta: 'Upgrade to Pro',
       employees: 'Unlimited employees',
       branches: 'Unlimited branches',
@@ -248,20 +257,19 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
         return;
     }
     
-    const planId = isYearly ? plan.plan_id.yearly[currency] : plan.plan_id.monthly[currency];
+    const planId = plan.plan_id[billingCycle][currency];
     if (!planId) {
         toast({ title: "Error", description: "This plan is not available for purchase yet.", variant: "destructive" });
         return;
     }
 
     setLoadingPlan(plan.id);
-
-    // This is now a placeholder for "Dodo Payments"
+    
     const options = {
       key: process.env.NEXT_PUBLIC_DODO_KEY_ID, // Placeholder for Dodo Key
       subscription_id: planId,
       name: "Attendry Subscription",
-      description: `Billing for ${plan.name} - ${isYearly ? 'Yearly' : 'Monthly'} (${currency.toUpperCase()})`,
+      description: `Billing for ${plan.name} - ${billingCycle} (${currency.toUpperCase()})`,
       image: "https://res.cloudinary.com/dnkghymx5/image/upload/v1721992194/logo-sm_scak0f.png",
       handler: async (response: any) => {
           try {
@@ -296,11 +304,6 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
       }
     };
     
-    // Placeholder for Dodo's payment modal opening
-    // const dodoPay = new window.DodoPay(options);
-    // dodoPay.open();
-    
-    // Since we don't have DodoPay, we'll just log and stop loading
     console.log("Initiating DodoPay with options:", options);
     setTimeout(() => {
         toast({ title: "Demo Flow", description: "Payment gateway would open here."});
@@ -321,24 +324,27 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
   );
 
   const currencySymbol = currency === 'inr' ? '₹' : '$';
+  const cycleText = billingCycle === 'monthly' ? '/month' : billingCycle === 'yearly' ? '/year' : '/3-years';
 
   return (
     <div className="max-w-7xl mx-auto py-16 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900/50 dark:to-background">
       <div className="text-center mb-12">
         <h2 className="text-4xl font-extrabold text-gray-900 dark:text-gray-100 tracking-tight">Simple, Powerful Pricing</h2>
         <p className="mt-3 text-lg text-gray-600 dark:text-gray-400">Choose the perfect plan for your business. Start free.</p>
-        <div className="mt-6 flex justify-center items-center gap-4">
+        <div className="mt-6 flex flex-col sm:flex-row justify-center items-center gap-4">
             <div className="flex items-center gap-2 text-sm font-medium">
                 <span className={cn(currency === 'inr' ? 'text-primary' : 'text-gray-500 dark:text-gray-400')}>INR (₹)</span>
                  <Switch checked={currency === 'usd'} onCheckedChange={(checked) => setCurrency(checked ? 'usd' : 'inr')} />
                 <span className={cn(currency === 'usd' ? 'text-primary' : 'text-gray-500 dark:text-gray-400')}>USD ($)</span>
             </div>
-            <Separator orientation="vertical" className="h-6" />
-            <div className="flex items-center gap-2 text-sm font-medium">
-                <span className={cn(!isYearly ? 'text-primary' : 'text-gray-500 dark:text-gray-400')}>Monthly</span>
-                <Switch checked={isYearly} onCheckedChange={setIsYearly} />
-                <span className={cn(isYearly ? 'text-primary' : 'text-gray-500 dark:text-gray-400')}>Yearly <span className="text-green-600 dark:text-green-400 font-semibold">(Save 2 Months)</span></span>
-            </div>
+            <Separator orientation="vertical" className="h-6 hidden sm:block" />
+             <Tabs value={billingCycle} onValueChange={(value) => setBillingCycle(value as any)} className="w-full sm:w-auto">
+                <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="monthly">Monthly</TabsTrigger>
+                    <TabsTrigger value="yearly">Yearly</TabsTrigger>
+                    <TabsTrigger value="threeYearly">3 Years</TabsTrigger>
+                </TabsList>
+            </Tabs>
         </div>
       </div>
 
@@ -360,18 +366,19 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
                     {p.id === 'trial' ? (
                         <span className="text-4xl font-extrabold text-gray-900 dark:text-gray-100">{currencySymbol}0</span>
                     ): (
-                        <span className="text-4xl font-extrabold text-gray-900 dark:text-gray-100">{currencySymbol}{isYearly ? p.price.yearly[currency] : p.price.monthly[currency]}</span>
+                        <span className="text-4xl font-extrabold text-gray-900 dark:text-gray-100">{currencySymbol}{p.price[billingCycle][currency]}</span>
                     )}
-                    <span className="text-sm text-gray-500 dark:text-gray-400">{isYearly && p.id !== 'trial' ? '/year' : p.id === 'trial' ? p.note : '/month'}</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">{p.id === 'trial' ? p.note : `${p.note}${cycleText}`}</span>
                 </div>
-                {p.perStaffCharge && (
-                  <p className="text-xs text-amber-600 dark:text-amber-400 font-medium mt-1">+ {currencySymbol}{p.perStaffCharge[currency]} per additional staff/month</p>
+                 {p.id === 'starter' && p.baseFee && (
+                  <p className="text-xs text-amber-600 dark:text-amber-400 font-medium mt-1">+ {currencySymbol}{p.baseFee[currency]} base fee/month</p>
                 )}
-                {p.id === 'pro' && isYearly ? (
-                  <p className="text-xs text-green-600 dark:text-green-400 font-medium mt-1">You save {currencySymbol}{(p.price.monthly[currency]*12 - p.price.yearly[currency])} per year!</p>
-                ) : p.id === 'growth' && isYearly ? (
-                  <p className="text-xs text-green-600 dark:text-green-400 font-medium mt-1">You save {currencySymbol}{(p.price.monthly[currency]*12 - p.price.yearly[currency])} per year!</p>
-                ): null }
+                 {billingCycle === 'yearly' && p.id !== 'trial' && (
+                    <p className="text-xs text-green-600 dark:text-green-400 font-medium mt-1">Save 2 months vs. monthly!</p>
+                )}
+                 {billingCycle === 'threeYearly' && p.id !== 'trial' && (
+                    <p className="text-xs text-green-600 dark:text-green-400 font-medium mt-1">Save over a year vs. monthly!</p>
+                )}
                 <div className="mt-2 text-sm text-gray-600 dark:text-gray-300">{p.employees} • {p.branches}</div>
               </div>
 
