@@ -116,7 +116,7 @@ const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
   const [currency, setCurrency] = useState<'inr' | 'usd'>('inr');
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const { toast } = useToast();
-  router = useRouter();
+  const router = useRouter();
 
   const plans = [
     {
