@@ -1,4 +1,5 @@
 
+
 'use strict';
 
 import * as functions from 'firebase-functions';
@@ -204,6 +205,7 @@ export const verifyRazorpaySubscription = functions.https.onCall(async (data, co
 
     } catch (error) {
         console.error("Error updating Firestore:", error);
-        throw new functions.https_HttpsError('internal', 'Failed to update subscription in the database.');
+        throw new functions.https.HttpsError('internal', 'Failed to update subscription in the database.');
     }
 });
+

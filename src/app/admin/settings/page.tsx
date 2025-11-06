@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Button } from "@/components/ui/button";
@@ -8,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Link from "next/link";
 import { Trophy, LogOut, Save, Loader2, Bell, Edit, Building, Mail, Check, Crown, ArrowRight, CalendarDays, ShieldCheck, Gift, Upload, Copy, Share2, CheckCircle, Users, Briefcase, MapPin, Percent, Phone, User as UserIcon, Settings as SettingsIcon } from "lucide-react";
-import { auth, db, requestForToken } from "@/lib/firebase";
+import { auth, db, requestForToken, functions } from "@/lib/firebase";
 import { signOut, onAuthStateChanged, type User as AuthUser } from "firebase/auth";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
@@ -25,6 +26,7 @@ import { cn } from "@/lib/utils";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useSubscription } from "@/context/SubscriptionContext";
 import { Progress } from "@/components/ui/progress";
+import { httpsCallable } from "firebase/functions";
 
 // Types
 type DayHours = {
@@ -59,10 +61,16 @@ type ShopProfile = {
     businessType?: string;
     address?: string;
     gstNumber?: string;
-    phone?: string
+    phone?: string;
 }
 
 type FullProfile = AppUser & ShopProfile;
+
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
 
 
 // Defaults
@@ -85,8 +93,11 @@ const defaultSettings: Settings = {
   qrCodeMode: 'permanent',
 };
 
-const PricingPlans = () => {
+const PricingPlans = ({ profile }: { profile: FullProfile | null }) => {
   const [isYearly, setIsYearly] = useState(false);
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const { toast } = useToast();
+  const router = useRouter();
 
   const features = [
     'QR Code Check-in/out (permanent & dynamic)',
@@ -114,6 +125,7 @@ const PricingPlans = () => {
       name: '14-Day Free Trial',
       monthly: 0,
       yearly: 0,
+      plan_id: { monthly: '', yearly: ''},
       note: 'for 14 days',
       cta: 'Start Free Trial',
       employees: 'Up to 5 employees',
@@ -140,6 +152,7 @@ const PricingPlans = () => {
       name: 'Growth',
       monthly: 499,
       yearly: 4990,
+      plan_id: { monthly: 'plan_RDqefndhTG7HFx', yearly: 'plan_RDqfTZ41RgBju4' },
       note: '',
       cta: 'Upgrade to Growth',
       employees: 'Up to 50 employees',
@@ -154,6 +167,7 @@ const PricingPlans = () => {
       name: 'Pro',
       monthly: 999,
       yearly: 9999,
+      plan_id: { monthly: 'plan_RDqf6nOgfKgrj4', yearly: 'plan_RDqfwlOZgKeEiQ' },
       note: '',
       cta: 'Upgrade to Pro',
       employees: 'Unlimited employees',
@@ -163,6 +177,67 @@ const PricingPlans = () => {
       accent: 'from-emerald-500 to-teal-500'
     }
   ];
+
+  const handlePayment = async (plan: typeof plans[0]) => {
+    if (!profile || !profile.id) {
+        toast({ title: "Error", description: "You must be logged in to subscribe.", variant: "destructive" });
+        return;
+    }
+    
+    const planId = isYearly ? plan.plan_id.yearly : plan.plan_id.monthly;
+    if (!planId) {
+        toast({ title: "Error", description: "This plan is not available for purchase yet.", variant: "destructive" });
+        return;
+    }
+
+    setLoadingPlan(plan.id);
+
+    const options = {
+      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+      subscription_id: planId,
+      name: "Attendry Subscription",
+      description: `Billing for ${plan.name} - ${isYearly ? 'Yearly' : 'Monthly'}`,
+      image: "https://res.cloudinary.com/dnkghymx5/image/upload/v1721992194/logo-sm_scak0f.png",
+      handler: async (response: any) => {
+          try {
+              const verifySubscription = httpsCallable(functions, 'verifyRazorpaySubscription');
+              await verifySubscription({
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_subscription_id: response.razorpay_subscription_id,
+                  razorpay_signature: response.razorpay_signature,
+                  shopId: profile.id,
+                  planName: plan.name,
+              });
+
+              toast({
+                  title: "Subscription Activated!",
+                  description: `You are now on the ${plan.name} plan.`,
+              });
+               router.refresh(); // Refresh page to update context
+          } catch (error: any) {
+              console.error("Verification failed:", error);
+              toast({ title: "Verification Failed", description: error.message || "Could not verify your payment. Please contact support.", variant: "destructive" });
+          } finally {
+              setLoadingPlan(null);
+          }
+      },
+      prefill: {
+          name: profile.name,
+          email: profile.email,
+          contact: profile.phone,
+      },
+      theme: {
+          color: "#0C2A6A"
+      }
+    };
+    
+    const rzp = new window.Razorpay(options);
+    rzp.on('payment.failed', function (response: any){
+        toast({ title: "Payment Failed", description: response.error.description, variant: "destructive"});
+        setLoadingPlan(null);
+    });
+    rzp.open();
+  }
 
   const CheckIcon = ({ className = 'w-5 h-5' }) => (
     <svg className={className} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
@@ -234,7 +309,14 @@ const PricingPlans = () => {
                 ))}
               </ul>
 
-              <button className={`w-full mt-auto py-3 rounded-xl font-semibold text-white bg-gradient-to-r ${p.accent} hover:opacity-90 transition-all shadow-md`}>{p.cta}</button>
+              <Button
+                onClick={() => handlePayment(p)}
+                disabled={loadingPlan === p.id || p.id === 'trial'}
+                className={`w-full mt-auto py-3 rounded-xl font-semibold text-white bg-gradient-to-r ${p.accent} hover:opacity-90 transition-all shadow-md`}
+              >
+                  {loadingPlan === p.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : null}
+                  {p.cta}
+              </Button>
             </div>
           </div>
         ))}
@@ -592,7 +674,7 @@ function SettingsPageContent() {
                 </TabsContent>
 
                 <TabsContent value="subscription">
-                    <PricingPlans />
+                    <PricingPlans profile={userProfile} />
                 </TabsContent>
 
                 {/* General Settings Tab */}
@@ -697,3 +779,4 @@ export default function AdminSettingsPage() {
     </Suspense>
   );
 }
+
