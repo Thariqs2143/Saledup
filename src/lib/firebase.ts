@@ -1,7 +1,7 @@
 
 
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { getAuth, initializeAuth, browserLocalPersistence } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { getMessaging, getToken } from "firebase/messaging";
@@ -19,7 +19,12 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const auth = getAuth(app);
+
+// Explicitly initialize Auth with local persistence
+const auth = initializeAuth(app, {
+  persistence: browserLocalPersistence
+});
+
 const db = getFirestore(app);
 const storage = getStorage(app);
 const functions = getFunctions(app);
@@ -62,4 +67,5 @@ const requestForToken = async () => {
 
 
 export { app, auth, db, storage, functions, messaging, requestForToken };
+
 
