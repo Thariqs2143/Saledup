@@ -1,10 +1,10 @@
 
 'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { User, LogOut, Loader2, Building, Mail, Phone, MapPin, FileText, Edit } from 'lucide-react';
+import { User, LogOut, Loader2, Building, Mail, Phone, MapPin, FileText, Edit, Percent, Briefcase, Settings as SettingsIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged, type User as AuthUser } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
@@ -12,29 +12,8 @@ import { auth, db } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-  SheetClose,
-} from "@/components/ui/sheet";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { cn } from '@/lib/utils';
-
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Progress } from "@/components/ui/progress"
 
 type ShopProfile = {
     ownerName?: string;
@@ -48,11 +27,11 @@ type ShopProfile = {
     email?: string;
 };
 
-const InfoRow = ({ icon: Icon, label, value }: { icon: React.ElementType, label: string, value?: string }) => (
-    <div className="flex items-start gap-4">
-        <Icon className="h-5 w-5 text-muted-foreground mt-1" />
+const InfoRow = ({ icon: Icon, label, value, iconClass }: { icon: React.ElementType, label: string, value?: string, iconClass?: string }) => (
+    <div className="flex items-start gap-4 p-4 rounded-lg bg-muted/50">
+        <Icon className={`h-5 w-5 text-muted-foreground mt-1 ${iconClass}`} />
         <div className="flex-1">
-            <p className="text-sm text-muted-foreground">{label}</p>
+            <p className="text-xs text-muted-foreground">{label}</p>
             <p className="font-medium">{value || 'Not set'}</p>
         </div>
     </div>
@@ -65,15 +44,6 @@ export default function AdminProfilePage() {
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [profile, setProfile] = useState<ShopProfile>({});
   const [loading, setLoading] = useState(true);
-  const [loggingOut, setLoggingOut] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const checkIsMobile = () => setIsMobile(window.innerWidth < 768);
-    checkIsMobile();
-    window.addEventListener('resize', checkIsMobile);
-    return () => window.removeEventListener('resize', checkIsMobile);
-  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -85,7 +55,6 @@ export default function AdminProfilePage() {
           const data = shopSnap.data() as ShopProfile;
           setProfile({
             ...data,
-            // Ensure email from auth is a fallback
             email: data.email || user.email || undefined,
             phone: user.phoneNumber || data.phone,
           });
@@ -97,66 +66,6 @@ export default function AdminProfilePage() {
     });
     return () => unsubscribe();
   }, [router]);
-  
-  const handleLogout = async () => {
-    setLoggingOut(true);
-    try {
-      await auth.signOut();
-      toast({
-        title: "Logged Out",
-        description: "You have been successfully logged out.",
-      });
-      router.push('/login');
-    } catch (error) {
-      console.error("Error signing out: ", error);
-      toast({
-        title: "Logout Failed",
-        description: "Could not log you out. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-        setLoggingOut(false);
-    }
-  };
-  
-  const LogoutConfirmation = () => (
-      <>
-        <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-                This action will log you out of your current session. You will need to log back in to access your dashboard.
-            </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleLogout} disabled={loggingOut} className="bg-destructive hover:bg-destructive/90">
-                {loggingOut ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                Yes, Logout
-            </AlertDialogAction>
-        </AlertDialogFooter>
-    </>
-  );
-
-  const LogoutSheetConfirmation = () => (
-    <>
-        <SheetHeader className="text-center">
-            <SheetTitle className="text-2xl">Log Out?</SheetTitle>
-            <SheetDescription>
-                Are you sure you want to log out from your account?
-            </SheetDescription>
-        </SheetHeader>
-        <SheetFooter className="mt-6 flex-row gap-2">
-             <SheetClose asChild>
-                <Button variant="outline" className="w-full">Cancel</Button>
-            </SheetClose>
-            <Button onClick={handleLogout} disabled={loggingOut} variant="destructive" className="w-full">
-                {loggingOut && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
-                Yes, Logout
-            </Button>
-        </SheetFooter>
-    </>
-  );
-
 
   if (loading) {
     return (
@@ -167,71 +76,88 @@ export default function AdminProfilePage() {
   }
 
   return (
-    <div className="space-y-8">
-       <div className="grid md:grid-cols-3 gap-8">
-          <div className="md:col-span-1">
-             <Card>
-                <CardContent className="pt-6 space-y-4">
-                    <div className="flex items-center gap-4">
-                        <Avatar className="h-20 w-20 border-2 border-primary">
-                            <AvatarImage src={profile.imageUrl ?? profile.ownerImageUrl} />
-                            <AvatarFallback>
-                                <Building className="h-8 w-8"/>
-                            </AvatarFallback>
-                        </Avatar>
-                        <div className="space-y-1">
-                            <h2 className="text-xl font-bold">{profile.shopName}</h2>
-                            <p className="text-muted-foreground text-sm">{profile.businessType}</p>
-                        </div>
-                    </div>
-                     <Link href="/admin/profile/edit" className="w-full">
-                        <Button variant="outline" className="w-full">
-                            <Edit className="mr-2 h-4 w-4"/>
-                            Edit Profile
-                        </Button>
-                    </Link>
-                </CardContent>
-             </Card>
-          </div>
-          <div className="md:col-span-2">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Business Details</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                    <InfoRow icon={User} label="Owner Name" value={profile.ownerName} />
-                    <InfoRow icon={MapPin} label="Shop Address" value={profile.address} />
-                    <InfoRow icon={Phone} label="Contact Phone" value={profile.phone} />
-                    <InfoRow icon={Mail} label="Contact Email" value={profile.email} />
-                    <InfoRow icon={FileText} label="GST Number" value={profile.gstNumber || 'Not provided'} />
-                </CardContent>
-            </Card>
-          </div>
-       </div>
-
-        {isMobile ? (
-            <Sheet>
-                <SheetTrigger asChild>
-                    <Button variant="destructive" className="w-full">
-                        <LogOut className="mr-2 h-4 w-4"/> Logout
-                    </Button>
-                </SheetTrigger>
-                <SheetContent side="bottom" className="rounded-t-lg">
-                    <LogoutSheetConfirmation />
-                </SheetContent>
-            </Sheet>
-        ) : (
-            <AlertDialog>
-                <AlertDialogTrigger asChild>
-                     <Button variant="destructive" className="w-full">
-                        <LogOut className="mr-2 h-4 w-4"/> Logout
-                    </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                   <LogoutConfirmation />
-                </AlertDialogContent>
-            </AlertDialog>
-        )}
+    <div className="space-y-6">
+        <div>
+            <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+            <p className="text-muted-foreground">Manage your account and shop preferences.</p>
+        </div>
+        
+        <Tabs defaultValue="profile" className="w-full">
+            <TabsList className="grid w-full grid-cols-5">
+                <TabsTrigger value="profile">Profile</TabsTrigger>
+                <TabsTrigger value="subscription" disabled>Subscription</TabsTrigger>
+                <TabsTrigger value="shifts" disabled>Shifts</TabsTrigger>
+                <TabsTrigger value="business" disabled>Business</TabsTrigger>
+                <TabsTrigger value="general" disabled>General</TabsTrigger>
+            </TabsList>
+            <TabsContent value="profile" className="mt-6">
+                <div className="space-y-8">
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between">
+                            <div>
+                                <CardTitle>Shop Profile</CardTitle>
+                                <CardDescription>This is how your business appears across the app.</CardDescription>
+                            </div>
+                             <Link href="/admin/profile/edit">
+                                <Button variant="outline">
+                                    <Edit className="mr-2 h-4 w-4"/> Edit Profile
+                                </Button>
+                            </Link>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                             <div className="p-4 rounded-lg border bg-background">
+                                <div className="flex items-center gap-4">
+                                    <Avatar className="h-16 w-16 border-2 border-primary">
+                                        <AvatarImage src={profile.imageUrl ?? profile.ownerImageUrl} />
+                                        <AvatarFallback>
+                                            {profile.shopName?.charAt(0) || 'S'}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                        <h3 className="text-lg font-bold">{profile.ownerName}</h3>
+                                        <p className="text-sm text-muted-foreground">Business Owner</p>
+                                    </div>
+                                </div>
+                             </div>
+                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <InfoRow icon={Building} label="Company" value={profile.shopName} />
+                                <InfoRow icon={Briefcase} label="Category" value={profile.businessType} />
+                                <InfoRow icon={MapPin} label="Location" value={profile.address} />
+                                <InfoRow icon={Percent} label="GST Number" value={profile.gstNumber} iconClass="rotate-45" />
+                                <InfoRow icon={Phone} label="Phone Number" value={profile.phone} />
+                             </div>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Usage</CardTitle>
+                            <CardDescription>Your current plan usage. Upgrade to increase limits.</CardDescription>
+                        </CardHeader>
+                         <CardContent className="space-y-4">
+                             <div>
+                                 <div className="flex justify-between mb-1">
+                                    <h4 className="text-sm font-medium">Employees</h4>
+                                    <p className="text-sm text-muted-foreground">1 / 5</p>
+                                 </div>
+                                 <Progress value={20} />
+                             </div>
+                             <div>
+                                <div className="flex justify-between mb-1">
+                                    <h4 className="text-sm font-medium">Branches</h4>
+                                    <p className="text-sm text-muted-foreground">1 / 1</p>
+                                </div>
+                                <Progress value={100} />
+                             </div>
+                         </CardContent>
+                         <CardFooter className="flex flex-col sm:flex-row gap-2">
+                             <Button variant="outline" className="w-full">Manage Employees</Button>
+                             <Button variant="outline" className="w-full">Manage Branches</Button>
+                             <Button className="w-full">Upgrade Plan</Button>
+                         </CardFooter>
+                    </Card>
+                </div>
+            </TabsContent>
+        </Tabs>
     </div>
   );
 }
