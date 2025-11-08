@@ -84,14 +84,14 @@ const targetCustomers = [
                 <p className="mt-6 text-base md:text-lg text-muted-foreground">
                     Saledup is the ultimate tool for local businesses to thrive in the digital age. Connect with customers through a simple QR code, launch real-time offers, track engagement, and watch your business grow—no app downloads required.
                 </p>
-                <div className="mt-8 flex gap-4">
-                    <Link href="/login" passHref>
-                        <Button size="lg" className="h-12 px-8 text-base">
+                <div className="mt-8 flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                    <Link href="/login" passHref className="w-full sm:w-auto">
+                        <Button size="lg" className="h-12 px-8 text-base w-full">
                             Claim Your Free Account <ArrowRight className="ml-2 h-4 w-4" />
                         </Button>
                     </Link>
-                     <Link href="/contact" passHref>
-                        <Button size="lg" variant="outline" className="h-12 px-8 text-base">
+                     <Link href="/contact" passHref className="w-full sm:w-auto">
+                        <Button size="lg" variant="outline" className="h-12 px-8 text-base w-full">
                             Contact Sales
                         </Button>
                     </Link>
@@ -355,31 +355,33 @@ const targetCustomers = [
 
         {/* FAQ Section */}
         <section className="bg-background py-20 sm:py-24">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center max-w-3xl">
-                <div className="inline-block bg-primary/10 text-primary font-semibold py-1 px-4 rounded-full text-sm mb-4">
-                    Everything you need to know
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-3xl">
+                <div className="text-center">
+                    <div className="inline-block bg-primary/10 text-primary font-semibold py-1 px-4 rounded-full text-sm mb-4">
+                        Everything you need to know
+                    </div>
+                    <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight">
+                        Frequently Asked Questions
+                    </h2>
+                    <p className="mt-4 mx-auto text-muted-foreground text-lg">
+                        Got questions? We've got answers. If you can't find what you're looking for, feel free to contact us.
+                    </p>
                 </div>
-                <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight">
-                    Frequently Asked Questions
-                </h2>
-                <p className="mt-4 mx-auto text-muted-foreground text-lg">
-                    Got questions? We've got answers. If you can't find what you're looking for, feel free to contact us.
-                </p>
                 
                 <Accordion type="single" collapsible className="w-full mt-12 text-left">
                     {placeholderImages.faqs.map((faq, index) => (
                          <AccordionItem key={index} value={`item-${index}`}>
-                            <AccordionTrigger className="text-base font-semibold hover:no-underline">
+                            <AccordionTrigger className="text-base font-semibold text-left hover:no-underline">
                                 {faq.question}
                             </AccordionTrigger>
-                            <AccordionContent className="text-muted-foreground">
+                            <AccordionContent className="text-muted-foreground text-left">
                                 {faq.answer}
                             </AccordionContent>
                         </AccordionItem>
                     ))}
                 </Accordion>
 
-                <div className="mt-12">
+                <div className="mt-12 text-center">
                      <Link href="/faq" passHref>
                         <Button size="lg" variant="outline" className="h-12 px-8 text-base">
                             View All FAQs <ChevronRight className="ml-2 h-4 w-4" />
@@ -398,14 +400,14 @@ const targetCustomers = [
                 <p className="mt-4 max-w-2xl mx-auto text-muted-foreground text-lg">
                     Join hundreds of local shops that are already seeing growth with Saledup. Get started for free today and see the difference.
                 </p>
-                <div className="mt-8 flex justify-center gap-4">
-                    <Link href="/login" passHref>
-                        <Button size="lg" className="h-12 px-8 text-base">
+                <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
+                    <Link href="/login" passHref className="w-full sm:w-auto">
+                        <Button size="lg" className="h-12 px-8 text-base w-full">
                             Claim Your Free Account <ArrowRight className="ml-2 h-4 w-4" />
                         </Button>
                     </Link>
-                    <Link href="/contact" passHref>
-                        <Button size="lg" variant="outline" className="h-12 px-8 text-base">
+                    <Link href="/contact" passHref className="w-full sm:w-auto">
+                        <Button size="lg" variant="outline" className="h-12 px-8 text-base w-full">
                             Contact Sales
                         </Button>
                     </Link>
@@ -419,5 +421,7 @@ const targetCustomers = [
     </div>
   );
 }
+
+    
 
     
