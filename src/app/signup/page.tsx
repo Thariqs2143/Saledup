@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -24,6 +24,8 @@ export default function SignupPage() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showRepeatPassword, setShowRepeatPassword] = useState(false);
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
@@ -213,25 +215,61 @@ export default function SignupPage() {
                             className="mt-1"
                         />
                         </div>
-                        <div>
-                        <Label htmlFor="password">Password</Label>
-                        <Input
-                            id="password"
-                            name="password"
-                            type="password"
-                            required
-                            className="mt-1"
-                        />
+                        <div className="space-y-1">
+                            <Label htmlFor="password">Password</Label>
+                            <div className="relative">
+                                <Input
+                                id="password"
+                                name="password"
+                                type={showPassword ? 'text' : 'password'}
+                                required
+                                className="pr-10"
+                                />
+                                <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="absolute inset-y-0 right-0 h-full px-3"
+                                onClick={() => setShowPassword(!showPassword)}
+                                >
+                                {showPassword ? (
+                                    <EyeOff className="h-5 w-5 text-muted-foreground" />
+                                ) : (
+                                    <Eye className="h-5 w-5 text-muted-foreground" />
+                                )}
+                                <span className="sr-only">
+                                    {showPassword ? 'Hide password' : 'Show password'}
+                                </span>
+                                </Button>
+                            </div>
                         </div>
-                        <div>
-                        <Label htmlFor="repeat-password">Repeat Password</Label>
-                        <Input
-                            id="repeat-password"
-                            name="repeat-password"
-                            type="password"
-                            required
-                            className="mt-1"
-                        />
+                        <div className="space-y-1">
+                            <Label htmlFor="repeat-password">Repeat Password</Label>
+                            <div className="relative">
+                                <Input
+                                id="repeat-password"
+                                name="repeat-password"
+                                type={showRepeatPassword ? 'text' : 'password'}
+                                required
+                                className="pr-10"
+                                />
+                                <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="absolute inset-y-0 right-0 h-full px-3"
+                                onClick={() => setShowRepeatPassword(!showRepeatPassword)}
+                                >
+                                {showRepeatPassword ? (
+                                    <EyeOff className="h-5 w-5 text-muted-foreground" />
+                                ) : (
+                                    <Eye className="h-5 w-5 text-muted-foreground" />
+                                )}
+                                <span className="sr-only">
+                                    {showRepeatPassword ? 'Hide password' : 'Show password'}
+                                </span>
+                                </Button>
+                            </div>
                         </div>
                         <Button
                         type="submit"
