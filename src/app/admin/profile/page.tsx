@@ -104,8 +104,10 @@ export default function AdminProfilePage() {
                             <Building className="h-12 w-12"/>
                         </AvatarFallback>
                     </Avatar>
-                    <h2 className="text-2xl font-bold mt-4">{profile.shopName}</h2>
-                    <p className="text-muted-foreground">{profile.businessType}</p>
+                    <div className="flex items-center justify-center gap-3 mt-4">
+                        <h2 className="text-2xl font-bold">{profile.shopName}</h2>
+                        <p className="text-muted-foreground mt-1">{profile.businessType}</p>
+                    </div>
                 </CardContent>
              </Card>
           </div>
