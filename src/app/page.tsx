@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, Sparkles, X, Store, ShoppingBag, Users, QrCode, TrendingUp, BarChart3, Shield, HeartHandshake, Coffee, Utensils, Shirt, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { LandingFooter } from '@/components/landing-footer';
 import placeholderImages from '@/lib/placeholder-images.json';
@@ -14,6 +14,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Card, CardContent } from '@/components/ui/card';
 import { LandingHeader } from '@/components/landing-header';
+import Autoplay from "embla-carousel-autoplay";
 
 
 export default function LandingPage() {
@@ -175,6 +176,17 @@ const targetCustomers = [
                     <div className="border-2 border-primary/50 bg-primary/5 rounded-xl p-8 text-center shadow-lg shadow-primary/10 relative overflow-hidden">
                         <h3 className="text-xl font-bold text-primary">With Saledup</h3>
                          <div className="my-8 flex items-center justify-center h-32 relative">
+                            <style jsx>{`
+                                @keyframes attract {
+                                    0% { transform: translate(var(--start-x), var(--start-y)) scale(0.8); opacity: 0; }
+                                    50% { opacity: 1; }
+                                    100% { transform: translate(0, 0) scale(1); opacity: 0; }
+                                }
+                                .attractor {
+                                    position: absolute;
+                                    animation: attract 3s ease-out infinite;
+                                }
+                            `}</style>
                             <div className="absolute bg-primary/10 rounded-full h-40 w-40 animate-pulse"></div>
                             <div className="absolute bg-primary/20 rounded-full h-32 w-32"></div>
                             
@@ -182,15 +194,10 @@ const targetCustomers = [
                                 <ShoppingBag className="h-16 w-16" />
                             </div>
 
-                            <div className="absolute top-0 left-10 p-2 bg-background rounded-full shadow-md animate-bounce">
-                                <QrCode className="h-5 w-5 text-primary" />
-                            </div>
-                             <div className="absolute top-4 right-8 p-2 bg-background rounded-full shadow-md animate-bounce" style={{ animationDelay: '0.2s' }}>
-                                <Users className="h-5 w-5 text-primary" />
-                            </div>
-                            <div className="absolute bottom-2 right-12 p-2 bg-background rounded-full shadow-md animate-bounce" style={{ animationDelay: '0.4s' }}>
-                                <TrendingUp className="h-5 w-5 text-primary" />
-                            </div>
+                            <div className="attractor" style={{ '--start-x': '-80px', '--start-y': '-60px', animationDelay: '0s' } as React.CSSProperties}><Users className="h-5 w-5 text-primary" /></div>
+                            <div className="attractor" style={{ '--start-x': '80px', '--start-y': '-50px', animationDelay: '0.5s' } as React.CSSProperties}><TrendingUp className="h-5 w-5 text-primary" /></div>
+                            <div className="attractor" style={{ '--start-x': '-70px', '--start-y': '60px', animationDelay: '1s' } as React.CSSProperties}><QrCode className="h-5 w-5 text-primary" /></div>
+                            <div className="attractor" style={{ '--start-x': '90px', '--start-y': '40px', animationDelay: '1.5s' } as React.CSSProperties}><Users className="h-5 w-5 text-primary" /></div>
                         </div>
                         <p className="text-foreground font-medium">
                             Attracting new customers, rewarding loyal ones, and boosting sales effortlessly.
@@ -309,6 +316,13 @@ const targetCustomers = [
                     Here's what people are saying about Saledup.
                 </p>
                 <Carousel
+                  plugins={[
+                    Autoplay({
+                      delay: 3000,
+                      stopOnInteraction: true,
+                      stopOnMouseEnter: true,
+                    }),
+                  ]}
                   opts={{
                     align: "start",
                     loop: true,
