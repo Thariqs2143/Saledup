@@ -28,20 +28,19 @@ service cloud.firestore {
       
       // Offers subcollection
       match /offers/{offerId} {
-        // Shop owner can read their offers (get + list) and write/delete them.
+        // Shop owner can manage their offers.
         allow read, write, delete: if isShopOwner(shopId);
         
-        // Any user (including unauthenticated) can list offers for a shop.
-        // This is for the public customer-facing page.
+        // Any user can list offers for a public shop page.
         allow list: if true;
       }
       
       // Claims subcollection
       match /claims/{claimId} {
-        // Shop owner can read/update individual claims and list all claims for their shop.
+        // Shop owner can read/update individual claims and list all of them.
         allow get, list, update: if isShopOwner(shopId);
         
-        // Anyone can create a claim (since it's an unauthenticated action)
+        // Anyone can create a claim (since it's an unauthenticated action).
         allow create;
       }
     }
