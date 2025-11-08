@@ -95,12 +95,12 @@ export default function LandingPage() {
 
       {/* Header */}
       <header className={cn(
-          "sticky top-0 z-50 transition-all duration-300 py-3",
-          isScrolled ? "bg-background/80 backdrop-blur-sm " : "bg-transparent"
+          "sticky top-0 z-50 transition-all duration-300",
+          isScrolled ? "py-2" : "py-4"
         )}>
         <div className={cn(
-            "container mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between transition-all duration-300",
-            isScrolled ? "h-16 bg-background rounded-full shadow-lg border" : "h-20"
+            "container mx-auto flex items-center justify-between transition-all duration-300",
+            isScrolled ? "h-16 bg-background/80 backdrop-blur-sm rounded-full shadow-lg border px-4 sm:px-6 lg:px-8" : "h-20 px-4 sm:px-6 lg:px-8"
             )}>
           <Link href="/" className="flex items-center gap-2.5 text-foreground">
               <SaledupLogo />
