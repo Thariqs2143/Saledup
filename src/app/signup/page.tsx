@@ -138,7 +138,7 @@ export default function SignupPage() {
   return (
     <div className="min-h-screen bg-background text-foreground md:grid md:grid-cols-2">
       {/* LEFT SIDE - Image */}
-      <div className="relative h-64 md:h-screen">
+      <div className="relative hidden h-screen md:block">
         <Image
           src="https://res.cloudinary.com/dyov4r11v/image/upload/v1762585915/business-woman-working-on-tablet_23-2148405822_yud2y9.jpg"
           alt="A vibrant storefront illustration for Saledup"
