@@ -145,7 +145,7 @@ export default function AdminDashboard() {
     const filteredClaims = claims.filter(c => {
         if (!c.claimedAt) return false;
         const claimedAtDate = c.claimedAt.toDate();
-        return claimedAtDate >= startDate && claimedAtDate <= endDate;
+        return claimedAtDate >= startDate && createdAtDate <= endDate;
     });
 
     return {
@@ -240,14 +240,14 @@ export default function AdminDashboard() {
 
 
         <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
-            <CardHeader>
-                <CardTitle className="font-bold">Your Live Offers Page</CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 p-6 pt-0">
-                <CardDescription className="font-bold flex-1">
-                    This is the public page your customers see when they scan your QR code.
-                </CardDescription>
-                <Button asChild className="w-full md:w-auto">
+            <CardContent className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 p-6">
+                <div className="flex-1">
+                    <CardTitle className="font-bold">Your Live Offers Page</CardTitle>
+                    <CardDescription className="font-bold">
+                        This is the public page your customers see when they scan your QR code.
+                    </CardDescription>
+                </div>
+                <Button asChild className="w-full md:w-auto font-bold">
                     <Link href={`/shops/${authUser?.uid}`} target="_blank">
                         Live View <Eye className="ml-2 h-4 w-4"/>
                     </Link>
@@ -305,7 +305,7 @@ export default function AdminDashboard() {
                 </div>
                 {recentClaims.length > 0 && (
                     <Link href="/admin/customers" className="hidden sm:block">
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" className="font-bold">
                             <Eye className="mr-2 h-4 w-4"/> View All
                         </Button>
                     </Link>
@@ -340,9 +340,9 @@ export default function AdminDashboard() {
                 </div>
             ) : (
                  <div className="text-center py-12 text-muted-foreground space-y-4">
-                    <p>No customers have claimed offers yet.</p>
+                    <p className="font-bold">No customers have claimed offers yet.</p>
                     <Link href="/admin/customers" className="mt-4 inline-block">
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" className="font-bold">
                             <Eye className="mr-2 h-4 w-4"/> View Customers Page
                         </Button>
                     </Link>
@@ -410,6 +410,8 @@ export default function AdminDashboard() {
 
 
 
+
+    
 
     
 
