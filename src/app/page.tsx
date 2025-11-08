@@ -184,12 +184,49 @@ export default function LandingPage() {
 
                 <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
                     {/* Without Saledup Card */}
-                    <div className="bg-background/50 rounded-xl p-8 text-center border transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-1">
+                     <div className="bg-background/50 rounded-xl p-8 text-center border-2 border-slate-600 transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-1">
+                        <style jsx>{`
+                            @keyframes fly-around-1 {
+                                0% { transform: translate(0, 0) rotate(0deg); opacity: 0.8; }
+                                25% { transform: translate(20px, -30px) rotate(90deg); opacity: 1; }
+                                50% { transform: translate(-20px, 20px) rotate(-180deg); opacity: 0.7; }
+                                75% { transform: translate(10px, 10px) rotate(45deg); opacity: 0.9; }
+                                100% { transform: translate(0, 0) rotate(0deg); opacity: 0.8; }
+                            }
+                            @keyframes fly-around-2 {
+                                0% { transform: translate(0, 0) rotate(0deg); opacity: 0.7; }
+                                25% { transform: translate(-25px, 25px) rotate(-45deg); opacity: 0.9; }
+                                50% { transform: translate(15px, -15px) rotate(120deg); opacity: 1; }
+                                75% { transform: translate(-10px, -20px) rotate(270deg); opacity: 0.8; }
+                                100% { transform: translate(0, 0) rotate(0deg); opacity: 0.7; }
+                            }
+                             @keyframes fly-around-3 {
+                                0% { transform: translate(0, 0) rotate(0deg); opacity: 0.9; }
+                                25% { transform: translate(10px, 30px) rotate(180deg); opacity: 0.8; }
+                                50% { transform: translate(-30px, -10px) rotate(0deg); opacity: 1; }
+                                75% { transform: translate(20px, -20px) rotate(-90deg); opacity: 0.7; }
+                                100% { transform: translate(0, 0) rotate(0deg); opacity: 0.9; }
+                            }
+                            .fly {
+                                position: absolute;
+                                width: 4px;
+                                height: 4px;
+                                background-color: #333;
+                                border-radius: 50%;
+                                will-change: transform;
+                            }
+                            .fly-1 { animation: fly-around-1 4s infinite ease-in-out; }
+                            .fly-2 { animation: fly-around-2 5s infinite ease-in-out; }
+                            .fly-3 { animation: fly-around-3 6s infinite ease-in-out; }
+                        `}</style>
                         <h3 className="text-xl font-bold text-muted-foreground">Without Saledup</h3>
-                        <div className="my-8 flex items-center justify-center h-32">
+                        <div className="my-8 flex items-center justify-center h-32 relative">
                            <div className="p-6 bg-muted rounded-full">
                                 <Store className="h-16 w-16 text-muted-foreground/60" />
                            </div>
+                           <div className="fly fly-1" style={{ top: '40%', left: '40%' }}></div>
+                           <div className="fly fly-2" style={{ top: '60%', left: '60%' }}></div>
+                           <div className="fly fly-3" style={{ top: '50%', left: '30%' }}></div>
                         </div>
                         <p className="text-muted-foreground">
                             Waiting for customers and relying on traditional marketing.
