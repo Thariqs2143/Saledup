@@ -10,7 +10,7 @@ import { AnimatedCounter } from "@/components/animated-counter";
 import { useEffect, useState, useMemo } from "react";
 import { collection, onSnapshot, query, where, Timestamp, orderBy, limit, doc, getDoc } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
-import { format, formatDistanceToNow } from 'date-fns';
+import { format, formatDistanceToNow, startOfToday, endOfToday, subDays, startOfDay, endOfDay, subMonths, startOfMonth, endOfMonth, subYears, startOfYear, endOfYear } from 'date-fns';
 import { onAuthStateChanged, type User as AuthUser } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from "next/navigation";
@@ -32,7 +32,7 @@ type Offer = {
 };
 
 type Claim = {
-    id: string;
+    id:string;
     customerName: string;
     customerEmail: string;
     offerId: string;
@@ -49,6 +49,8 @@ export default function AdminDashboard() {
   const [claims, setClaims] = useState<Claim[]>([]);
   const { toast } = useToast();
   const router = useRouter();
+  const [activeTab, setActiveTab] = useState('today');
+
 
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
@@ -91,8 +93,7 @@ export default function AdminDashboard() {
 
     const claimsQuery = query(
       collection(db, 'shops', authUser.uid, 'claims'),
-      orderBy('claimedAt', 'desc'),
-      limit(20) // Get the most recent 20 claims for the feed
+      orderBy('claimedAt', 'desc')
     );
     const unsubscribeClaims = onSnapshot(claimsQuery, (snapshot) => {
         const claimsList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Claim));
@@ -112,11 +113,52 @@ export default function AdminDashboard() {
     };
   }, [authUser, toast]); 
 
-  const totalClaims = useMemo(() => claims.length, [claims]);
-  const totalOffers = useMemo(() => offers.length, [offers]);
-  const activeOffers = useMemo(() => offers.filter(o => o.isActive).length, [offers]);
-  const expiredOffers = useMemo(() => offers.filter(o => !o.isActive).length, [offers]);
+  const filteredData = useMemo(() => {
+    let startDate: Date;
+    let endDate: Date = new Date();
+
+    switch (activeTab) {
+      case 'weekly':
+        startDate = startOfDay(subDays(new Date(), 6));
+        break;
+      case 'monthly':
+        startDate = startOfMonth(new Date());
+        endDate = endOfMonth(new Date());
+        break;
+      case 'yearly':
+        startDate = startOfYear(new Date());
+        endDate = endOfYear(new Date());
+        break;
+      case 'today':
+      default:
+        startDate = startOfToday();
+        endDate = endOfToday();
+        break;
+    }
+    
+    const filteredOffers = offers.filter(o => {
+        const createdAtDate = o.createdAt.toDate();
+        return createdAtDate >= startDate && createdAtDate <= endDate;
+    });
+
+    const filteredClaims = claims.filter(c => {
+        const claimedAtDate = c.claimedAt.toDate();
+        return claimedAtDate >= startDate && claimedAtDate <= endDate;
+    });
+
+    return {
+        offers: filteredOffers,
+        claims: filteredClaims,
+    };
+}, [activeTab, offers, claims]);
+
+
+  const totalClaims = useMemo(() => filteredData.claims.length, [filteredData.claims]);
+  const totalOffers = useMemo(() => filteredData.offers.length, [filteredData.offers]);
+  const activeOffers = useMemo(() => filteredData.offers.filter(o => o.isActive).length, [filteredData.offers]);
+  const expiredOffers = useMemo(() => filteredData.offers.filter(o => !o.isActive).length, [filteredData.offers]);
   const recentOffers = useMemo(() => offers.slice(0, 3), [offers]);
+  const recentClaims = useMemo(() => claims.slice(0, 20), [claims]);
 
 
   if (loading) {
@@ -138,14 +180,14 @@ export default function AdminDashboard() {
            </div>
        </div>
 
-      <Tabs defaultValue="today" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4 border dark:border-gray-700 hover:border-red-500">
+      <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="space-y-4">
+        <TabsList className="grid w-full grid-cols-4 border">
           <TabsTrigger value="today">Today</TabsTrigger>
           <TabsTrigger value="weekly">Weekly</TabsTrigger>
           <TabsTrigger value="monthly">Monthly</TabsTrigger>
           <TabsTrigger value="yearly">Yearly</TabsTrigger>
         </TabsList>
-        <TabsContent value="today" className="space-y-4">
+        <TabsContent value={activeTab} className="space-y-4">
             <div className="grid grid-cols-2 gap-4 lg:gap-6">
                 <Card className="relative overflow-hidden transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br from-blue-500 to-indigo-600 text-white border-none">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -271,9 +313,9 @@ export default function AdminDashboard() {
                  <div className="flex items-center justify-center h-48">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                  </div>
-            ) : claims.length > 0 ? (
+            ) : recentClaims.length > 0 ? (
                 <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
-                    {claims.map((claim) => (
+                    {recentClaims.map((claim) => (
                       <div key={claim.id} className="flex items-start gap-4">
                         <Avatar className="h-10 w-10 border">
                             <AvatarFallback>{claim.customerName.charAt(0)}</AvatarFallback>
@@ -349,4 +391,5 @@ export default function AdminDashboard() {
 
 
     
+
 
