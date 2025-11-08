@@ -157,9 +157,9 @@ export default function SignupPage() {
             <div className="w-full max-w-md bg-background/90 backdrop-blur-sm p-8 rounded-xl shadow-2xl lg:bg-background lg:backdrop-blur-none lg:shadow-none lg:p-6">
                 <div className="mx-auto grid gap-6">
                     <div className="grid gap-2 text-center">
-                        <h1 className="text-3xl font-bold">Start Creating 🔥</h1>
+                        <h1 className="text-3xl font-bold">Start Growing Today</h1>
                         <p className="text-balance text-muted-foreground">
-                        Sign up to generate, edit and bring your vision to life
+                        Create an account to launch instant offers and connect with customers.
                         </p>
                     </div>
                     <form onSubmit={handleEmailSignUp} className="grid gap-4">
