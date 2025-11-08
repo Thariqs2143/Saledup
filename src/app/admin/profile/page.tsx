@@ -111,19 +111,19 @@ export default function AdminProfilePage() {
                     </Avatar>
                     <h2 className="text-2xl font-bold mt-4">{profile.shopName}</h2>
                     <p className="text-muted-foreground">{profile.businessType}</p>
-                </CardContent>
-             </Card>
-          </div>
-          <div className="md:col-span-2">
-            <Card>
-                <CardHeader className="flex flex-row justify-between items-center">
-                    <CardTitle>Business Details</CardTitle>
-                    <Link href="/admin/profile/edit">
+                    <Link href="/admin/profile/edit" className="mt-4 inline-block">
                         <Button variant="outline" size="sm">
                             <Edit className="mr-2 h-4 w-4"/>
                             Edit Profile
                         </Button>
                     </Link>
+                </CardContent>
+             </Card>
+          </div>
+          <div className="md:col-span-2">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Business Details</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <InfoRow icon={User} label="Owner Name" value={profile.ownerName} />
