@@ -174,7 +174,7 @@ export default function AdminDashboard() {
         </Card>
       </div>
 
-       <Card>
+       <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
             <CardContent className="p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <div>
                     <h3 className="text-lg font-bold">View Your Live Offers Page</h3>
@@ -322,4 +322,5 @@ export default function AdminDashboard() {
       </div>
     </div>
   );
-}
+
+    
