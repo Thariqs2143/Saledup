@@ -2,7 +2,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Sparkles, X, Store, ShoppingBag, Users, QrCode, TrendingUp, BarChart3, Shield, HeartHandshake } from 'lucide-react';
+import { ArrowRight, Sparkles, X, Store, ShoppingBag, Users, QrCode, TrendingUp, BarChart3, Shield, HeartHandshake, Coffee, Utensils, Shirt } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
@@ -79,30 +79,53 @@ export default function LandingPage() {
     },
 ];
 
+const targetCustomers = [
+    {
+        icon: Coffee,
+        title: "Cafes & Bakeries",
+        description: "Promote your morning coffee deals or afternoon pastry specials."
+    },
+    {
+        icon: Utensils,
+        title: "Restaurants",
+        description: "Fill empty tables during off-peak hours with exclusive dining offers."
+    },
+    {
+        icon: Shirt,
+        title: "Retail & Boutiques",
+        description: "Announce flash sales or clear old inventory with instant discounts."
+    }
+]
+
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       {/* Header */}
-      <header className={'sticky top-0 z-50 w-full transition-all duration-300'}>
-        <div className="relative bg-primary text-primary-foreground py-2.5 px-4 text-center text-sm font-medium">
-          <Sparkles className="h-4 w-4 absolute left-4 top-1/2 -translate-y-1/2 hidden md:inline-block" />
-          <span>Upgrade to Pro and unlock powerful new features!</span>
-          <button
-            onClick={() => setShowBanner(false)}
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-md hover:bg-white/20"
-          >
-            <X className="h-4 w-4" />
-            <span className="sr-only">Dismiss</span>
-          </button>
-        </div>
+      <header className={cn(
+        'sticky top-0 z-50 w-full transition-colors duration-300',
+        isScrolled ? 'bg-background/80 backdrop-blur-sm' : 'bg-transparent'
+      )}>
+        {showBanner && (
+          <div className="relative bg-primary text-primary-foreground py-2.5 px-4 text-center text-sm font-medium">
+            <Sparkles className="h-4 w-4 absolute left-4 top-1/2 -translate-y-1/2 hidden md:inline-block" />
+            <span>Upgrade to Pro and unlock powerful new features!</span>
+            <button
+              onClick={() => setShowBanner(false)}
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-md hover:bg-white/20"
+            >
+              <X className="h-4 w-4" />
+              <span className="sr-only">Dismiss</span>
+            </button>
+          </div>
+        )}
         <div
           className={cn(
-            'transition-all duration-300',
+            'transition-all duration-300 container mx-auto',
             isScrolled
-              ? 'py-2 bg-background/80 backdrop-blur-sm rounded-full shadow-lg border mx-auto mt-2 max-w-6xl'
+              ? 'py-2 rounded-full'
               : 'py-4'
           )}
         >
-          <div className="container mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
             <Link href="/" className="flex items-center gap-2.5 text-foreground">
                 <SaledupLogo />
                 <span className="font-bold text-xl tracking-wide">
@@ -181,7 +204,7 @@ export default function LandingPage() {
 
                 <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
                     {/* Without Saledup Card */}
-                     <div className="bg-background/50 rounded-xl p-8 text-center border-2 border-slate-600 transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-1">
+                     <div className="bg-background/50 rounded-xl p-8 text-center border border-slate-300 dark:border-slate-700 transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-1">
                         <style jsx>{`
                             @keyframes fly-around-1 {
                                 0% { transform: translate(0, 0) rotate(0deg); opacity: 0.8; }
@@ -289,10 +312,38 @@ export default function LandingPage() {
             </div>
         </section>
 
+        {/* Who It's For Section */}
+        <section className="bg-background py-20 sm:py-24">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <div className="inline-block bg-primary/10 text-primary font-semibold py-1 px-4 rounded-full text-sm mb-4">
+                    Who It's For
+                </div>
+                <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight">
+                    Perfect For Every Local Business
+                </h2>
+                <p className="mt-4 max-w-2xl mx-auto text-muted-foreground text-lg">
+                    Whether you're selling coffee, clothing, or croissants, Saledup is designed to help your business grow.
+                </p>
+
+                <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {targetCustomers.map((customer, index) => (
+                         <div key={index}
+                             className={cn(
+                                'bg-muted/30 rounded-xl p-8 text-center border border-transparent shadow-sm transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-1 hover:border-primary/50'
+                             )}>
+                            <div className="p-4 bg-background rounded-lg inline-block mb-6 shadow-md">
+                                <customer.icon className="h-8 w-8 text-primary" />
+                            </div>
+                            <h3 className="text-lg font-bold">{customer.title}</h3>
+                            <p className="mt-2 text-sm text-muted-foreground">{customer.description}</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </section>
+
       </main>
       <LandingFooter />
     </div>
   );
 }
-
-    
