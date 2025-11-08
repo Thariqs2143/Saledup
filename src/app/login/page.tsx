@@ -58,44 +58,16 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-background md:grid md:grid-cols-2">
-      {/* LEFT SIDE - Desktop Image */}
-      <div className="relative hidden md:block">
-        <Image
-          src="https://res.cloudinary.com/dyov4r11v/image/upload/v1762585069/WhatsApp_Image_2025-11-08_at_12.26.33_9ac0131f_qj21tx.jpg"
-          alt="Saledup illustration"
-          fill
-          className="object-cover"
-          priority
-        />
-      </div>
-
-      {/* RIGHT SIDE - Form Section */}
-      <div className="flex flex-col items-center justify-center w-full">
-        {/* TOP IMAGE for Mobile */}
-        <div className="md:hidden w-full relative">
-            <Image
-            src="https://res.cloudinary.com/dyov4r11v/image/upload/v1762585069/WhatsApp_Image_2025-11-08_at_12.26.33_9ac0131f_qj21tx.jpg"
-            alt="Saledup illustration"
-            width={800}
-            height={600}
-            className="w-full h-auto object-cover"
-            priority
-            />
-        </div>
-
-        {/* FORM CARD */}
-        <div className="w-full max-w-sm space-y-6 p-6">
+      {/* LEFT SIDE - Form Section */}
+      <div className="flex flex-col items-center justify-center w-full p-6">
+        <div className="w-full max-w-sm space-y-6">
             <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold tracking-tight leading-tight">
-                Empower Your Local Business with Saledup
-            </h1>
-            <div className="flex items-center my-4">
-                <hr className="w-full border-muted-foreground/20" />
-                <span className="px-4 text-muted-foreground font-semibold whitespace-nowrap text-sm">
-                OWNER LOGIN / SIGNUP
-                </span>
-                <hr className="w-full border-muted-foreground/20" />
-            </div>
+                <h1 className="text-3xl font-bold tracking-tight leading-tight">
+                    Empower Your Local Business with Saledup
+                </h1>
+                <p className="mt-2 text-muted-foreground">
+                    Sign in to connect with customers and grow your sales.
+                </p>
             </div>
 
             <Button
@@ -110,9 +82,22 @@ export default function LoginPage() {
                 )}
                 Continue with Google
             </Button>
+            <p className="text-xs text-center text-muted-foreground">
+              By continuing, you agree to our Terms of Service and Privacy Policy.
+            </p>
         </div>
-        </div>
-
+      </div>
+      
+      {/* RIGHT SIDE - Desktop Image */}
+      <div className="relative hidden md:block">
+        <Image
+          src="https://res.cloudinary.com/dyov4r11v/image/upload/v1762585069/WhatsApp_Image_2025-11-08_at_12.26.33_9ac0131f_qj21tx.jpg"
+          alt="Saledup illustration of a local shop thriving"
+          fill
+          className="object-cover"
+          priority
+        />
+      </div>
     </div>
   );
 }
