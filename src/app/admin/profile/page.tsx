@@ -12,6 +12,18 @@ import { auth, db } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+
 
 type ShopProfile = {
     ownerName?: string;
@@ -42,6 +54,7 @@ export default function AdminProfilePage() {
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [profile, setProfile] = useState<ShopProfile>({});
   const [loading, setLoading] = useState(true);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -67,6 +80,7 @@ export default function AdminProfilePage() {
   }, [router]);
   
   const handleLogout = async () => {
+    setLoggingOut(true);
     try {
       await auth.signOut();
       toast({
@@ -81,6 +95,8 @@ export default function AdminProfilePage() {
         description: "Could not log you out. Please try again.",
         variant: "destructive",
       });
+    } finally {
+        setLoggingOut(false);
     }
   };
 
@@ -110,19 +126,19 @@ export default function AdminProfilePage() {
                             <p className="text-muted-foreground">{profile.businessType}</p>
                         </div>
                     </div>
-                    <Link href="/admin/profile/edit" className="w-full block mt-4">
-                        <Button variant="outline" className="w-full">
-                            <Edit className="mr-2 h-4 w-4"/>
-                            Edit Profile
-                        </Button>
-                    </Link>
                 </CardContent>
              </Card>
           </div>
           <div className="md:col-span-2">
             <Card>
-                <CardHeader>
+                <CardHeader className="flex flex-row justify-between items-center">
                     <CardTitle>Business Details</CardTitle>
+                     <Link href="/admin/profile/edit" className="w-fit">
+                        <Button variant="outline" size="sm">
+                            <Edit className="mr-2 h-4 w-4"/>
+                            Edit Profile
+                        </Button>
+                    </Link>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <InfoRow icon={User} label="Owner Name" value={profile.ownerName} />
@@ -134,6 +150,35 @@ export default function AdminProfilePage() {
             </Card>
           </div>
        </div>
+       <Card>
+            <CardHeader>
+                <CardTitle>Account</CardTitle>
+            </CardHeader>
+            <CardContent>
+                 <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                        <Button variant="destructive" className="w-full">
+                            <LogOut className="mr-2 h-4 w-4"/> Logout
+                        </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Log Out?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                Are you sure you want to log out?
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>No, Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={handleLogout} disabled={loggingOut} className="bg-destructive hover:bg-destructive/90">
+                                {loggingOut && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
+                                Yes, Logout
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+            </CardContent>
+       </Card>
     </div>
   );
 }
