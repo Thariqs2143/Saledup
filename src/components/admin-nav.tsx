@@ -20,6 +20,7 @@ import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { useMemo } from 'react';
 import { SheetClose } from '@/components/ui/sheet';
+import { ThemeSwitcher } from './theme-switcher';
 
 const iconMap: { [key: string]: any } = {
   LayoutDashboard,
@@ -115,22 +116,25 @@ export function AdminNav({ navItems, profile, isDesktop }: AdminNavProps) {
 
         {/* Profile + Logout */}
         <div className="mt-auto p-4 space-y-2 border-t">
-            <Link href="/admin/settings">
-            <div className="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-muted">
-                <Avatar className="h-10 w-10 border-2 border-primary">
-                <AvatarImage src={profile?.imageUrl} />
-                <AvatarFallback>{profile?.fallback || 'SO'}</AvatarFallback>
-                </Avatar>
-                <div className="flex flex-col overflow-hidden">
-                <span className="text-sm font-bold text-foreground truncate">
-                    {profile?.name || 'Shop Owner'}
-                </span>
-                <span className="text-xs text-muted-foreground truncate">
-                    {profile?.shopName || 'My Business'}
-                </span>
+            <div className="flex items-center justify-between">
+              <Link href="/admin/settings">
+                <div className="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-muted">
+                    <Avatar className="h-10 w-10 border-2 border-primary">
+                    <AvatarImage src={profile?.imageUrl} />
+                    <AvatarFallback>{profile?.fallback || 'SO'}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col overflow-hidden">
+                    <span className="text-sm font-bold text-foreground truncate">
+                        {profile?.name || 'Shop Owner'}
+                    </span>
+                    <span className="text-xs text-muted-foreground truncate">
+                        {profile?.shopName || 'My Business'}
+                    </span>
+                    </div>
                 </div>
+              </Link>
+              <ThemeSwitcher />
             </div>
-            </Link>
             <Button
             variant="ghost"
             onClick={handleLogout}
