@@ -1,29 +1,24 @@
 
-
-import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth, initializeAuth, browserLocalPersistence } from "firebase/auth";
+import { initializeApp, getApps, getApp, type FirebaseOptions } from "firebase/app";
+import { getAuth, setPersistence, browserLocalPersistence } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { getMessaging, getToken } from "firebase/messaging";
 import { getFunctions } from "firebase/functions";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyA7HLhCmNQ1Pqq0hdfz28fv1uD7EgmhnZY",
-  authDomain: "attendry-a6f9b.firebaseapp.com",
-  projectId: "attendry-a6f9b",
-  storageBucket: "attendry-a6f9b.appspot.com",
-  messagingSenderId: "166352358207",
-  appId: "1:166352358207:web:c663ad6c38352dc831218a",
-  measurementId: "G-6GEVRXQL9M"
+const firebaseConfig: FirebaseOptions = {
+  projectId: "saledup-37079661-bf1ee",
+  appId: "1:549813095043:web:3f71153821f97fa2c1e9b6",
+  apiKey: "AIzaSyB8o--qEIG40NFt16EbP8P9TtQrpX6QhPo",
+  authDomain: "saledup-37079661-bf1ee.firebaseapp.com",
 };
 
 // Initialize Firebase
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
-// Explicitly initialize Auth with local persistence
-const auth = initializeAuth(app, {
-  persistence: browserLocalPersistence
-});
+const auth = getAuth(app);
+setPersistence(auth, browserLocalPersistence);
+
 
 const db = getFirestore(app);
 const storage = getStorage(app);
@@ -67,5 +62,3 @@ const requestForToken = async () => {
 
 
 export { app, auth, db, storage, functions, messaging, requestForToken };
-
-
