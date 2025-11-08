@@ -181,7 +181,7 @@ export default function AdminDashboard() {
               </h1>
               <p className="text-muted-foreground font-bold">Here's a quick overview of your shop's performance.</p>
             </div>
-            <TabsList className="grid w-full lg:w-auto lg:inline-flex grid-cols-4 border-2 border-gray-300 dark:border-white hover:border-primary transition-colors">
+            <TabsList className="grid w-full lg:w-auto md:inline-flex grid-cols-4 border-2 border-gray-300 dark:border-white hover:border-primary transition-colors">
               <TabsTrigger value="today" className="font-extrabold">Today</TabsTrigger>
               <TabsTrigger value="weekly" className="font-extrabold">Weekly</TabsTrigger>
               <TabsTrigger value="monthly" className="font-extrabold">Monthly</TabsTrigger>
@@ -242,14 +242,11 @@ export default function AdminDashboard() {
         <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
             <CardHeader>
                 <CardTitle className="font-bold">Your Live Offers Page</CardTitle>
-                <CardDescription className="font-bold">
-                This is the public page your customers see when they scan your QR
-                code.
-                </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 p-6 pt-0">
-                <div className="flex-1">
-                </div>
+                <CardDescription className="font-bold flex-1">
+                    This is the public page your customers see when they scan your QR code.
+                </CardDescription>
                 <Button asChild className="w-full md:w-auto">
                     <Link href={`/shops/${authUser?.uid}`} target="_blank">
                         Live View <Eye className="ml-2 h-4 w-4"/>
@@ -413,6 +410,8 @@ export default function AdminDashboard() {
 
 
 
+
+    
 
     
 
