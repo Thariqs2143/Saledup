@@ -123,7 +123,7 @@ export default function AdminDashboard() {
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
                 Welcome to Saledup!
             </h1>
-            <p className="text-muted-foreground">Here's a quick overview of your shop's performance.</p>
+            <p className="text-muted-foreground font-semibold">Here's a quick overview of your shop's performance.</p>
            </div>
        </div>
 
