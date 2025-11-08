@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Building, Loader2, Store, Upload } from 'lucide-react';
+import { Loader2, Store, Upload } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
 import { doc, setDoc } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
@@ -15,6 +15,7 @@ import { onAuthStateChanged, type User as AuthUser } from 'firebase/auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { errorEmitter } from '@/lib/error-emitter';
 import { FirestorePermissionError } from '@/lib/errors';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 
 export default function AdminCompleteProfilePage() {
@@ -27,6 +28,8 @@ export default function AdminCompleteProfilePage() {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [ownerName, setOwnerName] = useState('');
     const [ownerEmail, setOwnerEmail] = useState('');
+    const [phone, setPhone] = useState('');
+    const [businessType, setBusinessType] = useState('');
 
 
     useEffect(() => {
@@ -35,6 +38,7 @@ export default function AdminCompleteProfilePage() {
                 setAuthUser(user);
                 setOwnerName(user.displayName || '');
                 setOwnerEmail(user.email || '');
+                setPhone(user.phoneNumber || '');
             } else {
                 toast({ title: "Error", description: "You must be logged in to complete your profile.", variant: "destructive"});
                 router.replace('/login');
@@ -50,10 +54,10 @@ export default function AdminCompleteProfilePage() {
 
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('upload_preset', 'saledup'); // Use your unsigned preset
+        formData.append('upload_preset', 'saledup');
 
         try {
-            const response = await fetch('https://api.cloudinary.com/v1_1/dyov4r11v/image/upload', { // Use your cloud name
+            const response = await fetch('https://api.cloudinary.com/v1_1/dyov4r11v/image/upload', {
                 method: 'POST',
                 body: formData,
             });
@@ -84,8 +88,10 @@ export default function AdminCompleteProfilePage() {
         const formData = new FormData(e.currentTarget);
         const shopName = formData.get('shopName') as string;
         const address = formData.get('address') as string;
+        const gstNumber = formData.get('gstNumber') as string;
+        const shopPhone = formData.get('phone') as string;
 
-        if (!shopName || !address) {
+        if (!shopName || !address || !businessType || !shopPhone) {
              toast({ title: "Error", description: "Please fill out all required fields.", variant: "destructive" });
              setLoading(false);
              return;
@@ -99,7 +105,11 @@ export default function AdminCompleteProfilePage() {
             ownerEmail: ownerEmail,
             ownerImageUrl: authUser.photoURL || '',
             shopName,
+            phone: shopPhone,
             address,
+            businessType,
+            gstNumber,
+            status: 'active',
             imageUrl: imageUrl || `https://placehold.co/400x300.png?text=${fallback}`,
             createdAt: new Date(),
         };
@@ -132,9 +142,6 @@ export default function AdminCompleteProfilePage() {
       <div className="w-full max-w-2xl mx-auto">
         <form onSubmit={handleSubmit} className="space-y-8">
             <div className="text-center">
-                <div className="inline-block p-4 bg-primary/10 rounded-full mb-4">
-                    <Building className="h-10 w-10 text-primary" />
-                </div>
                 <h1 className="text-3xl font-bold">Setup Your Shop Profile</h1>
                 <p className="text-muted-foreground mt-2">
                     This is your business's public presence on Saledup.
@@ -145,7 +152,7 @@ export default function AdminCompleteProfilePage() {
                  <div className="flex flex-col items-center gap-4">
                     <Avatar className="h-24 w-24 border-2 border-primary">
                         <AvatarImage src={imageUrl ?? undefined} />
-                        <AvatarFallback><Building className="h-10 w-10"/></AvatarFallback>
+                        <AvatarFallback><Store className="h-10 w-10"/></AvatarFallback>
                     </Avatar>
                      <input type="file" ref={fileInputRef} onChange={handlePhotoUpload} accept="image/*" className="hidden" />
                     <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
@@ -167,6 +174,29 @@ export default function AdminCompleteProfilePage() {
                         <Label htmlFor="shopName">Shop / Business Name *</Label>
                         <Input id="shopName" name="shopName" placeholder="e.g. The Daily Grind Café" required />
                     </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="phone">Shop Contact Number *</Label>
+                        <Input id="phone" name="phone" type="tel" placeholder="e.g. 9876543210" value={phone} onChange={(e) => setPhone(e.target.value)} required />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="businessType">Business Type / Category *</Label>
+                         <Select onValueChange={setBusinessType} required>
+                            <SelectTrigger id="businessType">
+                                <SelectValue placeholder="Select a category" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Retail">Retail</SelectItem>
+                                <SelectItem value="Food & Beverage">Food & Beverage</SelectItem>
+                                <SelectItem value="Service">Service</SelectItem>
+                                <SelectItem value="MSME">MSME</SelectItem>
+                                <SelectItem value="Other">Other</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="gstNumber">GST Number (Optional)</Label>
+                        <Input id="gstNumber" name="gstNumber" placeholder="e.g. 29ABCDE1234F1Z5" />
+                    </div>
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="address">Full Shop Address *</Label>
@@ -185,5 +215,3 @@ export default function AdminCompleteProfilePage() {
     </div>
   );
 }
-
-    
