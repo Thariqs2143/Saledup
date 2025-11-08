@@ -135,19 +135,6 @@ export default function AdminProfilePage() {
             </Card>
           </div>
        </div>
-      
-      <Card className="border-destructive">
-          <CardHeader>
-              <CardTitle className="text-destructive">Account Security</CardTitle>
-              <CardDescription>Log out from your current session.</CardDescription>
-          </CardHeader>
-          <CardContent>
-              <Button variant="destructive" onClick={handleLogout} className="max-w-sm">
-                <LogOut className="mr-2 h-4 w-4"/>
-                Logout
-              </Button>
-          </CardContent>
-      </Card>
     </div>
   );
 }
