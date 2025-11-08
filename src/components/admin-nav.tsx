@@ -103,7 +103,7 @@ export function AdminNav({ navItems, profile, isDesktop }: AdminNavProps) {
                         )}
                         >
                         {Icon && <Icon className="h-5 w-5" />}
-                        <span className="text-base font-medium">{item.label}</span>
+                        <span className="text-base font-bold">{item.label}</span>
                     </button>
                 );
 
@@ -125,7 +125,7 @@ export function AdminNav({ navItems, profile, isDesktop }: AdminNavProps) {
                     <span className="text-sm font-bold text-foreground truncate">
                         {profile?.name || 'Shop Owner'}
                     </span>
-                    <span className="text-xs text-muted-foreground truncate">
+                    <span className="text-xs text-muted-foreground truncate font-bold">
                         {profile?.shopName || 'My Business'}
                     </span>
                     </div>
@@ -139,7 +139,7 @@ export function AdminNav({ navItems, profile, isDesktop }: AdminNavProps) {
             className="w-full justify-start h-auto p-2 border bg-red-100 text-red-700 hover:bg-red-600 hover:text-white active:bg-red-800 active:text-white dark:bg-red-900/50 dark:text-red-400 dark:hover:bg-red-800 dark:hover:text-white"
             >
             <LogOut className="h-5 w-5 mr-3" />
-            <span className="font-semibold">Logout</span>
+            <span className="font-bold">Logout</span>
             </Button>
         </div>
     </>
