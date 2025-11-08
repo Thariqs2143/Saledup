@@ -176,7 +176,7 @@ export default function AdminCompleteProfilePage() {
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="phone">Shop Contact Number *</Label>
-                        <Input id="phone" name="phone" type="tel" placeholder="e.g. 9876543210" value={phone} onChange={(e) => setPhone(e.target.value)} required />
+                        <Input id="phone" name="phone" type="tel" placeholder="e.g. 9876543210" value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))} required />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="businessType">Business Type / Category *</Label>
