@@ -2,7 +2,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Sparkles, X, Store, ShoppingBag, Users, QrCode, TrendingUp, BarChart3, Shield, HeartHandshake, Coffee, Utensils, Shirt, ChevronRight } from 'lucide-react';
+import { ArrowRight, Sparkles, X, Store, ShoppingBag, Users, QrCode, TrendingUp, BarChart3, Shield, HeartHandshake, Coffee, Utensils, Shirt, ChevronRight, Magnet } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
@@ -304,7 +304,16 @@ const targetCustomers = [
         </section>
 
         {/* Testimonials Section */}
-        <section className="bg-muted/30 py-20 sm:py-24">
+        <section className="bg-muted/30 py-20 sm:py-24 w-full overflow-hidden">
+            <style jsx>{`
+                @keyframes scroll {
+                    from { transform: translateX(0); }
+                    to { transform: translateX(-100%); }
+                }
+                .scrolling-wrapper {
+                    animation: scroll 60s linear infinite;
+                }
+            `}</style>
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
                 <div className="inline-block bg-primary/10 text-primary font-semibold py-1 px-4 rounded-full text-sm mb-4">
                     Testimonials
@@ -315,24 +324,11 @@ const targetCustomers = [
                 <p className="mt-4 max-w-2xl mx-auto text-muted-foreground text-lg">
                     Here's what people are saying about Saledup.
                 </p>
-                <Carousel
-                  plugins={[
-                    Autoplay({
-                      delay: 3000,
-                      stopOnInteraction: true,
-                      stopOnMouseEnter: true,
-                    }),
-                  ]}
-                  opts={{
-                    align: "start",
-                    loop: true,
-                  }}
-                  className="w-full max-w-5xl mx-auto mt-12"
-                >
-                  <CarouselContent>
-                    {placeholderImages.testimonials.map((testimonial, index) => (
-                      <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
-                        <div className="p-1 h-full">
+            </div>
+            <div className="mt-12 relative w-full [mask-image:_linear-gradient(to_right,transparent_0,_black_128px,_black_calc(100%-128px),transparent_100%)]">
+                <div className="flex w-max items-stretch scrolling-wrapper">
+                    {[...placeholderImages.testimonials, ...placeholderImages.testimonials].map((testimonial, index) => (
+                      <div key={index} className="w-[380px] md:w-[450px] shrink-0 p-4">
                           <Card className="h-full flex flex-col justify-between border border-border shadow-sm hover:border-primary transition-all group">
                              <CardContent className="flex flex-col justify-between items-start gap-6 p-6">
                                 <blockquote className="text-muted-foreground italic text-left">
@@ -350,13 +346,9 @@ const targetCustomers = [
                                 </div>
                             </CardContent>
                           </Card>
-                        </div>
-                      </CarouselItem>
+                      </div>
                     ))}
-                  </CarouselContent>
-                  <CarouselPrevious className="hidden md:flex" />
-                  <CarouselNext className="hidden md:flex" />
-                </Carousel>
+                </div>
             </div>
         </section>
 
