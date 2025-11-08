@@ -97,12 +97,6 @@ export default function AdminProfilePage() {
                 <h1 className="text-3xl font-bold tracking-tight">Your Profile</h1>
                 <p className="text-muted-foreground">Manage your personal and shop details.</p>
             </div>
-            <Link href="/admin/profile/edit">
-                <Button variant="outline">
-                    <Edit className="mr-2 h-4 w-4"/>
-                    Edit Profile
-                </Button>
-            </Link>
        </div>
       
        <div className="grid md:grid-cols-3 gap-8">
@@ -122,8 +116,14 @@ export default function AdminProfilePage() {
           </div>
           <div className="md:col-span-2">
             <Card>
-                <CardHeader>
+                <CardHeader className="flex flex-row justify-between items-center">
                     <CardTitle>Business Details</CardTitle>
+                    <Link href="/admin/profile/edit">
+                        <Button variant="outline" size="sm">
+                            <Edit className="mr-2 h-4 w-4"/>
+                            Edit Profile
+                        </Button>
+                    </Link>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <InfoRow icon={User} label="Owner Name" value={profile.ownerName} />
