@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { User, LogOut, Loader2, Building, Mail, Phone, MapPin, FileText, Edit, Percent, Briefcase, Settings as SettingsIcon, Tag, CheckCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged, type User as AuthUser } from 'firebase/auth';
-import { doc, getDoc, collection, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc, collection, onSnapshot, query, where } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
@@ -16,6 +16,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
 import { AnimatedCounter } from '@/components/animated-counter';
 import PricingPageContent from './pricing-content';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 type ShopProfile = {
     ownerName?: string;
@@ -56,33 +67,62 @@ export default function AdminProfilePage() {
     const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setAuthUser(user);
-        const shopDocRef = doc(db, 'shops', user.uid);
-        const shopSnap = await getDoc(shopDocRef);
-        if (shopSnap.exists()) {
-          const data = shopSnap.data() as ShopProfile;
-          setProfile({
-            ...data,
-            email: data.email || user.email || undefined,
-            phone: user.phoneNumber || data.phone,
-          });
+        let unsubscribeOffers = () => {};
+
+        try {
+            const shopDocRef = doc(db, 'shops', user.uid);
+            const shopSnap = await getDoc(shopDocRef);
+            if (shopSnap.exists()) {
+              const data = shopSnap.data() as ShopProfile;
+              setProfile({
+                ...data,
+                email: data.email || user.email || undefined,
+                phone: user.phoneNumber || data.phone,
+              });
+            }
+
+            const offersQuery = collection(db, 'shops', user.uid, 'offers');
+            unsubscribeOffers = onSnapshot(offersQuery, 
+                (snapshot) => {
+                    const offersList = snapshot.docs.map(doc => doc.data() as Offer);
+                    setOffers(offersList);
+                },
+                (error) => {
+                    console.error("Firestore Error: ", error);
+                    toast({
+                        title: "Permission Error",
+                        description: "Could not fetch your offer data. You might not have the right permissions.",
+                        variant: "destructive"
+                    });
+                }
+            );
+
+        } catch(err) {
+             console.error("Failed to fetch initial data", err);
+             toast({ title: "Error", description: "Could not load your profile.", variant: "destructive" });
+        } finally {
+            setLoading(false);
         }
 
-        const offersQuery = collection(db, 'shops', user.uid, 'offers');
-        const unsubscribeOffers = onSnapshot(offersQuery, (snapshot) => {
-            const offersList = snapshot.docs.map(doc => doc.data() as Offer);
-            setOffers(offersList);
-        });
-        
-        // Return a cleanup function for the offers listener
         return () => unsubscribeOffers();
-
       } else {
         router.push('/login');
+        setLoading(false);
       }
-      setLoading(false);
     });
+
     return () => unsubscribeAuth();
-  }, [router]);
+  }, [router, toast]);
+
+  const handleLogout = async () => {
+    try {
+        await auth.signOut();
+        toast({ title: "Logged Out", description: "You have been successfully logged out." });
+        router.push('/login');
+    } catch (error) {
+        toast({ title: "Error", description: "Failed to log out.", variant: "destructive" });
+    }
+  };
 
   if (loading) {
     return (
@@ -175,6 +215,34 @@ export default function AdminProfilePage() {
                                 <Link href="/admin/profile?tab=pricing">Upgrade Plan</Link>
                             </Button>
                          </CardFooter>
+                    </Card>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Account</CardTitle>
+                            <CardDescription>Manage your session.</CardDescription>
+                        </CardHeader>
+                         <CardContent>
+                             <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button variant="destructive" className="w-full">
+                                        <LogOut className="mr-2 h-4 w-4"/>
+                                        Logout
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                    <AlertDialogTitle>Are you sure you want to log out?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        You will be returned to the login screen.
+                                    </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                    <AlertDialogCancel>No, Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={handleLogout}>Yes, Logout</AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                        </CardContent>
                     </Card>
                 </div>
             </TabsContent>
