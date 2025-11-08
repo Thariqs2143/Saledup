@@ -119,7 +119,7 @@ export default function LoginPage() {
           <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-black/10 lg:from-black/60 lg:to-transparent" />
        </div>
       <div className="hidden lg:flex flex-col justify-end p-12 text-white relative z-10">
-          <h2 className="text-4xl font-bold leading-tight">Join Millions of Businesses that Trust Saledup</h2>
+          <h2 className="text-4xl font-bold leading-tight">The Future of Local Commerce Starts Here.</h2>
           <p className="mt-4 text-lg text-white/80">Supercharge your business with easy integrations, powerful dashboards, and more.</p>
       </div>
        <div className="relative z-10 flex items-center justify-center min-h-screen p-4 lg:p-8">
