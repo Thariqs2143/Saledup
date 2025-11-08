@@ -162,7 +162,7 @@ export default function PricingPage() {
                             )}
                             <div className="flex-grow">
                                 <h2 className="text-2xl font-bold">{plan.name}</h2>
-                                <p className="text-muted-foreground mt-2 mb-8">{plan.description}</p>
+                                <p className="text-muted-foreground mt-2 h-12 md:h-20">{plan.description}</p>
                                 <div className="my-8">
                                     <span className="text-4xl font-extrabold">
                                         {isYearly ? plan.priceYearly : plan.priceMonthly}
@@ -196,7 +196,7 @@ export default function PricingPage() {
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <h2 className="text-3xl font-bold text-center mb-12">Detailed Feature Comparison</h2>
                 <div className="overflow-x-auto rounded-lg border shadow-sm">
-                    <table className="w-full min-w-[800px] text-left">
+                    <table className="w-full min-w-[700px] text-left">
                         <thead className="bg-muted">
                             <tr>
                                 <th className="p-4 w-1/3 font-semibold text-lg">Features</th>

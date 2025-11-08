@@ -111,7 +111,7 @@ export default function PricingPageContent() {
             </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
             {plans.map((plan) => (
                 <div key={plan.name} className={cn(
                     "rounded-xl border bg-card text-card-foreground shadow-sm flex flex-col p-6 transition-all duration-300 hover:shadow-xl hover:-translate-y-1",
@@ -154,7 +154,7 @@ export default function PricingPageContent() {
         <div>
             <h2 className="text-2xl font-bold text-center mb-8">Detailed Feature Comparison</h2>
             <div className="overflow-x-auto rounded-lg border shadow-sm">
-                <table className="w-full min-w-[700px] text-left">
+                <table className="w-full min-w-[600px] text-left">
                     <thead className="bg-muted">
                         <tr>
                             <th className="p-4 w-1/3 font-semibold">Features</th>
