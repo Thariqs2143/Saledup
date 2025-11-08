@@ -5,18 +5,24 @@ service cloud.firestore {
   
     // Helper function to check if a user is the owner of a specific shop
     function isShopOwner(shopId) {
-      return request.auth.uid == shopId;
+      // The user is the owner if their UID matches the shop document's ID
+      return request.auth != null && request.auth.uid == shopId;
     }
 
     // Rules for the shops collection
     match /shops/{shopId} {
-      // Owner can do anything to their own shop document.
-      // A new user can create their own shop document.
-      allow create: if isShopOwner(shopId);
-      allow read, update, delete: if isShopOwner(shopId);
+      // A new user can create their own shop document, as long as the ownerId in the
+      // document they are creating matches their own UID.
+      allow create: if request.auth != null && request.resource.data.ownerId == request.auth.uid;
       
-      // Public read for the shop details page that customers see
+      // The shop owner can update or delete their own shop document.
+      allow update, delete: if isShopOwner(shopId);
+      
+      // Any user (including unauthenticated) can read the main shop details.
+      // This is needed for the public-facing shop pages.
       allow get;
+      allow list: if request.auth != null;
+
 
       // --- SUBCOLLECTIONS ---
       
