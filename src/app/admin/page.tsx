@@ -173,22 +173,21 @@ export default function AdminDashboard() {
 
   return (
     <div className="flex flex-col gap-6 lg:gap-8">
-       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-                Good morning, {ownerName}!
-            </h1>
-            <p className="text-muted-foreground font-bold">Here's a quick overview of your shop's performance.</p>
-           </div>
-       </div>
-
       <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4 border-2 border-gray-300 dark:border-white hover:border-red-500 transition-colors">
-          <TabsTrigger value="today">Today</TabsTrigger>
-          <TabsTrigger value="weekly">Weekly</TabsTrigger>
-          <TabsTrigger value="monthly">Monthly</TabsTrigger>
-          <TabsTrigger value="yearly">Yearly</TabsTrigger>
-        </TabsList>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+                  Good morning, {ownerName}!
+              </h1>
+              <p className="text-muted-foreground font-bold">Here's a quick overview of your shop's performance.</p>
+            </div>
+            <TabsList className="grid w-full md:w-auto md:inline-flex grid-cols-4 border-2 border-gray-300 dark:border-white hover:border-red-500 transition-colors">
+              <TabsTrigger value="today">Today</TabsTrigger>
+              <TabsTrigger value="weekly">Weekly</TabsTrigger>
+              <TabsTrigger value="monthly">Monthly</TabsTrigger>
+              <TabsTrigger value="yearly">Yearly</TabsTrigger>
+            </TabsList>
+        </div>
         <TabsContent value={activeTab} className="space-y-4">
             <div className="grid grid-cols-2 gap-4 lg:gap-6">
                 <Card className="relative overflow-hidden transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br from-blue-500 to-indigo-600 text-white border-none">
@@ -393,6 +392,7 @@ export default function AdminDashboard() {
 
 
     
+
 
 
 
