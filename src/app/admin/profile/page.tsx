@@ -171,30 +171,32 @@ export default function AdminProfilePage() {
        <div className="grid md:grid-cols-3 gap-8">
           <div className="md:col-span-1">
              <Card>
-                <CardContent className="pt-6 flex items-center gap-4">
-                    <Avatar className="h-20 w-20 border-2 border-primary">
-                        <AvatarImage src={profile.imageUrl ?? profile.ownerImageUrl} />
-                        <AvatarFallback>
-                            <Building className="h-8 w-8"/>
-                        </AvatarFallback>
-                    </Avatar>
-                    <div className="space-y-1">
-                        <h2 className="text-xl font-bold">{profile.shopName}</h2>
-                        <p className="text-muted-foreground text-sm">{profile.businessType}</p>
+                <CardContent className="pt-6 space-y-4">
+                    <div className="flex items-center gap-4">
+                        <Avatar className="h-20 w-20 border-2 border-primary">
+                            <AvatarImage src={profile.imageUrl ?? profile.ownerImageUrl} />
+                            <AvatarFallback>
+                                <Building className="h-8 w-8"/>
+                            </AvatarFallback>
+                        </Avatar>
+                        <div className="space-y-1">
+                            <h2 className="text-xl font-bold">{profile.shopName}</h2>
+                            <p className="text-muted-foreground text-sm">{profile.businessType}</p>
+                        </div>
                     </div>
+                     <Link href="/admin/profile/edit" className="w-full">
+                        <Button variant="outline" className="w-full">
+                            <Edit className="mr-2 h-4 w-4"/>
+                            Edit Profile
+                        </Button>
+                    </Link>
                 </CardContent>
              </Card>
           </div>
           <div className="md:col-span-2">
             <Card>
-                <CardHeader className="flex flex-row justify-between items-center">
+                <CardHeader>
                     <CardTitle>Business Details</CardTitle>
-                     <Link href="/admin/profile/edit" className="w-fit">
-                        <Button variant="outline" size="sm">
-                            <Edit className="mr-2 h-4 w-4"/>
-                            Edit Profile
-                        </Button>
-                    </Link>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <InfoRow icon={User} label="Owner Name" value={profile.ownerName} />
@@ -233,5 +235,3 @@ export default function AdminProfilePage() {
     </div>
   );
 }
-
-    
