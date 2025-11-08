@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
+import { LandingFooter } from '@/components/landing-footer';
 
 
 const SaledupLogo = () => (
@@ -38,7 +39,7 @@ export default function LandingPage() {
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
+      setIsScrolled(window.scrollY > 20);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
@@ -60,10 +61,13 @@ export default function LandingPage() {
 
       {/* Header */}
       <header className={cn(
-          "sticky top-0 z-50 transition-all duration-300",
-          isScrolled ? "bg-background/80 backdrop-blur-sm shadow-md" : "bg-transparent"
+          "sticky top-0 z-50 transition-all duration-300 py-3",
+          isScrolled ? "bg-background/80 backdrop-blur-sm " : "bg-transparent"
         )}>
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+        <div className={cn(
+            "container mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between transition-all duration-300",
+            isScrolled ? "h-16 bg-background rounded-full shadow-lg border" : "h-20"
+            )}>
           <Link href="/" className="flex items-center gap-2.5 text-foreground">
               <SaledupLogo />
               <span className="font-bold text-xl tracking-wide">
@@ -104,13 +108,13 @@ export default function LandingPage() {
                 </p>
                 <div className="mt-8 flex gap-4">
                     <Link href="/login" passHref>
-                        <Button size="lg" className="h-11 px-6">
-                            Start Growing Today <ArrowRight className="ml-2 h-4 w-4" />
+                        <Button size="lg" className="h-12 px-8 text-base">
+                            Claim Your Free Account <ArrowRight className="ml-2 h-4 w-4" />
                         </Button>
                     </Link>
                      <Link href="#" passHref>
-                        <Button size="lg" variant="outline" className="h-11 px-6">
-                            Learn More
+                        <Button size="lg" variant="outline" className="h-12 px-8 text-base">
+                            Contact Sales
                         </Button>
                     </Link>
                 </div>
@@ -183,7 +187,7 @@ export default function LandingPage() {
         </section>
 
       </main>
-
+      <LandingFooter />
     </div>
   );
 }
