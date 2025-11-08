@@ -92,13 +92,6 @@ export default function AdminProfilePage() {
 
   return (
     <div className="space-y-8">
-       <div className="flex justify-between items-start">
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight">Your Profile</h1>
-                <p className="text-muted-foreground">Manage your personal and shop details.</p>
-            </div>
-       </div>
-      
        <div className="grid md:grid-cols-3 gap-8">
           <div className="md:col-span-1 flex flex-col items-center text-center">
              <Card className="w-full">
@@ -111,8 +104,8 @@ export default function AdminProfilePage() {
                     </Avatar>
                     <h2 className="text-2xl font-bold mt-4">{profile.shopName}</h2>
                     <p className="text-muted-foreground">{profile.businessType}</p>
-                    <Link href="/admin/profile/edit" className="mt-4 inline-block">
-                        <Button variant="outline" size="sm">
+                    <Link href="/admin/profile/edit" className="mt-4 inline-block w-full">
+                        <Button variant="outline" className="w-full">
                             <Edit className="mr-2 h-4 w-4"/>
                             Edit Profile
                         </Button>
