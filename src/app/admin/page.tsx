@@ -242,7 +242,7 @@ export default function AdminDashboard() {
         <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
             <CardHeader>
                 <CardTitle className="font-bold">Your Live Offers Page</CardTitle>
-                <CardDescription>
+                <CardDescription className="font-semibold">
                 This is the public page your customers see when they scan your QR
                 code.
                 </CardDescription>
@@ -262,7 +262,7 @@ export default function AdminDashboard() {
             <div className="space-y-4">
                 <div>
                     <h2 className="text-2xl font-bold tracking-tight">Recent Offers</h2>
-                    <p className="text-muted-foreground">A list of your most recent offers.</p>
+                    <p className="text-muted-foreground font-semibold">A list of your most recent offers.</p>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {recentOffers.map(offer => (
@@ -314,7 +314,7 @@ export default function AdminDashboard() {
                     </Link>
                 )}
             </div>
-            <CardDescription>A real-time log of customers claiming your offers.</CardDescription>
+            <CardDescription className="font-semibold">A real-time log of customers claiming your offers.</CardDescription>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -359,7 +359,7 @@ export default function AdminDashboard() {
                    <Sparkles className="h-6 w-6 text-primary"/>
                    <CardTitle className="font-bold">Quick Actions</CardTitle>
                 </div>
-                <CardDescription>Get started with these common tasks.</CardDescription>
+                <CardDescription className="font-semibold">Get started with these common tasks.</CardDescription>
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-4">
                 <Link href="/admin/offers/add">
@@ -413,6 +413,8 @@ export default function AdminDashboard() {
 
 
 
+
+    
 
     
 
