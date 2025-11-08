@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -123,10 +122,10 @@ const targetCustomers = [
         </div>
         <div
           className={cn(
-            'transition-all duration-300 bg-background',
+            'transition-all duration-300',
             isScrolled
               ? 'py-2 bg-background/80 backdrop-blur-sm rounded-full shadow-lg border mx-auto px-4 sm:px-6 lg:px-8 mt-2 max-w-6xl'
-              : 'py-4'
+              : 'py-4 bg-background'
           )}
         >
           <div className={cn('flex items-center justify-between', !isScrolled && 'container mx-auto')}>
@@ -135,17 +134,17 @@ const targetCustomers = [
               <span className="font-bold text-xl tracking-wide">Saledup</span>
             </Link>
             <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-              <Link href="#" className="text-foreground/80 hover:text-foreground">Home</Link>
-              <Link href="#" className="text-foreground/80 hover:text-foreground">About</Link>
-              <Link href="#" className="text-foreground/80 hover:text-foreground">Pricing</Link>
-              <Link href="#" className="text-foreground/80 hover:text-foreground">FAQ</Link>
-              <Link href="#" className="text-foreground/80 hover:text-foreground">Contact</Link>
+              <Link href="/" className="text-foreground/80 hover:text-foreground">Home</Link>
+              <Link href="/about" className="text-foreground/80 hover:text-foreground">About</Link>
+              <Link href="/pricing" className="text-foreground/80 hover:text-foreground">Pricing</Link>
+              <Link href="/faq" className="text-foreground/80 hover:text-foreground">FAQ</Link>
+              <Link href="/contact" className="text-foreground/80 hover:text-foreground">Contact</Link>
             </nav>
             <div className="flex items-center gap-2">
               <Link href="/login" passHref>
                 <Button variant="outline">Get Started</Button>
               </Link>
-              <Link href="/login" passHref>
+              <Link href="/pricing" passHref>
                 <Button>Go Pro</Button>
               </Link>
             </div>
@@ -171,7 +170,7 @@ const targetCustomers = [
                             Claim Your Free Account <ArrowRight className="ml-2 h-4 w-4" />
                         </Button>
                     </Link>
-                     <Link href="#" passHref>
+                     <Link href="/contact" passHref>
                         <Button size="lg" variant="outline" className="h-12 px-8 text-base">
                             Contact Sales
                         </Button>
@@ -439,7 +438,7 @@ const targetCustomers = [
                 </Accordion>
 
                 <div className="mt-12">
-                     <Link href="#" passHref>
+                     <Link href="/faq" passHref>
                         <Button size="lg" variant="outline" className="h-12 px-8 text-base">
                             View All FAQs <ChevronRight className="ml-2 h-4 w-4" />
                         </Button>
@@ -463,7 +462,7 @@ const targetCustomers = [
                             Claim Your Free Account <ArrowRight className="ml-2 h-4 w-4" />
                         </Button>
                     </Link>
-                    <Link href="#" passHref>
+                    <Link href="/contact" passHref>
                         <Button size="lg" variant="outline" className="h-12 px-8 text-base">
                             Contact Sales
                         </Button>

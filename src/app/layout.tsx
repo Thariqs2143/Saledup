@@ -6,8 +6,8 @@ import { ThemeProvider } from '@/components/theme-provider';
 import Script from 'next/script';
 
 export const metadata: Metadata = {
-  title: 'Attendry',
-  description: 'Effortless attendance tracking',
+  title: 'Saledup - Turn Foot Traffic into Loyal Customers',
+  description: 'The ultimate QR code offer platform for local businesses. Create real-time deals, track engagement, and grow your customer base effortlessly.',
   manifest: '/manifest.json',
 };
 
@@ -16,7 +16,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: '#1E40AF',
+  themeColor: '#FF4136', // Updated to match primary red color
 };
 
 export default function RootLayout({
@@ -29,7 +29,7 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
       </head>
       <body className="font-body antialiased">
