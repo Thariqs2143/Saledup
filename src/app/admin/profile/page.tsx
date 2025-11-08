@@ -4,7 +4,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { User, LogOut, Loader2, Building, Shield, Mail, Phone, MapPin, FileText, Edit } from 'lucide-react';
+import { User, LogOut, Loader2, Building, Mail, Phone, MapPin, FileText, Edit } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged, type User as AuthUser } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
@@ -13,16 +13,15 @@ import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  SheetClose,
+} from "@/components/ui/sheet";
 
 
 type ShopProfile = {
@@ -150,35 +149,31 @@ export default function AdminProfilePage() {
             </Card>
           </div>
        </div>
-       <Card>
-            <CardHeader>
-                <CardTitle>Account</CardTitle>
-            </CardHeader>
-            <CardContent>
-                 <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                        <Button variant="destructive" className="w-full">
-                            <LogOut className="mr-2 h-4 w-4"/> Logout
-                        </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>Log Out?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                                Are you sure you want to log out?
-                            </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                            <AlertDialogCancel>No, Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={handleLogout} disabled={loggingOut} className="bg-destructive hover:bg-destructive/90">
-                                {loggingOut && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
-                                Yes, Logout
-                            </AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
-            </CardContent>
-       </Card>
+
+        <Sheet>
+            <SheetTrigger asChild>
+                <Button variant="destructive" className="w-full">
+                    <LogOut className="mr-2 h-4 w-4"/> Logout
+                </Button>
+            </SheetTrigger>
+            <SheetContent side="bottom" className="rounded-t-lg">
+                <SheetHeader className="text-center">
+                    <SheetTitle className="text-2xl">Log Out?</SheetTitle>
+                    <SheetDescription>
+                        Are you sure you want to log out?
+                    </SheetDescription>
+                </SheetHeader>
+                <SheetFooter className="mt-6 flex-col sm:flex-col sm:space-x-0 gap-2">
+                    <Button onClick={handleLogout} disabled={loggingOut} variant="destructive">
+                        {loggingOut && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
+                        Yes, Logout
+                    </Button>
+                    <SheetClose asChild>
+                        <Button variant="outline">No, Cancel</Button>
+                    </SheetClose>
+                </SheetFooter>
+            </SheetContent>
+        </Sheet>
     </div>
   );
 }
