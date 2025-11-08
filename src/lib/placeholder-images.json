@@ -1,4 +1,21 @@
 {
+  "about": {
+    "hero": {
+      "src": "https://picsum.photos/seed/abouthero/1920/1080",
+      "alt": "A bustling city street with many small, local shops.",
+      "hint": "local shops street"
+    },
+    "story": {
+      "src": "https://picsum.photos/seed/aboutstory/600/450",
+      "alt": "A group of diverse people collaborating around a table with laptops and notes.",
+      "hint": "team brainstorming"
+    },
+    "mission": {
+      "src": "https://picsum.photos/seed/aboutmission/600/450",
+      "alt": "A vibrant community market with people shopping and interacting.",
+      "hint": "community market"
+    }
+  },
   "howItWorks": [
     {
       "src": "https://picsum.photos/seed/step1/600/400",
