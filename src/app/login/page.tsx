@@ -107,8 +107,8 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="w-full min-h-screen relative lg:grid lg:grid-cols-2">
-       <div className="absolute inset-0 z-0">
+    <div className="w-full min-h-screen lg:grid lg:grid-cols-2">
+       <div className="relative hidden lg:block">
           <Image
             src="https://res.cloudinary.com/dyov4r11v/image/upload/v1762585069/WhatsApp_Image_2025-11-08_at_12.26.33_9ac0131f_qj21tx.jpg"
             alt="Background"
@@ -117,13 +117,13 @@ export default function LoginPage() {
             className="dark:brightness-[0.4]"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-black/10 lg:from-black/60 lg:to-transparent" />
+           <div className="hidden lg:flex flex-col justify-end p-12 text-white relative z-10 h-full">
+              <h2 className="text-4xl font-bold leading-tight">The Future of Local Commerce Starts Here.</h2>
+              <p className="mt-4 text-lg text-white/80">Supercharge your business with easy integrations, powerful dashboards, and more.</p>
+          </div>
        </div>
-      <div className="hidden lg:flex flex-col justify-end p-12 text-white relative z-10">
-          <h2 className="text-4xl font-bold leading-tight">The Future of Local Commerce Starts Here.</h2>
-          <p className="mt-4 text-lg text-white/80">Supercharge your business with easy integrations, powerful dashboards, and more.</p>
-      </div>
-       <div className="relative z-10 flex items-center justify-center min-h-screen p-4 lg:p-8">
-            <div className="w-full max-w-md bg-background/90 backdrop-blur-sm p-8 rounded-xl shadow-2xl lg:bg-background lg:backdrop-blur-none lg:shadow-none lg:p-6">
+       <div className="flex items-center justify-center min-h-screen p-4 lg:p-8">
+            <div className="w-full max-w-md lg:bg-background lg:p-6 lg:rounded-xl lg:shadow-2xl">
                 <div className="mx-auto grid gap-6">
                     <div className="grid gap-2 text-center">
                         <h1 className="text-3xl font-bold">Welcome Back!</h1>
