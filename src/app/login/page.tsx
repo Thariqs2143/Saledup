@@ -107,23 +107,110 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="w-full min-h-screen lg:grid lg:grid-cols-2">
-       <div className="relative hidden lg:block">
-          <Image
+    <div className="w-full min-h-screen">
+      {/* Mobile View */}
+       <div className="flex flex-col items-center justify-center min-h-screen p-4 lg:hidden bg-background">
+          <div className="w-full max-w-md">
+              <div className="mx-auto grid gap-6">
+                  <div className="grid gap-2 text-center">
+                      <h1 className="text-3xl font-bold">Welcome Back!</h1>
+                      <p className="text-balance text-muted-foreground">
+                      Log in to manage your offers and track your shop's growth.
+                      </p>
+                  </div>
+                  <form onSubmit={handleEmailLogin} className="grid gap-4">
+                      <div className="grid gap-2">
+                      <Label htmlFor="email">Email</Label>
+                      <Input
+                          id="email"
+                          type="email"
+                          name="email"
+                          placeholder="m@example.com"
+                          required
+                      />
+                      </div>
+                      <div className="grid gap-2">
+                      <div className="flex items-center">
+                          <Label htmlFor="password">Password</Label>
+                          <Link
+                          href="/forgot-password"
+                          className="ml-auto inline-block text-sm underline"
+                          >
+                          Forgot your password?
+                          </Link>
+                      </div>
+                      <div className="relative">
+                          <Input
+                          id="password"
+                          name="password"
+                          type={showPassword ? 'text' : 'password'}
+                          required
+                          className="pr-10"
+                          />
+                          <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="absolute inset-y-0 right-0 h-full px-3"
+                          onClick={() => setShowPassword(!showPassword)}
+                          >
+                          {showPassword ? (
+                              <EyeOff className="h-5 w-5 text-muted-foreground" />
+                          ) : (
+                              <Eye className="h-5 w-5 text-muted-foreground" />
+                          )}
+                          <span className="sr-only">
+                              {showPassword ? 'Hide password' : 'Show password'}
+                          </span>
+                          </Button>
+                      </div>
+                      </div>
+                      <Button type="submit" className="w-full" disabled={loading || googleLoading}>
+                      {loading && <Loader2 className="mr-2 animate-spin" />}
+                      Login
+                      </Button>
+                      <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={loading || googleLoading}>
+                      {googleLoading ? (
+                          <Loader2 className="mr-2 animate-spin" />
+                      ) : (
+                          <svg role="img" viewBox="0 0 24 24" className="mr-2 h-4 w-4">
+                              <path
+                              fill="currentColor"
+                              d="M12.48 10.92v3.28h7.84c-.24 1.84-.85 3.18-1.73 4.1-1.05 1.05-2.36 1.67-4.06 1.67-3.4 0-6.17-2.83-6.17-6.23s2.77-6.23 6.17-6.23c1.87 0 3.13.78 3.88 1.48l2.34-2.34C18.37 1.9 15.48 0 12.48 0 5.88 0 .02 5.88.02 12.48s5.86 12.48 12.46 12.48c3.32 0 6.03-1.14 8.04-3.21 2.07-2.07 2.72-5.04 2.72-7.76v-2.1H12.48z"
+                              ></path>
+                          </svg>
+                      )}
+                      Login with Google
+                      </Button>
+                  </form>
+                  <div className="mt-4 text-center text-sm">
+                      Don&apos;t have an account?{' '}
+                      <Link href="/signup" className="underline">
+                      Sign up
+                      </Link>
+                  </div>
+              </div>
+          </div>
+       </div>
+
+      {/* Desktop View */}
+      <div className="hidden lg:flex min-h-screen w-full relative">
+        <Image
             src="https://res.cloudinary.com/dyov4r11v/image/upload/v1762585069/WhatsApp_Image_2025-11-08_at_12.26.33_9ac0131f_qj21tx.jpg"
             alt="Background"
             layout="fill"
             objectFit="cover"
-            className="dark:brightness-[0.4]"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-black/10 lg:from-black/60 lg:to-transparent" />
-           <div className="hidden lg:flex flex-col justify-end p-12 text-white relative z-10 h-full">
-              <h2 className="text-4xl font-bold leading-tight">The Future of Local Commerce Starts Here.</h2>
-              <p className="mt-4 text-lg text-white/80">Supercharge your business with easy integrations, powerful dashboards, and more.</p>
-          </div>
-       </div>
-       <div className="flex items-center justify-center min-h-screen p-4 lg:p-8">
-            <div className="w-full max-w-md lg:bg-background lg:p-6 lg:rounded-xl lg:shadow-2xl">
+            className="dark:brightness-[0.6]"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent"></div>
+
+        <div className="relative z-10 flex flex-col justify-end p-12 text-white w-1/2">
+            <h2 className="text-4xl font-bold leading-tight">The Future of Local Commerce Starts Here.</h2>
+            <p className="mt-4 text-lg text-white/80">Supercharge your business with easy integrations, powerful dashboards, and more.</p>
+        </div>
+        
+        <div className="relative z-10 flex items-center justify-center w-1/2 p-8">
+            <div className="w-full max-w-md bg-background p-8 rounded-xl shadow-2xl">
                 <div className="mx-auto grid gap-6">
                     <div className="grid gap-2 text-center">
                         <h1 className="text-3xl font-bold">Welcome Back!</h1>
@@ -133,9 +220,9 @@ export default function LoginPage() {
                     </div>
                     <form onSubmit={handleEmailLogin} className="grid gap-4">
                         <div className="grid gap-2">
-                        <Label htmlFor="email">Email</Label>
+                        <Label htmlFor="email-desktop">Email</Label>
                         <Input
-                            id="email"
+                            id="email-desktop"
                             type="email"
                             name="email"
                             placeholder="m@example.com"
@@ -144,7 +231,7 @@ export default function LoginPage() {
                         </div>
                         <div className="grid gap-2">
                         <div className="flex items-center">
-                            <Label htmlFor="password">Password</Label>
+                            <Label htmlFor="password-desktop">Password</Label>
                             <Link
                             href="/forgot-password"
                             className="ml-auto inline-block text-sm underline"
@@ -154,7 +241,7 @@ export default function LoginPage() {
                         </div>
                         <div className="relative">
                             <Input
-                            id="password"
+                            id="password-desktop"
                             name="password"
                             type={showPassword ? 'text' : 'password'}
                             required
@@ -204,7 +291,8 @@ export default function LoginPage() {
                     </div>
                 </div>
             </div>
-       </div>
+        </div>
+      </div>
     </div>
   );
 }
