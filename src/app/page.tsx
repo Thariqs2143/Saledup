@@ -177,27 +177,25 @@ const targetCustomers = [
                         <h3 className="text-xl font-bold text-primary">With Saledup</h3>
                          <div className="my-8 flex items-center justify-center h-32 relative">
                             <style jsx>{`
-                                @keyframes attract {
-                                    0% { transform: translate(var(--start-x), var(--start-y)) scale(0.8); opacity: 0; }
-                                    50% { opacity: 1; }
-                                    100% { transform: translate(0, 0) scale(1); opacity: 0; }
+                                @keyframes float {
+                                    0% { transform: translateY(0px); }
+                                    50% { transform: translateY(-10px); }
+                                    100% { transform: translateY(0px); }
                                 }
-                                .attractor {
+                                .floating-icon {
                                     position: absolute;
-                                    animation: attract 3s ease-out infinite;
+                                    animation-name: float;
+                                    animation-timing-function: ease-in-out;
+                                    animation-iteration-count: infinite;
                                 }
                             `}</style>
-                            <div className="absolute bg-primary/10 rounded-full h-40 w-40 animate-pulse"></div>
-                            <div className="absolute bg-primary/20 rounded-full h-32 w-32"></div>
-                            
                             <div className="relative p-6 bg-primary text-primary-foreground rounded-full shadow-md">
                                 <ShoppingBag className="h-16 w-16" />
                             </div>
 
-                            <div className="attractor" style={{ '--start-x': '-80px', '--start-y': '-60px', animationDelay: '0s' } as React.CSSProperties}><Users className="h-5 w-5 text-primary" /></div>
-                            <div className="attractor" style={{ '--start-x': '80px', '--start-y': '-50px', animationDelay: '0.5s' } as React.CSSProperties}><TrendingUp className="h-5 w-5 text-primary" /></div>
-                            <div className="attractor" style={{ '--start-x': '-70px', '--start-y': '60px', animationDelay: '1s' } as React.CSSProperties}><QrCode className="h-5 w-5 text-primary" /></div>
-                            <div className="attractor" style={{ '--start-x': '90px', '--start-y': '40px', animationDelay: '1.5s' } as React.CSSProperties}><Users className="h-5 w-5 text-primary" /></div>
+                            <div className="floating-icon" style={{ top: '10%', left: '20%', animationDuration: '3s' }}><Users className="h-6 w-6 text-primary" /></div>
+                            <div className="floating-icon" style={{ top: '15%', right: '18%', animationDuration: '4s', animationDelay: '0.5s' }}><TrendingUp className="h-6 w-6 text-primary" /></div>
+                            <div className="floating-icon" style={{ bottom: '10%', left: '30%', animationDuration: '3.5s', animationDelay: '1s' }}><QrCode className="h-6 w-6 text-primary" /></div>
                         </div>
                         <p className="text-foreground font-medium">
                             Attracting new customers, rewarding loyal ones, and boosting sales effortlessly.
