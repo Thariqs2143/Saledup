@@ -290,7 +290,7 @@ const targetCustomers = [
                                     data-ai-hint={step.hint}
                                     width={600}
                                     height={400}
-                                    className="rounded-lg shadow-lg w-full aspect-[3/2] object-cover"
+                                    className="rounded-lg w-full aspect-[3/2] object-cover"
                                 />
                             </div>
                             <h3 className="mt-6 text-xl font-bold">{step.title}</h3>
