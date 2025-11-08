@@ -188,7 +188,7 @@ export default function AdminDashboard() {
               <TabsTrigger value="yearly">Yearly</TabsTrigger>
             </TabsList>
         </div>
-        <TabsContent value={activeTab} className="space-y-4">
+        <TabsContent value={activeTab} className="mt-4 space-y-4">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
                 <Card className="relative overflow-hidden transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br from-blue-500 to-indigo-600 text-white border-none">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -392,6 +392,7 @@ export default function AdminDashboard() {
 
 
     
+
 
 
 
