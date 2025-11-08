@@ -16,6 +16,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useRouter } from "next/navigation";
 import Image from 'next/image';
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 
 // Types specific to Saledup
 type Offer = {
@@ -127,52 +129,63 @@ export default function AdminDashboard() {
            </div>
        </div>
 
-       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-6">
-        <Card className="relative overflow-hidden transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br from-blue-500 to-indigo-600 text-white border-none">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-bold text-blue-100">Total Offers</CardTitle>
-            <Tag className="h-5 w-5 text-blue-200" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-4xl font-bold flex items-center gap-2">
-              <AnimatedCounter from={0} to={totalOffers} />
+      <Tabs defaultValue="today" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="today">Today</TabsTrigger>
+          <TabsTrigger value="weekly">Weekly</TabsTrigger>
+          <TabsTrigger value="monthly">Monthly</TabsTrigger>
+          <TabsTrigger value="yearly">Yearly</TabsTrigger>
+        </TabsList>
+        <TabsContent value="today" className="space-y-4">
+            <div className="grid grid-cols-2 gap-4 lg:gap-6">
+                <Card className="relative overflow-hidden transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br from-blue-500 to-indigo-600 text-white border-none">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-bold text-blue-100">Total Offers</CardTitle>
+                    <Tag className="h-5 w-5 text-blue-200" />
+                </CardHeader>
+                <CardContent>
+                    <div className="text-4xl font-bold flex items-center gap-2">
+                    <AnimatedCounter from={0} to={totalOffers} />
+                    </div>
+                </CardContent>
+                </Card>
+                <Card className="relative overflow-hidden transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br from-green-500 to-emerald-600 text-white border-none">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-bold text-green-100">Active Offers</CardTitle>
+                    <CheckCircle className="h-5 w-5 text-green-200" />
+                </CardHeader>
+                <CardContent>
+                    <div className="text-4xl font-bold flex items-center gap-2">
+                    <AnimatedCounter from={0} to={activeOffers} />
+                    </div>
+                </CardContent>
+                </Card>
+                <Card className="relative overflow-hidden transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br from-amber-500 to-orange-600 text-white border-none">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-bold text-amber-100">Expired Offers</CardTitle>
+                    <XCircle className="h-5 w-5 text-amber-200" />
+                </CardHeader>
+                <CardContent>
+                    <div className="text-4xl font-bold flex items-center gap-2">
+                    <AnimatedCounter from={0} to={expiredOffers} />
+                    </div>
+                </CardContent>
+                </Card>
+                <Card className="relative overflow-hidden transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br from-fuchsia-500 to-purple-600 text-white border-none">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-bold text-fuchsia-100">Total Claims</CardTitle>
+                    <Users className="h-5 w-5 text-fuchsia-200" />
+                </CardHeader>
+                <CardContent>
+                    <div className="text-4xl font-bold">
+                        <AnimatedCounter from={0} to={totalClaims} />
+                    </div>
+                </CardContent>
+                </Card>
             </div>
-          </CardContent>
-        </Card>
-         <Card className="relative overflow-hidden transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br from-green-500 to-emerald-600 text-white border-none">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-bold text-green-100">Active Offers</CardTitle>
-            <CheckCircle className="h-5 w-5 text-green-200" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-4xl font-bold flex items-center gap-2">
-              <AnimatedCounter from={0} to={activeOffers} />
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="relative overflow-hidden transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br from-amber-500 to-orange-600 text-white border-none">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-bold text-amber-100">Expired Offers</CardTitle>
-            <XCircle className="h-5 w-5 text-amber-200" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-4xl font-bold flex items-center gap-2">
-              <AnimatedCounter from={0} to={expiredOffers} />
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="relative overflow-hidden transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br from-fuchsia-500 to-purple-600 text-white border-none">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-bold text-fuchsia-100">Total Claims</CardTitle>
-            <Users className="h-5 w-5 text-fuchsia-200" />
-          </CardHeader>
-          <CardContent>
-             <div className="text-4xl font-bold">
-                <AnimatedCounter from={0} to={totalClaims} />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+        </TabsContent>
+      </Tabs>
+
 
        <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
             <CardContent className="p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
