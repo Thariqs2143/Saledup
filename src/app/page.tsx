@@ -333,7 +333,7 @@ const targetCustomers = [
                     {placeholderImages.testimonials.map((testimonial, index) => (
                       <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
                         <div className="p-1 h-full">
-                          <Card className="h-full flex flex-col justify-between border-border shadow-sm hover:border-primary transition-all group">
+                          <Card className="h-full flex flex-col justify-between border border-border shadow-sm hover:border-primary transition-all group">
                              <CardContent className="flex flex-col justify-between items-start gap-6 p-6">
                                 <blockquote className="text-muted-foreground italic text-left">
                                     "{testimonial.quote}"
