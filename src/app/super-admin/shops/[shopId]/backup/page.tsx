@@ -47,7 +47,7 @@ type AttendanceRecord = {
 export default function SuperAdminBackupPage() {
     const router = useRouter();
     const params = useParams();
-    const { shopId } = params as { shopId: string };
+    const shopId = params.shopId as string;
     const { toast } = useToast();
     const [loading, setLoading] = useState(true);
     const [shopData, setShopData] = useState<ShopData | null>(null);

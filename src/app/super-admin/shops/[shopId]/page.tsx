@@ -46,7 +46,7 @@ type FullProfile = AppUser & ShopProfile;
 export default function SuperAdminViewShopPage() {
     const router = useRouter();
     const params = useParams();
-    const { shopId } = params as { shopId: string };
+    const shopId = params.shopId as string;
     const { toast } = useToast();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
