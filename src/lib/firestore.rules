@@ -28,11 +28,12 @@ service cloud.firestore {
       
       // Offers subcollection
       match /offers/{offerId} {
-        // Shop owner can manage their own offers
+        // Shop owner can read their offers (get + list) and write/delete them.
         allow read, write, delete: if isShopOwner(shopId);
         
-        // Any user (including unauthenticated) can list offers for a shop
-        allow list;
+        // Any user (including unauthenticated) can list offers for a shop.
+        // This is for the public customer-facing page.
+        allow list: if true;
       }
       
       // Claims subcollection
