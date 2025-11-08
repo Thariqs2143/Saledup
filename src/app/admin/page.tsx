@@ -43,6 +43,7 @@ type Claim = {
 
 export default function AdminDashboard() {
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+  const [ownerName, setOwnerName] = useState('');
   const [loading, setLoading] = useState(true);
   const [offers, setOffers] = useState<Offer[]>([]);
   const [claims, setClaims] = useState<Claim[]>([]);
@@ -68,6 +69,13 @@ export default function AdminDashboard() {
     };
 
     setLoading(true);
+
+    const shopDocRef = doc(db, 'shops', authUser.uid);
+    const unsubscribeShop = onSnapshot(shopDocRef, (doc) => {
+      if (doc.exists()) {
+        setOwnerName(doc.data().ownerName || '');
+      }
+    });
 
     const offersQuery = query(
       collection(db, 'shops', authUser.uid, 'offers'),
@@ -98,6 +106,7 @@ export default function AdminDashboard() {
 
 
     return () => { 
+        unsubscribeShop();
         unsubscribeOffers();
         unsubscribeClaims();
     };
@@ -123,14 +132,14 @@ export default function AdminDashboard() {
        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-                Welcome to Saledup!
+                Good morning, {ownerName}!
             </h1>
             <p className="text-muted-foreground font-bold">Here's a quick overview of your shop's performance.</p>
            </div>
        </div>
 
       <Tabs defaultValue="today" className="space-y-4">
-        <TabsList>
+        <TabsList className="grid w-full grid-cols-4 border dark:border-gray-700 hover:border-red-500">
           <TabsTrigger value="today">Today</TabsTrigger>
           <TabsTrigger value="weekly">Weekly</TabsTrigger>
           <TabsTrigger value="monthly">Monthly</TabsTrigger>
@@ -340,3 +349,4 @@ export default function AdminDashboard() {
 
 
     
+
