@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Sparkles, X, Store, ShoppingBag, Users, QrCode, TrendingUp } from 'lucide-react';
+import { ArrowRight, Sparkles, X, Store, ShoppingBag, Users, QrCode, TrendingUp, BarChart3, Shield, HeartHandshake } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
@@ -44,6 +44,40 @@ export default function LandingPage() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const features = [
+    {
+        icon: QrCode,
+        title: 'One QR, Endless Offers',
+        description: 'A single, permanent QR code for your shop. Update offers anytime without reprinting.',
+    },
+    {
+        icon: Store,
+        title: 'Instant Customer Access',
+        description: 'Customers scan and see your latest deals instantly. No app installation required.',
+        highlighted: true,
+    },
+    {
+        icon: Sparkles,
+        title: 'AI-Powered Descriptions',
+        description: 'Upload an offer image and let our AI generate compelling marketing copy for you.',
+    },
+    {
+        icon: Users,
+        title: 'Boost Customer Loyalty',
+        description: "Reward your regulars and attract new faces with timely, exciting offers they can't resist.",
+    },
+    {
+        icon: BarChart3,
+        title: 'Track Your Growth',
+        description: 'Get simple, actionable insights. See how many customers scan your code and claim your offers.',
+    },
+    {
+        icon: Shield,
+        title: 'Simple & Secure',
+        description: 'An easy-to-use platform for shop owners and a safe, private experience for customers.',
+    },
+];
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
@@ -182,6 +216,37 @@ export default function LandingPage() {
                             Attracting new customers, rewarding loyal ones, and boosting sales effortlessly.
                         </p>
                     </div>
+                </div>
+            </div>
+        </section>
+
+        {/* Key Features Section */}
+        <section className="py-20 sm:py-24">
+             <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                 <div className="inline-block bg-primary/10 text-primary font-semibold py-1 px-4 rounded-full text-sm mb-4">
+                    Key Features
+                </div>
+                <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight">
+                    Bridge the Digital-Physical Gap
+                </h2>
+                <p className="mt-4 max-w-3xl mx-auto text-muted-foreground text-lg">
+                    Engage customers the moment they walk by. Our platform is designed for simplicity and speed, for both you and your customers.
+                </p>
+
+                <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {features.map((feature, index) => (
+                        <div key={index}
+                             className={cn(
+                                'bg-background rounded-xl p-6 text-left border transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-1',
+                                feature.highlighted ? 'border-primary shadow-primary/10' : 'border-border'
+                             )}>
+                            <div className="p-3 bg-primary/10 rounded-lg inline-block mb-4">
+                                <feature.icon className="h-6 w-6 text-primary" />
+                            </div>
+                            <h3 className="text-lg font-bold">{feature.title}</h3>
+                            <p className="mt-2 text-sm text-muted-foreground">{feature.description}</p>
+                        </div>
+                    ))}
                 </div>
             </div>
         </section>
