@@ -110,8 +110,8 @@ export default function LoginPage() {
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
             <Image
-            src="https://res.cloudinary.com/dyov4r11v/image/upload/v1762585915/business-woman-working-on-tablet_23-2148405822_yud2y9.jpg"
-            alt="A business owner working on a tablet in a modern cafe"
+            src="https://res.cloudinary.com/dnkghymx5/image/upload/v1762241011/Generated_Image_November_04_2025_-_12_50PM_1_hslend.png"
+            alt="A business owner joyfully interacting with a customer over the counter"
             fill
             className="object-cover"
             priority
