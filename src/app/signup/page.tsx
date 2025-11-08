@@ -79,6 +79,7 @@ export default function SignupPage() {
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
     const repeatPassword = formData.get('repeat-password') as string;
+    const ownerName = email.split('@')[0];
 
     if (password !== repeatPassword) {
       toast({
@@ -96,10 +97,9 @@ export default function SignupPage() {
         email,
         password
       );
-      const user = userCredential.user;
+      await updateProfile(userCredential.user, { displayName: ownerName });
       
-      const ownerName = email.split('@')[0];
-      await updateProfile(user, { displayName: ownerName });
+      const user = userCredential.user;
 
       const shopDocRef = doc(db, 'shops', user.uid);
       await setDoc(
