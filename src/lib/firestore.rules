@@ -37,8 +37,8 @@ service cloud.firestore {
       
       // Claims subcollection
       match /claims/{claimId} {
-        // Shop owner can read/update claims (e.g., to mark as redeemed)
-        allow read, update: if isShopOwner(shopId);
+        // Shop owner can read/update individual claims and list all claims for their shop.
+        allow get, list, update: if isShopOwner(shopId);
         
         // Anyone can create a claim (since it's an unauthenticated action)
         allow create;
