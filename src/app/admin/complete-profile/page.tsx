@@ -90,8 +90,9 @@ export default function AdminCompleteProfilePage() {
         const address = formData.get('address') as string;
         const gstNumber = formData.get('gstNumber') as string;
         const shopPhone = formData.get('phone') as string;
+        const formOwnerName = formData.get('ownerName') as string;
 
-        if (!shopName || !address || !businessType || !shopPhone) {
+        if (!shopName || !address || !businessType || !shopPhone || !formOwnerName) {
              toast({ title: "Error", description: "Please fill out all required fields.", variant: "destructive" });
              setLoading(false);
              return;
@@ -101,7 +102,7 @@ export default function AdminCompleteProfilePage() {
 
         const shopData = {
             ownerId: authUser.uid,
-            ownerName: ownerName,
+            ownerName: formOwnerName,
             ownerEmail: ownerEmail,
             ownerImageUrl: authUser.photoURL || '',
             shopName,
@@ -163,8 +164,8 @@ export default function AdminCompleteProfilePage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                        <Label htmlFor="ownerName">Owner Name</Label>
-                        <Input id="ownerName" name="ownerName" value={ownerName} readOnly disabled />
+                        <Label htmlFor="ownerName">Owner Name *</Label>
+                        <Input id="ownerName" name="ownerName" value={ownerName} onChange={(e) => setOwnerName(e.target.value)} required />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="ownerEmail">Owner Email</Label>
@@ -215,3 +216,5 @@ export default function AdminCompleteProfilePage() {
     </div>
   );
 }
+
+    
