@@ -174,14 +174,14 @@ export default function AdminDashboard() {
   return (
     <div className="flex flex-col gap-6 lg:gap-8">
       <Tabs defaultValue={activeTab} onValueChange={setActiveTab}>
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
             <div>
               <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
                   Good morning, {ownerName}!
               </h1>
               <p className="text-muted-foreground font-semibold">Here's a quick overview of your shop's performance.</p>
             </div>
-            <TabsList className="grid w-full md:w-auto md:inline-flex grid-cols-4 border-2 border-gray-300 dark:border-white hover:border-primary transition-colors">
+            <TabsList className="grid w-full lg:w-auto lg:inline-flex grid-cols-4 border-2 border-gray-300 dark:border-white hover:border-primary transition-colors">
               <TabsTrigger value="today" className="font-extrabold">Today</TabsTrigger>
               <TabsTrigger value="weekly" className="font-extrabold">Weekly</TabsTrigger>
               <TabsTrigger value="monthly" className="font-extrabold">Monthly</TabsTrigger>
@@ -239,12 +239,12 @@ export default function AdminDashboard() {
       </Tabs>
 
 
-       <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
-            <CardContent className="p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                <div>
-                    <h3 className="text-lg font-bold">View Your Live Offers Page</h3>
-                    <p className="text-sm text-muted-foreground">This is the public page your customers see when they scan your QR code.</p>
-                </div>
+        <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
+            <CardHeader>
+                <CardTitle>View Your Live Offers Page</CardTitle>
+                <CardDescription>This is the public page your customers see when they scan your QR code.</CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <Button asChild>
                     <Link href={`/shops/${authUser?.uid}`} target="_blank">
                         Live View <Eye className="ml-2 h-4 w-4"/>
@@ -261,7 +261,7 @@ export default function AdminDashboard() {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {recentOffers.map(offer => (
-                        <Card key={offer.id} className="group overflow-hidden transition-all duration-300 hover:shadow-lg">
+                        <Card key={offer.id} className="group overflow-hidden transition-all duration-300 hover:shadow-lg border-2 border-foreground hover:border-primary">
                              <div className="relative">
                                 <Badge className="absolute top-2 right-2 z-10" variant={offer.isActive ? 'default' : 'secondary'}>
                                     {offer.isActive ? 'Active' : 'Inactive'}
@@ -337,7 +337,7 @@ export default function AdminDashboard() {
                     ))}
                 </div>
             ) : (
-                 <div className="text-center py-12 text-muted-foreground">
+                 <div className="text-center py-12 text-muted-foreground space-y-4">
                     <p>No customers have claimed offers yet.</p>
                     <Link href="/admin/customers" className="mt-4 inline-block">
                         <Button variant="outline" size="sm">
