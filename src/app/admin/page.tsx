@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -9,10 +10,12 @@ import { AnimatedCounter } from "@/components/animated-counter";
 import { useEffect, useState, useMemo } from "react";
 import { collection, onSnapshot, query, where, Timestamp, orderBy, limit, doc, getDoc } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
-import { formatDistanceToNow } from 'date-fns';
+import { format, formatDistanceToNow } from 'date-fns';
 import { onAuthStateChanged, type User as AuthUser } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from "next/navigation";
+import Image from 'next/image';
+import { Badge } from "@/components/ui/badge";
 
 // Types specific to Saledup
 type Offer = {
@@ -102,6 +105,8 @@ export default function AdminDashboard() {
   const totalOffers = useMemo(() => offers.length, [offers]);
   const activeOffers = useMemo(() => offers.filter(o => o.isActive).length, [offers]);
   const expiredOffers = useMemo(() => offers.filter(o => !o.isActive).length, [offers]);
+  const recentOffers = useMemo(() => offers.slice(0, 3), [offers]);
+
 
   if (loading) {
       return (
@@ -182,6 +187,46 @@ export default function AdminDashboard() {
                 </Button>
             </CardContent>
         </Card>
+        
+        {recentOffers.length > 0 && (
+            <div className="space-y-4">
+                <div>
+                    <h2 className="text-2xl font-bold tracking-tight">Recent Offers</h2>
+                    <p className="text-muted-foreground">A list of your most recent offers.</p>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {recentOffers.map(offer => (
+                        <Card key={offer.id} className="group overflow-hidden transition-all duration-300 hover:shadow-lg">
+                             <div className="relative">
+                                <Badge className="absolute top-2 right-2 z-10" variant={offer.isActive ? 'default' : 'secondary'}>
+                                    {offer.isActive ? 'Active' : 'Inactive'}
+                                </Badge>
+                                <Image 
+                                    src={offer.imageUrl || `https://placehold.co/600x400?text=${offer.title.replace(/\s/g, '+')}`}
+                                    alt={offer.title}
+                                    width={600}
+                                    height={400}
+                                    className="aspect-video object-cover transition-transform duration-300 group-hover:scale-105"
+                                />
+                             </div>
+                             <CardContent className="p-4 space-y-3">
+                                 <h3 className="font-bold truncate">{offer.title}</h3>
+                                 <p className="text-xs text-muted-foreground">
+                                    Created: {format(offer.createdAt.toDate(), 'PP')}
+                                 </p>
+                             </CardContent>
+                             <CardContent className="p-4 border-t">
+                                <Link href={`/admin/offers/${offer.id}`} className="w-full">
+                                    <Button variant="outline" className="w-full">
+                                        <Eye className="mr-2 h-4 w-4" /> View
+                                    </Button>
+                                </Link>
+                             </CardContent>
+                        </Card>
+                    ))}
+                </div>
+            </div>
+        )}
 
        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <Card className="transform-gpu xl:col-span-2 transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground dark:border-foreground hover:border-primary">
