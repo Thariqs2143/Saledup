@@ -140,10 +140,17 @@ export default function SignupPage() {
   return (
      <div className="w-full min-h-screen">
        {/* Mobile View */}
-       <div className="flex flex-col items-center justify-center min-h-screen p-4 lg:hidden bg-background">
-            <div className="w-full max-w-md">
-                <div className="mx-auto grid gap-6">
-                    <div className="grid gap-2 text-center">
+       <div className="flex flex-col min-h-screen lg:hidden bg-background">
+            <Image
+                src="https://res.cloudinary.com/dyov4r11v/image/upload/v1762585069/WhatsApp_Image_2025-11-08_at_12.26.33_9ac0131f_qj21tx.jpg"
+                alt="Welcome"
+                width={1200}
+                height={800}
+                className="w-full h-auto object-cover"
+            />
+            <div className="flex-grow flex flex-col justify-center p-6">
+                <div className="w-full max-w-md mx-auto">
+                    <div className="grid gap-2 text-center mb-6">
                         <h1 className="text-3xl font-bold">Start Growing Today</h1>
                         <p className="text-balance text-muted-foreground">
                         Create an account to launch instant offers and connect with customers.
