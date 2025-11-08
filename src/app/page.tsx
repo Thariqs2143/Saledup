@@ -108,7 +108,7 @@ const targetCustomers = [
         <div
           className={cn(
             'relative bg-primary text-primary-foreground py-2.5 px-4 text-center text-sm font-medium transition-all duration-300',
-            isScrolled ? 'block' : 'hidden'
+            !showBanner && 'hidden'
           )}
         >
           <Sparkles className="h-4 w-4 absolute left-4 top-1/2 -translate-y-1/2 hidden md:inline-block" />
@@ -123,7 +123,7 @@ const targetCustomers = [
         </div>
         <div
           className={cn(
-            'transition-all duration-300',
+            'transition-all duration-300 bg-background',
             isScrolled
               ? 'py-2 bg-background/80 backdrop-blur-sm rounded-full shadow-lg border mx-auto px-4 sm:px-6 lg:px-8 mt-2 max-w-6xl'
               : 'py-4'
@@ -392,7 +392,7 @@ const targetCustomers = [
                 </p>
                 <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
                     {placeholderImages.testimonials.map((testimonial, index) => (
-                        <div key={index} className="bg-background rounded-lg shadow-sm p-8 flex flex-col justify-between">
+                        <div key={index} className="bg-background rounded-lg shadow-sm p-8 flex flex-col justify-between border border-border">
                             <blockquote className="text-muted-foreground italic">
                                 "{testimonial.quote}"
                             </blockquote>
@@ -442,6 +442,30 @@ const targetCustomers = [
                      <Link href="#" passHref>
                         <Button size="lg" variant="outline" className="h-12 px-8 text-base">
                             View All FAQs <ChevronRight className="ml-2 h-4 w-4" />
+                        </Button>
+                    </Link>
+                </div>
+            </div>
+        </section>
+
+        {/* Final CTA Section */}
+        <section className="bg-primary/5 py-20 sm:py-24">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight">
+                    Ready to Boost Your Business?
+                </h2>
+                <p className="mt-4 max-w-2xl mx-auto text-muted-foreground text-lg">
+                    Join hundreds of local shops that are already seeing growth with Saledup. Get started for free today and see the difference.
+                </p>
+                <div className="mt-8 flex justify-center gap-4">
+                    <Link href="/login" passHref>
+                        <Button size="lg" className="h-12 px-8 text-base">
+                            Claim Your Free Account <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
+                    </Link>
+                    <Link href="#" passHref>
+                        <Button size="lg" variant="outline" className="h-12 px-8 text-base">
+                            Contact Sales
                         </Button>
                     </Link>
                 </div>
