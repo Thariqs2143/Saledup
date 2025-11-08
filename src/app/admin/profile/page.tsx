@@ -4,16 +4,18 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { User, LogOut, Loader2, Building, Mail, Phone, MapPin, FileText, Edit, Percent, Briefcase, Settings as SettingsIcon } from 'lucide-react';
+import { User, LogOut, Loader2, Building, Mail, Phone, MapPin, FileText, Edit, Percent, Briefcase, Settings as SettingsIcon, Tag, CheckCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged, type User as AuthUser } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, onSnapshot } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
+import { AnimatedCounter } from '@/components/animated-counter';
+import PricingPageContent from './pricing-content';
 
 type ShopProfile = {
     ownerName?: string;
@@ -25,6 +27,10 @@ type ShopProfile = {
     gstNumber?: string;
     phone?: string;
     email?: string;
+};
+
+type Offer = {
+    isActive: boolean;
 };
 
 const InfoRow = ({ icon: Icon, label, value, iconClass }: { icon: React.ElementType, label: string, value?: string, iconClass?: string }) => (
@@ -43,10 +49,11 @@ export default function AdminProfilePage() {
   const { toast } = useToast();
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [profile, setProfile] = useState<ShopProfile>({});
+  const [offers, setOffers] = useState<Offer[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setAuthUser(user);
         const shopDocRef = doc(db, 'shops', user.uid);
@@ -59,12 +66,22 @@ export default function AdminProfilePage() {
             phone: user.phoneNumber || data.phone,
           });
         }
+
+        const offersQuery = collection(db, 'shops', user.uid, 'offers');
+        const unsubscribeOffers = onSnapshot(offersQuery, (snapshot) => {
+            const offersList = snapshot.docs.map(doc => doc.data() as Offer);
+            setOffers(offersList);
+        });
+        
+        // Return a cleanup function for the offers listener
+        return () => unsubscribeOffers();
+
       } else {
         router.push('/login');
       }
       setLoading(false);
     });
-    return () => unsubscribe();
+    return () => unsubscribeAuth();
   }, [router]);
 
   if (loading) {
@@ -74,6 +91,9 @@ export default function AdminProfilePage() {
       </div>
     );
   }
+  
+  const totalOffers = offers.length;
+  const activeOffers = offers.filter(o => o.isActive).length;
 
   return (
     <div className="space-y-6">
@@ -83,12 +103,9 @@ export default function AdminProfilePage() {
         </div>
         
         <Tabs defaultValue="profile" className="w-full">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="profile">Profile</TabsTrigger>
-                <TabsTrigger value="subscription" disabled>Subscription</TabsTrigger>
-                <TabsTrigger value="shifts" disabled>Shifts</TabsTrigger>
-                <TabsTrigger value="business" disabled>Business</TabsTrigger>
-                <TabsTrigger value="general" disabled>General</TabsTrigger>
+                <TabsTrigger value="pricing">Pricing & Billing</TabsTrigger>
             </TabsList>
             <TabsContent value="profile" className="mt-6">
                 <div className="space-y-8">
@@ -125,37 +142,44 @@ export default function AdminProfilePage() {
                                 <InfoRow icon={MapPin} label="Location" value={profile.address} />
                                 <InfoRow icon={Percent} label="GST Number" value={profile.gstNumber} iconClass="rotate-45" />
                                 <InfoRow icon={Phone} label="Phone Number" value={profile.phone} />
+                                 <InfoRow icon={Mail} label="Email Address" value={profile.email} />
                              </div>
                         </CardContent>
                     </Card>
                     <Card>
                         <CardHeader>
-                            <CardTitle>Usage</CardTitle>
-                            <CardDescription>Your current plan usage. Upgrade to increase limits.</CardDescription>
+                            <CardTitle>Offer Stats</CardTitle>
+                            <CardDescription>Your current offer limits and usage.</CardDescription>
                         </CardHeader>
-                         <CardContent className="space-y-4">
-                             <div>
-                                 <div className="flex justify-between mb-1">
-                                    <h4 className="text-sm font-medium">Employees</h4>
-                                    <p className="text-sm text-muted-foreground">1 / 5</p>
-                                 </div>
-                                 <Progress value={20} />
-                             </div>
-                             <div>
-                                <div className="flex justify-between mb-1">
-                                    <h4 className="text-sm font-medium">Branches</h4>
-                                    <p className="text-sm text-muted-foreground">1 / 1</p>
+                         <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="p-4 rounded-lg bg-muted/50 flex items-center justify-between">
+                                <div>
+                                    <h4 className="text-sm font-medium text-muted-foreground">Total Offers</h4>
+                                     <p className="text-2xl font-bold"><AnimatedCounter from={0} to={totalOffers} /></p>
                                 </div>
-                                <Progress value={100} />
-                             </div>
+                                <Tag className="h-8 w-8 text-primary"/>
+                            </div>
+                            <div className="p-4 rounded-lg bg-muted/50 flex items-center justify-between">
+                                <div>
+                                    <h4 className="text-sm font-medium text-muted-foreground">Active Offers</h4>
+                                    <p className="text-2xl font-bold"><AnimatedCounter from={0} to={activeOffers} /></p>
+                                </div>
+                                <CheckCircle className="h-8 w-8 text-green-500"/>
+                            </div>
                          </CardContent>
                          <CardFooter className="flex flex-col sm:flex-row gap-2">
-                             <Button variant="outline" className="w-full">Manage Employees</Button>
-                             <Button variant="outline" className="w-full">Manage Branches</Button>
-                             <Button className="w-full">Upgrade Plan</Button>
+                             <Button asChild variant="outline" className="w-full">
+                                <Link href="/admin/offers">Manage Offers</Link>
+                             </Button>
+                             <Button asChild className="w-full">
+                                <Link href="/admin/profile?tab=pricing">Upgrade Plan</Link>
+                            </Button>
                          </CardFooter>
                     </Card>
                 </div>
+            </TabsContent>
+            <TabsContent value="pricing" className="mt-6">
+                <PricingPageContent />
             </TabsContent>
         </Tabs>
     </div>
