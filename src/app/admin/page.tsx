@@ -241,7 +241,7 @@ export default function AdminDashboard() {
 
         <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
             <CardHeader>
-                <CardTitle>View Your Live Offers Page</CardTitle>
+                <CardTitle className="font-bold">Your Live Offers Page</CardTitle>
                 <CardDescription>
                 This is the public page your customers see when they scan your QR
                 code.
@@ -304,7 +304,7 @@ export default function AdminDashboard() {
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Activity className="h-6 w-6 text-primary"/>
-                  <CardTitle>Customer Activity Feed</CardTitle>
+                  <CardTitle className="font-bold">Customers Activity</CardTitle>
                 </div>
                 {recentClaims.length > 0 && (
                     <Link href="/admin/customers" className="hidden sm:block">
@@ -357,7 +357,7 @@ export default function AdminDashboard() {
             <CardHeader>
                 <div className="flex items-center gap-3">
                    <Sparkles className="h-6 w-6 text-primary"/>
-                   <CardTitle>Quick Actions</CardTitle>
+                   <CardTitle className="font-bold">Quick Actions</CardTitle>
                 </div>
                 <CardDescription>Get started with these common tasks.</CardDescription>
             </CardHeader>
@@ -413,6 +413,8 @@ export default function AdminDashboard() {
 
 
 
+
+    
 
     
 
