@@ -83,47 +83,52 @@ export default function LandingPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       {/* Header */}
-      <header className={cn(
-          "sticky top-0 z-50 transition-all duration-300 w-full",
-          isScrolled ? "py-2" : "py-4"
-        )}>
-        {isScrolled && showBanner && (
-             <div className="relative bg-primary text-primary-foreground py-2.5 px-4 text-center text-sm font-medium transition-all animate-in fade-in-50 duration-300 mb-2">
-                <Sparkles className="h-4 w-4 absolute left-4 top-1/2 -translate-y-1/2 hidden md:inline-block" />
-                <span>Upgrade to Pro and unlock powerful new features!</span>
-                <button onClick={() => setShowBanner(false)} className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-md hover:bg-white/20">
-                    <X className="h-4 w-4" />
-                    <span className="sr-only">Dismiss</span>
-                </button>
-            </div>
+      <header className={'sticky top-0 z-50 w-full transition-all duration-300'}>
+        {showBanner && (
+          <div className="relative bg-primary text-primary-foreground py-2.5 px-4 text-center text-sm font-medium">
+            <Sparkles className="h-4 w-4 absolute left-4 top-1/2 -translate-y-1/2 hidden md:inline-block" />
+            <span>Upgrade to Pro and unlock powerful new features!</span>
+            <button
+              onClick={() => setShowBanner(false)}
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-md hover:bg-white/20"
+            >
+              <X className="h-4 w-4" />
+              <span className="sr-only">Dismiss</span>
+            </button>
+          </div>
         )}
-        <div className={cn(
-            "container mx-auto flex items-center justify-between transition-all duration-300",
-            isScrolled ? "h-16 bg-background/80 backdrop-blur-sm rounded-full shadow-lg border" : "h-20",
-             "px-4 sm:px-6 lg:px-8"
-            )}>
-          <Link href="/" className="flex items-center gap-2.5 text-foreground">
-              <SaledupLogo />
-              <span className="font-bold text-xl tracking-wide">
-                  Saledup
-              </span>
-          </Link>
-          <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-            <Link href="#" className="text-foreground/80 hover:text-foreground">Home</Link>
-            <Link href="#" className="text-foreground/80 hover:text-foreground">About</Link>
-            <Link href="#" className="text-foreground/80 hover:text-foreground">Pricing</Link>
-            <Link href="#" className="text-foreground/80 hover:text-foreground">FAQ</Link>
-            <Link href="#" className="text-foreground/80 hover:text-foreground">Contact</Link>
-          </nav>
-          <div className="flex items-center gap-2">
-            <Link href="/login" passHref>
-               <Button variant="outline">Get Started</Button>
+        <div
+          className={cn(
+            'transition-all duration-300',
+            isScrolled
+              ? 'py-2 bg-background/80 backdrop-blur-sm rounded-full shadow-lg border mx-auto mt-2 max-w-6xl'
+              : 'py-4'
+          )}
+        >
+          <div className="container mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-8">
+            <Link href="/" className="flex items-center gap-2.5 text-foreground">
+                <SaledupLogo />
+                <span className="font-bold text-xl tracking-wide">
+                    Saledup
+                </span>
             </Link>
-            <Link href="/login" passHref>
-               <Button>
-                  Go Pro
-               </Button>
-            </Link>
+            <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
+              <Link href="#" className="text-foreground/80 hover:text-foreground">Home</Link>
+              <Link href="#" className="text-foreground/80 hover:text-foreground">About</Link>
+              <Link href="#" className="text-foreground/80 hover:text-foreground">Pricing</Link>
+              <Link href="#" className="text-foreground/80 hover:text-foreground">FAQ</Link>
+              <Link href="#" className="text-foreground/80 hover:text-foreground">Contact</Link>
+            </nav>
+            <div className="flex items-center gap-2">
+              <Link href="/login" passHref>
+                 <Button variant="outline">Get Started</Button>
+              </Link>
+              <Link href="/login" passHref>
+                 <Button>
+                    Go Pro
+                 </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </header>
@@ -256,5 +261,3 @@ export default function LandingPage() {
     </div>
   );
 }
-
-    
