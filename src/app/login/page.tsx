@@ -106,7 +106,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white md:grid md:grid-cols-2">
+    <div className="min-h-screen bg-background text-foreground md:grid md:grid-cols-2">
       {/* LEFT SIDE - Image */}
       <div className="relative h-64 md:h-screen">
         <Image
@@ -116,15 +116,15 @@ export default function LoginPage() {
           className="object-cover"
           priority
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent md:bg-gradient-to-r md:from-black md:via-black/50 md:to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent md:bg-gradient-to-r md:from-background md:via-background/50 md:to-transparent"></div>
       </div>
 
       {/* RIGHT SIDE - Form */}
       <div className="flex flex-col items-center justify-center p-6 -mt-16 md:mt-0 relative z-10">
-        <div className="w-full max-w-sm space-y-6 rounded-lg bg-black/50 p-8">
+        <div className="w-full max-w-sm space-y-6">
           <div className="text-center">
             <h1 className="text-3xl font-bold tracking-tight">Welcome Back</h1>
-            <p className="mt-2 text-neutral-400">
+            <p className="mt-2 text-muted-foreground">
               Sign in to manage your offers and grow your business.
             </p>
           </div>
@@ -137,7 +137,7 @@ export default function LoginPage() {
                 name="email"
                 type="email"
                 required
-                className="mt-1 bg-neutral-800 border-neutral-700 placeholder:text-neutral-500"
+                className="mt-1"
               />
             </div>
             <div>
@@ -147,12 +147,12 @@ export default function LoginPage() {
                 name="password"
                 type="password"
                 required
-                className="mt-1 bg-neutral-800 border-neutral-700 placeholder:text-neutral-500"
+                className="mt-1"
               />
             </div>
             <Button
               type="submit"
-              className="w-full h-11 bg-primary hover:bg-primary/90"
+              className="w-full h-11"
               disabled={loading || googleLoading}
             >
               {loading && <Loader2 className="mr-2 animate-spin" />}
@@ -162,16 +162,17 @@ export default function LoginPage() {
 
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-neutral-700" />
+              <div className="w-full border-t" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="bg-black/50 px-2 text-neutral-400">OR</span>
+              <span className="bg-background px-2 text-muted-foreground">OR</span>
             </div>
           </div>
 
           <Button
             onClick={handleGoogleSignIn}
-            className="w-full h-11 bg-neutral-800 border border-neutral-700 hover:bg-neutral-700"
+            variant="outline"
+            className="w-full h-11"
             disabled={loading || googleLoading}
           >
             {googleLoading ? (
@@ -187,7 +188,7 @@ export default function LoginPage() {
             Continue with Google
           </Button>
 
-          <p className="text-center text-sm text-neutral-400">
+          <p className="text-center text-sm text-muted-foreground">
             Don't have an account?{' '}
             <Link href="/signup" className="font-medium text-primary hover:underline">
               Sign up
