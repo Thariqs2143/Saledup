@@ -9,10 +9,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Building, Loader2, Store, Upload } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
-import { doc, setDoc, writeBatch } from 'firebase/firestore';
+import { doc, setDoc } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
 import { onAuthStateChanged, type User as AuthUser } from 'firebase/auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { errorEmitter } from '@/lib/error-emitter';
+import { FirestorePermissionError } from '@/lib/errors';
 
 
 export default function AdminCompleteProfilePage() {
@@ -91,32 +93,38 @@ export default function AdminCompleteProfilePage() {
         
         const fallback = shopName.split(' ').map(n => n[0]).join('');
 
-        try {
-            const shopDocRef = doc(db, "shops", authUser.uid);
-            await setDoc(shopDocRef, {
-                ownerId: authUser.uid,
-                ownerName: ownerName,
-                ownerEmail: ownerEmail,
-                ownerImageUrl: authUser.photoURL || '',
-                shopName,
-                address,
-                imageUrl: imageUrl || `https://placehold.co/400x300.png?text=${fallback}`,
-                createdAt: new Date(),
-            }, { merge: true });
+        const shopData = {
+            ownerId: authUser.uid,
+            ownerName: ownerName,
+            ownerEmail: ownerEmail,
+            ownerImageUrl: authUser.photoURL || '',
+            shopName,
+            address,
+            imageUrl: imageUrl || `https://placehold.co/400x300.png?text=${fallback}`,
+            createdAt: new Date(),
+        };
 
-            toast({
-                title: "Profile Complete!",
-                description: "Welcome! Your shop profile has been created.",
+        const shopDocRef = doc(db, "shops", authUser.uid);
+        
+        setDoc(shopDocRef, shopData, { merge: true })
+            .then(() => {
+                toast({
+                    title: "Profile Complete!",
+                    description: "Welcome! Your shop profile has been created.",
+                });
+                router.push('/admin');
+            })
+            .catch(async (serverError) => {
+                const permissionError = new FirestorePermissionError({
+                  path: shopDocRef.path,
+                  operation: 'create',
+                  requestResourceData: shopData,
+                });
+                errorEmitter.emit('permission-error', permissionError);
+            })
+            .finally(() => {
+                setLoading(false);
             });
-            
-            router.push('/admin');
-
-        } catch (error) {
-            console.error("Error creating shop profile:", error);
-            toast({ title: "Error", description: "Could not save your profile. Please try again.", variant: "destructive" });
-        } finally {
-            setLoading(false);
-        }
     };
 
   return (
@@ -177,3 +185,5 @@ export default function AdminCompleteProfilePage() {
     </div>
   );
 }
+
+    

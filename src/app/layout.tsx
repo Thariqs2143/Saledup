@@ -6,6 +6,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import Script from 'next/script';
 import { Poppins } from 'next/font/google';
 import { cn } from '@/lib/utils';
+import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -45,6 +46,7 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
         >
+            <FirebaseErrorListener />
             {children}
             <Toaster />
         </ThemeProvider>
@@ -72,3 +74,5 @@ export default function RootLayout({
     </html>
   );
 }
+
+    
