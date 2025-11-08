@@ -56,14 +56,21 @@ export function LandingHeader() {
     <header className={'sticky top-0 z-50 w-full'}>
       <div
         className={cn(
-          'relative bg-primary text-primary-foreground py-2.5 px-4 text-center text-sm font-medium transition-all duration-300',
+          'relative bg-primary text-primary-foreground transition-all duration-300',
           !showBanner && 'hidden'
         )}
       >
-        <Sparkles className="h-4 w-4 absolute left-4 top-1/2 -translate-y-1/2 hidden md:inline-block" />
-        <span>Upgrade to Pro and unlock powerful new features!</span>
+        <Link href="/pricing" className="block py-2.5 px-4 text-center text-sm font-medium hover:bg-primary/90">
+            <div className="flex justify-center items-center gap-2">
+                <Sparkles className="h-4 w-4 hidden md:inline-block" />
+                <span>Upgrade to Pro and unlock powerful new features!</span>
+            </div>
+        </Link>
         <button
-          onClick={() => setShowBanner(false)}
+          onClick={(e) => {
+              e.preventDefault();
+              setShowBanner(false);
+          }}
           className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-md hover:bg-white/20"
         >
           <X className="h-4 w-4" />
