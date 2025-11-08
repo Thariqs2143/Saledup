@@ -188,7 +188,7 @@ export default function AdminDashboard() {
               <TabsTrigger value="yearly" className="font-extrabold">Yearly</TabsTrigger>
             </TabsList>
         </div>
-        <TabsContent value={activeTab} className="mt-4 space-y-4">
+        <TabsContent value={activeTab} className="mt-6 space-y-4">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
                 <Card className="relative overflow-hidden transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br from-blue-500 to-indigo-600 text-white border-none">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -337,9 +337,9 @@ export default function AdminDashboard() {
                     ))}
                 </div>
             ) : (
-                 <div className="text-center py-12 text-muted-foreground space-y-4">
+                 <div className="text-center py-12 text-muted-foreground">
                     <p>No customers have claimed offers yet.</p>
-                    <Link href="/admin/customers">
+                    <Link href="/admin/customers" className="mt-4 inline-block">
                         <Button variant="outline" size="sm">
                             <Eye className="mr-2 h-4 w-4"/> View Customers Page
                         </Button>
@@ -408,6 +408,8 @@ export default function AdminDashboard() {
 
 
 
+
+    
 
     
 
