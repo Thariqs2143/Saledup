@@ -3,7 +3,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Sparkles, X, Store, ShoppingBag, Users, QrCode, TrendingUp, BarChart3, Shield, HeartHandshake, Coffee, Utensils, Shirt } from 'lucide-react';
+import { ArrowRight, Sparkles, X, Store, ShoppingBag, Users, QrCode, TrendingUp, BarChart3, Shield, HeartHandshake, Coffee, Utensils, Shirt, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 import { LandingFooter } from '@/components/landing-footer';
 import placeholderImages from '@/lib/placeholder-images.json';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 
 const SaledupLogo = () => (
@@ -43,7 +44,7 @@ export default function LandingPage() {
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 0);
+      setIsScrolled(window.scrollY > 20);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
@@ -103,30 +104,35 @@ const targetCustomers = [
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       {/* Header */}
-       <header className={cn(
-        'sticky top-0 z-50 w-full transition-all duration-300',
-        isScrolled ? 'bg-background/80 backdrop-blur-sm' : 'bg-transparent'
-      )}>
-        {showBanner && (
-          <div className="relative bg-primary text-primary-foreground py-2.5 px-4 text-center text-sm font-medium">
-            <Sparkles className="h-4 w-4 absolute left-4 top-1/2 -translate-y-1/2 hidden md:inline-block" />
-            <span>Upgrade to Pro and unlock powerful new features!</span>
-            <button
-              onClick={() => setShowBanner(false)}
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-md hover:bg-white/20"
-            >
-              <X className="h-4 w-4" />
-              <span className="sr-only">Dismiss</span>
-            </button>
-          </div>
-        )}
-        <div className="container mx-auto">
-          <div className={cn("flex items-center justify-between transition-all duration-300", isScrolled ? 'py-2' : 'py-4')}>
+      <header className={'sticky top-0 z-50 w-full'}>
+        <div
+          className={cn(
+            'relative bg-primary text-primary-foreground py-2.5 px-4 text-center text-sm font-medium transition-all duration-300',
+            isScrolled ? 'block' : 'hidden'
+          )}
+        >
+          <Sparkles className="h-4 w-4 absolute left-4 top-1/2 -translate-y-1/2 hidden md:inline-block" />
+          <span>Upgrade to Pro and unlock powerful new features!</span>
+          <button
+            onClick={() => setShowBanner(false)}
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-md hover:bg-white/20"
+          >
+            <X className="h-4 w-4" />
+            <span className="sr-only">Dismiss</span>
+          </button>
+        </div>
+        <div
+          className={cn(
+            'transition-all duration-300',
+            isScrolled
+              ? 'py-2 bg-background/80 backdrop-blur-sm rounded-full shadow-lg border mx-auto px-4 sm:px-6 lg:px-8 mt-2 max-w-6xl'
+              : 'py-4'
+          )}
+        >
+          <div className={cn('flex items-center justify-between', !isScrolled && 'container mx-auto')}>
             <Link href="/" className="flex items-center gap-2.5 text-foreground">
-                <SaledupLogo />
-                <span className="font-bold text-xl tracking-wide">
-                    Saledup
-                </span>
+              <SaledupLogo />
+              <span className="font-bold text-xl tracking-wide">Saledup</span>
             </Link>
             <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
               <Link href="#" className="text-foreground/80 hover:text-foreground">Home</Link>
@@ -137,12 +143,10 @@ const targetCustomers = [
             </nav>
             <div className="flex items-center gap-2">
               <Link href="/login" passHref>
-                 <Button variant="outline">Get Started</Button>
+                <Button variant="outline">Get Started</Button>
               </Link>
               <Link href="/login" passHref>
-                 <Button>
-                    Go Pro
-                 </Button>
+                <Button>Go Pro</Button>
               </Link>
             </div>
           </div>
@@ -404,6 +408,42 @@ const targetCustomers = [
                             </div>
                         </div>
                     ))}
+                </div>
+            </div>
+        </section>
+
+        {/* FAQ Section */}
+        <section className="bg-background py-20 sm:py-24">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center max-w-3xl">
+                <div className="inline-block bg-primary/10 text-primary font-semibold py-1 px-4 rounded-full text-sm mb-4">
+                    Everything you need to know
+                </div>
+                <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight">
+                    Frequently Asked Questions
+                </h2>
+                <p className="mt-4 mx-auto text-muted-foreground text-lg">
+                    Got questions? We've got answers. If you can't find what you're looking for, feel free to contact us.
+                </p>
+                
+                <Accordion type="single" collapsible className="w-full mt-12 text-left">
+                    {placeholderImages.faqs.map((faq, index) => (
+                         <AccordionItem key={index} value={`item-${index}`}>
+                            <AccordionTrigger className="text-base font-semibold hover:no-underline">
+                                {faq.question}
+                            </AccordionTrigger>
+                            <AccordionContent className="text-muted-foreground">
+                                {faq.answer}
+                            </AccordionContent>
+                        </AccordionItem>
+                    ))}
+                </Accordion>
+
+                <div className="mt-12">
+                     <Link href="#" passHref>
+                        <Button size="lg" variant="outline" className="h-12 px-8 text-base">
+                            View All FAQs <ChevronRight className="ml-2 h-4 w-4" />
+                        </Button>
+                    </Link>
                 </div>
             </div>
         </section>

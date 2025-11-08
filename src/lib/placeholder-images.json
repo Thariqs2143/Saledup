@@ -44,5 +44,23 @@
       "quote": "I love discovering new deals just by scanning a code. It feels like a little surprise every time I visit my favorite cafe. No need to download another app!",
       "hint": "person smiling"
     }
+  ],
+  "faqs": [
+    {
+      "question": "What is Saledup and how does it work?",
+      "answer": "Saledup is a platform that allows local businesses to create and manage real-time offers through a single, permanent QR code. Customers scan the code with their phone to see your latest deals—no app needed. You create an offer in your dashboard, and it's instantly live."
+    },
+    {
+      "question": "Do my customers need to download an app?",
+      "answer": "No, and that's the beauty of it! Customers can use their phone's built-in camera to scan your QR code. It opens a simple, fast-loading webpage with your offers. This frictionless experience means more customers will engage with your deals."
+    },
+    {
+      "question": "Can I see how many people are scanning my code?",
+      "answer": "Yes! Your Saledup dashboard includes simple analytics that show you how many times your QR code has been scanned and how many customers have claimed each offer. This helps you understand what's working and what's not."
+    },
+    {
+      "question": "Is there a free trial?",
+      "answer": "Absolutely. You can sign up for a free account to get your permanent QR code and try out the basic features. We offer premium plans with more advanced capabilities like AI-powered descriptions and detailed analytics as your business grows."
+    }
   ]
 }
