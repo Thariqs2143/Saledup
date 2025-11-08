@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -109,7 +110,7 @@ export default function LoginPage() {
       {/* LEFT SIDE - Image */}
       <div className="relative h-64 md:h-screen">
         <Image
-          src="https://res.cloudinary.com/dyov4r11v/image/upload/v1762585069/WhatsApp_Image_2025-11-08_at_12.26.33_9ac0131f_qj21tx.jpg"
+          src="https://res.cloudinary.com/dyov4r11v/image/upload/v1762585915/business-woman-working-on-tablet_23-2148405822_yud2y9.jpg"
           alt="A vibrant storefront illustration for Saledup"
           fill
           className="object-cover"
