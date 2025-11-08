@@ -137,11 +137,13 @@ export default function AdminDashboard() {
     }
     
     const filteredOffers = offers.filter(o => {
+        if (!o.createdAt) return false;
         const createdAtDate = o.createdAt.toDate();
         return createdAtDate >= startDate && createdAtDate <= endDate;
     });
 
     const filteredClaims = claims.filter(c => {
+        if (!c.claimedAt) return false;
         const claimedAtDate = c.claimedAt.toDate();
         return claimedAtDate >= startDate && claimedAtDate <= endDate;
     });
@@ -155,8 +157,8 @@ export default function AdminDashboard() {
 
   const totalClaims = useMemo(() => filteredData.claims.length, [filteredData.claims]);
   const totalOffers = useMemo(() => filteredData.offers.length, [filteredData.offers]);
-  const activeOffers = useMemo(() => filteredData.offers.filter(o => o.isActive).length, [filteredData.offers]);
-  const expiredOffers = useMemo(() => filteredData.offers.filter(o => !o.isActive).length, [filteredData.offers]);
+  const activeOffers = useMemo(() => offers.filter(o => o.isActive).length, [offers]);
+  const expiredOffers = useMemo(() => offers.filter(o => !o.isActive).length, [offers]);
   const recentOffers = useMemo(() => offers.slice(0, 3), [offers]);
   const recentClaims = useMemo(() => claims.slice(0, 20), [claims]);
 
@@ -181,7 +183,7 @@ export default function AdminDashboard() {
        </div>
 
       <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4 border">
+        <TabsList className="grid w-full grid-cols-4 border border-gray-300 dark:border-white hover:border-red-500 transition-colors">
           <TabsTrigger value="today">Today</TabsTrigger>
           <TabsTrigger value="weekly">Weekly</TabsTrigger>
           <TabsTrigger value="monthly">Monthly</TabsTrigger>
@@ -391,6 +393,7 @@ export default function AdminDashboard() {
 
 
     
+
 
 
 
