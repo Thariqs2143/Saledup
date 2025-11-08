@@ -22,6 +22,18 @@ import {
   SheetTrigger,
   SheetClose,
 } from "@/components/ui/sheet";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { cn } from '@/lib/utils';
 
 
 type ShopProfile = {
@@ -54,6 +66,14 @@ export default function AdminProfilePage() {
   const [profile, setProfile] = useState<ShopProfile>({});
   const [loading, setLoading] = useState(true);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkIsMobile = () => setIsMobile(window.innerWidth < 768);
+    checkIsMobile();
+    window.addEventListener('resize', checkIsMobile);
+    return () => window.removeEventListener('resize', checkIsMobile);
+  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -98,6 +118,45 @@ export default function AdminProfilePage() {
         setLoggingOut(false);
     }
   };
+  
+  const LogoutConfirmation = () => (
+      <>
+        <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+                This action will log you out of your current session. You will need to log back in to access your dashboard.
+            </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleLogout} disabled={loggingOut} className="bg-destructive hover:bg-destructive/90">
+                {loggingOut ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                Yes, Logout
+            </AlertDialogAction>
+        </AlertDialogFooter>
+    </>
+  );
+
+  const LogoutSheetConfirmation = () => (
+    <>
+        <SheetHeader className="text-center">
+            <SheetTitle className="text-2xl">Log Out?</SheetTitle>
+            <SheetDescription>
+                Are you sure you want to log out from your account?
+            </SheetDescription>
+        </SheetHeader>
+        <SheetFooter className="mt-6 flex-row gap-2">
+             <SheetClose asChild>
+                <Button variant="outline" className="w-full">Cancel</Button>
+            </SheetClose>
+            <Button onClick={handleLogout} disabled={loggingOut} variant="destructive" className="w-full">
+                {loggingOut && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
+                Yes, Logout
+            </Button>
+        </SheetFooter>
+    </>
+  );
+
 
   if (loading) {
     return (
@@ -112,18 +171,16 @@ export default function AdminProfilePage() {
        <div className="grid md:grid-cols-3 gap-8">
           <div className="md:col-span-1">
              <Card>
-                <CardContent className="pt-6 space-y-4">
-                    <div className="flex items-center gap-4">
-                        <Avatar className="h-20 w-20 border-4 border-primary">
-                            <AvatarImage src={profile.imageUrl ?? profile.ownerImageUrl} />
-                            <AvatarFallback>
-                                <Building className="h-8 w-8"/>
-                            </AvatarFallback>
-                        </Avatar>
-                        <div>
-                            <h2 className="text-2xl font-bold">{profile.shopName}</h2>
-                            <p className="text-muted-foreground">{profile.businessType}</p>
-                        </div>
+                <CardContent className="pt-6 flex items-center gap-4">
+                    <Avatar className="h-20 w-20 border-2 border-primary">
+                        <AvatarImage src={profile.imageUrl ?? profile.ownerImageUrl} />
+                        <AvatarFallback>
+                            <Building className="h-8 w-8"/>
+                        </AvatarFallback>
+                    </Avatar>
+                    <div className="space-y-1">
+                        <h2 className="text-xl font-bold">{profile.shopName}</h2>
+                        <p className="text-muted-foreground text-sm">{profile.businessType}</p>
                     </div>
                 </CardContent>
              </Card>
@@ -150,30 +207,31 @@ export default function AdminProfilePage() {
           </div>
        </div>
 
-        <Sheet>
-            <SheetTrigger asChild>
-                <Button variant="destructive" className="w-full">
-                    <LogOut className="mr-2 h-4 w-4"/> Logout
-                </Button>
-            </SheetTrigger>
-            <SheetContent side="bottom" className="rounded-t-lg">
-                <SheetHeader className="text-center">
-                    <SheetTitle className="text-2xl">Log Out?</SheetTitle>
-                    <SheetDescription>
-                        Are you sure you want to log out?
-                    </SheetDescription>
-                </SheetHeader>
-                <SheetFooter className="mt-6 flex-col sm:flex-col sm:space-x-0 gap-2">
-                    <Button onClick={handleLogout} disabled={loggingOut} variant="destructive">
-                        {loggingOut && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
-                        Yes, Logout
+        {isMobile ? (
+            <Sheet>
+                <SheetTrigger asChild>
+                    <Button variant="destructive" className="w-full">
+                        <LogOut className="mr-2 h-4 w-4"/> Logout
                     </Button>
-                    <SheetClose asChild>
-                        <Button variant="outline">No, Cancel</Button>
-                    </SheetClose>
-                </SheetFooter>
-            </SheetContent>
-        </Sheet>
+                </SheetTrigger>
+                <SheetContent side="bottom" className="rounded-t-lg">
+                    <LogoutSheetConfirmation />
+                </SheetContent>
+            </Sheet>
+        ) : (
+            <AlertDialog>
+                <AlertDialogTrigger asChild>
+                     <Button variant="destructive" className="w-full">
+                        <LogOut className="mr-2 h-4 w-4"/> Logout
+                    </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                   <LogoutConfirmation />
+                </AlertDialogContent>
+            </AlertDialog>
+        )}
     </div>
   );
 }
+
+    
