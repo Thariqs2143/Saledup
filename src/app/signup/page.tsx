@@ -138,158 +138,117 @@ export default function SignupPage() {
   };
 
   return (
-      <div className="relative min-h-screen w-full bg-background text-foreground">
-        {/* Background Image */}
-        <div className="absolute inset-0 z-0">
-            <Image
-            src="https://res.cloudinary.com/dnkghymx5/image/upload/v1762241011/Generated_Image_November_04_2025_-_12_50PM_1_hslend.png"
-            alt="A business owner joyfully interacting with a customer over the counter"
-            fill
-            className="object-cover"
-            priority
-            />
-            <div className="absolute inset-0 bg-black/50"></div>
-        </div>
-        
-        {/* Main Content Grid */}
-        <div className="relative grid min-h-screen md:grid-cols-2">
-            
-            {/* Left Side - Promotional Text */}
-            <div className="hidden md:flex flex-col justify-end p-10 lg:p-16 text-white">
-                <div className="max-w-md">
-                    <h2 className="text-4xl lg:text-5xl font-bold tracking-tight">
-                        Start Your Growth Journey Today
-                    </h2>
-                    <p className="mt-4 text-lg text-white/80">
-                        Create your account in seconds and unlock the tools to supercharge your local business.
-                    </p>
-                </div>
+    <div className="w-full lg:grid lg:min-h-screen lg:grid-cols-2 xl:min-h-screen">
+       <div className="flex items-center justify-center p-6 py-12 lg:p-10">
+        <div className="mx-auto grid w-[350px] gap-6">
+          <div className="grid gap-2 text-center">
+            <h1 className="text-3xl font-bold">Sign Up</h1>
+            <p className="text-balance text-muted-foreground">
+              Enter your information to create an account
+            </p>
+          </div>
+          <form onSubmit={handleEmailSignUp} className="grid gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                name="email"
+                placeholder="m@example.com"
+                required
+              />
             </div>
-
-            {/* Right Side - Form Card */}
-            <div className="flex items-center justify-center p-4">
-                <div className="w-full max-w-sm bg-background rounded-lg shadow-2xl p-8 space-y-6">
-                    <div className="text-center">
-                        <h1 className="text-3xl font-bold tracking-tight">Start Creating</h1>
-                        <p className="mt-2 text-muted-foreground">
-                        Join Saledup to generate offers, engage customers, and grow your
-                        business.
-                        </p>
-                    </div>
-                    
-                    <Button
-                        onClick={handleGoogleSignIn}
-                        variant="outline"
-                        className="w-full h-11"
-                        disabled={loading || googleLoading}
-                    >
-                        {googleLoading ? (
-                        <Loader2 className="mr-2 animate-spin" />
-                        ) : (
-                        <svg role="img" viewBox="0 0 24 24" className="mr-2 h-5 w-5">
-                            <path
-                            fill="currentColor"
-                            d="M12.48 10.92v3.28h7.84c-.24 1.84-.85 3.18-1.73 4.1-1.05 1.05-2.36 1.67-4.06 1.67-3.4 0-6.17-2.83-6.17-6.23s2.77-6.23 6.17-6.23c1.87 0 3.13.78 3.88 1.48l2.34-2.34C18.37 1.9 15.48 0 12.48 0 5.88 0 .02 5.88.02 12.48s5.86 12.48 12.46 12.48c3.32 0 6.03-1.14 8.04-3.21 2.07-2.07 2.72-5.04 2.72-7.76v-2.1H12.48z"
-                            ></path>
-                        </svg>
-                        )}
-                        Continue with Google
-                    </Button>
-                    <div className="relative">
-                        <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t" />
-                        </div>
-                        <div className="relative flex justify-center text-sm">
-                            <span className="bg-background px-2 text-muted-foreground">OR</span>
-                        </div>
-                    </div>
-                    
-                    <form onSubmit={handleEmailSignUp} className="space-y-4">
-                        <div>
-                        <Label htmlFor="email">Email address</Label>
-                        <Input
-                            id="email"
-                            name="email"
-                            type="email"
-                            required
-                            className="mt-1"
-                        />
-                        </div>
-                        <div className="space-y-1">
-                            <Label htmlFor="password">Password</Label>
-                            <div className="relative">
-                                <Input
-                                id="password"
-                                name="password"
-                                type={showPassword ? 'text' : 'password'}
-                                required
-                                className="pr-10"
-                                />
-                                <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                className="absolute inset-y-0 right-0 h-full px-3"
-                                onClick={() => setShowPassword(!showPassword)}
-                                >
-                                {showPassword ? (
-                                    <EyeOff className="h-5 w-5 text-muted-foreground" />
-                                ) : (
-                                    <Eye className="h-5 w-5 text-muted-foreground" />
-                                )}
-                                <span className="sr-only">
-                                    {showPassword ? 'Hide password' : 'Show password'}
-                                </span>
-                                </Button>
-                            </div>
-                        </div>
-                        <div className="space-y-1">
-                            <Label htmlFor="repeat-password">Repeat Password</Label>
-                            <div className="relative">
-                                <Input
-                                id="repeat-password"
-                                name="repeat-password"
-                                type={showRepeatPassword ? 'text' : 'password'}
-                                required
-                                className="pr-10"
-                                />
-                                <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                className="absolute inset-y-0 right-0 h-full px-3"
-                                onClick={() => setShowRepeatPassword(!showRepeatPassword)}
-                                >
-                                {showRepeatPassword ? (
-                                    <EyeOff className="h-5 w-5 text-muted-foreground" />
-                                ) : (
-                                    <Eye className="h-5 w-5 text-muted-foreground" />
-                                )}
-                                <span className="sr-only">
-                                    {showRepeatPassword ? 'Hide password' : 'Show password'}
-                                </span>
-                                </Button>
-                            </div>
-                        </div>
-                        <Button
-                        type="submit"
-                        className="w-full h-11"
-                        disabled={loading || googleLoading}
-                        >
-                        {loading && <Loader2 className="mr-2 animate-spin" />}
-                        Sign up and start creating
-                        </Button>
-                    </form>
-
-                    <p className="text-center text-sm text-muted-foreground">
-                        Already have an account?{' '}
-                        <Link href="/login" className="font-medium text-primary hover:underline">
-                        Login
-                        </Link>
-                    </p>
-                </div>
+            <div className="grid gap-2">
+              <Label htmlFor="password">Password</Label>
+               <div className="relative">
+                <Input
+                id="password"
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                required
+                className="pr-10"
+                />
+                <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="absolute inset-y-0 right-0 h-full px-3"
+                onClick={() => setShowPassword(!showPassword)}
+                >
+                {showPassword ? (
+                    <EyeOff className="h-5 w-5 text-muted-foreground" />
+                ) : (
+                    <Eye className="h-5 w-5 text-muted-foreground" />
+                )}
+                <span className="sr-only">
+                    {showPassword ? 'Hide password' : 'Show password'}
+                </span>
+                </Button>
             </div>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="repeat-password">Repeat Password</Label>
+              <div className="relative">
+                <Input
+                id="repeat-password"
+                name="repeat-password"
+                type={showRepeatPassword ? 'text' : 'password'}
+                required
+                className="pr-10"
+                />
+                <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="absolute inset-y-0 right-0 h-full px-3"
+                onClick={() => setShowRepeatPassword(!showRepeatPassword)}
+                >
+                {showRepeatPassword ? (
+                    <EyeOff className="h-5 w-5 text-muted-foreground" />
+                ) : (
+                    <Eye className="h-5 w-5 text-muted-foreground" />
+                )}
+                <span className="sr-only">
+                    {showRepeatPassword ? 'Hide password' : 'Show password'}
+                </span>
+                </Button>
+            </div>
+            </div>
+            <Button type="submit" className="w-full" disabled={loading || googleLoading}>
+                {loading && <Loader2 className="mr-2 animate-spin" />}
+              Sign Up
+            </Button>
+            <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={loading || googleLoading}>
+              {googleLoading ? (
+                  <Loader2 className="mr-2 animate-spin" />
+              ) : (
+                  <svg role="img" viewBox="0 0 24 24" className="mr-2 h-4 w-4">
+                      <path
+                      fill="currentColor"
+                      d="M12.48 10.92v3.28h7.84c-.24 1.84-.85 3.18-1.73 4.1-1.05 1.05-2.36 1.67-4.06 1.67-3.4 0-6.17-2.83-6.17-6.23s2.77-6.23 6.17-6.23c1.87 0 3.13.78 3.88 1.48l2.34-2.34C18.37 1.9 15.48 0 12.48 0 5.88 0 .02 5.88.02 12.48s5.86 12.48 12.46 12.48c3.32 0 6.03-1.14 8.04-3.21 2.07-2.07 2.72-5.04 2.72-7.76v-2.1H12.48z"
+                      ></path>
+                  </svg>
+              )}
+              Sign up with Google
+            </Button>
+          </form>
+          <div className="mt-4 text-center text-sm">
+            Already have an account?{' '}
+            <Link href="/login" className="underline">
+              Login
+            </Link>
+          </div>
         </div>
+      </div>
+       <div className="hidden bg-muted lg:block">
+        <Image
+          src="https://res.cloudinary.com/dyov4r11v/image/upload/v1762585069/WhatsApp_Image_2025-11-08_at_12.26.33_9ac0131f_qj21tx.jpg"
+          alt="Image"
+          width="1920"
+          height="1080"
+          className="h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+        />
+      </div>
     </div>
   );
 }
