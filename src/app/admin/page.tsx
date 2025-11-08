@@ -179,7 +179,7 @@ export default function AdminDashboard() {
               <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
                   Good morning, {ownerName}!
               </h1>
-              <p className="text-muted-foreground font-semibold">Here's a quick overview of your shop's performance.</p>
+              <p className="text-muted-foreground font-bold">Here's a quick overview of your shop's performance.</p>
             </div>
             <TabsList className="grid w-full lg:w-auto lg:inline-flex grid-cols-4 border-2 border-gray-300 dark:border-white hover:border-primary transition-colors">
               <TabsTrigger value="today" className="font-extrabold">Today</TabsTrigger>
@@ -242,7 +242,7 @@ export default function AdminDashboard() {
         <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
             <CardHeader>
                 <CardTitle className="font-bold">Your Live Offers Page</CardTitle>
-                <CardDescription className="font-semibold">
+                <CardDescription className="font-bold">
                 This is the public page your customers see when they scan your QR
                 code.
                 </CardDescription>
@@ -262,7 +262,7 @@ export default function AdminDashboard() {
             <div className="space-y-4">
                 <div>
                     <h2 className="text-2xl font-bold tracking-tight">Recent Offers</h2>
-                    <p className="text-muted-foreground font-semibold">A list of your most recent offers.</p>
+                    <p className="text-muted-foreground font-bold">A list of your most recent offers.</p>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {recentOffers.map(offer => (
@@ -314,7 +314,7 @@ export default function AdminDashboard() {
                     </Link>
                 )}
             </div>
-            <CardDescription className="font-semibold">A real-time log of customers claiming your offers.</CardDescription>
+            <CardDescription className="font-bold">A real-time log of customers claiming your offers.</CardDescription>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -359,31 +359,31 @@ export default function AdminDashboard() {
                    <Sparkles className="h-6 w-6 text-primary"/>
                    <CardTitle className="font-bold">Quick Actions</CardTitle>
                 </div>
-                <CardDescription className="font-semibold">Get started with these common tasks.</CardDescription>
+                <CardDescription className="font-bold">Get started with these common tasks.</CardDescription>
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-4">
                 <Link href="/admin/offers/add">
                     <Card className="h-full flex flex-col items-center justify-center p-4 gap-2 transition-all hover:shadow-md hover:border-primary border-2 border-foreground">
                         <Tag className="h-6 w-6 text-primary"/>
-                        <span className="text-center text-sm font-medium">Create Offer</span>
+                        <span className="text-center text-sm font-bold">Create Offer</span>
                     </Card>
                 </Link>
                  <Link href="/admin/qr-code">
                     <Card className="h-full flex flex-col items-center justify-center p-4 gap-2 transition-all hover:shadow-md hover:border-primary border-2 border-foreground">
                         <QrCode className="h-6 w-6 text-primary"/>
-                        <span className="text-center text-sm font-medium">Get Shop QR</span>
+                        <span className="text-center text-sm font-bold">Get Shop QR</span>
                     </Card>
                 </Link>
                  <Link href="/admin/offers">
                      <Card className="h-full flex flex-col items-center justify-center p-4 gap-2 transition-all hover:shadow-md hover:border-primary border-2 border-foreground">
                         <Users className="h-6 w-6 text-primary"/>
-                        <span className="text-center text-sm font-medium">Manage Offers</span>
+                        <span className="text-center text-sm font-bold">Manage Offers</span>
                     </Card>
                 </Link>
                  <Link href="/admin/customers">
                      <Card className="h-full flex flex-col items-center justify-center p-4 gap-2 transition-all hover:shadow-md hover:border-primary border-2 border-foreground">
                         <BarChart3 className="h-6 w-6 text-primary"/>
-                        <span className="text-center text-sm font-medium">View Customers</span>
+                        <span className="text-center text-sm font-bold">View Customers</span>
                     </Card>
                 </Link>
             </CardContent>
@@ -413,6 +413,8 @@ export default function AdminDashboard() {
 
 
 
+
+    
 
     
 
