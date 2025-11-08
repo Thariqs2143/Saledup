@@ -47,10 +47,10 @@ export default function AdminCompleteProfilePage() {
 
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('upload_preset', 'attendry_uploads'); // Replace with your Cloudinary upload preset
+        formData.append('upload_preset', 'saledup'); // Use your unsigned preset
 
         try {
-            const response = await fetch('https://api.cloudinary.com/v1_1/YOUR_CLOUDINARY_CLOUD_NAME/image/upload', { // Replace with your Cloudinary URL
+            const response = await fetch('https://api.cloudinary.com/v1_1/dyov4r11v/image/upload', { // Use your cloud name
                 method: 'POST',
                 body: formData,
             });

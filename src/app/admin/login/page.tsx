@@ -200,7 +200,7 @@ export default function AdminLoginPage() {
       {/* LEFT SIDE - Desktop Image */}
       <div className="relative hidden md:block">
         <Image
-          src="https://res.cloudinary.com/dnkghymx5/image/upload/v1762241011/Generated_Image_November_04_2025_-_12_50PM_1_hslend.png"
+          src="https://res.cloudinary.com/dyov4r11v/image/upload/v1762585069/WhatsApp_Image_2025-11-08_at_12.26.33_9ac0131f_qj21tx.jpg"
           alt="Attendry illustration"
           fill
           className="object-cover"
@@ -213,7 +213,7 @@ export default function AdminLoginPage() {
         {/* TOP IMAGE for Mobile */}
         <div className="md:hidden w-full relative">
             <Image
-                src="https://res.cloudinary.com/dnkghymx5/image/upload/v1762241011/Generated_Image_November_04_2025_-_12_50PM_1_hslend.png"
+                src="https://res.cloudinary.com/dyov4r11v/image/upload/v1762585069/WhatsApp_Image_2025-11-08_at_12.26.33_9ac0131f_qj21tx.jpg"
                 alt="Attendry illustration"
                 width={800}
                 height={600}
