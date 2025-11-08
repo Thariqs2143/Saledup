@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -8,6 +9,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { LandingFooter } from '@/components/landing-footer';
+import placeholderImages from '@/lib/placeholder-images.json';
 
 
 const SaledupLogo = () => (
@@ -40,7 +42,7 @@ export default function LandingPage() {
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      setIsScrolled(window.scrollY > 0);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
@@ -100,8 +102,8 @@ const targetCustomers = [
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       {/* Header */}
-      <header className={cn(
-        'sticky top-0 z-50 w-full transition-colors duration-300',
+       <header className={cn(
+        'sticky top-0 z-50 w-full transition-all duration-300',
         isScrolled ? 'bg-background/80 backdrop-blur-sm' : 'bg-transparent'
       )}>
         {showBanner && (
@@ -117,15 +119,8 @@ const targetCustomers = [
             </button>
           </div>
         )}
-        <div
-          className={cn(
-            'transition-all duration-300 container mx-auto',
-            isScrolled
-              ? 'py-2 rounded-full'
-              : 'py-4'
-          )}
-        >
-          <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div className="container mx-auto">
+          <div className={cn("flex items-center justify-between transition-all duration-300", isScrolled ? 'py-2' : 'py-4')}>
             <Link href="/" className="flex items-center gap-2.5 text-foreground">
                 <SaledupLogo />
                 <span className="font-bold text-xl tracking-wide">
@@ -313,7 +308,7 @@ const targetCustomers = [
         </section>
 
         {/* Who It's For Section */}
-        <section className="bg-background py-20 sm:py-24">
+        <section className="bg-muted/30 py-20 sm:py-24">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
                 <div className="inline-block bg-primary/10 text-primary font-semibold py-1 px-4 rounded-full text-sm mb-4">
                     Who It's For
@@ -329,9 +324,9 @@ const targetCustomers = [
                     {targetCustomers.map((customer, index) => (
                          <div key={index}
                              className={cn(
-                                'bg-muted/30 rounded-xl p-8 text-center border border-transparent shadow-sm transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-1 hover:border-primary/50'
+                                'bg-background rounded-xl p-8 text-center border border-border shadow-sm transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-1 hover:border-primary'
                              )}>
-                            <div className="p-4 bg-background rounded-lg inline-block mb-6 shadow-md">
+                            <div className="p-4 bg-primary/10 rounded-lg inline-block mb-6 shadow-md">
                                 <customer.icon className="h-8 w-8 text-primary" />
                             </div>
                             <h3 className="text-lg font-bold">{customer.title}</h3>
@@ -341,6 +336,43 @@ const targetCustomers = [
                 </div>
             </div>
         </section>
+
+        {/* How It Works Section */}
+        <section className="bg-background py-20 sm:py-24">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <div className="inline-block bg-primary/10 text-primary font-semibold py-1 px-4 rounded-full text-sm mb-4">
+                    How It Works
+                </div>
+                <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight">
+                    Three Simple Steps
+                </h2>
+                <p className="mt-4 max-w-2xl mx-auto text-muted-foreground text-lg">
+                    Go from setup to serving customers in just a few clicks.
+                </p>
+                <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
+                    {placeholderImages.howItWorks.map((step, index) => (
+                        <div key={index} className="flex flex-col items-center">
+                            <div className="relative">
+                                <div className="absolute -top-5 -right-5 bg-primary text-primary-foreground rounded-full h-10 w-10 flex items-center justify-center font-bold text-xl">
+                                    {index + 1}
+                                </div>
+                                <Image
+                                    src={step.src}
+                                    alt={step.alt}
+                                    data-ai-hint={step.hint}
+                                    width={600}
+                                    height={400}
+                                    className="rounded-lg shadow-lg w-full aspect-[3/2] object-cover"
+                                />
+                            </div>
+                            <h3 className="mt-6 text-xl font-bold">{step.title}</h3>
+                            <p className="mt-2 text-muted-foreground">{step.description}</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </section>
+
 
       </main>
       <LandingFooter />

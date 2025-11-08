@@ -1,0 +1,25 @@
+{
+  "howItWorks": [
+    {
+      "src": "https://picsum.photos/seed/step1/600/400",
+      "alt": "A person creating a new offer on a dashboard.",
+      "title": "Create Your Offer",
+      "description": "Log in to your dashboard, upload an image, and set up your new deal in minutes.",
+      "hint": "coffee steam"
+    },
+    {
+      "src": "https://picsum.photos/seed/step2/600/400",
+      "alt": "A permanent QR code displayed at a shop entrance.",
+      "title": "Display Your QR Code",
+      "description": "Place your permanent Saledup QR code at your shop entrance or counter.",
+      "hint": "qr code shop"
+    },
+    {
+      "src": "https://picsum.photos/seed/step3/600/400",
+      "alt": "A customer scanning a QR code with their phone.",
+      "title": "Customers Scan & Save",
+      "description": "Walk-in customers scan the code with their phone to instantly see and claim your offers.",
+      "hint": "phone scanning"
+    }
+  ]
+}
