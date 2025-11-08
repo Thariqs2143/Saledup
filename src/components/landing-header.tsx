@@ -6,7 +6,9 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { Sparkles, X } from 'lucide-react';
+import { Sparkles, X, Menu } from 'lucide-react';
+import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
+
 
 const SaledupLogo = () => (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -81,7 +83,7 @@ export function LandingHeader() {
         className={cn(
           'transition-all duration-300',
           isScrolled
-            ? 'py-2 bg-background/80 backdrop-blur-sm rounded-full shadow-lg border mx-auto px-4 sm:px-6 lg:px-8 mt-2 max-w-6xl'
+            ? 'py-2 bg-background/80 backdrop-blur-sm shadow-lg border mx-auto px-4 sm:px-6 lg:px-8 mt-2 rounded-full max-w-6xl'
             : 'py-4 bg-background'
         )}
       >
@@ -104,13 +106,64 @@ export function LandingHeader() {
                 </Link>
             ))}
           </nav>
-          <div className="flex items-center gap-2">
+          <div className="hidden md:flex items-center gap-2">
             <Link href="/login" passHref>
               <Button variant="outline">Get Started</Button>
             </Link>
             <Link href="/pricing" passHref>
               <Button>Go Pro</Button>
             </Link>
+          </div>
+          
+          {/* Mobile Menu */}
+          <div className="md:hidden">
+            <Sheet>
+                <SheetTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                        <Menu className="h-6 w-6"/>
+                        <span className="sr-only">Open menu</span>
+                    </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-[300px] sm:w-[340px]">
+                    <div className="flex flex-col h-full">
+                        <div className="p-4 border-b">
+                            <Link href="/" className="flex items-center gap-2.5 text-foreground">
+                                <SaledupLogo />
+                                <span className="font-bold text-xl tracking-wide">Saledup</span>
+                            </Link>
+                        </div>
+                        <nav className="flex-1 flex flex-col gap-4 p-4 mt-4">
+                            {navLinks.map(link => (
+                                <SheetClose asChild key={link.href}>
+                                     <Link 
+                                        href={link.href} 
+                                        className={cn(
+                                            "text-lg font-medium text-foreground/80 hover:text-primary",
+                                            pathname === link.href && "text-primary"
+                                        )}
+                                    >
+                                        {link.label}
+                                    </Link>
+                                </SheetClose>
+                            ))}
+                        </nav>
+                        <div className="p-4 mt-auto border-t">
+                            <div className="flex flex-col gap-3">
+                                <SheetClose asChild>
+                                    <Link href="/login" passHref>
+                                      <Button variant="outline" className="w-full">Get Started</Button>
+                                    </Link>
+                                </SheetClose>
+                                <SheetClose asChild>
+                                     <Link href="/pricing" passHref>
+                                      <Button className="w-full">Go Pro</Button>
+                                    </Link>
+                                </SheetClose>
+                            </div>
+                        </div>
+                    </div>
+                </SheetContent>
+            </Sheet>
           </div>
         </div>
       </div>
