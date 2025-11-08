@@ -17,6 +17,7 @@ type ShopProfile = {
     ownerName?: string;
     shopName?: string;
     ownerImageUrl?: string;
+    imageUrl?: string;
     businessType?: string;
     address?: string;
     gstNumber?: string;
@@ -49,10 +50,11 @@ export default function AdminProfilePage() {
         const shopDocRef = doc(db, 'shops', user.uid);
         const shopSnap = await getDoc(shopDocRef);
         if (shopSnap.exists()) {
-          const data = shopSnap.data()
+          const data = shopSnap.data() as ShopProfile;
           setProfile({
             ...data,
-            email: user.email,
+            // Ensure email from auth is a fallback
+            email: data.email || user.email || undefined,
             phone: user.phoneNumber || data.phone,
           });
         }
@@ -97,26 +99,26 @@ export default function AdminProfilePage() {
              <Card className="w-full">
                 <CardContent className="pt-6">
                     <Avatar className="h-28 w-28 border-4 border-primary mx-auto">
-                        <AvatarImage src={profile.ownerImageUrl} />
+                        <AvatarImage src={profile.imageUrl ?? profile.ownerImageUrl} />
                         <AvatarFallback>
                             <Building className="h-12 w-12"/>
                         </AvatarFallback>
                     </Avatar>
                     <h2 className="text-2xl font-bold mt-4">{profile.shopName}</h2>
                     <p className="text-muted-foreground">{profile.businessType}</p>
-                    <Link href="/admin/profile/edit" className="mt-4 inline-block w-full">
-                        <Button variant="outline" className="w-full">
-                            <Edit className="mr-2 h-4 w-4"/>
-                            Edit Profile
-                        </Button>
-                    </Link>
                 </CardContent>
              </Card>
           </div>
           <div className="md:col-span-2">
             <Card>
-                <CardHeader>
+                <CardHeader className="flex flex-row justify-between items-center">
                     <CardTitle>Business Details</CardTitle>
+                    <Link href="/admin/profile/edit" className="mt-0">
+                        <Button variant="outline">
+                            <Edit className="mr-2 h-4 w-4"/>
+                            Edit Profile
+                        </Button>
+                    </Link>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <InfoRow icon={User} label="Owner Name" value={profile.ownerName} />

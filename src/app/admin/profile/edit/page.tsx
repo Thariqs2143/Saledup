@@ -46,10 +46,10 @@ export default function AdminEditProfilePage() {
         const shopDocRef = doc(db, 'shops', user.uid);
         const shopSnap = await getDoc(shopDocRef);
         if (shopSnap.exists()) {
-          const data = shopSnap.data()
+          const data = shopSnap.data() as ShopProfile;
           const currentProfile = {
             ...data,
-            email: user.email,
+            email: data.email || user.email || '',
             phone: user.phoneNumber || data.phone,
           };
           setProfile(currentProfile);
@@ -248,7 +248,7 @@ export default function AdminEditProfilePage() {
                     </div>
                     <div className="space-y-2 md:col-span-2">
                         <Label htmlFor="email">Email Address</Label>
-                        <Input id="email" value={profile.email || ''} disabled readOnly />
+                        <Input id="email" type="email" value={profile.email || ''} onChange={(e) => handleFieldChange('email', e.target.value)} />
                     </div>
                  </div>
             </CardContent>
