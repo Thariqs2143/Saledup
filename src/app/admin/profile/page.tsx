@@ -81,7 +81,8 @@ export default function AdminProfilePage() {
               });
             }
 
-            const offersQuery = collection(db, 'shops', user.uid, 'offers');
+            const offersQuery = query(collection(db, 'shops', user.uid, 'offers'));
+            
             unsubscribeOffers = onSnapshot(offersQuery, 
                 (snapshot) => {
                     const offersList = snapshot.docs.map(doc => doc.data() as Offer);
@@ -91,7 +92,7 @@ export default function AdminProfilePage() {
                     console.error("Firestore Error: ", error);
                     toast({
                         title: "Permission Error",
-                        description: "Could not fetch your offer data. You might not have the right permissions.",
+                        description: "Could not fetch your offer data. Check your connection or security rules.",
                         variant: "destructive"
                     });
                 }
@@ -144,8 +145,14 @@ export default function AdminProfilePage() {
         
         <Tabs defaultValue="profile" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="profile">Profile</TabsTrigger>
-                <TabsTrigger value="pricing">Pricing & Billing</TabsTrigger>
+                <TabsTrigger value="profile">
+                    <User className="mr-2 h-4 w-4"/>
+                    Profile
+                </TabsTrigger>
+                <TabsTrigger value="pricing">
+                    <Tag className="mr-2 h-4 w-4"/>
+                    Pricing & Billing
+                </TabsTrigger>
             </TabsList>
             <TabsContent value="profile" className="mt-6">
                 <div className="space-y-8">
@@ -156,27 +163,25 @@ export default function AdminProfilePage() {
                                 <CardDescription>This is how your business appears across the app.</CardDescription>
                             </div>
                              <Link href="/admin/profile/edit">
-                                <Button variant="outline">
+                                <Button variant="outline" size="sm">
                                     <Edit className="mr-2 h-4 w-4"/> Edit Profile
                                 </Button>
                             </Link>
                         </CardHeader>
                         <CardContent className="space-y-6">
-                             <div className="p-4 rounded-lg border bg-background">
-                                <div className="flex items-center gap-4">
-                                    <Avatar className="h-16 w-16 border-2 border-primary">
-                                        <AvatarImage src={profile.imageUrl ?? profile.ownerImageUrl} />
-                                        <AvatarFallback>
-                                            {profile.shopName?.charAt(0) || 'S'}
-                                        </AvatarFallback>
-                                    </Avatar>
-                                    <div>
-                                        <h3 className="text-lg font-bold">{profile.ownerName}</h3>
-                                        <p className="text-sm text-muted-foreground">Business Owner</p>
-                                    </div>
+                             <div className="p-4 rounded-lg flex items-center gap-4">
+                                <Avatar className="h-16 w-16 border-2 border-primary">
+                                    <AvatarImage src={profile.imageUrl ?? profile.ownerImageUrl} />
+                                    <AvatarFallback>
+                                        {profile.ownerName?.charAt(0) || 'A'}
+                                    </AvatarFallback>
+                                </Avatar>
+                                <div>
+                                    <h3 className="text-xl font-bold">{profile.ownerName}</h3>
+                                    <p className="text-sm text-white bg-black rounded-lg text-center w-fit px-2 py-1 mt-1">Business Owner</p>
                                 </div>
                              </div>
-                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                             <div className="grid grid-cols-1 gap-4">
                                 <InfoRow icon={Building} label="Company" value={profile.shopName} />
                                 <InfoRow icon={Briefcase} label="Category" value={profile.businessType} />
                                 <InfoRow icon={MapPin} label="Location" value={profile.address} />
@@ -186,36 +191,7 @@ export default function AdminProfilePage() {
                              </div>
                         </CardContent>
                     </Card>
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Offer Stats</CardTitle>
-                            <CardDescription>Your current offer limits and usage.</CardDescription>
-                        </CardHeader>
-                         <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div className="p-4 rounded-lg bg-muted/50 flex items-center justify-between">
-                                <div>
-                                    <h4 className="text-sm font-medium text-muted-foreground">Total Offers</h4>
-                                     <p className="text-2xl font-bold"><AnimatedCounter from={0} to={totalOffers} /></p>
-                                </div>
-                                <Tag className="h-8 w-8 text-primary"/>
-                            </div>
-                            <div className="p-4 rounded-lg bg-muted/50 flex items-center justify-between">
-                                <div>
-                                    <h4 className="text-sm font-medium text-muted-foreground">Active Offers</h4>
-                                    <p className="text-2xl font-bold"><AnimatedCounter from={0} to={activeOffers} /></p>
-                                </div>
-                                <CheckCircle className="h-8 w-8 text-green-500"/>
-                            </div>
-                         </CardContent>
-                         <CardFooter className="flex flex-col sm:flex-row gap-2">
-                             <Button asChild variant="outline" className="w-full">
-                                <Link href="/admin/offers">Manage Offers</Link>
-                             </Button>
-                             <Button asChild className="w-full">
-                                <Link href="/admin/profile?tab=pricing">Upgrade Plan</Link>
-                            </Button>
-                         </CardFooter>
-                    </Card>
+                    
                     <Card>
                         <CardHeader>
                             <CardTitle>Account</CardTitle>
