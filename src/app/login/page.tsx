@@ -123,7 +123,7 @@ export default function LoginPage() {
           <p className="mt-4 text-lg text-white/80">Supercharge your business with easy integrations, powerful dashboards, and more.</p>
       </div>
        <div className="relative z-10 flex items-center justify-center min-h-screen p-4 lg:p-8">
-            <div className="w-full max-w-md bg-background/90 backdrop-blur-sm p-8 rounded-xl shadow-2xl lg:bg-background lg:backdrop-blur-none lg:shadow-none lg:rounded-none lg:p-6">
+            <div className="w-full max-w-md bg-background/90 backdrop-blur-sm p-8 rounded-xl shadow-2xl lg:bg-background lg:backdrop-blur-none lg:shadow-none lg:p-6">
                 <div className="mx-auto grid gap-6">
                     <div className="grid gap-2 text-center">
                         <h1 className="text-3xl font-bold">Login</h1>
