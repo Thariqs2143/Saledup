@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Users, QrCode, Loader2, BarChart3, LogOut, Activity, Sparkles, Tag, Eye } from "lucide-react";
+import { Users, QrCode, Loader2, BarChart3, LogOut, Activity, Sparkles, Tag, Eye, CheckCircle, XCircle } from "lucide-react";
 import Link from 'next/link';
 import { AnimatedCounter } from "@/components/animated-counter";
 import { useEffect, useState, useMemo } from "react";
@@ -101,6 +101,7 @@ export default function AdminDashboard() {
   const totalClaims = useMemo(() => claims.length, [claims]);
   const totalOffers = useMemo(() => offers.length, [offers]);
   const activeOffers = useMemo(() => offers.filter(o => o.isActive).length, [offers]);
+  const expiredOffers = useMemo(() => offers.filter(o => !o.isActive).length, [offers]);
 
   if (loading) {
       return (
@@ -121,47 +122,66 @@ export default function AdminDashboard() {
            </div>
        </div>
 
-       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
+       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
         <Card className="relative overflow-hidden transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br from-blue-500 to-indigo-600 text-white border-none">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-bold text-blue-100">Total Offers Created</CardTitle>
+            <CardTitle className="text-sm font-bold text-blue-100">Total Offers</CardTitle>
             <Tag className="h-5 w-5 text-blue-200" />
           </CardHeader>
           <CardContent>
             <div className="text-4xl font-bold flex items-center gap-2">
               <AnimatedCounter from={0} to={totalOffers} />
             </div>
-            <p className="text-xs text-blue-100 mt-1">
-              <span className="font-semibold">{activeOffers}</span> currently active
-            </p>
           </CardContent>
         </Card>
-        <Card className="relative overflow-hidden transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br from-green-500 to-emerald-600 text-white border-none">
+         <Card className="relative overflow-hidden transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br from-green-500 to-emerald-600 text-white border-none">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-bold text-green-100">Total Offers Claimed</CardTitle>
-            <Users className="h-5 w-5 text-green-200" />
+            <CardTitle className="text-sm font-bold text-green-100">Active Offers</CardTitle>
+            <CheckCircle className="h-5 w-5 text-green-200" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-4xl font-bold flex items-center gap-2">
+              <AnimatedCounter from={0} to={activeOffers} />
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="relative overflow-hidden transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br from-amber-500 to-orange-600 text-white border-none">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-bold text-amber-100">Expired Offers</CardTitle>
+            <XCircle className="h-5 w-5 text-amber-200" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-4xl font-bold flex items-center gap-2">
+              <AnimatedCounter from={0} to={expiredOffers} />
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="relative overflow-hidden transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br from-fuchsia-500 to-purple-600 text-white border-none">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-bold text-fuchsia-100">Total Claims</CardTitle>
+            <Users className="h-5 w-5 text-fuchsia-200" />
           </CardHeader>
           <CardContent>
              <div className="text-4xl font-bold">
                 <AnimatedCounter from={0} to={totalClaims} />
             </div>
-            <p className="text-xs text-green-100 mt-1">Engagements from customers</p>
-          </CardContent>
-        </Card>
-        <Card className="relative overflow-hidden transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br from-orange-500 to-amber-600 text-white border-none">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-bold text-orange-100">Conversion Rate</CardTitle>
-            <BarChart3 className="h-5 w-5 text-orange-200" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-4xl font-bold">
-                {/* Dummy Data, logic TBD */}
-                <AnimatedCounter from={0} to={0} />%
-            </div>
-             <p className="text-xs text-orange-100 mt-1">Scans vs. Claims</p>
           </CardContent>
         </Card>
       </div>
+
+       <Card>
+            <CardContent className="p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div>
+                    <h3 className="text-lg font-bold">View Your Live Offers Page</h3>
+                    <p className="text-sm text-muted-foreground">This is the public page your customers see when they scan your QR code.</p>
+                </div>
+                <Button asChild>
+                    <Link href={`/shops/${authUser?.uid}`} target="_blank">
+                        Live View <Eye className="ml-2 h-4 w-4"/>
+                    </Link>
+                </Button>
+            </CardContent>
+        </Card>
 
        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <Card className="transform-gpu xl:col-span-2 transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground dark:border-foreground hover:border-primary">
