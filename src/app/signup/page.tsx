@@ -18,6 +18,8 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
+import { errorEmitter } from '@/lib/error-emitter';
+import { FirestorePermissionError } from '@/lib/errors';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -41,22 +43,30 @@ export default function SignupPage() {
         toast({ title: 'Login Successful!', description: 'Welcome back!' });
         router.push('/admin');
       } else {
-        await setDoc(
-          shopDocRef,
-          {
+        const shopData = {
             ownerId: user.uid,
             ownerName: user.displayName,
             ownerEmail: user.email,
             ownerImageUrl: user.photoURL,
             createdAt: new Date(),
-          },
-          { merge: true }
-        );
-        toast({
-          title: 'Account Created!',
-          description: 'Please complete your shop profile to continue.',
+        };
+        
+        setDoc(shopDocRef, shopData, { merge: true })
+        .then(() => {
+            toast({
+                title: 'Account Created!',
+                description: 'Please complete your shop profile to continue.',
+            });
+            router.push('/admin/complete-profile');
+        })
+        .catch(async (serverError) => {
+            const permissionError = new FirestorePermissionError({
+              path: shopDocRef.path,
+              operation: 'create',
+              requestResourceData: shopData,
+            });
+            errorEmitter.emit('permission-error', permissionError);
         });
-        router.push('/admin/complete-profile');
       }
     } catch (error: any) {
       if (error.code !== 'auth/popup-closed-by-user') {
@@ -102,22 +112,32 @@ export default function SignupPage() {
       const user = userCredential.user;
 
       const shopDocRef = doc(db, 'shops', user.uid);
-      await setDoc(
-        shopDocRef,
-        {
+      const shopData = {
           ownerId: user.uid,
           ownerName: ownerName,
           ownerEmail: user.email,
           createdAt: new Date(),
-        },
-        { merge: true }
-      );
-      
-      toast({
-        title: 'Account Created!',
-        description: 'Please complete your shop profile to continue.',
-      });
-      router.push('/admin/complete-profile');
+      };
+
+      setDoc(shopDocRef, shopData, { merge: true })
+        .then(() => {
+            toast({
+                title: 'Account Created!',
+                description: 'Please complete your shop profile to continue.',
+            });
+            router.push('/admin/complete-profile');
+        })
+        .catch(async (serverError) => {
+            const permissionError = new FirestorePermissionError({
+              path: shopDocRef.path,
+              operation: 'create',
+              requestResourceData: shopData,
+            });
+            errorEmitter.emit('permission-error', permissionError);
+        })
+        .finally(() => {
+            setLoading(false);
+        });
 
     } catch (error: any) {
       console.error('Email sign up error:', error);
@@ -132,7 +152,6 @@ export default function SignupPage() {
         description,
         variant: 'destructive',
       });
-    } finally {
       setLoading(false);
     }
   };
