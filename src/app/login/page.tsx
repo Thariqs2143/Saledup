@@ -1,64 +1,57 @@
-
 'use client';
 
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { auth, db } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
-import { IndianFlagIcon } from "@/components/ui/indian-flag-icon";
 
 export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleContinue = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!/^\d{10}$/.test(phone)) {
-      toast({
-        title: "Error",
-        description: "Please enter a valid 10-digit phone number.",
-        variant: "destructive",
-      });
-      return;
-    }
-
+  const handleGoogleSignIn = async () => {
     setLoading(true);
+    const googleProvider = new GoogleAuthProvider();
     try {
-      const phoneNumber = `+91${phone}`;
-      const phoneLookupRef = doc(db, 'employee_phone_to_shop_lookup', phoneNumber);
-      const phoneLookupSnap = await getDoc(phoneLookupRef);
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
 
-      let isNewUser = true;
-      if (phoneLookupSnap.exists()) {
-        if(phoneLookupSnap.data()?.isAdmin) {
-          isNewUser = false;
-        } else {
-          toast({
-            title: "Employee Account",
-            description: "This number is registered as an employee. Please use the employee login.",
-          });
-          setLoading(false);
-          return;
-        }
+      const shopDocRef = doc(db, 'shops', user.uid);
+      const shopDocSnap = await getDoc(shopDocRef);
+
+      if (shopDocSnap.exists()) {
+        // Existing shop owner, redirect to dashboard
+        toast({ title: "Login Successful!", description: "Welcome back!" });
+        router.push('/admin');
+      } else {
+        // New shop owner, redirect to complete profile
+        await setDoc(shopDocRef, {
+            ownerId: user.uid,
+            ownerName: user.displayName,
+            ownerEmail: user.email,
+            createdAt: new Date()
+        }, { merge: true });
+
+        toast({ title: "Account Created!", description: "Please complete your shop profile to continue." });
+        router.push('/admin/complete-profile');
       }
-      
-      router.push(`/admin/login?phone=${phone}&isNewUser=${isNewUser}`);
 
-    } catch (error) {
-      console.error("Error during owner check:", error);
-      toast({
-        title: "Error",
-        description: "Something went wrong. Please try again.",
-        variant: "destructive",
-      });
+    } catch (error: any) {
+      if (error.code !== 'auth/popup-closed-by-user') {
+        console.error("Error during Google Sign-In:", error);
+        toast({
+          title: "Error",
+          description: "Something went wrong during sign-in. Please try again.",
+          variant: "destructive",
+        });
+      }
       setLoading(false);
     }
   };
@@ -69,7 +62,7 @@ export default function LoginPage() {
       <div className="relative hidden md:block">
         <Image
           src="https://res.cloudinary.com/dnkghymx5/image/upload/v1762241011/Generated_Image_November_04_2025_-_12_50PM_1_hslend.png"
-          alt="Attendry illustration"
+          alt="Saledup illustration"
           fill
           className="object-cover"
           priority
@@ -82,7 +75,7 @@ export default function LoginPage() {
         <div className="md:hidden w-full relative">
             <Image
             src="https://res.cloudinary.com/dnkghymx5/image/upload/v1762241011/Generated_Image_November_04_2025_-_12_50PM_1_hslend.png"
-            alt="Attendry illustration"
+            alt="Saledup illustration"
             width={800}
             height={600}
             className="w-full h-auto object-cover"
@@ -94,60 +87,29 @@ export default function LoginPage() {
         <div className="w-full max-w-sm space-y-6 p-6">
             <div className="text-center mb-8">
             <h1 className="text-3xl font-bold tracking-tight leading-tight">
-                India’s #1 QR Powered Staff Attendance App
+                Empower Your Local Business with Saledup
             </h1>
             <div className="flex items-center my-4">
                 <hr className="w-full border-muted-foreground/20" />
                 <span className="px-4 text-muted-foreground font-semibold whitespace-nowrap text-sm">
-                LOG IN OR SIGN UP
+                OWNER LOGIN / SIGNUP
                 </span>
                 <hr className="w-full border-muted-foreground/20" />
             </div>
             </div>
 
-            {/* LOGIN FORM */}
-            <form className="space-y-6" onSubmit={handleContinue}>
-            <div className="flex items-center gap-2 border border-input rounded-md px-3 bg-transparent">
-                <IndianFlagIcon />
-                <span className="text-sm font-medium text-muted-foreground">+91</span>
-                <Input
-                id="phone"
-                type="tel"
-                inputMode="numeric"
-                placeholder="10-digit mobile number"
-                required
-                className="flex-1 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent"
-                value={phone}
-                onChange={(e) =>
-                    setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))
-                }
-                maxLength={10}
-                pattern="\d{10}"
-                title="Please enter a 10-digit phone number"
-                />
-            </div>
-
             <Button
-                type="submit"
-                className="w-full bg-[#0C2A6A] hover:bg-[#0C2A6A]/90"
+                onClick={handleGoogleSignIn}
+                className="w-full bg-[#0C2A6A] hover:bg-[#0C2A6A]/90 h-12 text-base"
                 disabled={loading}
             >
-                {loading && <Loader2 className="mr-2 animate-spin" />}
-                Continue
+                {loading ? (
+                    <Loader2 className="mr-2 animate-spin" />
+                ) : (
+                    <svg role="img" viewBox="0 0 24 24" className="mr-2 h-5 w-5"><path fill="currentColor" d="M12.48 10.92v3.28h7.84c-.24 1.84-.85 3.18-1.73 4.1-1.05 1.05-2.36 1.67-4.06 1.67-3.4 0-6.17-2.83-6.17-6.23s2.77-6.23 6.17-6.23c1.87 0 3.13.78 3.88 1.48l2.34-2.34C18.37 1.9 15.48 0 12.48 0 5.88 0 .02 5.88.02 12.48s5.86 12.48 12.46 12.48c3.32 0 6.03-1.14 8.04-3.21 2.07-2.07 2.72-5.04 2.72-7.76v-2.1H12.48z"></path></svg>
+                )}
+                Continue with Google
             </Button>
-            </form>
-
-            <div className="flex items-center my-8">
-            <hr className="w-full" />
-            <span className="px-4 text-muted-foreground font-medium">OR</span>
-            <hr className="w-full" />
-            </div>
-
-            <Link href="/employee/login" className="w-full">
-            <Button variant="outline" className="w-full border-primary text-primary hover:bg-primary/5">
-                Login as Employee
-            </Button>
-            </Link>
         </div>
         </div>
 

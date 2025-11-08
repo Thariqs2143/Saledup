@@ -1,14 +1,11 @@
-
 'use client';
 import { useRouter, usePathname } from 'next/navigation';
 import {
-  Shield,
   LayoutDashboard,
   QrCode,
   Users,
   Settings,
-  BarChart3,
-  Crown,
+  Tag, // Saledup: Changed icon
   User,
   Bell,
   LogOut,
@@ -22,7 +19,6 @@ import { useToast } from '@/hooks/use-toast';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { useMemo } from 'react';
-import type { User as AppUser } from '@/app/admin/employees/page';
 import { SheetClose } from '@/components/ui/sheet';
 
 const iconMap: { [key: string]: any } = {
@@ -30,15 +26,23 @@ const iconMap: { [key: string]: any } = {
   QrCode,
   Users,
   Settings,
-  BarChart3,
-  Crown,
+  Tag, // Saledup: Changed icon
   User,
   Bell,
 };
 
+// Saledup: Updated profile type
+type ShopProfile = {
+  shopName?: string;
+  name?: string; // Owner's name
+  email?: string;
+  imageUrl?: string;
+  fallback?: string;
+}
+
 type AdminNavProps = {
   navItems: NavItem[];
-  profile: Partial<AppUser & { shopName?: string }>;
+  profile: Partial<ShopProfile>;
   isDesktop: boolean;
 };
 
@@ -78,7 +82,7 @@ export function AdminNav({ navItems, profile, isDesktop }: AdminNavProps) {
             className="flex items-center gap-2 font-semibold"
             >
             <span className="font-bold text-2xl text-primary tracking-wider">
-                Attendry
+                Saledup
             </span>
             </button>
         </div>
@@ -88,7 +92,7 @@ export function AdminNav({ navItems, profile, isDesktop }: AdminNavProps) {
             <nav className="grid items-start gap-1 text-sm font-medium">
             {navItems.map((item) => {
                 const Icon = item.iconName ? iconMap[item.iconName] : null;
-                const isActive = item.href === activePath;
+                const isActive = item.href === '/admin' ? pathname === item.href : pathname.startsWith(item.href);
                 const NavButton = (
                     <button
                         key={item.href}

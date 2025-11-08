@@ -1,4 +1,3 @@
-
 'use client';
 
 import type { PropsWithChildren } from 'react';
@@ -13,63 +12,60 @@ import { useEffect, useState } from 'react';
 import { onAuthStateChanged, type User as AuthUser } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
-import type { User as AppUser } from './employees/page';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { SubscriptionProvider } from '@/context/SubscriptionContext';
 
-
-const adminNavItems: NavItem[] = [
-  { href: '/admin', label: 'Home', iconName: 'LayoutDashboard' },
-  { href: '/admin/generate-qr', label: 'QR Entry', iconName: 'QrCode' },
-  { href: '/admin/employees', label: 'Staffs', iconName: 'Users' },
-  { href: '/admin/report', label: 'Report', iconName: 'BarChart3' },
-  { href: '/admin/leaderboard', label: 'Leaderboard', iconName: 'Crown' },
-  { href: '/admin/settings', label: 'Profile', iconName: 'User' },
-];
-
-const mobileBottomNavItems: NavItem[] = adminNavItems.filter(
-    (item) => item.label !== 'Leaderboard'
-);
-
-
+// Saledup: Updated types and nav items
 type ShopProfile = {
   shopName?: string;
+  name?: string; // Owner's name
+  email?: string;
+  imageUrl?: string;
   fallback?: string;
-  subscriptionPlan?: string;
-  subscriptionStatus?: string;
 }
 
-type FullProfile = AppUser & ShopProfile;
+const adminNavItems: NavItem[] = [
+  { href: '/admin', label: 'Dashboard', iconName: 'LayoutDashboard' },
+  { href: '/admin/offers', label: 'Offers', iconName: 'Tag' },
+  { href: '/admin/qr-code', label: 'Shop QR', iconName: 'QrCode' },
+  { href: '/admin/customers', label: 'Customers', iconName: 'Users' },
+  { href: '/admin/settings', label: 'Settings', iconName: 'User' },
+];
+
+const mobileBottomNavItems: NavItem[] = adminNavItems;
 
 
 export default function AdminLayout({ children }: PropsWithChildren) {
   const pathname = usePathname();
   const router = useRouter();
-  const [profile, setProfile] = useState<Partial<FullProfile>>({});
+  const [profile, setProfile] = useState<Partial<ShopProfile>>({});
   const [loading, setLoading] = useState(true);
 
   const isAuthPage =
-    pathname === '/login' ||
+    pathname.startsWith('/login') ||
     pathname.startsWith('/admin/login') ||
     pathname.startsWith('/admin/signup') ||
-    pathname === '/admin/complete-profile';
+    pathname.startsWith('/admin/complete-profile');
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         try {
-          const userDocRef = doc(db, 'users', user.uid);
           const shopDocRef = doc(db, 'shops', user.uid); 
-
-          const [userSnap, shopSnap] = await Promise.all([
-            getDoc(userDocRef),
-            getDoc(shopDocRef)
-          ]);
-
-          const userData = userSnap.exists() ? userSnap.data() : {};
-          const shopData = shopSnap.exists() ? shopSnap.data() : {};
+          const shopSnap = await getDoc(shopDocRef);
           
-          setProfile({ ...userData, ...shopData });
+          if (shopSnap.exists()) {
+              const shopData = shopSnap.data();
+              setProfile({ 
+                name: shopData.ownerName,
+                shopName: shopData.shopName,
+                email: shopData.email,
+                imageUrl: shopData.ownerImageUrl,
+                fallback: shopData.ownerName?.split(' ').map((n: string) => n[0]).join('') || 'SO'
+              });
+          } else if (!isAuthPage) {
+              // If shop doesn't exist, they need to complete their profile
+              router.replace('/admin/complete-profile');
+          }
 
         } catch (error) {
           console.error("Failed to fetch admin profile", error);
@@ -91,10 +87,7 @@ export default function AdminLayout({ children }: PropsWithChildren) {
   }
 
   return (
-    <SubscriptionProvider 
-        subscriptionPlan={profile.subscriptionPlan} 
-        subscriptionStatus={profile.subscriptionStatus}
-    >
+      <>
       {isAuthPage ? (
         <>{children}</>
       ) : (
@@ -118,7 +111,7 @@ export default function AdminLayout({ children }: PropsWithChildren) {
                   <AdminNav navItems={adminNavItems} profile={profile} isDesktop={false} />
                   </SheetContent>
               </Sheet>
-              <h1 className="font-bold text-xl text-primary">Attendry</h1>
+              <h1 className="font-bold text-xl text-primary">Saledup</h1>
               <div className="ml-auto flex items-center gap-2">
                   <Link href="/admin/notifications">
                   <Button variant="ghost" size="icon">
@@ -140,6 +133,6 @@ export default function AdminLayout({ children }: PropsWithChildren) {
           <InstallPWA />
         </div>
       )}
-    </SubscriptionProvider>
+    </>
   );
 }

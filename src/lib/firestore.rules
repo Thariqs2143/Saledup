@@ -7,62 +7,36 @@ service cloud.firestore {
     function isShopOwner(shopId) {
       return request.auth.uid == shopId;
     }
-    
-    // Helper function to check if a user is an employee of a specific shop
-    function isEmployee(shopId) {
-      return exists(/databases/$(database)/documents/shops/$(shopId)/employees/$(request.auth.uid));
-    }
-
-    // Rules for the main user profiles collection
-    match /users/{userId} {
-      allow read, update: if request.auth.uid == userId;
-      allow create: if request.auth.uid != null;
-    }
 
     // Rules for the shops collection
     match /shops/{shopId} {
-      // Owners can do anything to their own shop document.
-      allow create, update, delete: if isShopOwner(shopId);
+      // Owner can do anything to their own shop document.
+      // A new user can create their own shop document.
+      allow create: if isShopOwner(shopId);
+      allow read, update, delete: if isShopOwner(shopId);
       
-      // An owner can read their own shop. An employee can read the shop they belong to.
-      // The query from the client-side MUST include `where('ownerId', '==', request.auth.uid)`
-      // for this list rule to work correctly.
-      allow read: if isShopOwner(shopId) || isEmployee(shopId);
-      allow list: if request.auth != null;
+      // Public read for the shop details page that customers see
+      allow get;
 
-      // Rules for all subcollections within a shop
-      match /{subcollection}/{docId} {
-        allow read, write: if isShopOwner(shopId);
+      // --- SUBCOLLECTIONS ---
+      
+      // Offers subcollection
+      match /offers/{offerId} {
+        // Shop owner can manage their own offers
+        allow read, write, delete: if isShopOwner(shopId);
+        
+        // Any user (including unauthenticated) can list offers for a shop
+        allow list;
       }
       
-      // More specific rules for employees subcollection
-      match /employees/{employeeId} {
-         allow read, write: if isShopOwner(shopId) || request.auth.uid == employeeId;
+      // Claims subcollection
+      match /claims/{claimId} {
+        // Shop owner can read/update claims (e.g., to mark as redeemed)
+        allow read, update: if isShopOwner(shopId);
+        
+        // Anyone can create a claim (since it's an unauthenticated action)
+        allow create;
       }
-      
-      // More specific rules for attendance
-      match /attendance/{attendanceId} {
-        allow create: if isEmployee(shopId);
-        allow read, write: if isShopOwner(shopId) || (isEmployee(shopId) && resource.data.userId == request.auth.uid);
-      }
-      
-      // More specific rules for leave requests
-      match /leaveRequests/{leaveId} {
-         allow create: if isEmployee(shopId);
-         allow read, write: if isShopOwner(shopId) || (isEmployee(shopId) && resource.data.userId == request.auth.uid);
-      }
-    }
-    
-    // Employee phone number to shopId lookup table
-    // Used for employee login and to prevent duplicate phone numbers.
-    match /employee_phone_to_shop_lookup/{phone} {
-      // Anyone can read this to find their shop during login.
-      allow read: if true;
-      // Only authenticated users can create their own lookup entry during signup/invitation.
-      allow create: if request.auth != null;
-      // Only the original shop owner can delete the lookup when an employee is deleted.
-      // (This rule is simplified; a more robust solution would use Cloud Functions for cascading deletes).
-      allow delete, update: if exists(/databases/$(database)/documents/shops/$(resource.data.shopId));
     }
   }
 }
