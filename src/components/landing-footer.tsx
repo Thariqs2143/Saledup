@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -49,11 +50,11 @@ export function LandingFooter() {
                     <div>
                         <h3 className="font-semibold text-foreground mb-4 tracking-wider">NAVIGATION</h3>
                         <ul className="space-y-3 text-sm">
-                            <li><Link href="#" className="text-muted-foreground hover:text-primary">Home</Link></li>
-                            <li><Link href="#" className="text-muted-foreground hover:text-primary">About</Link></li>
-                            <li><Link href="#" className="text-muted-foreground hover:text-primary">Pricing</Link></li>
-                            <li><Link href="#" className="text-muted-foreground hover:text-primary">FAQ</Link></li>
-                            <li><Link href="#" className="text-muted-foreground hover:text-primary">Contact</Link></li>
+                            <li><Link href="/" className="text-muted-foreground hover:text-primary">Home</Link></li>
+                            <li><Link href="/about" className="text-muted-foreground hover:text-primary">About</Link></li>
+                            <li><Link href="/pricing" className="text-muted-foreground hover:text-primary">Pricing</Link></li>
+                            <li><Link href="/faq" className="text-muted-foreground hover:text-primary">FAQ</Link></li>
+                            <li><Link href="/contact" className="text-muted-foreground hover:text-primary">Contact</Link></li>
                         </ul>
                     </div>
 
