@@ -10,6 +10,7 @@ import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { LandingFooter } from '@/components/landing-footer';
 import placeholderImages from '@/lib/placeholder-images.json';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 
 const SaledupLogo = () => (
@@ -367,6 +368,40 @@ const targetCustomers = [
                             </div>
                             <h3 className="mt-6 text-xl font-bold">{step.title}</h3>
                             <p className="mt-2 text-muted-foreground">{step.description}</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </section>
+
+        {/* Testimonials Section */}
+        <section className="bg-muted/30 py-20 sm:py-24">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <div className="inline-block bg-primary/10 text-primary font-semibold py-1 px-4 rounded-full text-sm mb-4">
+                    Testimonials
+                </div>
+                <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight">
+                    Loved by Shops and Customers
+                </h2>
+                <p className="mt-4 max-w-2xl mx-auto text-muted-foreground text-lg">
+                    Here's what people are saying about Saledup.
+                </p>
+                <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
+                    {placeholderImages.testimonials.map((testimonial, index) => (
+                        <div key={index} className="bg-background rounded-lg shadow-sm p-8 flex flex-col justify-between">
+                            <blockquote className="text-muted-foreground italic">
+                                "{testimonial.quote}"
+                            </blockquote>
+                            <div className="flex items-center mt-6">
+                                <Avatar className="h-12 w-12 mr-4">
+                                    <AvatarImage src={testimonial.src} alt={testimonial.name} data-ai-hint={testimonial.hint} />
+                                    <AvatarFallback>{testimonial.name.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <div>
+                                    <p className="font-semibold">{testimonial.name}</p>
+                                    <p className="text-sm text-muted-foreground">{testimonial.role}</p>
+                                </div>
+                            </div>
                         </div>
                     ))}
                 </div>

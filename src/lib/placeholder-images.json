@@ -21,5 +21,28 @@
       "description": "Walk-in customers scan the code with their phone to instantly see and claim your offers.",
       "hint": "phone scanning"
     }
+  ],
+  "testimonials": [
+    {
+      "src": "https://picsum.photos/seed/priya/100/100",
+      "name": "Priya Sharma",
+      "role": "Owner, The Daily Grind",
+      "quote": "Saledup is a game-changer! We've seen a 30% increase in offer claims since we started. It's so easy to update our daily specials without any technical fuss.",
+      "hint": "woman portrait"
+    },
+    {
+      "src": "https://picsum.photos/seed/rohan/100/100",
+      "name": "Rohan Mehta",
+      "role": "Manager, Urban Threads",
+      "quote": "The simplicity is its biggest strength. No app for the customer, no complex setup for us. We just put the QR code on our window, and it works.",
+      "hint": "man portrait"
+    },
+    {
+      "src": "https://picsum.photos/seed/anika/100/100",
+      "name": "Anika Reddy",
+      "role": "Customer",
+      "quote": "I love discovering new deals just by scanning a code. It feels like a little surprise every time I visit my favorite cafe. No need to download another app!",
+      "hint": "person smiling"
+    }
   ]
 }
