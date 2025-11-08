@@ -311,6 +311,9 @@ const targetCustomers = [
                 .scrolling-wrapper {
                     animation: scroll 60s linear infinite;
                 }
+                .scrolling-wrapper-container:hover .scrolling-wrapper {
+                    animation-play-state: paused;
+                }
             `}</style>
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
                 <div className="inline-block bg-primary/10 text-primary font-semibold py-1 px-4 rounded-full text-sm mb-4">
@@ -323,7 +326,7 @@ const targetCustomers = [
                     Here's what people are saying about Saledup.
                 </p>
             </div>
-            <div className="mt-12 relative w-full [mask-image:_linear-gradient(to_right,transparent_0,_black_128px,_black_calc(100%-128px),transparent_100%)]">
+            <div className="mt-12 relative w-full [mask-image:_linear-gradient(to_right,transparent_0,_black_128px,_black_calc(100%-128px),transparent_100%)] scrolling-wrapper-container">
                 <div className="flex w-max items-stretch scrolling-wrapper">
                     {[...placeholderImages.testimonials, ...placeholderImages.testimonials].map((testimonial, index) => (
                       <div key={index} className="w-[380px] md:w-[450px] shrink-0 p-4">
