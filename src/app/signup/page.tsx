@@ -10,14 +10,15 @@ import { useRouter } from 'next/navigation';
 import {
   signInWithPopup,
   GoogleAuthProvider,
-  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  updateProfile,
 } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
 
-export default function LoginPage() {
+export default function SignupPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -68,17 +69,18 @@ export default function LoginPage() {
     }
   };
 
-  const handleEmailLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleEmailSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     const formData = new FormData(e.currentTarget);
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
+    const repeatPassword = formData.get('repeat-password') as string;
 
-    if (!email || !password) {
+    if (password !== repeatPassword) {
       toast({
         title: 'Error',
-        description: 'Email and password are required.',
+        description: 'Passwords do not match.',
         variant: 'destructive',
       });
       setLoading(false);
@@ -86,17 +88,45 @@ export default function LoginPage() {
     }
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      toast({ title: 'Login Successful!', description: 'Welcome back!' });
-      router.push('/admin');
-    } catch (error: any) {
-      console.error('Email/password login error:', error);
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
+      
+      const ownerName = email.split('@')[0];
+      await updateProfile(user, { displayName: ownerName });
+
+      const shopDocRef = doc(db, 'shops', user.uid);
+      await setDoc(
+        shopDocRef,
+        {
+          ownerId: user.uid,
+          ownerName: ownerName,
+          ownerEmail: user.email,
+          createdAt: new Date(),
+        },
+        { merge: true }
+      );
+      
       toast({
-        title: 'Login Failed',
-        description:
-          error.code === 'auth/invalid-credential'
-            ? 'Invalid email or password.'
-            : 'An unexpected error occurred.',
+        title: 'Account Created!',
+        description: 'Please complete your shop profile to continue.',
+      });
+      router.push('/admin/complete-profile');
+
+    } catch (error: any) {
+      console.error('Email sign up error:', error);
+      let description = 'An unexpected error occurred.';
+      if (error.code === 'auth/email-already-in-use') {
+        description = 'This email is already in use. Please log in instead.';
+      } else if (error.code === 'auth/weak-password') {
+        description = 'Password should be at least 6 characters long.';
+      }
+      toast({
+        title: 'Sign Up Failed',
+        description,
         variant: 'destructive',
       });
     } finally {
@@ -122,50 +152,11 @@ export default function LoginPage() {
       <div className="flex flex-col items-center justify-center p-6 -mt-16 md:mt-0 relative z-10">
         <div className="w-full max-w-sm space-y-6 rounded-lg bg-black/50 p-8">
           <div className="text-center">
-            <h1 className="text-3xl font-bold tracking-tight">Welcome Back</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Start Creating</h1>
             <p className="mt-2 text-neutral-400">
-              Sign in to manage your offers and grow your business.
+              Join Saledup to generate offers, engage customers, and grow your
+              business.
             </p>
-          </div>
-
-          <form onSubmit={handleEmailLogin} className="space-y-4">
-            <div>
-              <Label htmlFor="email">Email address</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                required
-                className="mt-1 bg-neutral-800 border-neutral-700 placeholder:text-neutral-500"
-              />
-            </div>
-            <div>
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                required
-                className="mt-1 bg-neutral-800 border-neutral-700 placeholder:text-neutral-500"
-              />
-            </div>
-            <Button
-              type="submit"
-              className="w-full h-11 bg-primary hover:bg-primary/90"
-              disabled={loading || googleLoading}
-            >
-              {loading && <Loader2 className="mr-2 animate-spin" />}
-              Login
-            </Button>
-          </form>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-neutral-700" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="bg-black/50 px-2 text-neutral-400">OR</span>
-            </div>
           </div>
 
           <Button
@@ -186,10 +177,60 @@ export default function LoginPage() {
             Continue with Google
           </Button>
 
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-neutral-700" />
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="bg-black/50 px-2 text-neutral-400">OR</span>
+            </div>
+          </div>
+
+          <form onSubmit={handleEmailSignUp} className="space-y-4">
+            <div>
+              <Label htmlFor="email">Email address</Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                required
+                className="mt-1 bg-neutral-800 border-neutral-700 placeholder:text-neutral-500"
+              />
+            </div>
+            <div>
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                required
+                className="mt-1 bg-neutral-800 border-neutral-700 placeholder:text-neutral-500"
+              />
+            </div>
+            <div>
+              <Label htmlFor="repeat-password">Repeat Password</Label>
+              <Input
+                id="repeat-password"
+                name="repeat-password"
+                type="password"
+                required
+                className="mt-1 bg-neutral-800 border-neutral-700 placeholder:text-neutral-500"
+              />
+            </div>
+            <Button
+              type="submit"
+              className="w-full h-11 bg-primary hover:bg-primary/90"
+              disabled={loading || googleLoading}
+            >
+              {loading && <Loader2 className="mr-2 animate-spin" />}
+              Sign up and start creating
+            </Button>
+          </form>
+
           <p className="text-center text-sm text-neutral-400">
-            Don't have an account?{' '}
-            <Link href="/signup" className="font-medium text-primary hover:underline">
-              Sign up
+            Already have an account?{' '}
+            <Link href="/login" className="font-medium text-primary hover:underline">
+              Login
             </Link>
           </p>
         </div>
