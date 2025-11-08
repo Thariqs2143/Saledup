@@ -179,13 +179,13 @@ export default function AdminDashboard() {
               <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
                   Good morning, {ownerName}!
               </h1>
-              <p className="text-muted-foreground font-bold">Here's a quick overview of your shop's performance.</p>
+              <p className="text-muted-foreground font-semibold">Here's a quick overview of your shop's performance.</p>
             </div>
             <TabsList className="grid w-full md:w-auto md:inline-flex grid-cols-4 border-2 border-gray-300 dark:border-white hover:border-primary transition-colors">
-              <TabsTrigger value="today">Today</TabsTrigger>
-              <TabsTrigger value="weekly">Weekly</TabsTrigger>
-              <TabsTrigger value="monthly">Monthly</TabsTrigger>
-              <TabsTrigger value="yearly">Yearly</TabsTrigger>
+              <TabsTrigger value="today" className="font-extrabold">Today</TabsTrigger>
+              <TabsTrigger value="weekly" className="font-extrabold">Weekly</TabsTrigger>
+              <TabsTrigger value="monthly" className="font-extrabold">Monthly</TabsTrigger>
+              <TabsTrigger value="yearly" className="font-extrabold">Yearly</TabsTrigger>
             </TabsList>
         </div>
         <TabsContent value={activeTab} className="mt-4 space-y-4">
@@ -408,5 +408,7 @@ export default function AdminDashboard() {
 
 
 
+
+    
 
     
