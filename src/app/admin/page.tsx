@@ -181,7 +181,7 @@ export default function AdminDashboard() {
               </h1>
               <p className="text-muted-foreground font-bold">Here's a quick overview of your shop's performance.</p>
             </div>
-            <TabsList className="grid w-full md:w-auto md:inline-flex grid-cols-4 border-2 border-gray-300 dark:border-white hover:border-red-500 transition-colors">
+            <TabsList className="grid w-full md:w-auto md:inline-flex grid-cols-4 border-2 border-gray-300 dark:border-white hover:border-primary transition-colors">
               <TabsTrigger value="today">Today</TabsTrigger>
               <TabsTrigger value="weekly">Weekly</TabsTrigger>
               <TabsTrigger value="monthly">Monthly</TabsTrigger>
@@ -301,11 +301,13 @@ export default function AdminDashboard() {
                   <Activity className="h-6 w-6 text-primary"/>
                   <CardTitle>Customer Activity Feed</CardTitle>
                 </div>
-                <Link href="/admin/customers">
-                    <Button variant="outline" size="sm">
-                        <Eye className="mr-2 h-4 w-4"/> View All
-                    </Button>
-                </Link>
+                {recentClaims.length > 0 && (
+                    <Link href="/admin/customers">
+                        <Button variant="outline" size="sm">
+                            <Eye className="mr-2 h-4 w-4"/> View All
+                        </Button>
+                    </Link>
+                )}
             </div>
             <CardDescription>A real-time log of customers claiming your offers.</CardDescription>
           </CardHeader>
@@ -335,8 +337,13 @@ export default function AdminDashboard() {
                     ))}
                 </div>
             ) : (
-                 <div className="text-center py-12 text-muted-foreground">
+                 <div className="text-center py-12 text-muted-foreground space-y-4">
                     <p>No customers have claimed offers yet.</p>
+                    <Link href="/admin/customers">
+                        <Button variant="outline" size="sm">
+                            <Eye className="mr-2 h-4 w-4"/> View Customers Page
+                        </Button>
+                    </Link>
                 </div>
             )}
           </CardContent>
@@ -400,3 +407,6 @@ export default function AdminDashboard() {
 
 
 
+
+
+    
