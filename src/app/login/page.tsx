@@ -126,9 +126,9 @@ export default function LoginPage() {
             <div className="w-full max-w-md bg-background/90 backdrop-blur-sm p-8 rounded-xl shadow-2xl lg:bg-background lg:backdrop-blur-none lg:shadow-none lg:p-6">
                 <div className="mx-auto grid gap-6">
                     <div className="grid gap-2 text-center">
-                        <h1 className="text-3xl font-bold">Login</h1>
+                        <h1 className="text-3xl font-bold">Start Creating 🔥</h1>
                         <p className="text-balance text-muted-foreground">
-                        Enter your email below to login to your account
+                        Log in to generate, edit and bring your vison to life
                         </p>
                     </div>
                     <form onSubmit={handleEmailLogin} className="grid gap-4">
