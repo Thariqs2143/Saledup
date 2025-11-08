@@ -11,6 +11,8 @@ const firebaseConfig: FirebaseOptions = {
   appId: "1:549813095043:web:3f71153821f97fa2c1e9b6",
   apiKey: "AIzaSyB8o--qEIG40NFt16EbP8P9TtQrpX6QhPo",
   authDomain: "saledup-37079661-bf1ee.firebaseapp.com",
+  storageBucket: "saledup-37079661-bf1ee.appspot.com",
+  messagingSenderId: "549813095043",
 };
 
 // Initialize Firebase
