@@ -183,7 +183,7 @@ export default function AdminDashboard() {
        </div>
 
       <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4 border border-gray-300 dark:border-white hover:border-red-500 transition-colors">
+        <TabsList className="grid w-full grid-cols-4 border-2 border-gray-300 dark:border-white hover:border-red-500 transition-colors">
           <TabsTrigger value="today">Today</TabsTrigger>
           <TabsTrigger value="weekly">Weekly</TabsTrigger>
           <TabsTrigger value="monthly">Monthly</TabsTrigger>
@@ -393,6 +393,7 @@ export default function AdminDashboard() {
 
 
     
+
 
 
 
