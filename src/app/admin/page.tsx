@@ -173,7 +173,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="flex flex-col gap-6 lg:gap-8">
-      <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="space-y-4">
+      <Tabs defaultValue={activeTab} onValueChange={setActiveTab}>
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
               <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
@@ -302,7 +302,7 @@ export default function AdminDashboard() {
                   <CardTitle>Customer Activity Feed</CardTitle>
                 </div>
                 {recentClaims.length > 0 && (
-                    <Link href="/admin/customers">
+                    <Link href="/admin/customers" className="hidden sm:block">
                         <Button variant="outline" size="sm">
                             <Eye className="mr-2 h-4 w-4"/> View All
                         </Button>
@@ -408,6 +408,8 @@ export default function AdminDashboard() {
 
 
 
+
+    
 
     
 
