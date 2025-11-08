@@ -81,26 +81,25 @@ export default function LandingPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
-      {/* Top Banner */}
-      {showBanner && (
-        <div className="relative bg-primary text-primary-foreground py-2.5 px-4 text-center text-sm font-medium">
-            <Sparkles className="h-4 w-4 absolute left-4 top-1/2 -translate-y-1/2 hidden md:inline-block" />
-            <span>Upgrade to Pro and unlock powerful new features!</span>
-            <button onClick={() => setShowBanner(false)} className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-md hover:bg-white/20">
-                <X className="h-4 w-4" />
-                <span className="sr-only">Dismiss</span>
-            </button>
-        </div>
-      )}
-
       {/* Header */}
       <header className={cn(
-          "sticky top-0 z-50 transition-all duration-300",
-          isScrolled ? "py-2" : "py-4"
+          "sticky top-0 z-50 transition-all duration-300 w-full",
+          isScrolled ? "py-2 bg-background/80 backdrop-blur-sm shadow-lg border-b" : "py-4"
         )}>
+        {isScrolled && showBanner && (
+             <div className="relative bg-primary text-primary-foreground py-2.5 px-4 text-center text-sm font-medium transition-all animate-in fade-in-50 duration-300">
+                <Sparkles className="h-4 w-4 absolute left-4 top-1/2 -translate-y-1/2 hidden md:inline-block" />
+                <span>Upgrade to Pro and unlock powerful new features!</span>
+                <button onClick={() => setShowBanner(false)} className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-md hover:bg-white/20">
+                    <X className="h-4 w-4" />
+                    <span className="sr-only">Dismiss</span>
+                </button>
+            </div>
+        )}
         <div className={cn(
             "container mx-auto flex items-center justify-between transition-all duration-300",
-            isScrolled ? "h-16 bg-background/80 backdrop-blur-sm rounded-full shadow-lg border px-4 sm:px-6 lg:px-8" : "h-20 px-4 sm:px-6 lg:px-8"
+            isScrolled ? "h-16" : "h-20",
+             "px-4 sm:px-6 lg:px-8"
             )}>
           <Link href="/" className="flex items-center gap-2.5 text-foreground">
               <SaledupLogo />
@@ -179,7 +178,7 @@ export default function LandingPage() {
 
                 <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
                     {/* Without Saledup Card */}
-                    <div className="bg-background/50 rounded-xl p-8 text-center">
+                    <div className="bg-background/50 rounded-xl p-8 text-center border transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-1">
                         <h3 className="text-xl font-bold text-muted-foreground">Without Saledup</h3>
                         <div className="my-8 flex items-center justify-center h-32">
                            <div className="p-6 bg-muted rounded-full">
