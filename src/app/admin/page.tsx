@@ -240,12 +240,12 @@ export default function AdminDashboard() {
 
 
         <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
-            <CardHeader>
-                <CardTitle>View Your Live Offers Page</CardTitle>
-                <CardDescription>This is the public page your customers see when they scan your QR code.</CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                <Button asChild>
+            <CardContent className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 p-6">
+                <div className="flex-1">
+                    <h3 className="font-bold text-lg">View Your Live Offers Page</h3>
+                    <p className="text-sm text-muted-foreground">This is the public page your customers see when they scan your QR code.</p>
+                </div>
+                <Button asChild className="w-full md:w-auto">
                     <Link href={`/shops/${authUser?.uid}`} target="_blank">
                         Live View <Eye className="ml-2 h-4 w-4"/>
                     </Link>
