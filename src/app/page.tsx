@@ -56,7 +56,6 @@ export default function LandingPage() {
         icon: Store,
         title: 'Instant Customer Access',
         description: 'Customers scan and see your latest deals instantly. No app installation required.',
-        highlighted: true,
     },
     {
         icon: Sparkles,
@@ -84,19 +83,17 @@ export default function LandingPage() {
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       {/* Header */}
       <header className={'sticky top-0 z-50 w-full transition-all duration-300'}>
-        {showBanner && (
-          <div className="relative bg-primary text-primary-foreground py-2.5 px-4 text-center text-sm font-medium">
-            <Sparkles className="h-4 w-4 absolute left-4 top-1/2 -translate-y-1/2 hidden md:inline-block" />
-            <span>Upgrade to Pro and unlock powerful new features!</span>
-            <button
-              onClick={() => setShowBanner(false)}
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-md hover:bg-white/20"
-            >
-              <X className="h-4 w-4" />
-              <span className="sr-only">Dismiss</span>
-            </button>
-          </div>
-        )}
+        <div className="relative bg-primary text-primary-foreground py-2.5 px-4 text-center text-sm font-medium">
+          <Sparkles className="h-4 w-4 absolute left-4 top-1/2 -translate-y-1/2 hidden md:inline-block" />
+          <span>Upgrade to Pro and unlock powerful new features!</span>
+          <button
+            onClick={() => setShowBanner(false)}
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-md hover:bg-white/20"
+          >
+            <X className="h-4 w-4" />
+            <span className="sr-only">Dismiss</span>
+          </button>
+        </div>
         <div
           className={cn(
             'transition-all duration-300',
@@ -279,8 +276,7 @@ export default function LandingPage() {
                     {features.map((feature, index) => (
                         <div key={index}
                              className={cn(
-                                'bg-background rounded-xl p-6 text-left border transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-1',
-                                feature.highlighted ? 'border-primary shadow-primary/10' : 'border-border'
+                                'bg-background rounded-xl p-6 text-left border border-border shadow-sm transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-1 hover:border-primary'
                              )}>
                             <div className="p-3 bg-primary/10 rounded-lg inline-block mb-4">
                                 <feature.icon className="h-6 w-6 text-primary" />
@@ -298,3 +294,5 @@ export default function LandingPage() {
     </div>
   );
 }
+
+    
