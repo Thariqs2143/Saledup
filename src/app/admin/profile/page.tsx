@@ -110,7 +110,7 @@ export default function AdminProfilePage() {
                             <p className="text-muted-foreground">{profile.businessType}</p>
                         </div>
                     </div>
-                    <Link href="/admin/profile/edit" className="w-full">
+                    <Link href="/admin/profile/edit" className="w-full block mt-4">
                         <Button variant="outline" className="w-full">
                             <Edit className="mr-2 h-4 w-4"/>
                             Edit Profile
@@ -137,4 +137,3 @@ export default function AdminProfilePage() {
     </div>
   );
 }
-
