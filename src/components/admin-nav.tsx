@@ -1,11 +1,11 @@
+
 'use client';
 import { useRouter, usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
   QrCode,
   Users,
-  Settings,
-  Tag, // Saledup: Changed icon
+  Tag,
   User,
   Bell,
   LogOut,
@@ -26,13 +26,11 @@ const iconMap: { [key: string]: any } = {
   LayoutDashboard,
   QrCode,
   Users,
-  Settings,
-  Tag, // Saledup: Changed icon
+  Tag,
   User,
   Bell,
 };
 
-// Saledup: Updated profile type
 type ShopProfile = {
   shopName?: string;
   name?: string; // Owner's name
@@ -117,7 +115,7 @@ export function AdminNav({ navItems, profile, isDesktop }: AdminNavProps) {
         {/* Profile + Logout */}
         <div className="mt-auto p-4 space-y-2 border-t">
             <div className="flex items-center justify-between">
-              <Link href="/admin/settings">
+              <Link href="/admin/profile">
                 <div className="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-muted">
                     <Avatar className="h-10 w-10 border-2 border-primary">
                     <AvatarImage src={profile?.imageUrl} />

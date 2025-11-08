@@ -29,7 +29,7 @@ const adminNavItems: NavItem[] = [
   { href: '/admin/offers', label: 'Offers', iconName: 'Tag' },
   { href: '/admin/qr-code', label: 'Shop QR', iconName: 'QrCode' },
   { href: '/admin/customers', label: 'Customers', iconName: 'Users' },
-  { href: '/admin/settings', label: 'Settings', iconName: 'User' },
+  { href: '/admin/profile', label: 'Profile', iconName: 'User' },
 ];
 
 const mobileBottomNavItems: NavItem[] = adminNavItems;
