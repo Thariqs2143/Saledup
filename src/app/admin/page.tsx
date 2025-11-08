@@ -242,10 +242,12 @@ export default function AdminDashboard() {
         <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
             <CardContent className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 p-6">
                 <div className="flex-1">
-                    <CardTitle className="font-bold">Your Live Offers Page</CardTitle>
-                    <CardDescription className="font-bold">
+                    <CardHeader className="p-0">
+                        <CardTitle className="font-bold">Your Live Offers Page</CardTitle>
+                        <CardDescription className="font-bold pt-0.5">
                         This is the public page your customers see when they scan your QR code.
-                    </CardDescription>
+                        </CardDescription>
+                    </CardHeader>
                 </div>
                 <Button asChild className="w-full md:w-auto font-bold">
                     <Link href={`/shops/${authUser?.uid}`} target="_blank">
@@ -410,8 +412,6 @@ export default function AdminDashboard() {
 
 
 
-
-    
 
     
 
