@@ -97,7 +97,7 @@ const targetCustomers = [
                     </Link>
                 </div>
             </div>
-             <div className="hidden md:block">
+             <div className="md:block">
                  <Image
                     src="https://res.cloudinary.com/dyov4r11v/image/upload/v1762585069/WhatsApp_Image_2025-11-08_at_12.26.33_9ac0131f_qj21tx.jpg"
                     alt="Saledup engagement illustration"
@@ -306,7 +306,7 @@ const targetCustomers = [
             <style jsx>{`
                 @keyframes scroll {
                     from { transform: translateX(0); }
-                    to { transform: translateX(-100%); }
+                    to { transform: translateX(-50%); }
                 }
                 .scrolling-wrapper {
                     animation: scroll 60s linear infinite;
@@ -421,6 +421,8 @@ const targetCustomers = [
     </div>
   );
 }
+
+    
 
     
 
