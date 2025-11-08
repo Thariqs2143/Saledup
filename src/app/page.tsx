@@ -11,6 +11,8 @@ import { LandingFooter } from '@/components/landing-footer';
 import placeholderImages from '@/lib/placeholder-images.json';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import { Card, CardContent } from '@/components/ui/card';
 
 
 const SaledupLogo = () => (
@@ -106,8 +108,7 @@ const targetCustomers = [
       <header className={'sticky top-0 z-50 w-full'}>
         <div
           className={cn(
-            'relative bg-primary text-primary-foreground py-2.5 px-4 text-center text-sm font-medium transition-all duration-300',
-            !showBanner && 'hidden'
+            'relative bg-primary text-primary-foreground py-2.5 px-4 text-center text-sm font-medium'
           )}
         >
           <Sparkles className="h-4 w-4 absolute left-4 top-1/2 -translate-y-1/2 hidden md:inline-block" />
@@ -122,13 +123,13 @@ const targetCustomers = [
         </div>
         <div
           className={cn(
-            'transition-all duration-300',
+            'transition-all duration-300 w-full',
             isScrolled
-              ? 'py-2 bg-background/80 backdrop-blur-sm rounded-full shadow-lg border mx-auto px-4 sm:px-6 lg:px-8 mt-2 max-w-6xl'
+              ? 'py-2 bg-background/80 backdrop-blur-sm shadow-lg'
               : 'py-4 bg-background'
           )}
         >
-          <div className={cn('flex items-center justify-between', !isScrolled && 'container mx-auto')}>
+          <div className='container mx-auto flex items-center justify-between'>
             <Link href="/" className="flex items-center gap-2.5 text-foreground">
               <SaledupLogo />
               <span className="font-bold text-xl tracking-wide">Saledup</span>
@@ -389,25 +390,41 @@ const targetCustomers = [
                 <p className="mt-4 max-w-2xl mx-auto text-muted-foreground text-lg">
                     Here's what people are saying about Saledup.
                 </p>
-                <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
+                <Carousel
+                  opts={{
+                    align: "start",
+                    loop: true,
+                  }}
+                  className="w-full max-w-5xl mx-auto mt-12"
+                >
+                  <CarouselContent>
                     {placeholderImages.testimonials.map((testimonial, index) => (
-                        <div key={index} className="bg-background rounded-lg shadow-sm p-8 flex flex-col justify-between border border-border">
-                            <blockquote className="text-muted-foreground italic">
-                                "{testimonial.quote}"
-                            </blockquote>
-                            <div className="flex items-center mt-6">
-                                <Avatar className="h-12 w-12 mr-4">
-                                    <AvatarImage src={testimonial.src} alt={testimonial.name} data-ai-hint={testimonial.hint} />
-                                    <AvatarFallback>{testimonial.name.charAt(0)}</AvatarFallback>
-                                </Avatar>
-                                <div>
-                                    <p className="font-semibold">{testimonial.name}</p>
-                                    <p className="text-sm text-muted-foreground">{testimonial.role}</p>
+                      <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
+                        <div className="p-1 h-full">
+                          <Card className="h-full flex flex-col justify-between border-border shadow-sm hover:border-primary transition-all group">
+                             <CardContent className="flex flex-col justify-between items-start gap-6 p-6">
+                                <blockquote className="text-muted-foreground italic text-left">
+                                    "{testimonial.quote}"
+                                </blockquote>
+                                <div className="flex items-center">
+                                    <Avatar className="h-12 w-12 mr-4">
+                                        <AvatarImage src={testimonial.src} alt={testimonial.name} data-ai-hint={testimonial.hint} />
+                                        <AvatarFallback>{testimonial.name.charAt(0)}</AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                        <p className="font-semibold text-left">{testimonial.name}</p>
+                                        <p className="text-sm text-muted-foreground text-left">{testimonial.role}</p>
+                                    </div>
                                 </div>
-                            </div>
+                            </CardContent>
+                          </Card>
                         </div>
+                      </CarouselItem>
                     ))}
-                </div>
+                  </CarouselContent>
+                  <CarouselPrevious className="hidden md:flex" />
+                  <CarouselNext className="hidden md:flex" />
+                </Carousel>
             </div>
         </section>
 

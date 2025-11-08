@@ -43,6 +43,27 @@
       "role": "Customer",
       "quote": "I love discovering new deals just by scanning a code. It feels like a little surprise every time I visit my favorite cafe. No need to download another app!",
       "hint": "person smiling"
+    },
+    {
+      "src": "https://picsum.photos/seed/karan/100/100",
+      "name": "Karan Singh",
+      "role": "Chef & Owner, Spice Route",
+      "quote": "The AI description writer is magic. I just upload a photo of my daily special, and Saledup writes a perfect ad. Saves me so much time.",
+      "hint": "chef cooking"
+    },
+    {
+      "src": "https://picsum.photos/seed/aisha/100/100",
+      "name": "Aisha Khan",
+      "role": "Proprietor, The Book Nook",
+      "quote": "We've built a real community of regulars. People come back to see what's new on the QR code. It's fantastic for loyalty.",
+      "hint": "woman reading"
+    },
+    {
+      "src": "https://picsum.photos/seed/vikram/100/100",
+      "name": "Vikram Desai",
+      "role": "Customer",
+      "quote": "It's so much better than generic discount apps. The offers are unique to the shops I actually visit. Feels more personal.",
+      "hint": "man shopping"
     }
   ],
   "faqs": [
