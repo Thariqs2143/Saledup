@@ -1,10 +1,12 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Sparkles, X } from 'lucide-react';
+import { ArrowRight, Sparkles, X, Store, ShoppingBag, Users, QrCode, TrendingUp } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { cn } from '@/lib/utils';
+
 
 const SaledupLogo = () => (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -32,6 +34,15 @@ const SaledupLogo = () => (
 
 export default function LandingPage() {
   const [showBanner, setShowBanner] = useState(true);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
@@ -48,31 +59,37 @@ export default function LandingPage() {
       )}
 
       {/* Header */}
-      <header className="container mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2.5 text-foreground">
-            <SaledupLogo />
-            <span className="font-bold text-xl tracking-wide">
-                Saledup
-            </span>
-        </Link>
-        <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-          <Link href="#" className="text-foreground/80 hover:text-foreground">Home</Link>
-          <Link href="#" className="text-foreground/80 hover:text-foreground">About</Link>
-          <Link href="#" className="text-foreground/80 hover:text-foreground">Pricing</Link>
-          <Link href="#" className="text-foreground/80 hover:text-foreground">FAQ</Link>
-          <Link href="#" className="text-foreground/80 hover:text-foreground">Contact</Link>
-        </nav>
-        <div className="flex items-center gap-2">
-          <Link href="/login" passHref>
-             <Button variant="outline">Get Started</Button>
+      <header className={cn(
+          "sticky top-0 z-50 transition-all duration-300",
+          isScrolled ? "bg-background/80 backdrop-blur-sm shadow-md" : "bg-transparent"
+        )}>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2.5 text-foreground">
+              <SaledupLogo />
+              <span className="font-bold text-xl tracking-wide">
+                  Saledup
+              </span>
           </Link>
-          <Link href="/login" passHref>
-             <Button>
-                Go Pro
-             </Button>
-          </Link>
+          <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
+            <Link href="#" className="text-foreground/80 hover:text-foreground">Home</Link>
+            <Link href="#" className="text-foreground/80 hover:text-foreground">About</Link>
+            <Link href="#" className="text-foreground/80 hover:text-foreground">Pricing</Link>
+            <Link href="#" className="text-foreground/80 hover:text-foreground">FAQ</Link>
+            <Link href="#" className="text-foreground/80 hover:text-foreground">Contact</Link>
+          </nav>
+          <div className="flex items-center gap-2">
+            <Link href="/login" passHref>
+               <Button variant="outline">Get Started</Button>
+            </Link>
+            <Link href="/login" passHref>
+               <Button>
+                  Go Pro
+               </Button>
+            </Link>
+          </div>
         </div>
       </header>
+
 
       {/* Main Content */}
       <main className="flex-1">
@@ -106,6 +123,62 @@ export default function LandingPage() {
                     height={785}
                     className="rounded-lg"
                 />
+            </div>
+        </section>
+
+        {/* Visualize Your Growth Section */}
+        <section className="bg-muted/30 py-20 sm:py-24">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <div className="inline-block bg-primary/10 text-primary font-semibold py-1 px-4 rounded-full text-sm mb-4">
+                    From Empty to Extraordinary
+                </div>
+                <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight">
+                    Visualize Your Growth
+                </h2>
+                <p className="mt-4 max-w-2xl mx-auto text-muted-foreground text-lg">
+                    See the tangible impact Saledup can have on your business, transforming quiet moments into bustling opportunities.
+                </p>
+
+                <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                    {/* Without Saledup Card */}
+                    <div className="bg-background/50 rounded-xl p-8 text-center">
+                        <h3 className="text-xl font-bold text-muted-foreground">Without Saledup</h3>
+                        <div className="my-8 flex items-center justify-center h-32">
+                           <div className="p-6 bg-muted rounded-full">
+                                <Store className="h-16 w-16 text-muted-foreground/60" />
+                           </div>
+                        </div>
+                        <p className="text-muted-foreground">
+                            Waiting for customers and relying on traditional marketing.
+                        </p>
+                    </div>
+
+                    {/* With Saledup Card */}
+                    <div className="border-2 border-primary/50 bg-primary/5 rounded-xl p-8 text-center shadow-lg shadow-primary/10 relative overflow-hidden">
+                        <h3 className="text-xl font-bold text-primary">With Saledup</h3>
+                         <div className="my-8 flex items-center justify-center h-32 relative">
+                            <div className="absolute bg-primary/10 rounded-full h-40 w-40 animate-pulse"></div>
+                            <div className="absolute bg-primary/20 rounded-full h-32 w-32"></div>
+                            
+                            <div className="relative p-6 bg-primary text-primary-foreground rounded-full shadow-md">
+                                <ShoppingBag className="h-16 w-16" />
+                            </div>
+
+                            <div className="absolute top-0 left-10 p-2 bg-background rounded-full shadow-md animate-bounce">
+                                <QrCode className="h-5 w-5 text-primary" />
+                            </div>
+                             <div className="absolute top-4 right-8 p-2 bg-background rounded-full shadow-md animate-bounce" style={{ animationDelay: '0.2s' }}>
+                                <Users className="h-5 w-5 text-primary" />
+                            </div>
+                            <div className="absolute bottom-2 right-12 p-2 bg-background rounded-full shadow-md animate-bounce" style={{ animationDelay: '0.4s' }}>
+                                <TrendingUp className="h-5 w-5 text-primary" />
+                            </div>
+                        </div>
+                        <p className="text-foreground font-medium">
+                            Attracting new customers, rewarding loyal ones, and boosting sales effortlessly.
+                        </p>
+                    </div>
+                </div>
             </div>
         </section>
 
