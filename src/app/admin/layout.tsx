@@ -25,7 +25,7 @@ type ShopProfile = {
 }
 
 const adminNavItems: NavItem[] = [
-  { href: '/admin', label: 'Dashboard', iconName: 'LayoutDashboard' },
+  { href: '/admin', label: 'Home', iconName: 'LayoutDashboard' },
   { href: '/admin/offers', label: 'Offers', iconName: 'Tag' },
   { href: '/admin/qr-code', label: 'Shop QR', iconName: 'QrCode' },
   { href: '/admin/customers', label: 'Customers', iconName: 'Users' },
