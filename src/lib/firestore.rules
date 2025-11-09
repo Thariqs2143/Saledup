@@ -21,7 +21,7 @@ service cloud.firestore {
       // Any user (including unauthenticated) can read the main shop details.
       // This is needed for the public-facing shop pages.
       allow get;
-      allow list: if request.auth != null;
+      allow list;
 
 
       // --- SUBCOLLECTIONS ---
@@ -42,6 +42,11 @@ service cloud.firestore {
         // Anyone can create a claim (since it's an unauthenticated action).
         allow create;
       }
+    }
+
+     // Allow unauthenticated users to list offers across all shops
+    match /{path=**}/offers/{offerId} {
+      allow list: if true;
     }
   }
 }

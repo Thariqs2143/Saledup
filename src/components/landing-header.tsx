@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { Sparkles, X, Menu } from 'lucide-react';
+import { Sparkles, X, Menu, Compass } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetTitle } from '@/components/ui/sheet';
 
 
@@ -35,6 +35,7 @@ const SaledupLogo = () => (
 
 const navLinks = [
     { href: '/', label: 'Home' },
+    { href: '/find-offers', label: 'Find Offers' },
     { href: '/about', label: 'About' },
     { href: '/pricing', label: 'Pricing' },
     { href: '/faq', label: 'FAQ' },
@@ -98,10 +99,11 @@ export function LandingHeader() {
                     key={link.href} 
                     href={link.href} 
                     className={cn(
-                        "text-foreground/80 hover:text-foreground",
+                        "text-foreground/80 hover:text-foreground flex items-center gap-1",
                         pathname === link.href && "text-primary font-semibold"
                     )}
                 >
+                    {link.href === '/find-offers' && <Compass className="h-4 w-4" />}
                     {link.label}
                 </Link>
             ))}
@@ -139,10 +141,11 @@ export function LandingHeader() {
                                      <Link 
                                         href={link.href} 
                                         className={cn(
-                                            "text-lg font-medium text-foreground/80 hover:text-primary",
+                                            "text-lg font-medium text-foreground/80 hover:text-primary flex items-center gap-2",
                                             pathname === link.href && "text-primary"
                                         )}
                                     >
+                                        {link.href === '/find-offers' && <Compass className="h-5 w-5" />}
                                         {link.label}
                                     </Link>
                                 </SheetClose>
