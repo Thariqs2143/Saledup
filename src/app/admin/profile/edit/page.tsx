@@ -172,7 +172,7 @@ export default function AdminEditProfilePage() {
             </Link>
             <div>
                 <h1 className="text-3xl font-bold tracking-tight">Edit Profile</h1>
-                <p className="text-muted-foreground">Update your personal and shop details.</p>
+                <p className="text-muted-foreground hidden md:block">Update your personal and shop details.</p>
             </div>
        </div>
       
