@@ -18,38 +18,21 @@ import dynamic from 'next/dynamic';
 import 'leaflet/dist/leaflet.css';
 import { collection } from 'firebase/firestore';
 import Link from 'next/link';
+import type { Offer as SingleOffer } from '@/components/offer-map';
 
-type Offer = {
-    id: string;
-    shopId: string;
-    title: string;
-    description: string;
-    imageUrl?: string;
-    discountType: string;
-    discountValue?: string;
-    createdAt: { seconds: number, nanoseconds: number };
-    shopName?: string;
-    shopAddress?: string;
-    shopBusinessType?: string;
-    shopPhone?: string;
-    lat?: number;
-    lng?: number;
-    startDate?: Timestamp;
-    endDate?: Timestamp;
-    startTime?: string;
-    endTime?: string;
-};
+const OfferMap = dynamic(() => import('@/components/offer-map'), { 
+    ssr: false,
+    loading: () => <div className="flex justify-center items-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div>
+});
 
 // Helper function to check if an offer is currently active based on its schedule
-const isOfferCurrentlyActive = (offer: Offer): boolean => {
+const isOfferCurrentlyActive = (offer: SingleOffer): boolean => {
     const now = new Date();
     
-    // Check date range
     if (offer.startDate && now < offer.startDate.toDate()) {
         return false; // Offer hasn't started yet
     }
     if (offer.endDate) {
-        // Set end date to end of the day
         const endDate = offer.endDate.toDate();
         endDate.setHours(23, 59, 59, 999);
         if (now > endDate) {
@@ -57,7 +40,6 @@ const isOfferCurrentlyActive = (offer: Offer): boolean => {
         }
     }
 
-    // Check time range
     if (offer.startTime && offer.endTime) {
         const [startHour, startMinute] = offer.startTime.split(':').map(Number);
         const [endHour, endMinute] = offer.endTime.split(':').map(Number);
@@ -76,13 +58,8 @@ const isOfferCurrentlyActive = (offer: Offer): boolean => {
     return true;
 };
 
-const OfferMap = dynamic(() => import('@/components/offer-map'), { 
-    ssr: false,
-    loading: () => <div className="flex justify-center items-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div>
-});
-
 export default function FindOffersPage() {
-    const [offers, setOffers] = useState<Offer[]>([]);
+    const [offers, setOffers] = useState<SingleOffer[]>([]);
     const [loading, setLoading] = useState(true);
     const [view, setView] = useState<'list' | 'map'>('list');
     
@@ -108,7 +85,7 @@ export default function FindOffersPage() {
                         id: doc.id,
                         shopId,
                         ...data
-                    } as Offer;
+                    } as SingleOffer;
                 });
                 
                 const shopIds = [...new Set(offersList.map(o => o.shopId))];
@@ -135,9 +112,9 @@ export default function FindOffersPage() {
                     shopAddress: shopsData[offer.shopId]?.address,
                     shopBusinessType: shopsData[offer.shopId]?.businessType,
                     shopPhone: shopsData[offer.shopId]?.phone, // Fetch phone number
-                    lat: shopsData[offer.shopId]?.lat || 19.0760 + (Math.random() - 0.5) * 5, 
-                    lng: shopsData[offer.shopId]?.lng || 72.8777 + (Math.random() - 0.5) * 5,
-                }));
+                    lat: shopsData[offer.shopId]?.lat, 
+                    lng: shopsData[offer.shopId]?.lng,
+                })).filter(o => o.lat && o.lng); // Filter out offers without location
                 
                 setOffers(enrichedOffers);
 
@@ -183,6 +160,17 @@ export default function FindOffersPage() {
                 : [...prev, category]
         );
     };
+    
+    // Group offers by shop for the map view carousel
+    const offersByShop = useMemo(() => {
+        return filteredAndSortedOffers.reduce((acc, offer) => {
+            if (!acc[offer.shopId]) {
+                acc[offer.shopId] = [];
+            }
+            acc[offer.shopId].push(offer);
+            return acc;
+        }, {} as Record<string, SingleOffer[]>);
+    }, [filteredAndSortedOffers]);
 
     return (
         <div className="flex flex-col">
@@ -309,7 +297,7 @@ export default function FindOffersPage() {
                         )}
                         {view === 'map' && (
                              <div className="h-[calc(100vh-300px)] w-full rounded-lg overflow-hidden border relative z-10">
-                                <OfferMap offers={filteredAndSortedOffers} />
+                                <OfferMap offersByShop={offersByShop} />
                             </div>
                         )}
                     </>
@@ -318,4 +306,3 @@ export default function FindOffersPage() {
         </div>
     );
 }
-

@@ -3,13 +3,12 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { doc, getDoc, addDoc, collection, serverTimestamp, updateDoc, increment, Timestamp } from 'firebase/firestore';
+import { doc, getDoc, addDoc, collection, serverTimestamp, updateDoc, increment, Timestamp, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
 import { Loader2, ArrowLeft, Building, Tag, Info, Phone, Mail, MapPin, User as UserIcon, CheckCircle, Clock, Calendar } from 'lucide-react';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
 import {
   Dialog,
@@ -24,7 +23,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { format, formatDistanceToNow } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 
 type Shop = {
     shopName: string;
@@ -52,6 +51,27 @@ type Offer = {
     endTime?: string;
 };
 
+// Helper to check if offer is active (same as on other pages)
+const isOfferCurrentlyActive = (offer: Offer): boolean => {
+    const now = new Date();
+    if (offer.startDate && now < offer.startDate.toDate()) return false;
+    if (offer.endDate) {
+        const endDate = offer.endDate.toDate();
+        endDate.setHours(23, 59, 59, 999);
+        if (now > endDate) return false;
+    }
+    if (offer.startTime && offer.endTime) {
+        const [startHour, startMinute] = offer.startTime.split(':').map(Number);
+        const [endHour, endMinute] = offer.endTime.split(':').map(Number);
+        const startTime = new Date();
+        startTime.setHours(startHour, startMinute, 0, 0);
+        const endTime = new Date();
+        endTime.setHours(endHour, endMinute, 0, 0);
+        if (now < startTime || now > endTime) return false;
+    }
+    return true;
+};
+
 export default function OfferDetailPage() {
     const params = useParams();
     const searchParams = useSearchParams();
@@ -64,6 +84,7 @@ export default function OfferDetailPage() {
 
     const [offer, setOffer] = useState<Offer | null>(null);
     const [shop, setShop] = useState<Shop | null>(null);
+    const [otherOffers, setOtherOffers] = useState<Offer[]>([]);
     const [loading, setLoading] = useState(true);
 
     const [isClaiming, setIsClaiming] = useState(false);
@@ -92,7 +113,8 @@ export default function OfferDetailPage() {
                 if (!offerSnap.exists()) {
                     throw new Error("Offer not found.");
                 }
-                setOffer({ id: offerSnap.id, shopId, ...offerSnap.data() } as Offer);
+                const currentOffer = { id: offerSnap.id, shopId, ...offerSnap.data() } as Offer;
+                setOffer(currentOffer);
 
                 // Fetch Shop
                 const shopDocRef = doc(db, 'shops', shopId);
@@ -101,6 +123,20 @@ export default function OfferDetailPage() {
                     throw new Error("Shop not found.");
                 }
                 setShop(shopSnap.data() as Shop);
+
+                // Fetch other offers from the same shop
+                const otherOffersQuery = query(
+                    collection(db, 'shops', shopId, 'offers'),
+                    where('isActive', '==', true)
+                );
+                const otherOffersSnap = await getDocs(otherOffersQuery);
+                const allActiveOffers = otherOffersSnap.docs
+                    .map(doc => ({ id: doc.id, shopId, ...doc.data() } as Offer))
+                    .filter(isOfferCurrentlyActive);
+                
+                // Filter out the current offer and take the first 3
+                setOtherOffers(allActiveOffers.filter(o => o.id !== offerId).slice(0, 3));
+
 
             } catch (error: any) {
                 toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -285,6 +321,37 @@ export default function OfferDetailPage() {
                 </div>
             </Card>
 
+            {/* You Might Also Like Section */}
+            {otherOffers.length > 0 && (
+                <div className="mt-12">
+                    <h2 className="text-2xl font-bold mb-4">More from {shop.shopName}</h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {otherOffers.map(otherOffer => (
+                            <Link key={otherOffer.id} href={`/offers/${otherOffer.id}?shopId=${otherOffer.shopId}&from=shop`} className="block">
+                                <Card className="flex flex-col bg-card transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group h-full">
+                                    <CardHeader className="p-0 relative">
+                                        <Image
+                                            src={otherOffer.imageUrl || `https://placehold.co/600x400?text=${otherOffer.title.replace(/\s/g, '+')}`}
+                                            alt={otherOffer.title}
+                                            width={600}
+                                            height={400}
+                                            className="aspect-[16/10] object-cover rounded-t-lg"
+                                        />
+                                    </CardHeader>
+                                    <CardContent className="p-4 flex-1 space-y-1">
+                                        <h3 className="font-bold text-lg leading-snug truncate group-hover:text-primary" title={otherOffer.title}>{otherOffer.title}</h3>
+                                        <p className="text-sm text-muted-foreground line-clamp-2">{otherOffer.description}</p>
+                                    </CardContent>
+                                    <CardFooter className="p-4 border-t">
+                                        <Button variant="outline" size="sm" className="w-full">View Deal</Button>
+                                    </CardFooter>
+                                </Card>
+                            </Link>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             {/* Claim Offer Dialog */}
             <Dialog open={isClaimDialogOpen} onOpenChange={setIsClaimDialogOpen}>
                 <DialogContent>
@@ -354,4 +421,3 @@ export default function OfferDetailPage() {
         </div>
     );
 }
-
