@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { collectionGroup, getDocs, query, where, orderBy, doc, collection } from 'firebase/firestore';
+import { collectionGroup, getDocs, query, where, orderBy, collection } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -144,7 +144,7 @@ export default function FindOffersPage() {
 
     return (
         <div>
-            <header className="text-center my-8 container mx-auto px-4 sm:px-6 lg:px-8">
+            <header className="text-center my-12 container mx-auto px-4 sm:px-6 lg:px-8">
                 <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">Find Local Deals</h1>
                 <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
                     Discover the best offers from local shops near you.
@@ -152,7 +152,7 @@ export default function FindOffersPage() {
             </header>
 
             {/* Filter Bar */}
-            <div className="sticky top-24 z-40 bg-background/80 backdrop-blur-sm py-4 mb-8 pt-6">
+            <div className="sticky top-[68px] z-40 bg-background/95 backdrop-blur-sm py-4 border-b border-border mb-8">
                 <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex flex-col md:flex-row gap-4 items-center">
                         <div className="relative w-full md:flex-1">
@@ -239,7 +239,7 @@ export default function FindOffersPage() {
                         <OfferMap offers={filteredAndSortedOffers} />
                     </div>
                 ) : (
-                    <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-8 relative z-20">
+                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8 relative z-20">
                         {filteredAndSortedOffers.length > 0 ? (
                             filteredAndSortedOffers.map(offer => (
                                 <Card key={offer.id} className="flex flex-col transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
