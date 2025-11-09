@@ -60,7 +60,7 @@ export default function AdminLayout({ children }: PropsWithChildren) {
                 name: shopData.ownerName,
                 shopName: shopData.shopName,
                 email: shopData.ownerEmail,
-                imageUrl: shopData.ownerImageUrl, // Corrected from shopData.imageUrl to ownerImageUrl
+                imageUrl: shopData.imageUrl || shopData.ownerImageUrl, // Prioritize shop image, fallback to owner image
                 fallback: shopData.ownerName?.split(' ').map((n: string) => n[0]).join('') || 'SO'
               });
           } else if (!isAuthPage) {
