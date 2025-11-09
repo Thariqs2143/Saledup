@@ -193,10 +193,7 @@ export default function AdminEditOfferPage() {
                         <span className="sr-only">Back</span>
                     </Button>
                 </Link>
-                <div>
-                    <h1 className="text-2xl font-bold tracking-tight">Edit Offer</h1>
-                    <p className="text-muted-foreground">Make changes to your existing offer.</p>
-                </div>
+                <h1 className="text-2xl font-bold tracking-tight">Edit Offer</h1>
             </div>
              <AlertDialog>
                 <AlertDialogTrigger asChild>
