@@ -143,8 +143,8 @@ export default function FindOffersPage() {
     };
 
     return (
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-8">
-            <header className="text-center mb-12">
+        <div>
+            <header className="text-center my-8 container mx-auto px-4 sm:px-6 lg:px-8">
                 <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">Find Local Deals</h1>
                 <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
                     Discover the best offers from local shops near you.
@@ -152,82 +152,84 @@ export default function FindOffersPage() {
             </header>
 
             {/* Filter Bar */}
-            <div className="sticky top-24 z-40 bg-background/80 backdrop-blur-sm py-4 mb-8 rounded-lg pt-6">
-                <div className="flex flex-col md:flex-row gap-4 items-center">
-                    <div className="relative w-full md:flex-1">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                        <Input 
-                            placeholder="Search for offers, products, or shops..."
-                            className="pl-10 h-12"
-                            value={searchTerm}
-                            onChange={e => setSearchTerm(e.target.value)}
-                        />
-                    </div>
-                    <div className="flex gap-2 w-full md:w-auto">
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button variant="outline" className="h-12 flex-1 md:flex-initial">
-                                    <Filter className="mr-2 h-4 w-4" /> Category ({selectedCategories.length})
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-64">
-                                <div className="space-y-4">
-                                    <h4 className="font-medium leading-none">Filter by Category</h4>
-                                    <div className="space-y-2">
-                                        {businessCategories.map(cat => (
-                                            <div key={cat} className="flex items-center space-x-2">
-                                                <Checkbox
-                                                    id={cat}
-                                                    checked={selectedCategories.includes(cat)}
-                                                    onCheckedChange={() => handleCategoryChange(cat)}
-                                                />
-                                                <label htmlFor={cat} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">{cat}</label>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <Button size="sm" variant="ghost" className="w-full" onClick={() => setSelectedCategories([])}>
-                                        <X className="mr-2 h-4 w-4" /> Clear
+            <div className="sticky top-20 z-40 bg-background/80 backdrop-blur-sm border-b border-t">
+                 <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                    <div className="flex flex-col md:flex-row gap-4 items-center">
+                        <div className="relative w-full md:flex-1">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                            <Input 
+                                placeholder="Search for offers, products, or shops..."
+                                className="pl-10 h-12"
+                                value={searchTerm}
+                                onChange={e => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+                        <div className="flex gap-2 w-full md:w-auto">
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button variant="outline" className="h-12 flex-1 md:flex-initial">
+                                        <Filter className="mr-2 h-4 w-4" /> Category ({selectedCategories.length})
                                     </Button>
-                                </div>
-                            </PopoverContent>
-                        </Popover>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-64">
+                                    <div className="space-y-4">
+                                        <h4 className="font-medium leading-none">Filter by Category</h4>
+                                        <div className="space-y-2">
+                                            {businessCategories.map(cat => (
+                                                <div key={cat} className="flex items-center space-x-2">
+                                                    <Checkbox
+                                                        id={cat}
+                                                        checked={selectedCategories.includes(cat)}
+                                                        onCheckedChange={() => handleCategoryChange(cat)}
+                                                    />
+                                                    <label htmlFor={cat} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">{cat}</label>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <Button size="sm" variant="ghost" className="w-full" onClick={() => setSelectedCategories([])}>
+                                            <X className="mr-2 h-4 w-4" /> Clear
+                                        </Button>
+                                    </div>
+                                </PopoverContent>
+                            </Popover>
 
-                        <Select value={sortBy} onValueChange={setSortBy}>
-                            <SelectTrigger className="h-12 w-[180px]">
-                                <SelectValue placeholder="Sort by" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="newest">Newest</SelectItem>
-                                <SelectItem value="popular">Most Popular</SelectItem>
-                            </SelectContent>
-                        </Select>
+                            <Select value={sortBy} onValueChange={setSortBy}>
+                                <SelectTrigger className="h-12 w-[180px]">
+                                    <SelectValue placeholder="Sort by" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="newest">Newest</SelectItem>
+                                    <SelectItem value="popular">Most Popular</SelectItem>
+                                </SelectContent>
+                            </Select>
 
-                        <div className="hidden md:flex bg-muted p-1 rounded-md">
-                            <Button variant={view === 'list' ? 'secondary' : 'ghost'} size="icon" onClick={() => setView('list')}>
-                                <List className="h-5 w-5"/>
-                            </Button>
-                             <Button variant={view === 'map' ? 'secondary' : 'ghost'} size="icon" onClick={() => setView('map')}>
-                                <Map className="h-5 w-5"/>
-                            </Button>
+                            <div className="hidden md:flex bg-muted p-1 rounded-md">
+                                <Button variant={view === 'list' ? 'secondary' : 'ghost'} size="icon" onClick={() => setView('list')}>
+                                    <List className="h-5 w-5"/>
+                                </Button>
+                                <Button variant={view === 'map' ? 'secondary' : 'ghost'} size="icon" onClick={() => setView('map')}>
+                                    <Map className="h-5 w-5"/>
+                                </Button>
+                            </div>
                         </div>
                     </div>
-                </div>
-                 {selectedCategories.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-4">
-                        {selectedCategories.map(cat => (
-                            <Badge key={cat} variant="secondary" className="pr-1">
-                                {cat}
-                                <button onClick={() => handleCategoryChange(cat)} className="ml-1 rounded-full p-0.5 hover:bg-muted-foreground/20">
-                                    <X className="h-3 w-3" />
-                                </button>
-                            </Badge>
-                        ))}
-                    </div>
-                )}
+                    {selectedCategories.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mt-4">
+                            {selectedCategories.map(cat => (
+                                <Badge key={cat} variant="secondary" className="pr-1">
+                                    {cat}
+                                    <button onClick={() => handleCategoryChange(cat)} className="ml-1 rounded-full p-0.5 hover:bg-muted-foreground/20">
+                                        <X className="h-3 w-3" />
+                                    </button>
+                                </Badge>
+                            ))}
+                        </div>
+                    )}
+                 </div>
             </div>
 
             {/* Content Area */}
-            <div className="relative">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 relative">
                 {loading ? (
                     <div className="flex justify-center items-center h-64">
                         <Loader2 className="h-12 w-12 animate-spin text-primary" />
