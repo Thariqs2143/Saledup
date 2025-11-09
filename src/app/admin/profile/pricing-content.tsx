@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 const plans = [
     {
@@ -153,7 +154,9 @@ export default function PricingPageContent() {
 
         <div>
             <h2 className="text-2xl font-bold text-center mb-8">Detailed Feature Comparison</h2>
-            <div className="overflow-x-auto rounded-lg border shadow-sm">
+            
+            {/* Desktop Table */}
+            <div className="hidden md:block overflow-x-auto rounded-lg border shadow-sm">
                 <table className="w-full min-w-[600px] text-left">
                     <thead className="bg-muted">
                         <tr>
@@ -199,6 +202,37 @@ export default function PricingPageContent() {
                     </tbody>
                 </table>
             </div>
+
+             {/* Mobile Accordion View */}
+            <div className="md:hidden space-y-4">
+                {allFeatures.map(feature => (
+                    <Card key={feature.name}>
+                        <CardHeader>
+                            <CardTitle className="text-lg">{feature.name}</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            {plans.map(plan => {
+                                const featureValue = plan.featureMap[feature.name as keyof typeof plan.featureMap];
+                                return (
+                                    <div key={plan.name} className="flex justify-between items-center text-sm border-b pb-2 last:border-b-0">
+                                        <span className="font-semibold">{plan.name}</span>
+                                        {typeof featureValue === 'boolean' ? (
+                                            featureValue ? (
+                                                <Check className="h-5 w-5 text-green-500" />
+                                            ) : (
+                                                <Minus className="h-5 w-5 text-muted-foreground" />
+                                            )
+                                        ) : (
+                                            <span className="font-medium text-foreground">{featureValue}</span>
+                                        )}
+                                    </div>
+                                )
+                            })}
+                        </CardContent>
+                    </Card>
+                ))}
+            </div>
+
         </div>
     </div>
   );

@@ -138,11 +138,6 @@ export default function AdminProfilePage() {
 
   return (
     <div className="space-y-6">
-        <div>
-            <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
-            <p className="text-muted-foreground">Manage your account and shop preferences.</p>
-        </div>
-        
         <Tabs defaultValue="profile" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="profile">
