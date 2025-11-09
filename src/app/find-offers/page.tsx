@@ -231,52 +231,51 @@ export default function FindOffersPage() {
                 <div className="flex justify-center items-center h-64">
                     <Loader2 className="h-12 w-12 animate-spin text-primary" />
                 </div>
+            ) : view === 'map' ? (
+                <div className="h-[600px] w-full rounded-lg overflow-hidden border">
+                    <OfferMap offers={filteredAndSortedOffers} />
+                </div>
             ) : (
-                <div className={cn("transition-all duration-300", view === 'list' ? "grid lg:grid-cols-3 md:grid-cols-2 gap-8" : "h-[600px] w-full")}>
-                    {view === 'map' ? (
-                        <div className="h-full w-full rounded-lg overflow-hidden border">
-                            <OfferMap offers={filteredAndSortedOffers} />
+                <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-8">
+                    {filteredAndSortedOffers.length > 0 ? (
+                        filteredAndSortedOffers.map(offer => (
+                            <Card key={offer.id} className="flex flex-col transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                                <CardHeader className="p-0 relative">
+                                        <Badge className="absolute top-2 right-2 z-10" variant='secondary'>
+                                        {offer.discountValue ? `${offer.discountValue}${offer.discountType === 'percentage' ? '%' : ' OFF'}` : 'Special Deal'}
+                                    </Badge>
+                                    <Image 
+                                        src={offer.imageUrl || `https://placehold.co/600x400?text=${offer.title.replace(/\s/g, '+')}`}
+                                        alt={offer.title}
+                                        width={600}
+                                        height={400}
+                                        className="aspect-[16/10] object-cover rounded-t-lg"
+                                    />
+                                </CardHeader>
+                                <CardContent className="p-4 flex-1">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <Building className="h-4 w-4 text-muted-foreground" />
+                                        <p className="text-sm font-semibold text-primary truncate">{offer.shopName || 'Local Shop'}</p>
+                                    </div>
+                                    <h3 className="font-bold text-lg truncate" title={offer.title}>{offer.title}</h3>
+                                    <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{offer.description}</p>
+                                </CardContent>
+                                <CardFooter className="p-4 border-t flex justify-between items-center text-xs text-muted-foreground">
+                                    <div className="flex items-center gap-1">
+                                        <Clock className="h-3 w-3"/>
+                                        <span>Posted {formatDistanceToNow(new Date(offer.createdAt.seconds * 1000), { addSuffix: true })}</span>
+                                    </div>
+                                    {offer.shopBusinessType && <Badge variant="outline">{offer.shopBusinessType}</Badge>}
+                                </CardFooter>
+                            </Card>
+                        ))
+                    ) : (
+                        <div className="col-span-full text-center py-20 text-muted-foreground">
+                            <Search className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                            <h3 className="text-xl font-semibold">No Offers Found</h3>
+                            <p>Try adjusting your search or filter criteria.</p>
                         </div>
-                    ) : filteredAndSortedOffers.length > 0 ? (
-                           filteredAndSortedOffers.map(offer => (
-                                <Card key={offer.id} className="flex flex-col transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                                    <CardHeader className="p-0 relative">
-                                         <Badge className="absolute top-2 right-2 z-10" variant='secondary'>
-                                            {offer.discountValue ? `${offer.discountValue}${offer.discountType === 'percentage' ? '%' : ' OFF'}` : 'Special Deal'}
-                                        </Badge>
-                                        <Image 
-                                            src={offer.imageUrl || `https://placehold.co/600x400?text=${offer.title.replace(/\s/g, '+')}`}
-                                            alt={offer.title}
-                                            width={600}
-                                            height={400}
-                                            className="aspect-[16/10] object-cover rounded-t-lg"
-                                        />
-                                    </CardHeader>
-                                    <CardContent className="p-4 flex-1">
-                                        <div className="flex items-center gap-2 mb-2">
-                                            <Building className="h-4 w-4 text-muted-foreground" />
-                                            <p className="text-sm font-semibold text-primary truncate">{offer.shopName || 'Local Shop'}</p>
-                                        </div>
-                                        <h3 className="font-bold text-lg truncate" title={offer.title}>{offer.title}</h3>
-                                        <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{offer.description}</p>
-                                    </CardContent>
-                                    <CardFooter className="p-4 border-t flex justify-between items-center text-xs text-muted-foreground">
-                                        <div className="flex items-center gap-1">
-                                            <Clock className="h-3 w-3"/>
-                                            <span>Posted {formatDistanceToNow(new Date(offer.createdAt.seconds * 1000), { addSuffix: true })}</span>
-                                        </div>
-                                        {offer.shopBusinessType && <Badge variant="outline">{offer.shopBusinessType}</Badge>}
-                                    </CardFooter>
-                                </Card>
-                            ))
-                        ) : (
-                            <div className="col-span-full text-center py-20 text-muted-foreground">
-                                <Search className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                                <h3 className="text-xl font-semibold">No Offers Found</h3>
-                                <p>Try adjusting your search or filter criteria.</p>
-                            </div>
-                        )
-                    }
+                    )}
                 </div>
             )}
         </div>

@@ -1,15 +1,15 @@
+import type { NextConfig } from 'next';
+import nextPWA from 'next-pwa';
 
-import type {NextConfig} from 'next';
-
-const withPWA = require('next-pwa')({
+const withPWA = nextPWA({
   dest: 'public',
   register: true,
   skipWaiting: true,
-  disable: process.env.NODE_ENV === 'development',
+  disable: process.env.NODE_ENV === 'development', // PWA disabled in dev
 });
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  reactStrictMode: false, // 👈 Important: prevents Leaflet double-init error in dev
   typescript: {
     ignoreBuildErrors: true,
   },
