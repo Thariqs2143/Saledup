@@ -23,6 +23,8 @@ import {
 } from "@/components/ui/dialog"
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { formatDistanceToNow } from 'date-fns';
+import { Badge } from '@/components/ui/badge';
 
 type Shop = {
     shopName: string;
@@ -309,3 +311,5 @@ export default function OfferDetailPage() {
         </div>
     );
 }
+
+    
