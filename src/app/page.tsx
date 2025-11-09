@@ -290,7 +290,7 @@ const targetCustomers = [
                     </p>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
-                    <Card className="text-center p-6">
+                    <Card className="text-center p-6 transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-1 hover:border-primary">
                         <div className="p-4 bg-orange-100 dark:bg-orange-900/30 rounded-full inline-block mb-4 shadow-md">
                             <Store className="h-8 w-8 text-orange-600 dark:text-orange-400" />
                         </div>
@@ -299,7 +299,7 @@ const targetCustomers = [
                         </h3>
                         <p className="mt-2 text-muted-foreground">Active Deals</p>
                     </Card>
-                     <Card className="text-center p-6">
+                     <Card className="text-center p-6 transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-1 hover:border-primary">
                         <div className="p-4 bg-green-100 dark:bg-green-900/30 rounded-full inline-block mb-4 shadow-md">
                             <BuildingIcon className="h-8 w-8 text-green-600 dark:text-green-400" />
                         </div>
@@ -308,14 +308,14 @@ const targetCustomers = [
                         </h3>
                         <p className="mt-2 text-muted-foreground">Shops Onboarded</p>
                     </Card>
-                    <Card className="text-center p-6">
+                    <Card className="text-center p-6 transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-1 hover:border-primary">
                          <div className="p-4 bg-red-100 dark:bg-red-900/30 rounded-full inline-block mb-4 shadow-md">
                             <PercentIcon className="h-8 w-8 text-primary" />
                         </div>
                         <h3 className="text-4xl font-bold">0%</h3>
                         <p className="mt-2 text-muted-foreground">Average Discount</p>
                     </Card>
-                    <Card className="text-center p-6">
+                    <Card className="text-center p-6 transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-1 hover:border-primary">
                          <div className="p-4 bg-blue-100 dark:bg-blue-900/30 rounded-full inline-block mb-4 shadow-md">
                             <MapPin className="h-8 w-8 text-blue-600 dark:text-blue-400" />
                         </div>
@@ -513,3 +513,6 @@ const targetCustomers = [
   );
 }
 
+
+
+    
