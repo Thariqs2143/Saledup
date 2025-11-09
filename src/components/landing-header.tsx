@@ -82,13 +82,13 @@ export function LandingHeader() {
       </div>
       <div
         className={cn(
-          'transition-all duration-300 bg-background/80 backdrop-blur-sm border-b',
-          isScrolled
-            ? 'py-2'
-            : 'py-4'
+          'transition-all duration-300',
+           isScrolled
+            ? 'py-2 bg-background/80 backdrop-blur-sm rounded-full shadow-lg border mx-auto px-4 sm:px-6 lg:px-8 mt-2 max-w-6xl'
+            : 'py-4 bg-background border-b'
         )}
       >
-        <div className={cn('flex items-center justify-between', 'container mx-auto')}>
+        <div className={cn('flex items-center justify-between', !isScrolled && 'container mx-auto')}>
           <Link href="/" className="flex items-center gap-2.5 text-foreground">
             <SaledupLogo />
             <span className="font-bold text-xl tracking-wide">Saledup</span>

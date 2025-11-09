@@ -152,8 +152,8 @@ export default function FindOffersPage() {
             </header>
 
             {/* Filter Bar */}
-            <div className="sticky top-20 z-40 bg-background/80 backdrop-blur-sm border-b border-t">
-                 <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="sticky top-24 z-40 bg-background/80 backdrop-blur-sm py-4 mb-8 pt-6">
+                <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex flex-col md:flex-row gap-4 items-center">
                         <div className="relative w-full md:flex-1">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
