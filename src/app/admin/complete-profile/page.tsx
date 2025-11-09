@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Store, Upload } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
@@ -16,6 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { errorEmitter } from '@/lib/error-emitter';
 import { FirestorePermissionError } from '@/lib/errors';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { AddressInput } from '@/components/address-input';
 
 
 export default function AdminCompleteProfilePage() {
@@ -30,6 +30,8 @@ export default function AdminCompleteProfilePage() {
     const [ownerEmail, setOwnerEmail] = useState('');
     const [phone, setPhone] = useState('');
     const [businessType, setBusinessType] = useState('');
+    const [address, setAddress] = useState('');
+    const [location, setLocation] = useState<{lat: number, lng: number} | null>(null);
 
 
     useEffect(() => {
@@ -87,13 +89,12 @@ export default function AdminCompleteProfilePage() {
 
         const formData = new FormData(e.currentTarget);
         const shopName = formData.get('shopName') as string;
-        const address = formData.get('address') as string;
         const gstNumber = formData.get('gstNumber') as string;
         const shopPhone = formData.get('phone') as string;
         const formOwnerName = formData.get('ownerName') as string;
 
-        if (!shopName || !address || !businessType || !shopPhone || !formOwnerName) {
-             toast({ title: "Error", description: "Please fill out all required fields.", variant: "destructive" });
+        if (!shopName || !address || !businessType || !shopPhone || !formOwnerName || !location) {
+             toast({ title: "Error", description: "Please fill out all required fields, including a valid address.", variant: "destructive" });
              setLoading(false);
              return;
         }
@@ -110,6 +111,8 @@ export default function AdminCompleteProfilePage() {
             address,
             businessType,
             gstNumber,
+            lat: location.lat,
+            lng: location.lng,
             status: 'active',
             imageUrl: imageUrl || `https://placehold.co/400x300.png?text=${fallback}`,
             createdAt: new Date(),
@@ -201,7 +204,11 @@ export default function AdminCompleteProfilePage() {
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="address">Full Shop Address *</Label>
-                    <Textarea id="address" name="address" placeholder="e.g. 123 Main Street, Anytown, State, 12345" required />
+                    <AddressInput 
+                        value={address} 
+                        onValueChange={setAddress}
+                        onLocationSelect={(loc) => setLocation(loc ? { lat: loc.y, lng: loc.x } : null)}
+                    />
                 </div>
             </div>
             <div className="flex justify-center pt-4">

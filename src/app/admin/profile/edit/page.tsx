@@ -16,6 +16,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Link from 'next/link';
+import { AddressInput } from '@/components/address-input';
 
 type ShopProfile = {
     ownerName?: string;
@@ -27,6 +28,8 @@ type ShopProfile = {
     gstNumber?: string;
     phone?: string;
     email?: string;
+    lat?: number;
+    lng?: number;
 };
 
 export default function AdminEditProfilePage() {
@@ -38,6 +41,11 @@ export default function AdminEditProfilePage() {
   const [saving, setSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [initialProfile, setInitialProfile] = useState<ShopProfile>({});
+  
+  // New state for location
+  const [address, setAddress] = useState('');
+  const [location, setLocation] = useState<{lat: number, lng: number} | null>(null);
+
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -54,6 +62,10 @@ export default function AdminEditProfilePage() {
           };
           setProfile(currentProfile);
           setInitialProfile(currentProfile);
+          setAddress(data.address || '');
+          if (data.lat && data.lng) {
+              setLocation({lat: data.lat, lng: data.lng});
+          }
         }
       } else {
         router.push('/login');
@@ -106,14 +118,14 @@ export default function AdminEditProfilePage() {
     try {
       const shopDocRef = doc(db, 'shops', authUser.uid);
       
-      const changes: Partial<ShopProfile> = {};
+      const changes: Partial<ShopProfile> = { ...profile, address };
+      if (location) {
+          changes.lat = location.lat;
+          changes.lng = location.lng;
+      }
       
-      // Compare current profile with initial to only update changed fields
-      (Object.keys(profile) as Array<keyof ShopProfile>).forEach(key => {
-          if (profile[key] !== initialProfile[key]) {
-              changes[key] = profile[key];
-          }
-      });
+      // We are updating all fields for simplicity, instead of checking one-by-one.
+      // Firestore `updateDoc` is efficient and only writes changed fields anyway.
       
       if(Object.keys(changes).length > 0) {
         await updateDoc(shopDocRef, changes);
@@ -211,7 +223,11 @@ export default function AdminEditProfilePage() {
                     </div>
                      <div className="space-y-2 md:col-span-2">
                         <Label htmlFor="address">Full Shop Address</Label>
-                        <Textarea id="address" value={profile.address || ''} onChange={(e) => handleFieldChange('address', e.target.value)} />
+                        <AddressInput 
+                            value={address} 
+                            onValueChange={setAddress}
+                            onLocationSelect={(loc) => setLocation(loc ? { lat: loc.y, lng: loc.x } : null)}
+                        />
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="gstNumber">GST Number (Optional)</Label>
