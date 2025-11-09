@@ -5,8 +5,8 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Loader2, Search, Users, Download, Mail, Tag, Calendar, Phone, CheckCircle, XCircle } from "lucide-react";
-import { collection, query, onSnapshot, orderBy, type Timestamp } from "firebase/firestore";
+import { Loader2, Search, Users, Download, Mail, Tag, Calendar, Phone, CheckCircle, XCircle, Edit, Trash2, RefreshCcw } from "lucide-react";
+import { collection, query, onSnapshot, orderBy, type Timestamp, doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
@@ -16,7 +16,17 @@ import { useRouter } from 'next/navigation';
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 // Extend jsPDF with autoTable
 declare module 'jspdf' {
@@ -102,6 +112,32 @@ export default function AdminCustomersPage() {
         toast({ title: "Export Successful", description: "Customer data has been downloaded as a PDF." });
     };
 
+    const handleStatusToggle = async (claimId: string, currentStatus: 'claimed' | 'redeemed') => {
+        if (!authUser) return;
+        const newStatus = currentStatus === 'claimed' ? 'redeemed' : 'claimed';
+        const claimDocRef = doc(db, 'shops', authUser.uid, 'claims', claimId);
+        try {
+            await updateDoc(claimDocRef, { status: newStatus });
+            toast({ title: "Status Updated", description: `Claim marked as ${newStatus}.`});
+        } catch (error) {
+            console.error(error);
+            toast({ title: "Error", description: "Could not update claim status.", variant: "destructive" });
+        }
+    };
+    
+    const handleDeleteClaim = async (claimId: string) => {
+        if (!authUser) return;
+        const claimDocRef = doc(db, 'shops', authUser.uid, 'claims', claimId);
+        try {
+            await deleteDoc(claimDocRef);
+            toast({ title: "Claim Deleted", description: "The customer claim has been removed."});
+        } catch (error) {
+            console.error(error);
+            toast({ title: "Error", description: "Could not delete the claim.", variant: "destructive" });
+        }
+    };
+
+
     return (
         <div className="space-y-6">
             <div>
@@ -169,6 +205,30 @@ export default function AdminCustomersPage() {
                                                 <span>{format(customer.claimedAt.toDate(), 'PP')}</span>
                                             </div>
                                         </div>
+                                         <div className="flex justify-end gap-2 pt-2 border-t">
+                                            <Button size="sm" variant="outline" onClick={() => handleStatusToggle(customer.id, customer.status)}>
+                                                <RefreshCcw className="h-3 w-3 mr-1.5"/> Toggle Status
+                                            </Button>
+                                            <AlertDialog>
+                                                <AlertDialogTrigger asChild>
+                                                    <Button size="sm" variant="destructive">
+                                                        <Trash2 className="h-3 w-3 mr-1.5"/> Delete
+                                                    </Button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                                        <AlertDialogDescription>
+                                                            This will permanently delete the claim for {customer.customerName}. This cannot be undone.
+                                                        </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                        <AlertDialogAction onClick={() => handleDeleteClaim(customer.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
+                                        </div>
                                     </Card>
                                 ))}
                             </div>
@@ -181,7 +241,8 @@ export default function AdminCustomersPage() {
                                             <TableHead>Customer</TableHead>
                                             <TableHead>Offer Claimed</TableHead>
                                             <TableHead>Status</TableHead>
-                                            <TableHead className="text-right">Date Claimed</TableHead>
+                                            <TableHead>Date Claimed</TableHead>
+                                            <TableHead className="text-right">Actions</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
@@ -198,7 +259,31 @@ export default function AdminCustomersPage() {
                                                         {customer.status === 'redeemed' ? 'Redeemed' : 'Claimed'}
                                                     </Badge>
                                                 </TableCell>
-                                                <TableCell className="text-right">{format(customer.claimedAt.toDate(), 'PPpp')}</TableCell>
+                                                <TableCell>{format(customer.claimedAt.toDate(), 'PPpp')}</TableCell>
+                                                <TableCell className="text-right space-x-2">
+                                                    <Button size="sm" variant="ghost" onClick={() => handleStatusToggle(customer.id, customer.status)}>
+                                                         <RefreshCcw className="h-4 w-4"/>
+                                                    </Button>
+                                                     <AlertDialog>
+                                                        <AlertDialogTrigger asChild>
+                                                            <Button size="sm" variant="ghost" className="text-destructive hover:bg-destructive/10 hover:text-destructive">
+                                                                <Trash2 className="h-4 w-4"/>
+                                                            </Button>
+                                                        </AlertDialogTrigger>
+                                                        <AlertDialogContent>
+                                                            <AlertDialogHeader>
+                                                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                                                <AlertDialogDescription>
+                                                                    This will permanently delete the claim for {customer.customerName}. This cannot be undone.
+                                                                </AlertDialogDescription>
+                                                            </AlertDialogHeader>
+                                                            <AlertDialogFooter>
+                                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                                <AlertDialogAction onClick={() => handleDeleteClaim(customer.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                                                            </AlertDialogFooter>
+                                                        </AlertDialogContent>
+                                                    </AlertDialog>
+                                                </TableCell>
                                             </TableRow>
                                         ))}
                                     </TableBody>
@@ -211,3 +296,5 @@ export default function AdminCustomersPage() {
         </div>
     );
 }
+
+    
