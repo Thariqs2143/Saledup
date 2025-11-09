@@ -144,15 +144,17 @@ export default function FindOffersPage() {
 
     return (
         <div>
-            <header className="text-center my-12 container mx-auto px-4 sm:px-6 lg:px-8">
-                <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">Find Local Deals</h1>
-                <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
-                    Discover the best offers from local shops near you.
-                </p>
-            </header>
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                <header className="text-center my-8 md:my-12">
+                    <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">Find Local Deals</h1>
+                    <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
+                        Discover the best offers from local shops near you.
+                    </p>
+                </header>
+            </div>
 
             {/* Filter Bar */}
-            <div className="sticky top-[68px] z-40 bg-background/95 backdrop-blur-sm py-4 border-b border-border mb-8">
+            <div className="sticky top-[61px] md:top-20 z-40 bg-background/95 backdrop-blur-sm py-4 border-y">
                 <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex flex-col md:flex-row gap-4 items-center">
                         <div className="relative w-full md:flex-1">
@@ -203,7 +205,7 @@ export default function FindOffersPage() {
                                 </SelectContent>
                             </Select>
 
-                            <div className="hidden md:flex bg-muted p-1 rounded-md">
+                            <div className="flex bg-muted p-1 rounded-md ml-auto md:ml-0">
                                 <Button variant={view === 'list' ? 'secondary' : 'ghost'} size="icon" onClick={() => setView('list')}>
                                     <List className="h-5 w-5"/>
                                 </Button>
