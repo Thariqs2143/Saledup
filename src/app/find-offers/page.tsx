@@ -232,7 +232,7 @@ export default function FindOffersPage() {
                     <Loader2 className="h-12 w-12 animate-spin text-primary" />
                 </div>
             ) : view === 'map' ? (
-                <div className="h-[600px] w-full rounded-lg overflow-hidden border">
+                <div className="h-[600px] w-full rounded-lg overflow-hidden border relative z-10">
                     <OfferMap offers={filteredAndSortedOffers} />
                 </div>
             ) : (
