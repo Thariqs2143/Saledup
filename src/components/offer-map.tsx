@@ -65,16 +65,29 @@ const OfferPopupContent = ({ offers }: { offers: Offer[] }) => {
                 {offers.map((offer) => (
                     <CarouselItem key={offer.id}>
                         <div className="w-full bg-card text-card-foreground">
-                            <Image
-                                src={offer.imageUrl || `https://placehold.co/600x400?text=${offer.title.replace(/\s/g, '+')}`}
-                                alt={offer.title}
-                                width={220}
-                                height={150}
-                                className="aspect-[4/3] object-cover"
-                            />
+                            <div className="relative">
+                                <Image
+                                    src={offer.imageUrl || `https://placehold.co/600x400?text=${offer.title.replace(/\s/g, '+')}`}
+                                    alt={offer.title}
+                                    width={220}
+                                    height={150}
+                                    className="aspect-[4/3] object-cover"
+                                />
+                                {offers.length > 1 && (
+                                    <>
+                                        <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 h-6 w-6 p-1 bg-background/50 hover:bg-background/80" />
+                                        <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 p-1 bg-background/50 hover:bg-background/80" />
+                                    </>
+                                )}
+                            </div>
                             <div className="p-3">
                                 <h3 className="font-bold truncate text-base">{offer.title}</h3>
                                 <p className="text-sm text-muted-foreground truncate">{offer.shopName}</p>
+                                {offers.length > 1 && (
+                                    <div className="text-center text-xs text-muted-foreground pt-1">
+                                        Offer {current} of {count}
+                                    </div>
+                                )}
                             </div>
                             <div className="p-3 border-t grid grid-cols-2 gap-2">
                                {offer.shopPhone && (
@@ -94,15 +107,6 @@ const OfferPopupContent = ({ offers }: { offers: Offer[] }) => {
                     </CarouselItem>
                 ))}
             </CarouselContent>
-            {offers.length > 1 && (
-                <>
-                    <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 h-6 w-6 p-1 bg-background/50 hover:bg-background/80 rounded-full" />
-                    <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 p-1 bg-background/50 hover:bg-background/80 rounded-full" />
-                    <div className="text-center text-xs text-muted-foreground pt-1">
-                        Offer {current} of {count}
-                    </div>
-                </>
-            )}
         </Carousel>
     );
 };
