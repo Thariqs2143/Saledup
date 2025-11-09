@@ -2,7 +2,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Sparkles, X, Store, ShoppingBag, Users, QrCode, TrendingUp, BarChart3, Shield, HeartHandshake, Coffee, Utensils, Shirt, ChevronRight, Magnet } from 'lucide-react';
+import { ArrowRight, Sparkles, X, Store, ShoppingBag, Users, QrCode, TrendingUp, BarChart3, Shield, HeartHandshake, Coffee, Utensils, Shirt, ChevronRight, Magnet, Clock, Building as BuildingIcon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
@@ -12,13 +12,80 @@ import placeholderImages from '@/lib/placeholder-images.json';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LandingHeader } from '@/components/landing-header';
 import Autoplay from "embla-carousel-autoplay";
+import { collection, collectionGroup, getDocs, limit, orderBy, query, where } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { formatDistanceToNow } from 'date-fns';
+import { Badge } from '@/components/ui/badge';
 
+
+type LiveOffer = {
+    title: string;
+    shopName: string;
+    imageUrl: string;
+    createdAt: any;
+};
+
+type LiveShop = {
+    shopName: string;
+    imageUrl?: string;
+    createdAt: any;
+};
 
 export default function LandingPage() {
-  const features = [
+  const [latestOffers, setLatestOffers] = useState<LiveOffer[]>([]);
+  const [latestShops, setLatestShops] = useState<LiveShop[]>([]);
+  const [loadingActivity, setLoadingActivity] = useState(true);
+
+  useEffect(() => {
+    async function fetchLiveActivity() {
+      setLoadingActivity(true);
+      try {
+        // Fetch latest 5 shops
+        const shopsQuery = query(collection(db, 'shops'), orderBy('createdAt', 'desc'), limit(5));
+        const shopsSnapshot = await getDocs(shopsQuery);
+        const shopsList = shopsSnapshot.docs.map(doc => doc.data() as LiveShop);
+        setLatestShops(shopsList);
+        
+        // Fetch latest 5 active offers
+        const offersQuery = query(
+            collectionGroup(db, 'offers'), 
+            where('isActive', '==', true), 
+            orderBy('createdAt', 'desc'), 
+            limit(5)
+        );
+        const offersSnapshot = await getDocs(offersQuery);
+        const offersList = await Promise.all(offersSnapshot.docs.map(async (doc) => {
+            const offerData = doc.data();
+            const shopRef = doc.ref.parent.parent;
+            let shopName = 'A Local Shop';
+            if(shopRef) {
+                const shopSnap = await getDoc(shopRef);
+                if (shopSnap.exists()) {
+                    shopName = shopSnap.data().shopName;
+                }
+            }
+            return {
+                title: offerData.title,
+                shopName: shopName,
+                imageUrl: offerData.imageUrl,
+                createdAt: offerData.createdAt,
+            } as LiveOffer;
+        }));
+        setLatestOffers(offersList);
+
+      } catch (error) {
+        console.error("Error fetching live activity: ", error);
+      } finally {
+        setLoadingActivity(false);
+      }
+    }
+    fetchLiveActivity();
+  }, []);
+
+const features = [
     {
         icon: QrCode,
         title: 'One QR, Endless Offers',
@@ -235,8 +302,71 @@ const targetCustomers = [
             </div>
         </section>
 
-        {/* Who It's For Section */}
+         {/* Live Activity Section */}
         <section className="bg-muted/30 py-20 sm:py-24">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="text-center mb-12">
+                     <div className="inline-block bg-primary/10 text-primary font-semibold py-1 px-4 rounded-full text-sm mb-4">
+                        Live from Our Community
+                    </div>
+                    <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight">
+                        What's Happening Now
+                    </h2>
+                    <p className="mt-4 max-w-2xl mx-auto text-muted-foreground text-lg">
+                        See the latest offers and newest shops joining the Saledup family in real-time.
+                    </p>
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2"><Sparkles className="text-amber-500" /> Latest Active Deals</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-4">
+                                {loadingActivity ? (
+                                    <p className="text-muted-foreground">Loading latest deals...</p>
+                                ) : latestOffers.map((offer, index) => (
+                                    <div key={`offer-${index}`} className="flex items-center gap-4">
+                                        <Image src={offer.imageUrl || 'https://placehold.co/100x100'} alt={offer.title} width={64} height={64} className="rounded-md object-cover aspect-square" />
+                                        <div className="flex-1">
+                                            <p className="font-bold truncate">{offer.title}</p>
+                                            <p className="text-sm text-muted-foreground flex items-center gap-1"><BuildingIcon className="h-3 w-3" /> {offer.shopName}</p>
+                                            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1"><Clock className="h-3 w-3" /> {offer.createdAt ? formatDistanceToNow(offer.createdAt.toDate(), { addSuffix: true }) : 'Just now'}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
+                     <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2"><Store className="text-green-500" /> Newly Onboarded Shops</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-4">
+                                 {loadingActivity ? (
+                                    <p className="text-muted-foreground">Loading new shops...</p>
+                                ) : latestShops.map((shop, index) => (
+                                    <div key={`shop-${index}`} className="flex items-center gap-4">
+                                        <Avatar className="h-16 w-16 border-2 border-primary/20">
+                                            <AvatarImage src={shop.imageUrl} />
+                                            <AvatarFallback>{shop.shopName.charAt(0)}</AvatarFallback>
+                                        </Avatar>
+                                        <div>
+                                            <p className="font-bold">{shop.shopName}</p>
+                                            <Badge variant="outline" className="mt-1">Just Joined!</Badge>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
+        </section>
+
+        {/* Who It's For Section */}
+        <section className="bg-background py-20 sm:py-24">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
                 <div className="inline-block bg-primary/10 text-primary font-semibold py-1 px-4 rounded-full text-sm mb-4">
                     Who It's For
@@ -252,7 +382,7 @@ const targetCustomers = [
                     {targetCustomers.map((customer, index) => (
                          <div key={index}
                              className={cn(
-                                'bg-background rounded-xl p-8 text-center border border-border shadow-sm transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-1 hover:border-primary'
+                                'bg-muted/30 rounded-xl p-8 text-center border border-border shadow-sm transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-1 hover:border-primary'
                              )}>
                             <div className="p-4 bg-primary/10 rounded-lg inline-block mb-6 shadow-md">
                                 <customer.icon className="h-8 w-8 text-primary" />
@@ -266,7 +396,7 @@ const targetCustomers = [
         </section>
 
         {/* How It Works Section */}
-        <section className="bg-background py-20 sm:py-24">
+        <section className="bg-muted/30 py-20 sm:py-24">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
                 <div className="inline-block bg-primary/10 text-primary font-semibold py-1 px-4 rounded-full text-sm mb-4">
                     How It Works
@@ -302,7 +432,7 @@ const targetCustomers = [
         </section>
 
         {/* Testimonials Section */}
-        <section className="bg-muted/30 py-20 sm:py-24 w-full overflow-hidden">
+        <section className="bg-background py-20 sm:py-24 w-full overflow-hidden">
             <style jsx>{`
                 @keyframes scroll {
                     from { transform: translateX(0); }
@@ -354,7 +484,7 @@ const targetCustomers = [
         </section>
 
         {/* FAQ Section */}
-        <section className="bg-background py-20 sm:py-24">
+        <section className="bg-muted/30 py-20 sm:py-24">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-3xl">
                 <div className="text-center">
                     <div className="inline-block bg-primary/10 text-primary font-semibold py-1 px-4 rounded-full text-sm mb-4">
@@ -421,9 +551,3 @@ const targetCustomers = [
     </div>
   );
 }
-
-    
-
-    
-
-    
