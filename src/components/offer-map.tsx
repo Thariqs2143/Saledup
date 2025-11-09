@@ -81,10 +81,11 @@ export default function OfferMap({ offers }: OfferMapProps) {
           border-radius: 12px;
           padding: 0;
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          overflow: hidden;
         }
         .leaflet-popup-content {
           margin: 0;
-          width: 240px !important;
+          width: 220px !important;
         }
         .leaflet-popup-tip {
             background: hsl(var(--card));
@@ -106,12 +107,12 @@ export default function OfferMap({ offers }: OfferMapProps) {
             offer.lng !== undefined && (
               <Marker key={offer.id} position={[offer.lat, offer.lng]}>
                 <Popup>
-                   <div className="w-full bg-card text-card-foreground overflow-hidden">
+                   <div className="w-full bg-card text-card-foreground">
                         <Image
                             src={offer.imageUrl || `https://placehold.co/600x400?text=${offer.title.replace(/\s/g, '+')}`}
                             alt={offer.title}
-                            width={240}
-                            height={160}
+                            width={220}
+                            height={150}
                             className="aspect-[4/3] object-cover"
                         />
                         <div className="p-3">
