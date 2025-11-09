@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -7,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Sparkles, Tag, Upload, ArrowLeft } from 'lucide-react';
+import { Loader2, Sparkles, Tag, Upload, ArrowLeft, Calendar as CalendarIcon, Clock } from 'lucide-react';
 import { addDoc, collection, doc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
 import { onAuthStateChanged, type User as AuthUser } from 'firebase/auth';
@@ -17,6 +18,10 @@ import Link from 'next/link';
 import { errorEmitter } from '@/lib/error-emitter';
 import { FirestorePermissionError } from '@/lib/errors';
 import Image from 'next/image';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { format } from 'date-fns';
+import { Calendar } from '@/components/ui/calendar';
+import { cn } from '@/lib/utils';
 
 export default function AdminAddOfferPage() {
     const router = useRouter();
@@ -26,6 +31,13 @@ export default function AdminAddOfferPage() {
     const [imageUrl, setImageUrl] = useState<string>('');
     const [uploading, setUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    
+    // New state for scheduling
+    const [startDate, setStartDate] = useState<Date | undefined>();
+    const [endDate, setEndDate] = useState<Date | undefined>();
+    const [startTime, setStartTime] = useState('');
+    const [endTime, setEndTime] = useState('');
+
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -86,6 +98,11 @@ export default function AdminAddOfferPage() {
             isActive: true,
             claimCount: 0,
             createdAt: serverTimestamp(),
+            // New scheduling fields
+            startDate: startDate || null,
+            endDate: endDate || null,
+            startTime: startTime || null,
+            endTime: endTime || null,
         };
 
         if (!offerData.title || !offerData.description || !offerData.discountType) {
@@ -194,6 +211,58 @@ export default function AdminAddOfferPage() {
                     </div>
 
                 </CardContent>
+                
+                 <CardContent>
+                    <CardHeader className="p-0 mb-4 -ml-6">
+                        <CardTitle>Scheduling (Optional)</CardTitle>
+                        <CardDescription>Set a specific time frame for this offer. Leave blank for the offer to be always active.</CardDescription>
+                    </CardHeader>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <Label htmlFor="startDate">Start Date</Label>
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !startDate && "text-muted-foreground")}>
+                                        <CalendarIcon className="mr-2 h-4 w-4" />
+                                        {startDate ? format(startDate, "PPP") : <span>Pick a date</span>}
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0">
+                                    <Calendar mode="single" selected={startDate} onSelect={setStartDate} initialFocus />
+                                </PopoverContent>
+                            </Popover>
+                        </div>
+                         <div className="space-y-2">
+                            <Label htmlFor="endDate">End Date</Label>
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !endDate && "text-muted-foreground")}>
+                                        <CalendarIcon className="mr-2 h-4 w-4" />
+                                        {endDate ? format(endDate, "PPP") : <span>Pick a date</span>}
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0">
+                                    <Calendar mode="single" selected={endDate} onSelect={setEndDate} initialFocus />
+                                </PopoverContent>
+                            </Popover>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="startTime">Start Time</Label>
+                            <div className="relative">
+                                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Input id="startTime" type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className="pl-10" />
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="endTime">End Time</Label>
+                             <div className="relative">
+                                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Input id="endTime" type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="pl-10" />
+                            </div>
+                        </div>
+                    </div>
+                </CardContent>
+
                  <CardContent className="border-t pt-6 flex justify-end">
                     <Button type="submit" disabled={loading || uploading}>
                         {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

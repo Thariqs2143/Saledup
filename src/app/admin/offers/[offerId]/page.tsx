@@ -8,8 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Tag, Upload, ArrowLeft, Save, Trash2 } from 'lucide-react';
-import { doc, getDoc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
+import { Loader2, Tag, Upload, ArrowLeft, Save, Trash2, Calendar as CalendarIcon, Clock } from 'lucide-react';
+import { doc, getDoc, updateDoc, deleteDoc, serverTimestamp, type Timestamp } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
 import { onAuthStateChanged, type User as AuthUser } from 'firebase/auth';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -27,6 +27,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { format } from 'date-fns';
+import { Calendar } from '@/components/ui/calendar';
+import { cn } from '@/lib/utils';
 
 type Offer = {
     title: string;
@@ -35,6 +39,11 @@ type Offer = {
     discountValue?: string;
     terms?: string;
     imageUrl?: string;
+    // New scheduling fields
+    startDate?: Timestamp;
+    endDate?: Timestamp;
+    startTime?: string;
+    endTime?: string;
 };
 
 export default function AdminEditOfferPage() {
@@ -47,10 +56,16 @@ export default function AdminEditOfferPage() {
     const [saving, setSaving] = useState(false);
     const [deleting, setDeleting] = useState(false);
     const [authUser, setAuthUser] = useState<AuthUser | null>(null);
-    const [offer, setOffer] = useState<Offer | null>(null);
+    const [offer, setOffer] = useState<Partial<Offer>>({});
     const [imageUrl, setImageUrl] = useState<string>('');
     const [uploading, setUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // New state for scheduling
+    const [startDate, setStartDate] = useState<Date | undefined>();
+    const [endDate, setEndDate] = useState<Date | undefined>();
+    const [startTime, setStartTime] = useState('');
+    const [endTime, setEndTime] = useState('');
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -72,6 +87,11 @@ export default function AdminEditOfferPage() {
                 const data = docSnap.data() as Offer;
                 setOffer(data);
                 setImageUrl(data.imageUrl || '');
+                // Populate scheduling states
+                if (data.startDate) setStartDate(data.startDate.toDate());
+                if (data.endDate) setEndDate(data.endDate.toDate());
+                setStartTime(data.startTime || '');
+                setEndTime(data.endTime || '');
             } else {
                 toast({ title: "Offer not found", variant: "destructive" });
                 router.push('/admin/offers');
@@ -96,7 +116,7 @@ export default function AdminEditOfferPage() {
 
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('upload_preset', 'saledup'); // Your Cloudinary upload preset
+        formData.append('upload_preset', 'saledup');
 
         try {
             const response = await fetch('https://api.cloudinary.com/v1_1/dyov4r11v/image/upload', {
@@ -127,11 +147,16 @@ export default function AdminEditOfferPage() {
         
         const offerDocRef = doc(db, "shops", authUser.uid, "offers", offerId);
         try {
-            await updateDoc(offerDocRef, {
+            const dataToUpdate = {
                 ...offer,
                 imageUrl,
-                updatedAt: serverTimestamp()
-            });
+                updatedAt: serverTimestamp(),
+                startDate: startDate || null,
+                endDate: endDate || null,
+                startTime: startTime || null,
+                endTime: endTime || null,
+            };
+            await updateDoc(offerDocRef, dataToUpdate);
             toast({ title: "Offer Updated", description: "Your changes have been saved."});
             router.push('/admin/offers');
         } catch (error) {
@@ -256,6 +281,58 @@ export default function AdminEditOfferPage() {
                     </div>
 
                 </CardContent>
+                
+                 <CardContent>
+                    <CardHeader className="p-0 mb-4 -ml-6">
+                        <CardTitle>Scheduling (Optional)</CardTitle>
+                        <CardDescription>Set a specific time frame for this offer. Leave blank for the offer to be always active.</CardDescription>
+                    </CardHeader>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <Label htmlFor="startDate">Start Date</Label>
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !startDate && "text-muted-foreground")}>
+                                        <CalendarIcon className="mr-2 h-4 w-4" />
+                                        {startDate ? format(startDate, "PPP") : <span>Pick a date</span>}
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0">
+                                    <Calendar mode="single" selected={startDate} onSelect={setStartDate} initialFocus />
+                                </PopoverContent>
+                            </Popover>
+                        </div>
+                         <div className="space-y-2">
+                            <Label htmlFor="endDate">End Date</Label>
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !endDate && "text-muted-foreground")}>
+                                        <CalendarIcon className="mr-2 h-4 w-4" />
+                                        {endDate ? format(endDate, "PPP") : <span>Pick a date</span>}
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0">
+                                    <Calendar mode="single" selected={endDate} onSelect={setEndDate} initialFocus />
+                                </PopoverContent>
+                            </Popover>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="startTime">Start Time</Label>
+                             <div className="relative">
+                                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Input id="startTime" type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className="pl-10" />
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="endTime">End Time</Label>
+                             <div className="relative">
+                                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Input id="endTime" type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="pl-10" />
+                            </div>
+                        </div>
+                    </div>
+                </CardContent>
+
                  <CardContent className="border-t pt-6 flex justify-end">
                     <Button type="submit" disabled={saving || uploading}>
                         {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
@@ -267,3 +344,4 @@ export default function AdminEditOfferPage() {
     </div>
   );
 }
+

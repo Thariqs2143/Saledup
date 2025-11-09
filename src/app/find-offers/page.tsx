@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { collectionGroup, getDocs, query, where } from 'firebase/firestore';
+import { collectionGroup, getDocs, query, where, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -33,6 +33,46 @@ type Offer = {
     shopBusinessType?: string;
     lat?: number;
     lng?: number;
+    startDate?: Timestamp;
+    endDate?: Timestamp;
+    startTime?: string;
+    endTime?: string;
+};
+
+// Helper function to check if an offer is currently active based on its schedule
+const isOfferCurrentlyActive = (offer: Offer): boolean => {
+    const now = new Date();
+    
+    // Check date range
+    if (offer.startDate && now < offer.startDate.toDate()) {
+        return false; // Offer hasn't started yet
+    }
+    if (offer.endDate) {
+        // Set end date to end of the day
+        const endDate = offer.endDate.toDate();
+        endDate.setHours(23, 59, 59, 999);
+        if (now > endDate) {
+            return false; // Offer has expired
+        }
+    }
+
+    // Check time range
+    if (offer.startTime && offer.endTime) {
+        const [startHour, startMinute] = offer.startTime.split(':').map(Number);
+        const [endHour, endMinute] = offer.endTime.split(':').map(Number);
+
+        const startTime = new Date();
+        startTime.setHours(startHour, startMinute, 0, 0);
+        
+        const endTime = new Date();
+        endTime.setHours(endHour, endMinute, 0, 0);
+
+        if (now < startTime || now > endTime) {
+            return false; // Outside of active hours
+        }
+    }
+
+    return true;
 };
 
 const OfferMap = dynamic(() => import('@/components/offer-map'), { 
@@ -110,6 +150,10 @@ export default function FindOffersPage() {
 
     const filteredAndSortedOffers = useMemo(() => {
         let result = offers.filter(offer => {
+            if (!isOfferCurrentlyActive(offer)) {
+                return false;
+            }
+
             const searchTermMatch = searchTerm.length === 0 || 
                 offer.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 offer.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -272,3 +316,4 @@ export default function FindOffersPage() {
         </div>
     );
 }
+

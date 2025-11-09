@@ -6,7 +6,7 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { doc, getDoc, addDoc, collection, serverTimestamp, updateDoc, increment, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
-import { Loader2, ArrowLeft, Building, Tag, Info, Phone, Mail, MapPin, User as UserIcon, CheckCircle, Clock } from 'lucide-react';
+import { Loader2, ArrowLeft, Building, Tag, Info, Phone, Mail, MapPin, User as UserIcon, CheckCircle, Clock, Calendar } from 'lucide-react';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/dialog"
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { formatDistanceToNow } from 'date-fns';
+import { format, formatDistanceToNow } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 
@@ -46,6 +46,10 @@ type Offer = {
     discountValue?: string;
     terms?: string;
     createdAt: Timestamp;
+    startDate?: Timestamp;
+    endDate?: Timestamp;
+    startTime?: string;
+    endTime?: string;
 };
 
 export default function OfferDetailPage() {
@@ -166,6 +170,20 @@ export default function OfferDetailPage() {
             </div>
         )
     }
+    
+    const getValidityText = () => {
+        if (!offer.startDate && !offer.endDate) return null;
+        
+        let text = "Valid";
+        if (offer.startDate) {
+            text += ` from ${format(offer.startDate.toDate(), 'PP')}`;
+        }
+        if (offer.endDate) {
+            text += ` until ${format(offer.endDate.toDate(), 'PP')}`;
+        }
+        return text;
+    };
+
 
     return (
         <div className="container mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
@@ -192,11 +210,13 @@ export default function OfferDetailPage() {
                 
                 <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-8">
                     <div className="md:col-span-2 space-y-6">
-                        {offer.discountValue && (
-                            <Badge variant='secondary' className="text-base py-1 px-3">
-                                {offer.discountValue}{offer.discountType === 'percentage' ? '%' : ''} OFF
-                            </Badge>
-                        )}
+                        <div className="flex items-center gap-2">
+                            {offer.discountValue && (
+                                <Badge variant='secondary' className="text-base py-1 px-3">
+                                    {offer.discountValue}{offer.discountType === 'percentage' ? '%' : ''} OFF
+                                </Badge>
+                            )}
+                        </div>
                         <h2 className="text-3xl font-bold">{offer.title}</h2>
                         <p className="text-muted-foreground text-base">{offer.description}</p>
                         
@@ -209,6 +229,24 @@ export default function OfferDetailPage() {
                                     <p>{formatDistanceToNow(new Date(offer.createdAt.seconds * 1000), { addSuffix: true })}</p>
                                 </div>
                              </div>
+                             {getValidityText() && (
+                                <div className="flex items-center gap-3 text-muted-foreground">
+                                    <Calendar className="h-5 w-5"/>
+                                    <div>
+                                        <p className="font-medium text-foreground">Validity</p>
+                                        <p>{getValidityText()}</p>
+                                    </div>
+                                </div>
+                            )}
+                            {offer.startTime && offer.endTime && (
+                                 <div className="flex items-center gap-3 text-muted-foreground">
+                                    <Clock className="h-5 w-5"/>
+                                    <div>
+                                        <p className="font-medium text-foreground">Daily Hours</p>
+                                        <p>{offer.startTime} - {offer.endTime}</p>
+                                    </div>
+                                </div>
+                            )}
                              {offer.terms && (
                                 <div className="flex items-center gap-3 text-muted-foreground">
                                     <Info className="h-5 w-5"/>
@@ -316,3 +354,4 @@ export default function OfferDetailPage() {
         </div>
     );
 }
+

@@ -42,7 +42,48 @@ type Offer = {
     discountValue?: string;
     terms?: string;
     createdAt: Timestamp;
+    startDate?: Timestamp;
+    endDate?: Timestamp;
+    startTime?: string;
+    endTime?: string;
 };
+
+// Helper function to check if an offer is currently active based on its schedule
+const isOfferCurrentlyActive = (offer: Offer): boolean => {
+    const now = new Date();
+    
+    // Check date range
+    if (offer.startDate && now < offer.startDate.toDate()) {
+        return false; // Offer hasn't started yet
+    }
+    if (offer.endDate) {
+        // Set end date to end of the day
+        const endDate = offer.endDate.toDate();
+        endDate.setHours(23, 59, 59, 999);
+        if (now > endDate) {
+            return false; // Offer has expired
+        }
+    }
+
+    // Check time range
+    if (offer.startTime && offer.endTime) {
+        const [startHour, startMinute] = offer.startTime.split(':').map(Number);
+        const [endHour, endMinute] = offer.endTime.split(':').map(Number);
+
+        const startTime = new Date();
+        startTime.setHours(startHour, startMinute, 0, 0);
+        
+        const endTime = new Date();
+        endTime.setHours(endHour, endMinute, 0, 0);
+
+        if (now < startTime || now > endTime) {
+            return false; // Outside of active hours
+        }
+    }
+
+    return true;
+};
+
 
 export default function ShopOffersPage() {
     const params = useParams();
@@ -89,7 +130,10 @@ export default function ShopOffersPage() {
                     where('__name__', '!=', 'template')
                 );
                 const offersSnapshot = await getDocs(offersQuery);
-                const offersList = offersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Offer));
+                const offersList = offersSnapshot.docs
+                    .map(doc => ({ id: doc.id, ...doc.data() } as Offer))
+                    .filter(isOfferCurrentlyActive); // Filter by schedule client-side
+                
                 setOffers(offersList);
 
             } catch (error) {
@@ -313,7 +357,4 @@ export default function ShopOffersPage() {
         </Dialog>
     </div>
     );
-
-    
-
-
+}
