@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { collectionGroup, getDocs, query, where, orderBy } from 'firebase/firestore';
+import { collectionGroup, getDocs, query, where, orderBy, doc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -16,10 +16,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import dynamic from 'next/dynamic';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
-
 
 type Offer = {
     id: string;
@@ -38,25 +35,11 @@ type Offer = {
     lng?: number;
 };
 
-// Dynamically import the map component to ensure it's client-side only
-const OfferMap = dynamic(() => Promise.resolve(({ offers }: { offers: Offer[] }) => (
-    <MapContainer center={[20.5937, 78.9629]} zoom={5} style={{ height: '100%', width: '100%', borderRadius: '0.5rem' }}>
-        <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        />
-        {offers.map(offer => (
-            offer.lat && offer.lng ? (
-                <Marker key={offer.id} position={[offer.lat, offer.lng]}>
-                    <Popup>
-                        <div className="font-bold">{offer.title}</div>
-                        <div className="text-sm">{offer.shopName}</div>
-                    </Popup>
-                </Marker>
-            ) : null
-        ))}
-    </MapContainer>
-)), { ssr: false });
+// Dynamically import the map component and its dependencies to ensure it's client-side only
+const OfferMap = dynamic(() => import('@/components/offer-map'), { 
+    ssr: false,
+    loading: () => <div className="flex justify-center items-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div>
+});
 
 export default function FindOffersPage() {
     const [offers, setOffers] = useState<Offer[]>([]);
@@ -71,18 +54,6 @@ export default function FindOffersPage() {
     const businessCategories = ["Retail", "Food & Beverage", "Service", "MSME", "Other"];
 
     useEffect(() => {
-        // Fix for default marker icon issue with webpack
-        const iconDefault = new L.Icon({
-            iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-            iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-            iconSize: [25, 41],
-            iconAnchor: [12, 41],
-            popupAnchor: [1, -34],
-            shadowSize: [41, 41]
-        });
-        L.Marker.prototype.options.icon = iconDefault;
-
         const fetchAllOffers = async () => {
             setLoading(true);
             try {
@@ -103,26 +74,31 @@ export default function FindOffersPage() {
                 
                 const shopIds = [...new Set(offersList.map(o => o.shopId))];
                 const shopsData: Record<string, any> = {};
-
-                // Batch fetch shop data
-                const shopPromises = shopIds.map(id => getDocs(query(collection(db, 'shops'), where('__name__', '==', id))));
-                const shopSnapshots = await Promise.all(shopPromises);
-
-                shopSnapshots.forEach((shopSnapshot, index) => {
-                    if(!shopSnapshot.empty) {
-                        const shopDoc = shopSnapshot.docs[0];
-                        shopsData[shopDoc.id] = shopDoc.data();
-                    }
-                });
                 
-                const enrichedOffers = offersList.map((offer, index) => ({
+                // Firestore allows up to 30 'in' queries in a batch, but we'll be safer
+                const shopIdChunks: string[][] = [];
+                for (let i = 0; i < shopIds.length; i += 10) {
+                    shopIdChunks.push(shopIds.slice(i, i + 10));
+                }
+
+                for (const chunk of shopIdChunks) {
+                    if (chunk.length > 0) {
+                        const shopsQuery = query(collection(db, 'shops'), where('__name__', 'in', chunk));
+                        const shopSnapshots = await getDocs(shopsQuery);
+                        shopSnapshots.forEach(shopDoc => {
+                            shopsData[shopDoc.id] = shopDoc.data();
+                        });
+                    }
+                }
+                
+                const enrichedOffers = offersList.map((offer) => ({
                     ...offer,
                     shopName: shopsData[offer.shopId]?.shopName,
                     shopAddress: shopsData[offer.shopId]?.address,
                     shopBusinessType: shopsData[offer.shopId]?.businessType,
-                     // Placeholder coordinates - replace with real data when available
-                    lat: 19.0760 + (Math.random() - 0.5) * 5, // Randomly around Mumbai
-                    lng: 72.8777 + (Math.random() - 0.5) * 5,
+                    // Use actual coordinates if they exist, otherwise fallback to random placeholder
+                    lat: shopsData[offer.shopId]?.lat || 19.0760 + (Math.random() - 0.5) * 5, 
+                    lng: shopsData[offer.shopId]?.lng || 72.8777 + (Math.random() - 0.5) * 5,
                 }));
                 
                 setOffers(enrichedOffers);
@@ -257,13 +233,11 @@ export default function FindOffersPage() {
                 </div>
             ) : (
                 <div className={cn("grid gap-8", view === 'list' ? "lg:grid-cols-3 md:grid-cols-2" : "h-[600px] col-span-full")}>
-                    {view === 'map' && (
-                        <div className="h-full w-full">
+                    {view === 'map' ? (
+                        <div className="h-full w-full rounded-lg overflow-hidden">
                             <OfferMap offers={filteredAndSortedOffers} />
                         </div>
-                    )}
-                    {view === 'list' && (
-                        filteredAndSortedOffers.length > 0 ? (
+                    ) : filteredAndSortedOffers.length > 0 ? (
                            filteredAndSortedOffers.map(offer => (
                                 <Card key={offer.id} className="flex flex-col transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                                     <CardHeader className="p-0 relative">
@@ -302,9 +276,12 @@ export default function FindOffersPage() {
                                 <p>Try adjusting your search or filter criteria.</p>
                             </div>
                         )
-                    )}
+                    }
                 </div>
             )}
         </div>
     );
 }
+
+
+    
