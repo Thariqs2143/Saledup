@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { Sparkles, X, Menu, Compass } from 'lucide-react';
+import { Sparkles, X, Menu, Compass, Home, Info, Gem, HelpCircle, Mail } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetTitle } from '@/components/ui/sheet';
 
 
@@ -34,12 +34,12 @@ const SaledupLogo = () => (
 );
 
 const navLinks = [
-    { href: '/', label: 'Home' },
-    { href: '/find-offers', label: 'Find Offers' },
-    { href: '/about', label: 'About' },
-    { href: '/pricing', label: 'Pricing' },
-    { href: '/faq', label: 'FAQ' },
-    { href: '/contact', label: 'Contact' },
+    { href: '/', label: 'Home', icon: Home },
+    { href: '/find-offers', label: 'Find Offers', icon: Compass },
+    { href: '/about', label: 'About', icon: Info },
+    { href: '/pricing', label: 'Pricing', icon: Gem },
+    { href: '/faq', label: 'FAQ', icon: HelpCircle },
+    { href: '/contact', label: 'Contact', icon: Mail },
 ];
 
 export function LandingHeader() {
@@ -65,19 +65,22 @@ export function LandingHeader() {
                     <span className="font-bold text-xl tracking-wide text-primary">Saledup</span>
                 </Link>
                 <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-                    {navLinks.map(link => (
-                        <Link 
-                            key={link.href} 
-                            href={link.href} 
-                            className={cn(
-                                "text-foreground/80 hover:text-foreground flex items-center gap-1",
-                                pathname === link.href && "text-primary font-semibold"
-                            )}
-                        >
-                            {link.href === '/find-offers' && <Compass className="h-4 w-4" />}
-                            {link.label}
-                        </Link>
-                    ))}
+                    {navLinks.map(link => {
+                        const LinkComponent = link.href === pathname ? 'span' : Link;
+                        return (
+                            <LinkComponent
+                                key={link.href}
+                                href={link.href}
+                                className={cn(
+                                    "text-foreground/80 hover:text-foreground flex items-center gap-1.5",
+                                    pathname === link.href && "text-primary font-semibold"
+                                )}
+                            >
+                                <link.icon className="h-4 w-4" />
+                                {link.label}
+                            </LinkComponent>
+                        );
+                    })}
                 </nav>
                  <div className="hidden md:flex items-center gap-2">
                     <Link href="/login" passHref>
@@ -107,20 +110,22 @@ export function LandingHeader() {
                                     </Link>
                                 </div>
                                 <nav className="flex-1 flex flex-col gap-4 p-4 mt-4">
-                                    {navLinks.map(link => (
+                                    {navLinks.map(link => {
+                                      const LinkComponent = link.href === pathname ? 'span' : Link;
+                                      return(
                                         <SheetClose asChild key={link.href}>
-                                            <Link
+                                            <LinkComponent
                                                 href={link.href}
                                                 className={cn(
                                                     "text-lg font-medium text-foreground/80 hover:text-primary flex items-center gap-2",
                                                     pathname === link.href && "text-primary"
                                                 )}
                                             >
-                                                {link.href === '/find-offers' && <Compass className="h-5 w-5" />}
+                                                <link.icon className="h-5 w-5" />
                                                 {link.label}
-                                            </Link>
+                                            </LinkComponent>
                                         </SheetClose>
-                                    ))}
+                                    )})}
                                 </nav>
                                 <div className="p-4 mt-auto border-t">
                                     <div className="flex flex-col gap-3">
@@ -178,19 +183,22 @@ export function LandingHeader() {
             <span className="font-bold text-xl tracking-wide text-primary">Saledup</span>
           </Link>
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-            {navLinks.map(link => (
-                 <Link 
-                    key={link.href} 
-                    href={link.href} 
-                    className={cn(
-                        "text-foreground/80 hover:text-foreground flex items-center gap-1",
-                        pathname === link.href && "text-primary font-semibold"
-                    )}
-                >
-                    {link.href === '/find-offers' && <Compass className="h-4 w-4" />}
-                    {link.label}
-                </Link>
-            ))}
+            {navLinks.map(link => {
+              const LinkComponent = link.href === pathname ? 'span' : Link;
+              return (
+                  <LinkComponent
+                      key={link.href}
+                      href={link.href}
+                      className={cn(
+                          "text-foreground/80 hover:text-foreground flex items-center gap-1.5",
+                          pathname === link.href && "text-primary font-semibold"
+                      )}
+                  >
+                      <link.icon className="h-4 w-4" />
+                      {link.label}
+                  </LinkComponent>
+              );
+            })}
           </nav>
            <div className="hidden md:flex items-center gap-2">
               <Link href="/login" passHref>
@@ -219,20 +227,22 @@ export function LandingHeader() {
                               </Link>
                           </div>
                           <nav className="flex-1 flex flex-col gap-4 p-4 mt-4">
-                              {navLinks.map(link => (
+                              {navLinks.map(link => {
+                                const LinkComponent = link.href === pathname ? 'span' : Link;
+                                return(
                                   <SheetClose asChild key={link.href}>
-                                      <Link
+                                      <LinkComponent
                                           href={link.href}
                                           className={cn(
                                               "text-lg font-medium text-foreground/80 hover:text-primary flex items-center gap-2",
                                               pathname === link.href && "text-primary"
                                           )}
                                       >
-                                          {link.href === '/find-offers' && <Compass className="h-5 w-5" />}
+                                          <link.icon className="h-5 w-5" />
                                           {link.label}
-                                      </Link>
+                                      </LinkComponent>
                                   </SheetClose>
-                              ))}
+                              )})}
                           </nav>
                           <div className="p-4 mt-auto border-t">
                               <div className="flex flex-col gap-3">
