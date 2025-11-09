@@ -31,6 +31,7 @@ type Offer = {
     shopName?: string;
     shopAddress?: string;
     shopBusinessType?: string;
+    shopPhone?: string;
     lat?: number;
     lng?: number;
     startDate?: Timestamp;
@@ -133,6 +134,7 @@ export default function FindOffersPage() {
                     shopName: shopsData[offer.shopId]?.shopName,
                     shopAddress: shopsData[offer.shopId]?.address,
                     shopBusinessType: shopsData[offer.shopId]?.businessType,
+                    shopPhone: shopsData[offer.shopId]?.phone, // Fetch phone number
                     lat: shopsData[offer.shopId]?.lat || 19.0760 + (Math.random() - 0.5) * 5, 
                     lng: shopsData[offer.shopId]?.lng || 72.8777 + (Math.random() - 0.5) * 5,
                 }));
