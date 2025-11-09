@@ -196,7 +196,7 @@ export default function ShopOffersPage() {
         <main className="container mx-auto p-4 sm:p-6 lg:p-8 flex-1">
             <h2 className="text-xl font-bold mb-6 text-center sm:text-left">Available Offers ({offers.length})</h2>
              {offers.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {offers.map(offer => (
                          <Card key={offer.id} className="flex flex-col bg-background transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group">
                             <CardHeader className="p-0 relative">
@@ -316,4 +316,5 @@ export default function ShopOffersPage() {
         </Dialog>
     </div>
     );
-}
+
+    
