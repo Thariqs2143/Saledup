@@ -143,7 +143,7 @@ export default function FindOffersPage() {
     };
 
     return (
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
             <header className="text-center mb-12">
                 <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">Find Local Deals</h1>
                 <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
@@ -232,7 +232,7 @@ export default function FindOffersPage() {
                     <Loader2 className="h-12 w-12 animate-spin text-primary" />
                 </div>
             ) : view === 'map' ? (
-                <div className="h-[600px] w-full rounded-lg overflow-hidden border relative z-10">
+                <div className="h-[600px] w-full rounded-lg overflow-hidden border">
                     <OfferMap offers={filteredAndSortedOffers} />
                 </div>
             ) : (
