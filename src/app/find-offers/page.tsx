@@ -262,7 +262,7 @@ export default function FindOffersPage() {
                             </div>
                         )}
                         {view === 'map' && (
-                             <div className="h-[calc(100vh-250px)] w-full rounded-lg overflow-hidden border">
+                             <div className="h-[calc(100vh-250px)] w-full rounded-lg overflow-hidden border relative z-10">
                                 <OfferMap offers={filteredAndSortedOffers} />
                             </div>
                         )}
