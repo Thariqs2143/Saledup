@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Loader2, Search, Users, Download, Mail, Tag, Calendar, Phone } from "lucide-react";
+import { Loader2, Search, Users, Download, Mail, Tag, Calendar, Phone, CheckCircle, XCircle } from "lucide-react";
 import { collection, query, onSnapshot, orderBy, type Timestamp } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
 import { format } from 'date-fns';
@@ -15,6 +15,8 @@ import { onAuthStateChanged, type User as AuthUser } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import jsPDF from "jspdf";
 import "jspdf-autotable";
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 // Extend jsPDF with autoTable
 declare module 'jspdf' {
@@ -30,6 +32,7 @@ type Claim = {
     customerPhone: string;
     offerTitle: string;
     claimedAt: Timestamp;
+    status: 'claimed' | 'redeemed';
 };
 
 export default function AdminCustomersPage() {
@@ -86,12 +89,12 @@ export default function AdminCustomersPage() {
         doc.text("Customer Claims Report", 14, 15);
         doc.autoTable({
             startY: 20,
-            head: [['Customer Name', 'Phone', 'Email', 'Offer Claimed', 'Date']],
+            head: [['Customer Name', 'Phone', 'Offer Claimed', 'Status', 'Date']],
             body: filteredCustomers.map(c => [
                 c.customerName,
                 c.customerPhone,
-                c.customerEmail || 'N/A',
                 c.offerTitle,
+                c.status === 'redeemed' ? 'Redeemed' : 'Claimed',
                 format(c.claimedAt.toDate(), 'PPpp')
             ]),
         });
@@ -144,8 +147,15 @@ export default function AdminCustomersPage() {
                                     <Card key={customer.id} className="p-4 space-y-3">
                                         <div className="flex justify-between items-start">
                                             <p className="font-bold">{customer.customerName}</p>
+                                            <Badge variant={customer.status === 'redeemed' ? 'secondary' : 'outline'}>
+                                                {customer.status === 'redeemed' ? <CheckCircle className="mr-1.5 h-3 w-3" /> : <Tag className="mr-1.5 h-3 w-3" />}
+                                                {customer.status === 'redeemed' ? 'Redeemed' : 'Claimed'}
+                                            </Badge>
                                         </div>
                                         <div className="space-y-2 text-sm text-muted-foreground">
+                                             <div className="flex items-center gap-2 font-medium">
+                                                <span>Claimed "{customer.offerTitle}"</span>
+                                            </div>
                                             <div className="flex items-center gap-2">
                                                 <Phone className="h-3 w-3 shrink-0" />
                                                 <span>{customer.customerPhone}</span>
@@ -153,10 +163,6 @@ export default function AdminCustomersPage() {
                                              <div className="flex items-center gap-2">
                                                 <Mail className="h-3 w-3 shrink-0" />
                                                 <span>{customer.customerEmail || 'No email'}</span>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <Tag className="h-3 w-3 shrink-0" />
-                                                <span>Claimed "{customer.offerTitle}"</span>
                                             </div>
                                             <div className="flex items-center gap-2">
                                                 <Calendar className="h-3 w-3 shrink-0" />
@@ -174,6 +180,7 @@ export default function AdminCustomersPage() {
                                         <TableRow>
                                             <TableHead>Customer</TableHead>
                                             <TableHead>Offer Claimed</TableHead>
+                                            <TableHead>Status</TableHead>
                                             <TableHead className="text-right">Date Claimed</TableHead>
                                         </TableRow>
                                     </TableHeader>
@@ -185,6 +192,12 @@ export default function AdminCustomersPage() {
                                                     <div className="text-xs text-muted-foreground">{customer.customerPhone}</div>
                                                 </TableCell>
                                                 <TableCell>{customer.offerTitle}</TableCell>
+                                                <TableCell>
+                                                    <Badge variant={customer.status === 'redeemed' ? 'secondary' : 'outline'}>
+                                                        {customer.status === 'redeemed' ? <CheckCircle className="mr-1.5 h-3 w-3" /> : <Tag className="mr-1.5 h-3 w-3" />}
+                                                        {customer.status === 'redeemed' ? 'Redeemed' : 'Claimed'}
+                                                    </Badge>
+                                                </TableCell>
                                                 <TableCell className="text-right">{format(customer.claimedAt.toDate(), 'PPpp')}</TableCell>
                                             </TableRow>
                                         ))}
