@@ -198,14 +198,6 @@ export default function FindOffersPage() {
                                     <SelectItem value="popular">Most Popular</SelectItem>
                                 </SelectContent>
                             </Select>
-                            <div className="flex bg-muted p-1 rounded-md">
-                                <Button variant={view === 'list' ? 'secondary' : 'ghost'} size="icon" onClick={() => setView('list')}>
-                                    <List className="h-5 w-5"/>
-                                </Button>
-                                <Button variant={view === 'map' ? 'secondary' : 'ghost'} size="icon" onClick={() => setView('map')}>
-                                    <Map className="h-5 w-5"/>
-                                </Button>
-                            </div>
                         </div>
                     </div>
                 </div>
