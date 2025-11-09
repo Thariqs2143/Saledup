@@ -60,11 +60,11 @@ const OfferPopupContent = ({ offers }: { offers: Offer[] }) => {
     }, [api]);
 
     return (
-        <Carousel setApi={setApi} className="w-full max-w-xs">
+        <Carousel setApi={setApi} className="w-full max-w-[220px]">
             <CarouselContent>
                 {offers.map((offer) => (
                     <CarouselItem key={offer.id}>
-                        <div className="w-[220px] bg-card text-card-foreground">
+                        <div className="w-full bg-card text-card-foreground">
                             <Image
                                 src={offer.imageUrl || `https://placehold.co/600x400?text=${offer.title.replace(/\s/g, '+')}`}
                                 alt={offer.title}
@@ -96,8 +96,8 @@ const OfferPopupContent = ({ offers }: { offers: Offer[] }) => {
             </CarouselContent>
             {offers.length > 1 && (
                 <>
-                    <CarouselPrevious className="absolute -left-3 top-1/2 -translate-y-1/2" />
-                    <CarouselNext className="absolute -right-3 top-1/2 -translate-y-1/2" />
+                    <CarouselPrevious className="absolute -left-3 top-[calc(50%-40px)] -translate-y-1/2 h-8 w-8" />
+                    <CarouselNext className="absolute -right-3 top-[calc(50%-40px)] -translate-y-1/2 h-8 w-8" />
                     <div className="py-2 text-center text-xs text-muted-foreground">
                         Offer {current} of {count}
                     </div>
