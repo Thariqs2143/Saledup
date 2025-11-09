@@ -200,14 +200,10 @@ export default function FindOffersPage() {
                                     <SelectItem value="popular">Most Popular</SelectItem>
                                 </SelectContent>
                             </Select>
-                            <div className="flex items-center gap-1 rounded-md bg-muted p-1 ml-2">
-                                 <Button variant={view === 'list' ? 'default' : 'ghost'} size="icon" onClick={() => setView('list')}>
-                                    <List className="h-5 w-5"/>
-                                </Button>
-                                 <Button variant={view === 'map' ? 'default' : 'ghost'} size="icon" onClick={() => setView('map')}>
-                                    <Map className="h-5 w-5"/>
-                                </Button>
-                            </div>
+                            <Button variant="outline" size="icon" className="h-12 w-12" onClick={() => setView(view === 'list' ? 'map' : 'list')}>
+                                {view === 'list' ? <Map className="h-5 w-5"/> : <List className="h-5 w-5"/>}
+                                <span className="sr-only">Toggle View</span>
+                            </Button>
                         </div>
                     </div>
                 </div>
