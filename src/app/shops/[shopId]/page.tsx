@@ -24,6 +24,7 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog"
+import Link from 'next/link';
 
 type Shop = {
     shopName: string;
@@ -198,39 +199,35 @@ export default function ShopOffersPage() {
              {offers.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {offers.map(offer => (
-                         <Card key={offer.id} className="flex flex-col bg-background transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group">
-                            <CardHeader className="p-0 relative">
-                                <Image 
-                                    src={offer.imageUrl || `https://placehold.co/600x400?text=${offer.title.replace(/\s/g, '+')}`}
-                                    alt={offer.title}
-                                    width={600}
-                                    height={400}
-                                    className="aspect-[16/10] object-cover rounded-t-lg"
-                                />
-                            </CardHeader>
-                            <CardContent className="p-4 flex-1 space-y-3">
-                                {offer.discountValue && (
-                                    <Badge variant='secondary' className="text-sm">
-                                        {offer.discountValue}{offer.discountType === 'percentage' ? '%' : ''} OFF
-                                    </Badge>
-                                )}
-                                <h3 className="font-bold text-lg leading-snug truncate group-hover:text-primary" title={offer.title}>{offer.title}</h3>
-                                <p className="text-sm text-muted-foreground line-clamp-2">{offer.description}</p>
-                                {offer.terms && <p className="text-xs text-muted-foreground/80 pt-2 border-t">Terms: {offer.terms}</p>}
-                            </CardContent>
-                            <CardFooter className="p-4 border-t flex-col items-start gap-4">
-                               <div className="flex justify-between w-full items-center text-xs text-muted-foreground">
+                         <Link key={offer.id} href={`/offers/${offer.id}?shopId=${shopId}`} className="block">
+                            <Card className="flex flex-col bg-background transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group h-full">
+                                <CardHeader className="p-0 relative">
+                                    <Image 
+                                        src={offer.imageUrl || `https://placehold.co/600x400?text=${offer.title.replace(/\s/g, '+')}`}
+                                        alt={offer.title}
+                                        width={600}
+                                        height={400}
+                                        className="aspect-[16/10] object-cover rounded-t-lg"
+                                    />
+                                </CardHeader>
+                                <CardContent className="p-4 flex-1 space-y-3">
+                                    {offer.discountValue && (
+                                        <Badge variant='secondary' className="text-sm">
+                                            {offer.discountValue}{offer.discountType === 'percentage' ? '%' : ''} OFF
+                                        </Badge>
+                                    )}
+                                    <h3 className="font-bold text-lg leading-snug truncate group-hover:text-primary" title={offer.title}>{offer.title}</h3>
+                                    <p className="text-sm text-muted-foreground line-clamp-2">{offer.description}</p>
+                                </CardContent>
+                                <CardFooter className="p-4 border-t flex justify-between items-center text-xs text-muted-foreground">
                                     <div className="flex items-center gap-1">
                                         <Clock className="h-3 w-3"/>
                                         <span>Posted {formatDistanceToNow(new Date(offer.createdAt.seconds * 1000), { addSuffix: true })}</span>
                                     </div>
-                                </div>
-                                <Button className="w-full" onClick={() => setSelectedOffer(offer)}>
-                                    <Tag className="mr-2 h-4 w-4"/>
-                                    Claim Offer
-                                </Button>
-                            </CardFooter>
-                        </Card>
+                                    <Button variant="outline" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">View Deal</Button>
+                                </CardFooter>
+                            </Card>
+                        </Link>
                     ))}
                 </div>
             ) : (

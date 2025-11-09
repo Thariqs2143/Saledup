@@ -17,6 +17,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import dynamic from 'next/dynamic';
 import 'leaflet/dist/leaflet.css';
 import { collection } from 'firebase/firestore';
+import Link from 'next/link';
 
 type Offer = {
     id: string;
@@ -200,8 +201,11 @@ export default function FindOffersPage() {
                                 </SelectContent>
                             </Select>
                             <div className="flex items-center gap-1 rounded-md bg-muted p-1 ml-2">
-                                 <Button variant={'ghost'} size="icon" onClick={() => setView(view === 'list' ? 'map' : 'list')}>
-                                    {view === 'list' ? <Map className="h-5 w-5"/> : <List className="h-5 w-5"/>}
+                                 <Button variant={view === 'list' ? 'default' : 'ghost'} size="icon" onClick={() => setView('list')}>
+                                    <List className="h-5 w-5"/>
+                                </Button>
+                                 <Button variant={view === 'map' ? 'default' : 'ghost'} size="icon" onClick={() => setView('map')}>
+                                    <Map className="h-5 w-5"/>
                                 </Button>
                             </div>
                         </div>
@@ -218,37 +222,39 @@ export default function FindOffersPage() {
                 ) : (
                     <>
                         {view === 'list' && (
-                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
                                 {filteredAndSortedOffers.length > 0 ? (
                                     filteredAndSortedOffers.map(offer => (
-                                        <Card key={offer.id} className="flex flex-col transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group">
-                                            <CardHeader className="p-0 relative">
-                                                    <Badge className="absolute top-2 right-2 z-10" variant='secondary'>
-                                                    {offer.discountValue ? `${offer.discountValue}${offer.discountType === 'percentage' ? '%' : ' OFF'}` : 'Special Deal'}
-                                                </Badge>
-                                                <Image 
-                                                    src={offer.imageUrl || `https://placehold.co/600x400?text=${offer.title.replace(/\s/g, '+')}`}
-                                                    alt={offer.title}
-                                                    width={600}
-                                                    height={400}
-                                                    className="aspect-[16/10] object-cover rounded-t-lg"
-                                                />
-                                            </CardHeader>
-                                            <CardContent className="p-3 md:p-4 flex-1">
-                                                <div className="flex items-center gap-2 mb-2">
-                                                    <Building className="h-4 w-4 text-muted-foreground" />
-                                                    <p className="text-sm font-semibold text-primary truncate">{offer.shopName || 'Local Shop'}</p>
-                                                </div>
-                                                <h3 className="font-bold text-base md:text-lg leading-snug truncate group-hover:text-primary" title={offer.title}>{offer.title}</h3>
-                                            </CardContent>
-                                            <CardFooter className="p-3 md:p-4 border-t flex justify-between items-center text-xs text-muted-foreground">
-                                                <div className="flex items-center gap-1">
-                                                    <Clock className="h-3 w-3"/>
-                                                    <span>{formatDistanceToNow(new Date(offer.createdAt.seconds * 1000), { addSuffix: true })}</span>
-                                                </div>
-                                                {offer.shopBusinessType && <Badge variant="outline">{offer.shopBusinessType}</Badge>}
-                                            </CardFooter>
-                                        </Card>
+                                        <Link key={offer.id} href={`/offers/${offer.id}?shopId=${offer.shopId}`} className="block">
+                                            <Card className="flex flex-col transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group h-full">
+                                                <CardHeader className="p-0 relative">
+                                                        <Badge className="absolute top-2 right-2 z-10" variant='secondary'>
+                                                        {offer.discountValue ? `${offer.discountValue}${offer.discountType === 'percentage' ? '%' : ' OFF'}` : 'Special Deal'}
+                                                    </Badge>
+                                                    <Image 
+                                                        src={offer.imageUrl || `https://placehold.co/600x400?text=${offer.title.replace(/\s/g, '+')}`}
+                                                        alt={offer.title}
+                                                        width={600}
+                                                        height={400}
+                                                        className="aspect-[16/10] object-cover rounded-t-lg"
+                                                    />
+                                                </CardHeader>
+                                                <CardContent className="p-3 md:p-4 flex-1">
+                                                    <div className="flex items-center gap-2 mb-2">
+                                                        <Building className="h-4 w-4 text-muted-foreground" />
+                                                        <p className="text-sm font-semibold text-primary truncate">{offer.shopName || 'Local Shop'}</p>
+                                                    </div>
+                                                    <h3 className="font-bold text-base md:text-lg leading-snug truncate group-hover:text-primary" title={offer.title}>{offer.title}</h3>
+                                                </CardContent>
+                                                <CardFooter className="p-3 md:p-4 border-t flex justify-between items-center text-xs text-muted-foreground">
+                                                    <div className="flex items-center gap-1">
+                                                        <Clock className="h-3 w-3"/>
+                                                        <span>{formatDistanceToNow(new Date(offer.createdAt.seconds * 1000), { addSuffix: true })}</span>
+                                                    </div>
+                                                    {offer.shopBusinessType && <Badge variant="outline">{offer.shopBusinessType}</Badge>}
+                                                </CardFooter>
+                                            </Card>
+                                        </Link>
                                     ))
                                 ) : (
                                     <div className="col-span-full text-center py-20 text-muted-foreground">
