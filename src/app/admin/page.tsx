@@ -145,7 +145,7 @@ export default function AdminDashboard() {
     const filteredClaims = claims.filter(c => {
         if (!c.claimedAt) return false;
         const claimedAtDate = c.claimedAt.toDate();
-        return claimedAtDate >= startDate && createdAtDate <= endDate;
+        return claimedAtDate >= startDate && claimedAtDate <= endDate;
     });
 
     return {
@@ -428,5 +428,8 @@ export default function AdminDashboard() {
     
 
     
+
+    
+
 
     
