@@ -62,7 +62,7 @@ export function LandingHeader() {
              <div className="container mx-auto flex h-16 items-center justify-between">
                  <Link href="/" className="flex items-center gap-2.5 text-foreground">
                     <SaledupLogo />
-                    <span className="font-bold text-xl tracking-wide">Saledup</span>
+                    <span className="font-bold text-xl tracking-wide text-primary">Saledup</span>
                 </Link>
                 <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
                     {navLinks.map(link => (
@@ -103,7 +103,7 @@ export function LandingHeader() {
                                 <div className="p-4 border-b">
                                     <Link href="/" className="flex items-center gap-2.5 text-foreground">
                                         <SaledupLogo />
-                                        <span className="font-bold text-xl tracking-wide">Saledup</span>
+                                        <span className="font-bold text-xl tracking-wide text-primary">Saledup</span>
                                     </Link>
                                 </div>
                                 <nav className="flex-1 flex flex-col gap-4 p-4 mt-4">
@@ -175,7 +175,7 @@ export function LandingHeader() {
         <div className={cn('flex items-center justify-between', !isScrolled && 'container mx-auto')}>
           <Link href="/" className="flex items-center gap-2.5 text-foreground">
             <SaledupLogo />
-            <span className="font-bold text-xl tracking-wide">Saledup</span>
+            <span className="font-bold text-xl tracking-wide text-primary">Saledup</span>
           </Link>
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
             {navLinks.map(link => (
@@ -215,7 +215,7 @@ export function LandingHeader() {
                           <div className="p-4 border-b">
                               <Link href="/" className="flex items-center gap-2.5 text-foreground">
                                   <SaledupLogo />
-                                  <span className="font-bold text-xl tracking-wide">Saledup</span>
+                                  <span className="font-bold text-xl tracking-wide text-primary">Saledup</span>
                               </Link>
                           </div>
                           <nav className="flex-1 flex flex-col gap-4 p-4 mt-4">
