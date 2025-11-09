@@ -232,6 +232,19 @@ service cloud.firestore {
       match /shifts/{shiftId} {
           allow read, write: if isShopOwner(shopId) || isSuperAdmin();
       }
+
+       // Offers Subcollection
+      match /offers/{offerId} {
+        allow read, write: if isShopOwner(shopId);
+        // Allow public listing of offers within a shop.
+        allow list: if true; 
+      }
+      
+      // Claims Subcollection
+      match /claims/{claimId} {
+        allow get, update, list: if isShopOwner(shopId);
+        allow create: if true; // Unauthenticated users can create claims.
+      }
     }
     
           
@@ -243,6 +256,11 @@ service cloud.firestore {
 // ----------------------
 // These rules allow shop owners/admins to query employees, attendance, 
 // and leaveRequests across all their owned shops.
+
+// Allow public listing of all active offers for the "Find Offers" page.
+match /{path=**}/offers/{offerId} {
+  allow list: if true;
+}
 
 match /{path=**}/employees/{employeeId} {
   allow get, list: if isOwnerOfResourceShop() || request.auth.uid == resource.data.ownerId;
