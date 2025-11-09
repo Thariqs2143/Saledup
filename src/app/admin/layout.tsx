@@ -59,8 +59,8 @@ export default function AdminLayout({ children }: PropsWithChildren) {
               setProfile({ 
                 name: shopData.ownerName,
                 shopName: shopData.shopName,
-                email: shopData.email,
-                imageUrl: shopData.ownerImageUrl,
+                email: shopData.ownerEmail,
+                imageUrl: shopData.ownerImageUrl, // Corrected from shopData.imageUrl to ownerImageUrl
                 fallback: shopData.ownerName?.split(' ').map((n: string) => n[0]).join('') || 'SO'
               });
           } else if (!isAuthPage) {
