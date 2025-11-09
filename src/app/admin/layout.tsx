@@ -28,7 +28,7 @@ const adminNavItems: NavItem[] = [
   { href: '/admin', label: 'Home', iconName: 'LayoutDashboard' },
   { href: '/admin/offers', label: 'Offers', iconName: 'Tag' },
   { href: '/admin/redeem', label: 'Redeem', iconName: 'ScanLine' },
-  { href: '/admin/qr-code', label: 'Shop QR', iconName: 'QrCode' },
+  { href: '/admin/qr-code', label: 'QR', iconName: 'QrCode' },
   { href: '/admin/customers', label: 'Customers', iconName: 'Users' },
   { href: '/admin/profile', label: 'Profile', iconName: 'User' },
 ];
