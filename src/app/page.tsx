@@ -289,7 +289,7 @@ const targetCustomers = [
                         Real-time data from our platform.
                     </p>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
                     <Card className="text-center p-6 transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-1 hover:border-primary">
                         <div className="p-4 bg-orange-100 dark:bg-orange-900/30 rounded-full inline-block mb-4 shadow-md">
                             <Store className="h-8 w-8 text-orange-600 dark:text-orange-400" />

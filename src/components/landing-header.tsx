@@ -64,7 +64,7 @@ export function LandingHeader() {
                     <SaledupLogo />
                     <span className="font-bold text-xl tracking-wide text-primary">Saledup</span>
                 </Link>
-                <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
+                <nav className="hidden lg:flex items-center gap-6 text-sm font-medium">
                     {navLinks.map(link => {
                         const LinkComponent = link.href === pathname ? 'span' : Link;
                         return (
@@ -82,7 +82,7 @@ export function LandingHeader() {
                         );
                     })}
                 </nav>
-                 <div className="hidden md:flex items-center gap-2">
+                 <div className="hidden lg:flex items-center gap-2">
                     <Link href="/login" passHref>
                         <Button variant="outline">Get Started</Button>
                     </Link>
@@ -91,8 +91,8 @@ export function LandingHeader() {
                     </Link>
                 </div>
 
-                {/* Mobile Menu */}
-                <div className="md:hidden">
+                {/* Mobile & Tablet Menu */}
+                <div className="lg:hidden">
                     <Sheet>
                         <SheetTrigger asChild>
                             <Button variant="ghost" size="icon">
@@ -182,7 +182,7 @@ export function LandingHeader() {
             <SaledupLogo />
             <span className="font-bold text-xl tracking-wide text-primary">Saledup</span>
           </Link>
-          <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
+          <nav className="hidden lg:flex items-center gap-6 text-sm font-medium">
             {navLinks.map(link => {
               const LinkComponent = link.href === pathname ? 'span' : Link;
               return (
@@ -200,7 +200,7 @@ export function LandingHeader() {
               );
             })}
           </nav>
-           <div className="hidden md:flex items-center gap-2">
+           <div className="hidden lg:flex items-center gap-2">
               <Link href="/login" passHref>
                 <Button variant="outline">Get Started</Button>
               </Link>
@@ -209,7 +209,7 @@ export function LandingHeader() {
               </Link>
           </div>
 
-          <div className="md:hidden">
+          <div className="lg:hidden">
               <Sheet>
                   <SheetTrigger asChild>
                       <Button variant="ghost" size="icon">
