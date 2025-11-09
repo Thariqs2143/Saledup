@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -336,7 +335,15 @@ export default function AdminDashboard() {
                                 {formatDistanceToNow(claim.claimedAt.toDate(), { addSuffix: true })}
                             </p>
                         </div>
-                        <div className="text-xs text-muted-foreground hidden sm:block">{claim.customerEmail}</div>
+                        {claim.status === 'redeemed' ? (
+                          <Badge variant="secondary" className="flex items-center gap-1">
+                            <CheckCircle className="h-3 w-3" /> Redeemed
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="flex items-center gap-1">
+                            <Tag className="h-3 w-3" /> Claimed
+                          </Badge>
+                        )}
                        </div>
                     ))}
                 </div>
@@ -398,38 +405,4 @@ export default function AdminDashboard() {
       </div>
     </div>
   );
-
-    
-
-
-    
-
-
-
-
-
-
-
-
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-
-    
+}

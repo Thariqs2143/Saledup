@@ -3,14 +3,14 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { doc, getDoc, collection, query, where, getDocs, addDoc, serverTimestamp, Timestamp, updateDoc, increment } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, getDocs, addDoc, serverTimestamp, Timestamp, updateDoc, increment, DocumentReference } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Building, Clock, Loader2, Mail, MapPin, Phone, Tag, User as UserIcon } from 'lucide-react';
+import { Building, Clock, Loader2, Mail, MapPin, Phone, Tag, User as UserIcon, CheckCircle } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
@@ -21,7 +21,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter
+  DialogFooter,
+  DialogClose,
 } from "@/components/ui/dialog"
 
 type Shop = {
@@ -54,6 +55,8 @@ export default function ShopOffersPage() {
 
     const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null);
     const [isClaiming, setIsClaiming] = useState(false);
+    const [claimSuccessData, setClaimSuccessData] = useState<{qrCodeUrl: string, offerTitle: string} | null>(null);
+
     const [customerName, setCustomerName] = useState('');
     const [customerPhone, setCustomerPhone] = useState('');
     const [customerEmail, setCustomerEmail] = useState('');
@@ -107,28 +110,27 @@ export default function ShopOffersPage() {
         try {
             // 1. Add claim to subcollection
             const claimsCollectionRef = collection(db, 'shops', shopId, 'claims');
-            await addDoc(claimsCollectionRef, {
+            const claimDocRef = await addDoc(claimsCollectionRef, {
                 customerName,
                 customerPhone,
                 customerEmail,
                 offerId: selectedOffer.id,
                 offerTitle: selectedOffer.title,
                 claimedAt: serverTimestamp(),
+                status: 'claimed', // New status field
             });
 
             // 2. Increment claim count on the offer
             const offerDocRef = doc(db, 'shops', shopId, 'offers', selectedOffer.id);
             await updateDoc(offerDocRef, { claimCount: increment(1) });
-
-
-            toast({
-                title: "Offer Claimed!",
-                description: `Your voucher for "${selectedOffer.title}" has been registered.`,
-            });
+            
+            // 3. Generate QR for the claim
+            const claimId = claimDocRef.id;
+            const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(claimId)}`;
+            
+            // Set success data to show in the next dialog
+            setClaimSuccessData({qrCodeUrl, offerTitle: selectedOffer.title});
             setSelectedOffer(null);
-            setCustomerName('');
-            setCustomerPhone('');
-            setCustomerEmail('');
 
         } catch (error) {
             console.error("Error claiming offer:", error);
@@ -137,6 +139,13 @@ export default function ShopOffersPage() {
             setIsClaiming(false);
         }
     };
+    
+    const resetClaimFlow = () => {
+        setClaimSuccessData(null);
+        setCustomerName('');
+        setCustomerPhone('');
+        setCustomerEmail('');
+    }
 
 
     if (loading) {
@@ -239,7 +248,7 @@ export default function ShopOffersPage() {
                 <DialogHeader>
                     <DialogTitle>Claim "{selectedOffer?.title}"</DialogTitle>
                     <DialogDescription>
-                        Enter your details below to claim this offer. Show the confirmation at the counter.
+                        Enter your details below to claim this offer. You'll receive a QR code to present at the counter.
                     </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleClaimOffer}>
@@ -263,7 +272,7 @@ export default function ShopOffersPage() {
                             <Input id="customer-email" type="email" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} />
                         </div>
                     </div>
-                    <DialogFooter className="gap-2">
+                    <DialogFooter className="gap-2 sm:justify-between">
                         <Button type="button" variant="outline" onClick={() => setSelectedOffer(null)}>Cancel</Button>
                         <Button type="submit" disabled={isClaiming}>
                             {isClaiming && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
@@ -271,6 +280,38 @@ export default function ShopOffersPage() {
                         </Button>
                     </DialogFooter>
                 </form>
+            </DialogContent>
+        </Dialog>
+
+        {/* Claim Success Dialog */}
+        <Dialog open={!!claimSuccessData} onOpenChange={resetClaimFlow}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2">
+                        <CheckCircle className="h-6 w-6 text-green-500" />
+                        Offer Claimed Successfully!
+                    </DialogTitle>
+                     <DialogDescription>
+                        You have claimed the offer: "{claimSuccessData?.offerTitle}".
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="py-4 flex flex-col items-center gap-4 text-center">
+                    <p className="text-sm text-muted-foreground">Show this QR code at the counter to redeem your offer.</p>
+                    {claimSuccessData?.qrCodeUrl && (
+                        <Image
+                            src={claimSuccessData.qrCodeUrl}
+                            alt="Your unique claim QR code"
+                            width={200}
+                            height={200}
+                            className="rounded-lg border p-2 bg-white"
+                        />
+                    )}
+                </div>
+                <DialogFooter>
+                    <DialogClose asChild>
+                        <Button type="button" className="w-full">Done</Button>
+                    </DialogClose>
+                </DialogFooter>
             </DialogContent>
         </Dialog>
     </div>
