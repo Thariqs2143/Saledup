@@ -55,6 +55,97 @@ export function LandingHeader() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // On the /find-offers page, we want a simpler, non-floating header
+  if (pathname === '/find-offers') {
+    return (
+        <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-sm">
+             <div className="container mx-auto flex h-16 items-center justify-between">
+                 <Link href="/" className="flex items-center gap-2.5 text-foreground">
+                    <SaledupLogo />
+                    <span className="font-bold text-xl tracking-wide">Saledup</span>
+                </Link>
+                <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
+                    {navLinks.map(link => (
+                        <Link 
+                            key={link.href} 
+                            href={link.href} 
+                            className={cn(
+                                "text-foreground/80 hover:text-foreground flex items-center gap-1",
+                                pathname === link.href && "text-primary font-semibold"
+                            )}
+                        >
+                            {link.href === '/find-offers' && <Compass className="h-4 w-4" />}
+                            {link.label}
+                        </Link>
+                    ))}
+                </nav>
+                 <div className="hidden md:flex items-center gap-2">
+                    <Link href="/login" passHref>
+                        <Button variant="outline">Get Started</Button>
+                    </Link>
+                    <Link href="/pricing" passHref>
+                        <Button>Go Pro</Button>
+                    </Link>
+                </div>
+
+                {/* Mobile Menu */}
+                <div className="md:hidden">
+                    <Sheet>
+                        <SheetTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                                <Menu className="h-6 w-6"/>
+                                <span className="sr-only">Open menu</span>
+                            </Button>
+                        </SheetTrigger>
+                        <SheetContent side="right" className="w-[300px] sm:w-[340px] p-0">
+                            <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+                            <div className="flex flex-col h-full">
+                                <div className="p-4 border-b">
+                                    <Link href="/" className="flex items-center gap-2.5 text-foreground">
+                                        <SaledupLogo />
+                                        <span className="font-bold text-xl tracking-wide">Saledup</span>
+                                    </Link>
+                                </div>
+                                <nav className="flex-1 flex flex-col gap-4 p-4 mt-4">
+                                    {navLinks.map(link => (
+                                        <SheetClose asChild key={link.href}>
+                                            <Link
+                                                href={link.href}
+                                                className={cn(
+                                                    "text-lg font-medium text-foreground/80 hover:text-primary flex items-center gap-2",
+                                                    pathname === link.href && "text-primary"
+                                                )}
+                                            >
+                                                {link.href === '/find-offers' && <Compass className="h-5 w-5" />}
+                                                {link.label}
+                                            </Link>
+                                        </SheetClose>
+                                    ))}
+                                </nav>
+                                <div className="p-4 mt-auto border-t">
+                                    <div className="flex flex-col gap-3">
+                                        <SheetClose asChild>
+                                            <Link href="/login" passHref>
+                                            <Button variant="outline" className="w-full">Get Started</Button>
+                                            </Link>
+                                        </SheetClose>
+                                        <SheetClose asChild>
+                                            <Link href="/pricing" passHref>
+                                            <Button className="w-full">Go Pro</Button>
+                                            </Link>
+                                        </SheetClose>
+                                    </div>
+                                </div>
+                            </div>
+                        </SheetContent>
+                    </Sheet>
+                </div>
+            </div>
+        </header>
+    );
+  }
+
+  // Default header for all other pages
   return (
     <header className={'sticky top-0 z-50 w-full'}>
       <div
