@@ -1,10 +1,11 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Loader2, Search, Users, Download, Mail, Tag, Calendar } from "lucide-react";
+import { Loader2, Search, Users, Download, Mail, Tag, Calendar, Phone } from "lucide-react";
 import { collection, query, onSnapshot, orderBy, type Timestamp } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
 import { format } from 'date-fns';
@@ -25,7 +26,8 @@ declare module 'jspdf' {
 type Claim = {
     id: string;
     customerName: string;
-    customerEmail: string;
+    customerEmail?: string;
+    customerPhone: string;
     offerTitle: string;
     claimedAt: Timestamp;
 };
@@ -70,6 +72,7 @@ export default function AdminCustomersPage() {
     const filteredCustomers = customers.filter(customer =>
         customer.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         customer.customerEmail?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        customer.customerPhone?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         customer.offerTitle?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
@@ -83,10 +86,11 @@ export default function AdminCustomersPage() {
         doc.text("Customer Claims Report", 14, 15);
         doc.autoTable({
             startY: 20,
-            head: [['Customer Name', 'Email', 'Offer Claimed', 'Date']],
+            head: [['Customer Name', 'Phone', 'Email', 'Offer Claimed', 'Date']],
             body: filteredCustomers.map(c => [
                 c.customerName,
-                c.customerEmail,
+                c.customerPhone,
+                c.customerEmail || 'N/A',
                 c.offerTitle,
                 format(c.claimedAt.toDate(), 'PPpp')
             ]),
@@ -116,7 +120,7 @@ export default function AdminCustomersPage() {
                         <Search className="absolute left-2.5 top-6 h-4 w-4 text-muted-foreground" />
                         <Input
                             type="search"
-                            placeholder="Search by name, email, or offer..."
+                            placeholder="Search by name, phone, or offer..."
                             className="w-full rounded-lg bg-background pl-8"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
@@ -142,9 +146,13 @@ export default function AdminCustomersPage() {
                                             <p className="font-bold">{customer.customerName}</p>
                                         </div>
                                         <div className="space-y-2 text-sm text-muted-foreground">
+                                            <div className="flex items-center gap-2">
+                                                <Phone className="h-3 w-3 shrink-0" />
+                                                <span>{customer.customerPhone}</span>
+                                            </div>
                                              <div className="flex items-center gap-2">
                                                 <Mail className="h-3 w-3 shrink-0" />
-                                                <span>{customer.customerEmail}</span>
+                                                <span>{customer.customerEmail || 'No email'}</span>
                                             </div>
                                             <div className="flex items-center gap-2">
                                                 <Tag className="h-3 w-3 shrink-0" />
@@ -174,7 +182,7 @@ export default function AdminCustomersPage() {
                                             <TableRow key={customer.id}>
                                                 <TableCell className="font-medium">
                                                     <div>{customer.customerName}</div>
-                                                    <div className="text-xs text-muted-foreground">{customer.customerEmail}</div>
+                                                    <div className="text-xs text-muted-foreground">{customer.customerPhone}</div>
                                                 </TableCell>
                                                 <TableCell>{customer.offerTitle}</TableCell>
                                                 <TableCell className="text-right">{format(customer.claimedAt.toDate(), 'PPpp')}</TableCell>

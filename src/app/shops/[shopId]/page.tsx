@@ -3,14 +3,14 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { doc, getDoc, collection, query, where, getDocs, addDoc, serverTimestamp, Timestamp, increment } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, getDocs, addDoc, serverTimestamp, Timestamp, updateDoc, increment } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Building, Clock, Loader2, Mail, MapPin, Tag, User as UserIcon } from 'lucide-react';
+import { Building, Clock, Loader2, Mail, MapPin, Phone, Tag, User as UserIcon } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
@@ -55,6 +55,7 @@ export default function ShopOffersPage() {
     const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null);
     const [isClaiming, setIsClaiming] = useState(false);
     const [customerName, setCustomerName] = useState('');
+    const [customerPhone, setCustomerPhone] = useState('');
     const [customerEmail, setCustomerEmail] = useState('');
 
 
@@ -108,6 +109,7 @@ export default function ShopOffersPage() {
             const claimsCollectionRef = collection(db, 'shops', shopId, 'claims');
             await addDoc(claimsCollectionRef, {
                 customerName,
+                customerPhone,
                 customerEmail,
                 offerId: selectedOffer.id,
                 offerTitle: selectedOffer.title,
@@ -116,16 +118,16 @@ export default function ShopOffersPage() {
 
             // 2. Increment claim count on the offer
             const offerDocRef = doc(db, 'shops', shopId, 'offers', selectedOffer.id);
-            await getDoc(offerDocRef);
-            await addDoc(offerDocRef, { claimCount: increment(1) });
+            await updateDoc(offerDocRef, { claimCount: increment(1) });
 
 
             toast({
                 title: "Offer Claimed!",
-                description: `Your voucher for "${selectedOffer.title}" will be sent to ${customerEmail}.`,
+                description: `Your voucher for "${selectedOffer.title}" has been registered.`,
             });
             setSelectedOffer(null);
             setCustomerName('');
+            setCustomerPhone('');
             setCustomerEmail('');
 
         } catch (error) {
@@ -237,25 +239,31 @@ export default function ShopOffersPage() {
                 <DialogHeader>
                     <DialogTitle>Claim "{selectedOffer?.title}"</DialogTitle>
                     <DialogDescription>
-                        Enter your details below to claim this offer. A voucher will be sent to your email.
+                        Enter your details below to claim this offer. Show the confirmation at the counter.
                     </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleClaimOffer}>
                     <div className="space-y-4 py-4">
                         <div className="space-y-2">
                             <Label htmlFor="customer-name" className="flex items-center gap-2">
-                                <UserIcon className="h-4 w-4" /> Your Name
+                                <UserIcon className="h-4 w-4" /> Your Name*
                             </Label>
                             <Input id="customer-name" value={customerName} onChange={(e) => setCustomerName(e.target.value)} required />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="customer-email" className="flex items-center gap-2">
-                                <Mail className="h-4 w-4" /> Your Email
+                            <Label htmlFor="customer-phone" className="flex items-center gap-2">
+                                <Phone className="h-4 w-4" /> Your Phone Number*
                             </Label>
-                            <Input id="customer-email" type="email" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} required />
+                            <Input id="customer-phone" type="tel" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} required />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="customer-email" className="flex items-center gap-2">
+                                <Mail className="h-4 w-4" /> Your Email (Optional)
+                            </Label>
+                            <Input id="customer-email" type="email" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} />
                         </div>
                     </div>
-                    <DialogFooter>
+                    <DialogFooter className="gap-2">
                         <Button type="button" variant="outline" onClick={() => setSelectedOffer(null)}>Cancel</Button>
                         <Button type="submit" disabled={isClaiming}>
                             {isClaiming && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
