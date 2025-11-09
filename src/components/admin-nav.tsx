@@ -134,12 +134,12 @@ export function AdminNav({ navItems, profile, isDesktop }: AdminNavProps) {
               <ThemeSwitcher />
             </div>
             <Button
-            variant="ghost"
-            onClick={handleLogout}
-            className="w-full justify-start h-auto p-2 border bg-red-100 text-red-700 hover:bg-red-600 hover:text-white active:bg-red-800 active:text-white dark:bg-red-900/50 dark:text-red-400 dark:hover:bg-red-800 dark:hover:text-white"
+              variant="outline"
+              onClick={handleLogout}
+              className="w-full justify-start h-auto p-2 border bg-red-100/80 text-red-700 hover:bg-red-600 hover:text-white dark:bg-red-900/20 dark:border-red-800/50 dark:text-red-400 dark:hover:bg-red-800 dark:hover:text-white"
             >
-            <LogOut className="h-5 w-5 mr-3" />
-            <span className="font-bold">Logout</span>
+              <LogOut className="h-5 w-5 mr-3" />
+              <span className="font-bold">Logout</span>
             </Button>
         </div>
     </>

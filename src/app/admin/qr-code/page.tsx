@@ -46,14 +46,20 @@ export default function GenerateQrPage() {
                         const shopPublicUrl = `${window.location.origin}/shops/${shopSnap.id}`;
                         setPublicUrl(shopPublicUrl);
 
-                        const qrData = encodeURIComponent(shopPublicUrl);
-                        const generatedUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${qrData}`;
-                        setQrUrl(generatedUrl);
-                        
-                        await setDoc(doc(db, 'shops', user.uid), {
-                            permanentQrUrl: generatedUrl,
-                            publicUrl: shopPublicUrl
-                        }, { merge: true });
+                        // If publicUrl exists in DB, use it, otherwise generate and save it
+                        if (data.publicUrl) {
+                            setPublicUrl(data.publicUrl);
+                            setQrUrl(data.permanentQrUrl);
+                        } else {
+                            const qrData = encodeURIComponent(shopPublicUrl);
+                            const generatedUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${qrData}`;
+                            setQrUrl(generatedUrl);
+                            
+                            await setDoc(doc(db, 'shops', user.uid), {
+                                permanentQrUrl: generatedUrl,
+                                publicUrl: shopPublicUrl
+                            }, { merge: true });
+                        }
 
                     }
                 } catch (e) {
