@@ -43,105 +43,126 @@ const navLinks = [
 ];
 
 export function LandingHeader() {
+  const [showBanner, setShowBanner] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
+      setIsScrolled(window.scrollY > 20);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   return (
-    <header className={cn(
-        'sticky top-0 z-50 w-full transition-all duration-300',
-        isScrolled ? 'bg-background/80 backdrop-blur-sm shadow-sm' : 'bg-background border-b'
-    )}>
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex h-16 items-center justify-between">
-                <Link href="/" className="flex items-center gap-2.5 text-foreground">
-                    <SaledupLogo />
-                    <span className="font-bold text-xl tracking-wide">Saledup</span>
+    <header className={'sticky top-0 z-50 w-full'}>
+      <div
+        className={cn(
+          'relative bg-primary text-primary-foreground py-2.5 px-4 text-center text-sm font-medium transition-all duration-300',
+          !showBanner && 'hidden'
+        )}
+      >
+        <Sparkles className="h-4 w-4 absolute left-4 top-1/2 -translate-y-1/2 hidden md:inline-block" />
+        <span>Upgrade to Pro and unlock powerful new features!</span>
+        <button
+          onClick={() => setShowBanner(false)}
+          className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-md hover:bg-white/20"
+        >
+          <X className="h-4 w-4" />
+          <span className="sr-only">Dismiss</span>
+        </button>
+      </div>
+      <div
+        className={cn(
+          'transition-all duration-300',
+          isScrolled
+            ? 'py-2 bg-background/80 backdrop-blur-sm rounded-full shadow-lg border mx-auto px-4 sm:px-6 lg:px-8 mt-2 max-w-6xl'
+            : 'py-4 bg-background'
+        )}
+      >
+        <div className={cn('flex items-center justify-between', !isScrolled && 'container mx-auto')}>
+          <Link href="/" className="flex items-center gap-2.5 text-foreground">
+            <SaledupLogo />
+            <span className="font-bold text-xl tracking-wide">Saledup</span>
+          </Link>
+          <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
+            {navLinks.map(link => (
+                 <Link 
+                    key={link.href} 
+                    href={link.href} 
+                    className={cn(
+                        "text-foreground/80 hover:text-foreground flex items-center gap-1",
+                        pathname === link.href && "text-primary font-semibold"
+                    )}
+                >
+                    {link.href === '/find-offers' && <Compass className="h-4 w-4" />}
+                    {link.label}
                 </Link>
-                <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-                    {navLinks.map(link => (
-                        <Link 
-                            key={link.href} 
-                            href={link.href} 
-                            className={cn(
-                                "text-foreground/80 hover:text-foreground flex items-center gap-1",
-                                pathname === link.href && "text-primary font-semibold"
-                            )}
-                        >
-                            {link.href === '/find-offers' && <Compass className="h-4 w-4" />}
-                            {link.label}
-                        </Link>
-                    ))}
-                </nav>
-                <div className="hidden md:flex items-center gap-2">
-                    <Link href="/login" passHref>
-                    <Button variant="outline">Get Started</Button>
-                    </Link>
-                    <Link href="/pricing" passHref>
-                    <Button>Go Pro</Button>
-                    </Link>
-                </div>
-                
-                {/* Mobile Menu */}
-                <div className="md:hidden">
-                    <Sheet>
-                        <SheetTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                                <Menu className="h-6 w-6"/>
-                                <span className="sr-only">Open menu</span>
-                            </Button>
-                        </SheetTrigger>
-                        <SheetContent side="right" className="w-[300px] sm:w-[340px] p-0">
-                            <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-                            <div className="flex flex-col h-full">
-                                <div className="p-4 border-b">
-                                    <Link href="/" className="flex items-center gap-2.5 text-foreground">
-                                        <SaledupLogo />
-                                        <span className="font-bold text-xl tracking-wide">Saledup</span>
-                                    </Link>
-                                </div>
-                                <nav className="flex-1 flex flex-col gap-4 p-4 mt-4">
-                                    {navLinks.map(link => (
-                                        <SheetClose asChild key={link.href}>
-                                            <Link 
-                                                href={link.href} 
-                                                className={cn(
-                                                    "text-lg font-medium text-foreground/80 hover:text-primary flex items-center gap-2",
-                                                    pathname === link.href && "text-primary"
-                                                )}
-                                            >
-                                                {link.href === '/find-offers' && <Compass className="h-5 w-5" />}
-                                                {link.label}
-                                            </Link>
-                                        </SheetClose>
-                                    ))}
-                                </nav>
-                                <div className="p-4 mt-auto border-t">
-                                    <div className="flex flex-col gap-3">
-                                        <SheetClose asChild>
-                                            <Link href="/login" passHref>
-                                            <Button variant="outline" className="w-full">Get Started</Button>
-                                            </Link>
-                                        </SheetClose>
-                                        <SheetClose asChild>
-                                            <Link href="/pricing" passHref>
-                                            <Button className="w-full">Go Pro</Button>
-                                            </Link>
-                                        </SheetClose>
-                                    </div>
-                                </div>
-                            </div>
-                        </SheetContent>
-                    </Sheet>
-                </div>
-            </div>
+            ))}
+          </nav>
+           <div className="hidden md:flex items-center gap-2">
+              <Link href="/login" passHref>
+                <Button variant="outline">Get Started</Button>
+              </Link>
+              <Link href="/pricing" passHref>
+                <Button>Go Pro</Button>
+              </Link>
+          </div>
+
+          <div className="md:hidden">
+              <Sheet>
+                  <SheetTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                          <Menu className="h-6 w-6"/>
+                          <span className="sr-only">Open menu</span>
+                      </Button>
+                  </SheetTrigger>
+                  <SheetContent side="right" className="w-[300px] sm:w-[340px] p-0">
+                      <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+                      <div className="flex flex-col h-full">
+                          <div className="p-4 border-b">
+                              <Link href="/" className="flex items-center gap-2.5 text-foreground">
+                                  <SaledupLogo />
+                                  <span className="font-bold text-xl tracking-wide">Saledup</span>
+                              </Link>
+                          </div>
+                          <nav className="flex-1 flex flex-col gap-4 p-4 mt-4">
+                              {navLinks.map(link => (
+                                  <SheetClose asChild key={link.href}>
+                                      <Link
+                                          href={link.href}
+                                          className={cn(
+                                              "text-lg font-medium text-foreground/80 hover:text-primary flex items-center gap-2",
+                                              pathname === link.href && "text-primary"
+                                          )}
+                                      >
+                                          {link.href === '/find-offers' && <Compass className="h-5 w-5" />}
+                                          {link.label}
+                                      </Link>
+                                  </SheetClose>
+                              ))}
+                          </nav>
+                          <div className="p-4 mt-auto border-t">
+                              <div className="flex flex-col gap-3">
+                                  <SheetClose asChild>
+                                      <Link href="/login" passHref>
+                                      <Button variant="outline" className="w-full">Get Started</Button>
+                                      </Link>
+                                  </SheetClose>
+                                  <SheetClose asChild>
+                                      <Link href="/pricing" passHref>
+                                      <Button className="w-full">Go Pro</Button>
+                                      </Link>
+                                  </SheetClose>
+                              </div>
+                          </div>
+                      </div>
+                  </SheetContent>
+              </Sheet>
+          </div>
+
+        </div>
       </div>
     </header>
   );
