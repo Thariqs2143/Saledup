@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { collectionGroup, getDocs, query, where, orderBy, doc } from 'firebase/firestore';
+import { collectionGroup, getDocs, query, where, orderBy, doc, collection } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
