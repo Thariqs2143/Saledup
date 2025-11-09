@@ -9,6 +9,7 @@ import {
   User,
   Bell,
   LogOut,
+  ScanLine,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { NavItem } from './bottom-nav';
@@ -29,6 +30,7 @@ const iconMap: { [key: string]: any } = {
   Tag,
   User,
   Bell,
+  ScanLine,
 };
 
 type ShopProfile = {
