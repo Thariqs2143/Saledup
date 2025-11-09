@@ -96,9 +96,9 @@ const OfferPopupContent = ({ offers }: { offers: Offer[] }) => {
             </CarouselContent>
             {offers.length > 1 && (
                 <>
-                    <CarouselPrevious className="absolute -left-3 top-[calc(50%-40px)] -translate-y-1/2 h-8 w-8" />
-                    <CarouselNext className="absolute -right-3 top-[calc(50%-40px)] -translate-y-1/2 h-8 w-8" />
-                    <div className="py-2 text-center text-xs text-muted-foreground">
+                    <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 h-6 w-6 p-1 bg-background/50 hover:bg-background/80 rounded-full" />
+                    <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 p-1 bg-background/50 hover:bg-background/80 rounded-full" />
+                    <div className="text-center text-xs text-muted-foreground pt-1">
                         Offer {current} of {count}
                     </div>
                 </>
