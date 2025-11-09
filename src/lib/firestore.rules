@@ -1,3 +1,4 @@
+
 rules_version = '2';
 
 service cloud.firestore {
@@ -31,7 +32,7 @@ service cloud.firestore {
         // Shop owner can manage their offers (read, write, delete).
         // Any user can list offers for a public shop page.
         allow read, write, delete: if isShopOwner(shopId);
-        allow list: if isShopOwner(shopId) || true;
+        allow list: if true; 
       }
       
       // Claims subcollection
@@ -40,7 +41,7 @@ service cloud.firestore {
         allow get, list, update: if isShopOwner(shopId);
         
         // Anyone can create a claim (since it's an unauthenticated action).
-        allow create;
+        allow create: if true;
       }
     }
 

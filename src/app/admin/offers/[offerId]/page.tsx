@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -246,12 +247,12 @@ export default function AdminEditOfferPage() {
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="discountValue">Discount Value</Label>
-                            <Input id="discountValue" name="discountValue" value={offer.discountValue} onChange={e => handleFieldChange('discountValue', e.target.value)} />
+                            <Input id="discountValue" name="discountValue" value={offer.discountValue || ''} onChange={e => handleFieldChange('discountValue', e.target.value)} />
                         </div>
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="terms">Terms & Conditions (Optional)</Label>
-                        <Textarea id="terms" name="terms" value={offer.terms} onChange={e => handleFieldChange('terms', e.target.value)} />
+                        <Textarea id="terms" name="terms" value={offer.terms || ''} onChange={e => handleFieldChange('terms', e.target.value)} />
                     </div>
 
                 </CardContent>
