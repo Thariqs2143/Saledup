@@ -119,7 +119,7 @@ export function AdminNav({ navItems, profile, isDesktop }: AdminNavProps) {
                 <div className="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-muted">
                     <Avatar className="h-10 w-10 border-2 border-primary">
                     <AvatarImage src={profile?.imageUrl} />
-                    <AvatarFallback>{profile?.fallback || 'SO'}</AvatarFallback>
+                    <AvatarFallback>{profile?.fallback || 'A'}</AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col overflow-hidden">
                     <span className="text-sm font-bold text-foreground truncate">
