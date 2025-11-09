@@ -25,28 +25,21 @@ interface OfferMapProps {
   offers: Offer[];
 }
 
-// Dynamically import react-leaflet components (Next.js SSR fix)
-const MapContainer = dynamic(
-  async () => (await import('react-leaflet')).MapContainer,
-  { ssr: false }
-);
-const TileLayer = dynamic(async () => (await import('react-leaflet')).TileLayer, {
-  ssr: false,
-});
-const Marker = dynamic(async () => (await import('react-leaflet')).Marker, {
-  ssr: false,
-});
-const Popup = dynamic(async () => (await import('react-leaflet')).Popup, {
-  ssr: false,
-});
+// Dynamically import react-leaflet components for SSR fix
+const MapContainer = dynamic(async () => (await import('react-leaflet')).MapContainer, { ssr: false });
+const TileLayer = dynamic(async () => (await import('react-leaflet')).TileLayer, { ssr: false });
+const Marker = dynamic(async () => (await import('react-leaflet')).Marker, { ssr: false });
+const Popup = dynamic(async () => (await import('react-leaflet')).Popup, { ssr: false });
 
 export default function OfferMap({ offers }: OfferMapProps) {
   const [L, setL] = useState<any>(null);
 
-  // Load Leaflet only on client side and set default icon once
+  // Load Leaflet and set default marker icons
   useEffect(() => {
     (async () => {
       const leaflet = await import('leaflet');
+
+      // Reset default icons
       delete (leaflet.Icon.Default as any).prototype._getIconUrl;
       leaflet.Icon.Default.mergeOptions({
         iconRetinaUrl:
@@ -56,23 +49,28 @@ export default function OfferMap({ offers }: OfferMapProps) {
         shadowUrl:
           'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
       });
+
       setL(leaflet);
     })();
   }, []);
 
-  // Fallback center if no coordinates are provided
-  const mapCenter: [number, number] =
-    offers.find((o) => o.lat && o.lng)
-      ? [offers[0].lat ?? 20.5937, offers[0].lng ?? 78.9629]
-      : [20.5937, 78.9629];
+  // Find first offer with coordinates to center map
+  const firstWithCoords = offers.find(o => o.lat !== undefined && o.lng !== undefined);
+  const mapCenter: [number, number] = firstWithCoords
+    ? [firstWithCoords.lat!, firstWithCoords.lng!]
+    : [20.5937, 78.9629]; // fallback to India center
 
-  // Wait for Leaflet to load before rendering
-  if (!L) return <div>Loading map...</div>;
+  // Wait for Leaflet to load
+  if (!L) return (
+    <div className="flex justify-center items-center h-full text-gray-500">
+      Loading map...
+    </div>
+  );
 
   return (
-    <div style={{ height: '100%', width: '100%' }}>
+    <div className="h-full w-full">
       <MapContainer
-        key={`${mapCenter[0]}-${mapCenter[1]}`} // prevents reinitialization error
+        key={`${mapCenter[0]}-${mapCenter[1]}`} // prevent re-init issues
         center={mapCenter}
         zoom={5}
         style={{ height: '100%', width: '100%' }}
@@ -83,8 +81,8 @@ export default function OfferMap({ offers }: OfferMapProps) {
         />
         {offers.map(
           (offer) =>
-            offer.lat &&
-            offer.lng && (
+            offer.lat !== undefined &&
+            offer.lng !== undefined && (
               <Marker key={offer.id} position={[offer.lat, offer.lng]}>
                 <Popup>
                   <div className="font-bold">{offer.title}</div>
