@@ -139,29 +139,21 @@ export default function AdminCustomersPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Customers ({filteredCustomers.length})</h1>
-                    <p className="text-muted-foreground">A list of all customers who have claimed your offers.</p>
-                </div>
-                 <Button onClick={handleExportPDF} variant="outline" size="sm">
-                    <Download className="mr-2"/>Export PDF
-                </Button>
-            </div>
-            
-             <div className="bg-muted/50 border rounded-lg p-4">
-                <div className="relative">
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div className="relative w-full">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                     <Input
                         type="search"
-                        placeholder="Search by name, phone, email, or offer title..."
+                        placeholder={`Search ${customers.length} customers...`}
                         className="w-full rounded-lg bg-background pl-10 h-12"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
+                 <Button onClick={handleExportPDF} variant="outline" size="sm" className="w-full sm:w-auto h-12">
+                    <Download className="mr-2"/>Export PDF
+                </Button>
             </div>
-
             
             {loading ? (
                 <div className="flex items-center justify-center h-64">
@@ -205,12 +197,12 @@ export default function AdminCustomersPage() {
                             </CardContent>
                             <CardContent className="border-t pt-4 flex justify-end gap-2">
                                 <Button size="sm" variant="outline" onClick={() => handleStatusToggle(customer.id, customer.status)}>
-                                    <RefreshCcw className="h-3 w-3"/>
+                                    {customer.status === 'claimed' ? 'Mark as Redeemed' : 'Mark as Claimed'}
                                 </Button>
                                 <AlertDialog>
                                     <AlertDialogTrigger asChild>
-                                        <Button size="sm" variant="destructive" className="h-9 w-9 p-0">
-                                            <Trash2 className="h-4 w-4"/>
+                                        <Button size="sm" variant="destructive">
+                                            <Trash2 className="h-4 w-4 mr-2"/> Delete
                                         </Button>
                                     </AlertDialogTrigger>
                                     <AlertDialogContent>
@@ -234,6 +226,8 @@ export default function AdminCustomersPage() {
         </div>
     );
 }
+
+    
 
     
 
