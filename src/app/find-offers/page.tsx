@@ -2,19 +2,18 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { collectionGroup, getDocs, query, where, orderBy, collection } from 'firebase/firestore';
+import { collection, collectionGroup, getDocs, query, where, orderBy } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
-import { Loader2, Search, Map, List, Tag, Building, Star, Clock, Filter, X } from 'lucide-react';
+import { Loader2, Search, Map, List, Building, Clock, Filter, X } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { formatDistanceToNow } from 'date-fns';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Checkbox } from '@/components/ui/checkbox';
-import { cn } from '@/lib/utils';
 import dynamic from 'next/dynamic';
 import 'leaflet/dist/leaflet.css';
 
@@ -30,12 +29,10 @@ type Offer = {
     shopName?: string;
     shopAddress?: string;
     shopBusinessType?: string;
-    // Placeholder coordinates - you'll need to add real ones to your data
     lat?: number;
     lng?: number;
 };
 
-// Dynamically import the map component and its dependencies to ensure it's client-side only
 const OfferMap = dynamic(() => import('@/components/offer-map'), { 
     ssr: false,
     loading: () => <div className="flex justify-center items-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div>
@@ -46,7 +43,6 @@ export default function FindOffersPage() {
     const [loading, setLoading] = useState(true);
     const [view, setView] = useState<'list' | 'map'>('list');
     
-    // Filter states
     const [searchTerm, setSearchTerm] = useState('');
     const [sortBy, setSortBy] = useState('newest');
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -75,7 +71,6 @@ export default function FindOffersPage() {
                 const shopIds = [...new Set(offersList.map(o => o.shopId))];
                 const shopsData: Record<string, any> = {};
                 
-                // Firestore allows up to 30 'in' queries in a batch, but we'll be safer
                 const shopIdChunks: string[][] = [];
                 for (let i = 0; i < shopIds.length; i += 10) {
                     shopIdChunks.push(shopIds.slice(i, i + 10));
@@ -96,7 +91,6 @@ export default function FindOffersPage() {
                     shopName: shopsData[offer.shopId]?.shopName,
                     shopAddress: shopsData[offer.shopId]?.address,
                     shopBusinessType: shopsData[offer.shopId]?.businessType,
-                    // Use actual coordinates if they exist, otherwise fallback to random placeholder
                     lat: shopsData[offer.shopId]?.lat || 19.0760 + (Math.random() - 0.5) * 5, 
                     lng: shopsData[offer.shopId]?.lng || 72.8777 + (Math.random() - 0.5) * 5,
                 }));
@@ -143,7 +137,8 @@ export default function FindOffersPage() {
     };
 
     return (
-        <div>
+        <div className="flex flex-col">
+            {/* Page Header */}
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <header className="text-center my-8 md:my-12">
                     <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">Find Local Deals</h1>
@@ -153,20 +148,20 @@ export default function FindOffersPage() {
                 </header>
             </div>
 
-            {/* Filter Bar */}
-            <div className="sticky top-[61px] md:top-20 z-40 bg-background/95 backdrop-blur-sm py-4 border-y">
+            {/* Sticky Filter Bar */}
+            <div className="sticky top-16 z-40 bg-background/95 backdrop-blur-sm border-y py-3">
                 <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex flex-col md:flex-row gap-4 items-center">
-                        <div className="relative w-full md:flex-1">
+                    <div className="flex flex-col sm:flex-row gap-4 items-center">
+                        <div className="relative w-full sm:flex-1">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                             <Input 
-                                placeholder="Search for offers, products, or shops..."
+                                placeholder="Search offers, products, or shops..."
                                 className="pl-10 h-12"
                                 value={searchTerm}
                                 onChange={e => setSearchTerm(e.target.value)}
                             />
                         </div>
-                        <div className="flex gap-2 w-full md:w-auto">
+                        <div className="flex gap-2 w-full sm:w-auto">
                             <Popover>
                                 <PopoverTrigger asChild>
                                     <Button variant="outline" className="h-12 flex-1 md:flex-initial">
@@ -194,9 +189,8 @@ export default function FindOffersPage() {
                                     </div>
                                 </PopoverContent>
                             </Popover>
-
                             <Select value={sortBy} onValueChange={setSortBy}>
-                                <SelectTrigger className="h-12 w-[180px]">
+                                <SelectTrigger className="h-12 w-[180px] flex-1 sm:flex-initial">
                                     <SelectValue placeholder="Sort by" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -204,8 +198,7 @@ export default function FindOffersPage() {
                                     <SelectItem value="popular">Most Popular</SelectItem>
                                 </SelectContent>
                             </Select>
-
-                            <div className="flex bg-muted p-1 rounded-md ml-auto md:ml-0">
+                            <div className="flex bg-muted p-1 rounded-md">
                                 <Button variant={view === 'list' ? 'secondary' : 'ghost'} size="icon" onClick={() => setView('list')}>
                                     <List className="h-5 w-5"/>
                                 </Button>
@@ -215,75 +208,67 @@ export default function FindOffersPage() {
                             </div>
                         </div>
                     </div>
-                    {selectedCategories.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mt-4">
-                            {selectedCategories.map(cat => (
-                                <Badge key={cat} variant="secondary" className="pr-1">
-                                    {cat}
-                                    <button onClick={() => handleCategoryChange(cat)} className="ml-1 rounded-full p-0.5 hover:bg-muted-foreground/20">
-                                        <X className="h-3 w-3" />
-                                    </button>
-                                </Badge>
-                            ))}
-                        </div>
-                    )}
-                 </div>
+                </div>
             </div>
 
-            {/* Content Area */}
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 relative">
+            {/* Main Content Area */}
+            <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {loading ? (
                     <div className="flex justify-center items-center h-64">
                         <Loader2 className="h-12 w-12 animate-spin text-primary" />
                     </div>
-                ) : view === 'map' ? (
-                    <div className="h-[600px] w-full rounded-lg overflow-hidden border relative z-10">
-                        <OfferMap offers={filteredAndSortedOffers} />
-                    </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8 relative z-20">
-                        {filteredAndSortedOffers.length > 0 ? (
-                            filteredAndSortedOffers.map(offer => (
-                                <Card key={offer.id} className="flex flex-col transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                                    <CardHeader className="p-0 relative">
-                                            <Badge className="absolute top-2 right-2 z-10" variant='secondary'>
-                                            {offer.discountValue ? `${offer.discountValue}${offer.discountType === 'percentage' ? '%' : ' OFF'}` : 'Special Deal'}
-                                        </Badge>
-                                        <Image 
-                                            src={offer.imageUrl || `https://placehold.co/600x400?text=${offer.title.replace(/\s/g, '+')}`}
-                                            alt={offer.title}
-                                            width={600}
-                                            height={400}
-                                            className="aspect-[16/10] object-cover rounded-t-lg"
-                                        />
-                                    </CardHeader>
-                                    <CardContent className="p-4 flex-1">
-                                        <div className="flex items-center gap-2 mb-2">
-                                            <Building className="h-4 w-4 text-muted-foreground" />
-                                            <p className="text-sm font-semibold text-primary truncate">{offer.shopName || 'Local Shop'}</p>
-                                        </div>
-                                        <h3 className="font-bold text-lg truncate" title={offer.title}>{offer.title}</h3>
-                                        <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{offer.description}</p>
-                                    </CardContent>
-                                    <CardFooter className="p-4 border-t flex justify-between items-center text-xs text-muted-foreground">
-                                        <div className="flex items-center gap-1">
-                                            <Clock className="h-3 w-3"/>
-                                            <span>Posted {formatDistanceToNow(new Date(offer.createdAt.seconds * 1000), { addSuffix: true })}</span>
-                                        </div>
-                                        {offer.shopBusinessType && <Badge variant="outline">{offer.shopBusinessType}</Badge>}
-                                    </CardFooter>
-                                </Card>
-                            ))
-                        ) : (
-                            <div className="col-span-full text-center py-20 text-muted-foreground">
-                                <Search className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                                <h3 className="text-xl font-semibold">No Offers Found</h3>
-                                <p>Try adjusting your search or filter criteria.</p>
+                    <>
+                        {view === 'list' && (
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                                {filteredAndSortedOffers.length > 0 ? (
+                                    filteredAndSortedOffers.map(offer => (
+                                        <Card key={offer.id} className="flex flex-col transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group">
+                                            <CardHeader className="p-0 relative">
+                                                    <Badge className="absolute top-2 right-2 z-10" variant='secondary'>
+                                                    {offer.discountValue ? `${offer.discountValue}${offer.discountType === 'percentage' ? '%' : ' OFF'}` : 'Special Deal'}
+                                                </Badge>
+                                                <Image 
+                                                    src={offer.imageUrl || `https://placehold.co/600x400?text=${offer.title.replace(/\s/g, '+')}`}
+                                                    alt={offer.title}
+                                                    width={600}
+                                                    height={400}
+                                                    className="aspect-[16/10] object-cover rounded-t-lg"
+                                                />
+                                            </CardHeader>
+                                            <CardContent className="p-3 md:p-4 flex-1">
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <Building className="h-4 w-4 text-muted-foreground" />
+                                                    <p className="text-sm font-semibold text-primary truncate">{offer.shopName || 'Local Shop'}</p>
+                                                </div>
+                                                <h3 className="font-bold text-base md:text-lg leading-snug truncate group-hover:text-primary" title={offer.title}>{offer.title}</h3>
+                                            </CardContent>
+                                            <CardFooter className="p-3 md:p-4 border-t flex justify-between items-center text-xs text-muted-foreground">
+                                                <div className="flex items-center gap-1">
+                                                    <Clock className="h-3 w-3"/>
+                                                    <span>{formatDistanceToNow(new Date(offer.createdAt.seconds * 1000), { addSuffix: true })}</span>
+                                                </div>
+                                                {offer.shopBusinessType && <Badge variant="outline">{offer.shopBusinessType}</Badge>}
+                                            </CardFooter>
+                                        </Card>
+                                    ))
+                                ) : (
+                                    <div className="col-span-full text-center py-20 text-muted-foreground">
+                                        <Search className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                                        <h3 className="text-xl font-semibold">No Offers Found</h3>
+                                        <p>Try adjusting your search or filter criteria.</p>
+                                    </div>
+                                )}
                             </div>
                         )}
-                    </div>
+                        {view === 'map' && (
+                             <div className="h-[calc(100vh-250px)] w-full rounded-lg overflow-hidden border">
+                                <OfferMap offers={filteredAndSortedOffers} />
+                            </div>
+                        )}
+                    </>
                 )}
-            </div>
+            </main>
         </div>
     );
 }
