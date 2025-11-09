@@ -48,7 +48,7 @@ export function BottomNav({ navItems }: BottomNavProps) {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background/95 backdrop-blur-sm md:hidden">
-      <div className="flex h-16 justify-evenly">
+      <div className="flex h-16 justify-around">
         {navItems.map((item) => {
           const Icon = item.iconName ? iconMap[item.iconName] : item.icon;
           const isHomePage = item.href === '/admin' || item.href === '/employee' || item.href === '/super-admin';
