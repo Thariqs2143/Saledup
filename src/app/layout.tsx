@@ -38,6 +38,12 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+        <link
+            rel="stylesheet"
+            href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+            integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+            crossOrigin=""
+        />
       </head>
       <body className={cn("font-body antialiased", poppins.variable)}>
         <ThemeProvider
@@ -74,5 +80,3 @@ export default function RootLayout({
     </html>
   );
 }
-
-    

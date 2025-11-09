@@ -15,6 +15,23 @@ import { formatDistanceToNow } from 'date-fns';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
+import dynamic from 'next/dynamic';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+
+// Fix for default marker icon issue with webpack
+const iconDefault = new L.Icon({
+    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+});
+L.Marker.prototype.options.icon = iconDefault;
+
 
 type Offer = {
     id: string;
@@ -28,18 +45,30 @@ type Offer = {
     shopName?: string;
     shopAddress?: string;
     shopBusinessType?: string;
+    // Placeholder coordinates - you'll need to add real ones to your data
+    lat?: number;
+    lng?: number;
 };
 
-// Mock map component, as a real one needs an API key
-const MockMap = () => (
-    <div className="w-full h-full bg-muted flex items-center justify-center rounded-lg">
-        <div className="text-center text-muted-foreground p-8">
-            <Map className="h-16 w-16 mx-auto mb-4" />
-            <p className="font-bold">Map View Placeholder</p>
-            <p className="text-sm">In a real app, this would be an interactive map showing offer locations.</p>
-        </div>
-    </div>
-);
+// Dynamically import the map component to ensure it's client-side only
+const OfferMap = dynamic(() => Promise.resolve(({ offers }: { offers: Offer[] }) => (
+    <MapContainer center={[20.5937, 78.9629]} zoom={5} style={{ height: '100%', width: '100%', borderRadius: '0.5rem' }}>
+        <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        />
+        {offers.map(offer => (
+            offer.lat && offer.lng ? (
+                <Marker key={offer.id} position={[offer.lat, offer.lng]}>
+                    <Popup>
+                        <div className="font-bold">{offer.title}</div>
+                        <div className="text-sm">{offer.shopName}</div>
+                    </Popup>
+                </Marker>
+            ) : null
+        ))}
+    </MapContainer>
+)), { ssr: false });
 
 export default function FindOffersPage() {
     const [offers, setOffers] = useState<Offer[]>([]);
@@ -86,11 +115,14 @@ export default function FindOffersPage() {
                     }
                 });
                 
-                const enrichedOffers = offersList.map(offer => ({
+                const enrichedOffers = offersList.map((offer, index) => ({
                     ...offer,
                     shopName: shopsData[offer.shopId]?.shopName,
                     shopAddress: shopsData[offer.shopId]?.address,
                     shopBusinessType: shopsData[offer.shopId]?.businessType,
+                     // Placeholder coordinates - replace with real data when available
+                    lat: 19.0760 + (Math.random() - 0.5) * 5, // Randomly around Mumbai
+                    lng: 72.8777 + (Math.random() - 0.5) * 5,
                 }));
                 
                 setOffers(enrichedOffers);
@@ -224,10 +256,10 @@ export default function FindOffersPage() {
                     <Loader2 className="h-12 w-12 animate-spin text-primary" />
                 </div>
             ) : (
-                <div className={cn("grid gap-8", view === 'list' && "lg:grid-cols-3 md:grid-cols-2")}>
+                <div className={cn("grid gap-8", view === 'list' ? "lg:grid-cols-3 md:grid-cols-2" : "h-[600px] col-span-full")}>
                     {view === 'map' && (
-                        <div className="h-[600px] col-span-full">
-                            <MockMap />
+                        <div className="h-full w-full">
+                            <OfferMap offers={filteredAndSortedOffers} />
                         </div>
                     )}
                     {view === 'list' && (
