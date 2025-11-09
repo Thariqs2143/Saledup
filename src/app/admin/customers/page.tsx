@@ -3,7 +3,6 @@
 
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Loader2, Search, Users, Download, Mail, Tag, Calendar, Phone, CheckCircle, XCircle, Edit, Trash2, RefreshCcw } from "lucide-react";
 import { collection, query, onSnapshot, orderBy, type Timestamp, doc, updateDoc, deleteDoc } from "firebase/firestore";
@@ -140,161 +139,102 @@ export default function AdminCustomersPage() {
 
     return (
         <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight">Customers</h1>
-                <p className="text-muted-foreground">A list of all customers who have claimed your offers.</p>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                 <div>
+                    <h1 className="text-3xl font-bold tracking-tight">Customers ({filteredCustomers.length})</h1>
+                    <p className="text-muted-foreground">A list of all customers who have claimed your offers.</p>
+                </div>
+                 <Button onClick={handleExportPDF} variant="outline" size="sm">
+                    <Download className="mr-2"/>Export PDF
+                </Button>
             </div>
-            <Card>
-                <CardHeader>
-                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                        <div>
-                            <CardTitle>All Customers ({filteredCustomers.length})</CardTitle>
-                            <CardDescription>A log of every customer interaction.</CardDescription>
-                        </div>
-                        <Button onClick={handleExportPDF} variant="outline" size="sm">
-                            <Download className="mr-2"/>Export PDF
-                        </Button>
-                    </div>
-                    <div className="relative pt-4 sm:max-w-xs">
-                        <Search className="absolute left-2.5 top-6 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            type="search"
-                            placeholder="Search by name, phone, or offer..."
-                            className="w-full rounded-lg bg-background pl-8"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </div>
-                </CardHeader>
-                <CardContent>
-                    {loading ? (
-                        <div className="flex items-center justify-center h-48">
-                            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                        </div>
-                    ) : filteredCustomers.length === 0 ? (
-                        <div className="text-center py-12 text-muted-foreground">
-                            <p>No customers have claimed offers yet.</p>
-                        </div>
-                    ) : (
-                         <>
-                            {/* Mobile View */}
-                            <div className="grid gap-4 md:hidden">
-                                {filteredCustomers.map(customer => (
-                                    <Card key={customer.id} className="p-4 space-y-3">
-                                        <div className="flex justify-between items-start">
-                                            <p className="font-bold">{customer.customerName}</p>
-                                            <Badge variant={customer.status === 'redeemed' ? 'secondary' : 'outline'}>
-                                                {customer.status === 'redeemed' ? <CheckCircle className="mr-1.5 h-3 w-3" /> : <Tag className="mr-1.5 h-3 w-3" />}
-                                                {customer.status === 'redeemed' ? 'Redeemed' : 'Claimed'}
-                                            </Badge>
-                                        </div>
-                                        <div className="space-y-2 text-sm text-muted-foreground">
-                                             <div className="flex items-center gap-2 font-medium">
-                                                <span>Claimed "{customer.offerTitle}"</span>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <Phone className="h-3 w-3 shrink-0" />
-                                                <span>{customer.customerPhone}</span>
-                                            </div>
-                                             <div className="flex items-center gap-2">
-                                                <Mail className="h-3 w-3 shrink-0" />
-                                                <span>{customer.customerEmail || 'No email'}</span>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <Calendar className="h-3 w-3 shrink-0" />
-                                                <span>{format(customer.claimedAt.toDate(), 'PP')}</span>
-                                            </div>
-                                        </div>
-                                         <div className="flex justify-end gap-2 pt-2 border-t">
-                                            <Button size="sm" variant="outline" onClick={() => handleStatusToggle(customer.id, customer.status)}>
-                                                <RefreshCcw className="h-3 w-3 mr-1.5"/> Toggle Status
-                                            </Button>
-                                            <AlertDialog>
-                                                <AlertDialogTrigger asChild>
-                                                    <Button size="sm" variant="destructive">
-                                                        <Trash2 className="h-3 w-3 mr-1.5"/> Delete
-                                                    </Button>
-                                                </AlertDialogTrigger>
-                                                <AlertDialogContent>
-                                                    <AlertDialogHeader>
-                                                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                                        <AlertDialogDescription>
-                                                            This will permanently delete the claim for {customer.customerName}. This cannot be undone.
-                                                        </AlertDialogDescription>
-                                                    </AlertDialogHeader>
-                                                    <AlertDialogFooter>
-                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                        <AlertDialogAction onClick={() => handleDeleteClaim(customer.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
-                                                    </AlertDialogFooter>
-                                                </AlertDialogContent>
-                                            </AlertDialog>
-                                        </div>
-                                    </Card>
-                                ))}
-                            </div>
+            
+             <div className="bg-muted/50 border rounded-lg p-4">
+                <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <Input
+                        type="search"
+                        placeholder="Search by name, phone, email, or offer title..."
+                        className="w-full rounded-lg bg-background pl-10 h-12"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
+            </div>
 
-                            {/* Desktop View */}
-                            <div className="hidden md:block rounded-lg border">
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Customer</TableHead>
-                                            <TableHead>Offer Claimed</TableHead>
-                                            <TableHead>Status</TableHead>
-                                            <TableHead>Date Claimed</TableHead>
-                                            <TableHead className="text-right">Actions</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {filteredCustomers.map(customer => (
-                                            <TableRow key={customer.id}>
-                                                <TableCell className="font-medium">
-                                                    <div>{customer.customerName}</div>
-                                                    <div className="text-xs text-muted-foreground">{customer.customerPhone}</div>
-                                                </TableCell>
-                                                <TableCell>{customer.offerTitle}</TableCell>
-                                                <TableCell>
-                                                    <Badge variant={customer.status === 'redeemed' ? 'secondary' : 'outline'}>
-                                                        {customer.status === 'redeemed' ? <CheckCircle className="mr-1.5 h-3 w-3" /> : <Tag className="mr-1.5 h-3 w-3" />}
-                                                        {customer.status === 'redeemed' ? 'Redeemed' : 'Claimed'}
-                                                    </Badge>
-                                                </TableCell>
-                                                <TableCell>{format(customer.claimedAt.toDate(), 'PPpp')}</TableCell>
-                                                <TableCell className="text-right space-x-2">
-                                                    <Button size="sm" variant="ghost" onClick={() => handleStatusToggle(customer.id, customer.status)}>
-                                                         <RefreshCcw className="h-4 w-4"/>
-                                                    </Button>
-                                                     <AlertDialog>
-                                                        <AlertDialogTrigger asChild>
-                                                            <Button size="sm" variant="ghost" className="text-destructive hover:bg-destructive/10 hover:text-destructive">
-                                                                <Trash2 className="h-4 w-4"/>
-                                                            </Button>
-                                                        </AlertDialogTrigger>
-                                                        <AlertDialogContent>
-                                                            <AlertDialogHeader>
-                                                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                                                <AlertDialogDescription>
-                                                                    This will permanently delete the claim for {customer.customerName}. This cannot be undone.
-                                                                </AlertDialogDescription>
-                                                            </AlertDialogHeader>
-                                                            <AlertDialogFooter>
-                                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                                <AlertDialogAction onClick={() => handleDeleteClaim(customer.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
-                                                            </AlertDialogFooter>
-                                                        </AlertDialogContent>
-                                                    </AlertDialog>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </div>
-                        </>
-                    )}
-                </CardContent>
-            </Card>
+            
+            {loading ? (
+                <div className="flex items-center justify-center h-64">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+            ) : filteredCustomers.length === 0 ? (
+                <div className="text-center py-20 text-muted-foreground rounded-lg border bg-background">
+                    <Users className="h-16 w-16 mx-auto mb-4 opacity-50"/>
+                    <h3 className="text-xl font-semibold">No Customers Found</h3>
+                    <p>When customers claim offers, they will appear here.</p>
+                </div>
+            ) : (
+                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    {filteredCustomers.map(customer => (
+                        <Card key={customer.id} className="flex flex-col">
+                            <CardHeader>
+                                <div className="flex justify-between items-start">
+                                    <p className="font-bold text-lg">{customer.customerName}</p>
+                                    <Badge variant={customer.status === 'redeemed' ? 'secondary' : 'outline'} className="whitespace-nowrap">
+                                        {customer.status === 'redeemed' ? <CheckCircle className="mr-1.5 h-3 w-3" /> : <Tag className="mr-1.5 h-3 w-3" />}
+                                        {customer.status === 'redeemed' ? 'Redeemed' : 'Claimed'}
+                                    </Badge>
+                                </div>
+                                <CardDescription className="text-sm">
+                                    Claimed "{customer.offerTitle}"
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-3 text-sm text-muted-foreground flex-1">
+                                <div className="flex items-center gap-3">
+                                    <Phone className="h-4 w-4 shrink-0" />
+                                    <span>{customer.customerPhone}</span>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <Mail className="h-4 w-4 shrink-0" />
+                                    <span className="truncate">{customer.customerEmail || 'No email'}</span>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <Calendar className="h-4 w-4 shrink-0" />
+                                    <span>{format(customer.claimedAt.toDate(), 'PP')}</span>
+                                </div>
+                            </CardContent>
+                            <CardContent className="border-t pt-4 flex justify-end gap-2">
+                                <Button size="sm" variant="outline" onClick={() => handleStatusToggle(customer.id, customer.status)}>
+                                    <RefreshCcw className="h-3 w-3"/>
+                                </Button>
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <Button size="sm" variant="destructive" className="h-9 w-9 p-0">
+                                            <Trash2 className="h-4 w-4"/>
+                                        </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                This will permanently delete the claim for {customer.customerName}. This cannot be undone.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                            <AlertDialogAction onClick={() => handleDeleteClaim(customer.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
+            )}
         </div>
     );
 }
+
+    
 
     
