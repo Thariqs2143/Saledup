@@ -224,110 +224,110 @@ export default function AdminEditOfferPage() {
 
         <Card>
             <form onSubmit={handleSubmit}>
-                <CardContent className="pt-6 space-y-6">
-                    <div className="space-y-2">
-                        <Label htmlFor="title">Offer Title *</Label>
-                        <Input id="title" name="title" value={offer.title} onChange={e => handleFieldChange('title', e.target.value)} required />
-                    </div>
+                <CardContent className="pt-6 space-y-8">
+                    <div className="space-y-6">
+                        <div className="space-y-2">
+                            <Label htmlFor="title">Offer Title *</Label>
+                            <Input id="title" name="title" value={offer.title} onChange={e => handleFieldChange('title', e.target.value)} required />
+                        </div>
 
-                    <div className="space-y-2">
-                        <Label>Offer Image</Label>
-                        <div className="flex items-center gap-4">
-                             {imageUrl && (
-                                <Image
-                                    src={imageUrl}
-                                    alt="Offer preview"
-                                    width={100}
-                                    height={100}
-                                    className="rounded-md aspect-square object-cover"
-                                />
-                             )}
-                            <Input type="file" ref={fileInputRef} onChange={handlePhotoUpload} accept="image/*" className="hidden" />
-                            <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
-                            {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Upload className="mr-2 h-4 w-4"/>}
-                            Change Photo
-                            </Button>
+                        <div className="space-y-2">
+                            <Label>Offer Image</Label>
+                            <div className="flex items-center gap-4">
+                                {imageUrl && (
+                                    <Image
+                                        src={imageUrl}
+                                        alt="Offer preview"
+                                        width={100}
+                                        height={100}
+                                        className="rounded-md aspect-square object-cover"
+                                    />
+                                )}
+                                <Input type="file" ref={fileInputRef} onChange={handlePhotoUpload} accept="image/*" className="hidden" />
+                                <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
+                                {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Upload className="mr-2 h-4 w-4"/>}
+                                Change Photo
+                                </Button>
+                            </div>
                         </div>
-                    </div>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="description">Offer Description *</Label>
-                        <Textarea id="description" name="description" value={offer.description} onChange={e => handleFieldChange('description', e.target.value)} required />
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
-                            <Label htmlFor="discountType">Discount Type *</Label>
-                            <Select name="discountType" value={offer.discountType} onValueChange={value => handleFieldChange('discountType', value)} required>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select discount type" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="percentage">Percentage Off (%)</SelectItem>
-                                    <SelectItem value="fixed">Fixed Amount Off (₹)</SelectItem>
-                                    <SelectItem value="freebie">Free Item / BOGO</SelectItem>
-                                    <SelectItem value="other">Other</SelectItem>
-                                </SelectContent>
-                            </Select>
+                            <Label htmlFor="description">Offer Description *</Label>
+                            <Textarea id="description" name="description" value={offer.description} onChange={e => handleFieldChange('description', e.target.value)} required />
                         </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="discountValue">Discount Value</Label>
-                            <Input id="discountValue" name="discountValue" value={offer.discountValue || ''} onChange={e => handleFieldChange('discountValue', e.target.value)} />
-                        </div>
-                    </div>
-                     <div className="space-y-2">
-                        <Label htmlFor="terms">Terms & Conditions (Optional)</Label>
-                        <Textarea id="terms" name="terms" value={offer.terms || ''} onChange={e => handleFieldChange('terms', e.target.value)} />
-                    </div>
-
-                </CardContent>
-                
-                 <CardContent>
-                    <CardHeader className="p-0 mb-4 -ml-6">
-                        <CardTitle>Scheduling (Optional)</CardTitle>
-                        <CardDescription>Set a specific time frame for this offer. Leave blank for the offer to be always active.</CardDescription>
-                    </CardHeader>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                            <Label htmlFor="startDate">Start Date</Label>
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                    <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !startDate && "text-muted-foreground")}>
-                                        <CalendarIcon className="mr-2 h-4 w-4" />
-                                        {startDate ? format(startDate, "PPP") : <span>Pick a date</span>}
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0">
-                                    <Calendar mode="single" selected={startDate} onSelect={setStartDate} initialFocus />
-                                </PopoverContent>
-                            </Popover>
-                        </div>
-                         <div className="space-y-2">
-                            <Label htmlFor="endDate">End Date</Label>
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                    <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !endDate && "text-muted-foreground")}>
-                                        <CalendarIcon className="mr-2 h-4 w-4" />
-                                        {endDate ? format(endDate, "PPP") : <span>Pick a date</span>}
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0">
-                                    <Calendar mode="single" selected={endDate} onSelect={setEndDate} initialFocus />
-                                </PopoverContent>
-                            </Popover>
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="startTime">Start Time</Label>
-                             <div className="relative">
-                                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                <Input id="startTime" type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className="pl-10" />
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                                <Label htmlFor="discountType">Discount Type *</Label>
+                                <Select name="discountType" value={offer.discountType} onValueChange={value => handleFieldChange('discountType', value)} required>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select discount type" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="percentage">Percentage Off (%)</SelectItem>
+                                        <SelectItem value="fixed">Fixed Amount Off (₹)</SelectItem>
+                                        <SelectItem value="freebie">Free Item / BOGO</SelectItem>
+                                        <SelectItem value="other">Other</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="discountValue">Discount Value</Label>
+                                <Input id="discountValue" name="discountValue" value={offer.discountValue || ''} onChange={e => handleFieldChange('discountValue', e.target.value)} />
                             </div>
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="endTime">End Time</Label>
-                             <div className="relative">
-                                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                <Input id="endTime" type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="pl-10" />
+                            <Label htmlFor="terms">Terms & Conditions (Optional)</Label>
+                            <Textarea id="terms" name="terms" value={offer.terms || ''} onChange={e => handleFieldChange('terms', e.target.value)} />
+                        </div>
+                    </div>
+                    
+                    <div className="space-y-6 border-t pt-6">
+                        <CardHeader className="p-0">
+                            <CardTitle>Scheduling (Optional)</CardTitle>
+                        </CardHeader>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                                <Label htmlFor="startDate">Start Date</Label>
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !startDate && "text-muted-foreground")}>
+                                            <CalendarIcon className="mr-2 h-4 w-4" />
+                                            {startDate ? format(startDate, "PPP") : <span>Pick a date</span>}
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0">
+                                        <Calendar mode="single" selected={startDate} onSelect={setStartDate} initialFocus />
+                                    </PopoverContent>
+                                </Popover>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="endDate">End Date</Label>
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !endDate && "text-muted-foreground")}>
+                                            <CalendarIcon className="mr-2 h-4 w-4" />
+                                            {endDate ? format(endDate, "PPP") : <span>Pick a date</span>}
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0">
+                                        <Calendar mode="single" selected={endDate} onSelect={setEndDate} initialFocus />
+                                    </PopoverContent>
+                                </Popover>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="startTime">Start Time</Label>
+                                <div className="relative">
+                                    <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                    <Input id="startTime" type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className="pl-10" />
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="endTime">End Time</Label>
+                                <div className="relative">
+                                    <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                    <Input id="endTime" type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="pl-10" />
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -344,4 +344,3 @@ export default function AdminEditOfferPage() {
     </div>
   );
 }
-
