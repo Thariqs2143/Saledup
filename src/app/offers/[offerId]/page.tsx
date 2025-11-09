@@ -56,6 +56,7 @@ export default function OfferDetailPage() {
 
     const offerId = params.offerId as string;
     const shopId = searchParams.get('shopId');
+    const from = searchParams.get('from');
 
     const [offer, setOffer] = useState<Offer | null>(null);
     const [shop, setShop] = useState<Shop | null>(null);
@@ -68,6 +69,8 @@ export default function OfferDetailPage() {
     const [customerName, setCustomerName] = useState('');
     const [customerPhone, setCustomerPhone] = useState('');
     const [customerEmail, setCustomerEmail] = useState('');
+
+    const backLink = from === 'all' ? '/find-offers' : shopId ? `/shops/${shopId}` : '/find-offers';
 
     useEffect(() => {
         if (!offerId || !shopId) {
@@ -166,7 +169,7 @@ export default function OfferDetailPage() {
 
     return (
         <div className="container mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-             <Link href={shopId ? `/shops/${shopId}` : '/find-offers'} className="inline-flex items-center gap-2 text-sm font-semibold mb-4 text-muted-foreground hover:text-primary">
+             <Link href={backLink} className="inline-flex items-center gap-2 text-sm font-semibold mb-4 text-muted-foreground hover:text-primary">
                 <ArrowLeft className="h-4 w-4" />
                 Back to Offers
             </Link>

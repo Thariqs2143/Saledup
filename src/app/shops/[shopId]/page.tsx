@@ -199,7 +199,7 @@ export default function ShopOffersPage() {
              {offers.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {offers.map(offer => (
-                         <Link key={offer.id} href={`/offers/${offer.id}?shopId=${shopId}`} className="block">
+                         <Link key={offer.id} href={`/offers/${offer.id}?shopId=${shopId}&from=shop`} className="block">
                             <Card className="flex flex-col bg-background transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group h-full">
                                 <CardHeader className="p-0 relative">
                                     <Image 
@@ -315,4 +315,5 @@ export default function ShopOffersPage() {
     );
 
     
+
 

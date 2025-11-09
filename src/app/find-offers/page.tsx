@@ -221,7 +221,7 @@ export default function FindOffersPage() {
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
                                 {filteredAndSortedOffers.length > 0 ? (
                                     filteredAndSortedOffers.map(offer => (
-                                        <Link key={offer.id} href={`/offers/${offer.id}?shopId=${offer.shopId}`} className="block">
+                                        <Link key={offer.id} href={`/offers/${offer.id}?shopId=${offer.shopId}&from=all`} className="block">
                                             <Card className="flex flex-col transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group h-full">
                                                 <CardHeader className="p-0 relative">
                                                         <Badge className="absolute top-2 right-2 z-10" variant='secondary'>
