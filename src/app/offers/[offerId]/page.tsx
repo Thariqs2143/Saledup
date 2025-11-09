@@ -6,8 +6,7 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { doc, getDoc, addDoc, collection, serverTimestamp, updateDoc, increment, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2, ArrowLeft, Building, Tag, Info, Phone, Mail, MapPin, User as UserIcon, CheckCircle } from 'lucide-react';
+import { Loader2, ArrowLeft, Building, Tag, Info, Phone, Mail, MapPin, User as UserIcon, CheckCircle, Clock } from 'lucide-react';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -25,6 +24,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { formatDistanceToNow } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
 
 type Shop = {
     shopName: string;
@@ -165,82 +165,84 @@ export default function OfferDetailPage() {
     }
 
     return (
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-            <Link href={shopId ? `/shops/${shopId}` : '/find-offers'} className="inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-primary">
+        <div className="container mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+             <Link href={shopId ? `/shops/${shopId}` : '/find-offers'} className="inline-flex items-center gap-2 text-sm font-semibold mb-4 text-muted-foreground hover:text-primary">
                 <ArrowLeft className="h-4 w-4" />
                 Back to Offers
             </Link>
 
-             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Main Offer Content */}
-                <div className="lg:col-span-2 space-y-8">
-                    <Card className="overflow-hidden">
-                        <CardHeader className="p-0">
-                            <Image
-                                src={offer.imageUrl || `https://placehold.co/1200x600?text=${offer.title.replace(/\s/g, '+')}`}
-                                alt={offer.title}
-                                width={1200}
-                                height={600}
-                                className="aspect-video object-cover w-full"
-                            />
-                        </CardHeader>
-                        <CardContent className="p-6 space-y-4">
-                            <CardTitle className="text-3xl">{offer.title}</CardTitle>
-                            <div className="flex items-center gap-2">
-                                {offer.discountValue && (
-                                    <Badge variant='secondary' className="text-base">
-                                        {offer.discountValue}{offer.discountType === 'percentage' ? '%' : ''} OFF
-                                    </Badge>
-                                )}
-                                <span className="text-muted-foreground text-sm">&bull; Posted {formatDistanceToNow(new Date(offer.createdAt.seconds * 1000), { addSuffix: true })}</span>
-                            </div>
-                            <CardDescription className="text-base">{offer.description}</CardDescription>
-                             {offer.terms && (
-                                <div className="pt-4 border-t">
-                                    <h4 className="font-semibold">Terms & Conditions</h4>
-                                    <p className="text-sm text-muted-foreground">{offer.terms}</p>
+            <Card className="bg-card text-card-foreground shadow-2xl overflow-hidden">
+                <div className="relative">
+                     <Image
+                        src={shop.imageUrl || `https://placehold.co/1200x400?text=${shop.shopName.replace(/\s/g, '+')}`}
+                        alt={shop.shopName}
+                        width={1200}
+                        height={400}
+                        className="aspect-[16/6] object-cover w-full"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                    <div className="absolute bottom-0 left-0 p-6">
+                        <h1 className="text-3xl font-bold text-white">{shop.shopName}</h1>
+                        <p className="text-base text-white/80">{shop.businessType}</p>
+                    </div>
+                </div>
+                
+                <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div className="md:col-span-2 space-y-6">
+                        {offer.discountValue && (
+                            <Badge variant='secondary' className="text-base py-1 px-3">
+                                {offer.discountValue}{offer.discountType === 'percentage' ? '%' : ''} OFF
+                            </Badge>
+                        )}
+                        <h2 className="text-3xl font-bold">{offer.title}</h2>
+                        <p className="text-muted-foreground text-base">{offer.description}</p>
+                        
+                        <div className="border-t pt-6 space-y-4">
+                             <h3 className="font-semibold text-lg">Promotion Details</h3>
+                             <div className="flex items-center gap-3 text-muted-foreground">
+                                <Clock className="h-5 w-5"/>
+                                <div>
+                                    <p className="font-medium text-foreground">Posted</p>
+                                    <p>{formatDistanceToNow(new Date(offer.createdAt.seconds * 1000), { addSuffix: true })}</p>
                                 </div>
-                            )}
-                        </CardContent>
-                    </Card>
-                    <div className="block lg:hidden">
-                        <Button className="w-full h-12 text-lg" onClick={() => setIsClaimDialogOpen(true)}>
-                            <Tag className="mr-2 h-5 w-5"/> Claim This Offer
-                        </Button>
+                             </div>
+                             {offer.terms && (
+                                <div className="flex items-center gap-3 text-muted-foreground">
+                                    <Info className="h-5 w-5"/>
+                                    <div>
+                                        <p className="font-medium text-foreground">Terms & Conditions</p>
+                                        <p>{offer.terms}</p>
+                                    </div>
+                                </div>
+                             )}
+                        </div>
+                    </div>
+                    <div className="space-y-6">
+                         <div className="p-4 bg-muted/50 rounded-lg space-y-4">
+                            <h3 className="font-semibold text-lg">About {shop.shopName}</h3>
+                             <div className="flex items-start gap-3 text-muted-foreground">
+                                <MapPin className="h-4 w-4 mt-1 shrink-0"/>
+                                <div>
+                                    <p className="font-medium text-foreground">Address</p>
+                                    <p className="text-sm">{shop.address}</p>
+                                </div>
+                             </div>
+                             <div className="flex items-start gap-3 text-muted-foreground">
+                                <Phone className="h-4 w-4 mt-1 shrink-0"/>
+                                <div>
+                                    <p className="font-medium text-foreground">Phone</p>
+                                    <p className="text-sm">{shop.phone}</p>
+                                </div>
+                             </div>
+                         </div>
                     </div>
                 </div>
-
-                {/* Shop Details Sidebar */}
-                <div className="space-y-8">
-                    <Card>
-                        <CardHeader className="flex-row items-center gap-4">
-                             <Avatar className="h-14 w-14 border">
-                                <AvatarImage src={shop.imageUrl} alt={shop.shopName} />
-                                <AvatarFallback><Building/></AvatarFallback>
-                            </Avatar>
-                            <div>
-                                <CardTitle className="text-xl">{shop.shopName}</CardTitle>
-                                {shop.businessType && <CardDescription>{shop.businessType}</CardDescription>}
-                            </div>
-                        </CardHeader>
-                        <CardContent className="space-y-4 text-sm">
-                             <div className="flex items-start gap-3">
-                                <MapPin className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0"/>
-                                <span>{shop.address}</span>
-                            </div>
-                            <div className="flex items-start gap-3">
-                                <UserIcon className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0"/>
-                                <span>Managed by {shop.ownerName}</span>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <div className="hidden lg:block">
-                         <Button className="w-full h-12 text-lg" onClick={() => setIsClaimDialogOpen(true)}>
-                            <Tag className="mr-2 h-5 w-5"/> Claim This Offer
-                        </Button>
-                    </div>
+                <div className="p-6 border-t">
+                    <Button className="w-full md:w-auto h-12 text-lg" size="lg" onClick={() => setIsClaimDialogOpen(true)}>
+                        <Tag className="mr-2 h-5 w-5"/> Claim This Offer
+                    </Button>
                 </div>
-            </div>
+            </Card>
 
             {/* Claim Offer Dialog */}
             <Dialog open={isClaimDialogOpen} onOpenChange={setIsClaimDialogOpen}>
@@ -311,5 +313,3 @@ export default function OfferDetailPage() {
         </div>
     );
 }
-
-    
