@@ -232,9 +232,9 @@ export default function FindOffersPage() {
                     <Loader2 className="h-12 w-12 animate-spin text-primary" />
                 </div>
             ) : (
-                <div className={cn("grid gap-8", view === 'list' ? "lg:grid-cols-3 md:grid-cols-2" : "h-[600px] col-span-full")}>
+                <div className={cn("transition-all duration-300", view === 'list' ? "grid lg:grid-cols-3 md:grid-cols-2 gap-8" : "h-[600px] w-full")}>
                     {view === 'map' ? (
-                        <div className="h-full w-full rounded-lg overflow-hidden">
+                        <div className="h-full w-full rounded-lg overflow-hidden border">
                             <OfferMap offers={filteredAndSortedOffers} />
                         </div>
                     ) : filteredAndSortedOffers.length > 0 ? (
@@ -282,6 +282,3 @@ export default function FindOffersPage() {
         </div>
     );
 }
-
-
-    
