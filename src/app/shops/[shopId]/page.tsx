@@ -23,7 +23,6 @@ import {
   DialogDescription,
   DialogFooter
 } from "@/components/ui/dialog"
-import { LandingFooter } from '@/components/landing-footer';
 
 type Shop = {
     shopName: string;
@@ -232,8 +231,6 @@ export default function ShopOffersPage() {
             )}
         </main>
         
-         <LandingFooter />
-
          {/* Claim Offer Dialog */}
          <Dialog open={!!selectedOffer} onOpenChange={(isOpen) => !isOpen && setSelectedOffer(null)}>
             <DialogContent>
