@@ -152,28 +152,22 @@ export default function AdminProfilePage() {
             <TabsContent value="profile" className="mt-6">
                 <div className="space-y-8">
                     <Card>
-                        <CardHeader className="flex flex-row items-center justify-between">
-                            <div>
-                                <CardTitle>Shop Profile</CardTitle>
-                                <CardDescription>This is how your business appears across the app.</CardDescription>
-                            </div>
-                             <Link href="/admin/profile/edit">
-                                <Button variant="outline" size="sm">
-                                    <Edit className="mr-2 h-4 w-4"/> Edit Profile
-                                </Button>
-                            </Link>
-                        </CardHeader>
-                        <CardContent className="space-y-6">
-                             <div className="p-4 rounded-lg flex items-center gap-4">
+                        <CardContent className="space-y-6 pt-6">
+                             <div className="p-4 rounded-lg flex items-start gap-4">
                                 <Avatar className="h-16 w-16 border-2 border-primary">
                                     <AvatarImage src={profile.imageUrl ?? profile.ownerImageUrl} />
                                     <AvatarFallback>
                                         {profile.ownerName?.charAt(0) || 'A'}
                                     </AvatarFallback>
                                 </Avatar>
-                                <div>
+                                <div className="flex-1">
                                     <h3 className="text-xl font-bold">{profile.ownerName}</h3>
                                     <p className="text-sm text-white bg-black rounded-lg text-center w-fit px-2 py-1 mt-1">Business Owner</p>
+                                    <Link href="/admin/profile/edit" className="mt-2 inline-block">
+                                        <Button variant="outline" size="sm">
+                                            <Edit className="mr-2 h-4 w-4"/> Edit Profile
+                                        </Button>
+                                    </Link>
                                 </div>
                              </div>
                              <div className="grid grid-cols-1 gap-4">
