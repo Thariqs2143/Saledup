@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { collection, collectionGroup, getDocs, query, where, orderBy } from 'firebase/firestore';
+import { collectionGroup, getDocs, query, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Checkbox } from '@/components/ui/checkbox';
 import dynamic from 'next/dynamic';
 import 'leaflet/dist/leaflet.css';
+import { collection } from 'firebase/firestore';
 
 type Offer = {
     id: string;
@@ -72,8 +73,8 @@ export default function FindOffersPage() {
                 const shopsData: Record<string, any> = {};
                 
                 const shopIdChunks: string[][] = [];
-                for (let i = 0; i < shopIds.length; i += 10) {
-                    shopIdChunks.push(shopIds.slice(i, i + 10));
+                for (let i = 0; i < shopIds.length; i += 30) { // Firestore 'in' query limit is 30
+                    shopIdChunks.push(shopIds.slice(i, i + 30));
                 }
 
                 for (const chunk of shopIdChunks) {
@@ -139,17 +140,15 @@ export default function FindOffersPage() {
     return (
         <div className="flex flex-col">
             {/* Page Header */}
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                <header className="text-center my-8 md:my-12">
-                    <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">Find Local Deals</h1>
-                    <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
-                        Discover the best offers from local shops near you.
-                    </p>
-                </header>
-            </div>
+            <header className="text-center py-8 md:py-12">
+                <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">Find Local Deals</h1>
+                <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
+                    Discover the best offers from local shops near you.
+                </p>
+            </header>
 
             {/* Sticky Filter Bar */}
-            <div className="sticky top-16 z-40 bg-background/95 backdrop-blur-sm border-y py-3">
+            <div className="sticky top-[61px] z-40 bg-background/95 backdrop-blur-sm py-4 border-y border-border mb-8">
                 <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex flex-col sm:flex-row gap-4 items-center">
                         <div className="relative w-full sm:flex-1">
@@ -162,33 +161,35 @@ export default function FindOffersPage() {
                             />
                         </div>
                         <div className="flex gap-2 w-full sm:w-auto">
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                    <Button variant="outline" className="h-12 flex-1 md:flex-initial">
-                                        <Filter className="mr-2 h-4 w-4" /> Category ({selectedCategories.length})
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-64">
-                                    <div className="space-y-4">
-                                        <h4 className="font-medium leading-none">Filter by Category</h4>
-                                        <div className="space-y-2">
-                                            {businessCategories.map(cat => (
-                                                <div key={cat} className="flex items-center space-x-2">
-                                                    <Checkbox
-                                                        id={cat}
-                                                        checked={selectedCategories.includes(cat)}
-                                                        onCheckedChange={() => handleCategoryChange(cat)}
-                                                    />
-                                                    <label htmlFor={cat} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">{cat}</label>
-                                                </div>
-                                            ))}
-                                        </div>
-                                        <Button size="sm" variant="ghost" className="w-full" onClick={() => setSelectedCategories([])}>
-                                            <X className="mr-2 h-4 w-4" /> Clear
+                           <div className="flex-1">
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <Button variant="outline" className="h-12 w-full">
+                                            <Filter className="mr-2 h-4 w-4" /> Category ({selectedCategories.length})
                                         </Button>
-                                    </div>
-                                </PopoverContent>
-                            </Popover>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-64">
+                                        <div className="space-y-4">
+                                            <h4 className="font-medium leading-none">Filter by Category</h4>
+                                            <div className="space-y-2">
+                                                {businessCategories.map(cat => (
+                                                    <div key={cat} className="flex items-center space-x-2">
+                                                        <Checkbox
+                                                            id={cat}
+                                                            checked={selectedCategories.includes(cat)}
+                                                            onCheckedChange={() => handleCategoryChange(cat)}
+                                                        />
+                                                        <label htmlFor={cat} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">{cat}</label>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <Button size="sm" variant="ghost" className="w-full" onClick={() => setSelectedCategories([])}>
+                                                <X className="mr-2 h-4 w-4" /> Clear
+                                            </Button>
+                                        </div>
+                                    </PopoverContent>
+                                </Popover>
+                           </div>
                             <Select value={sortBy} onValueChange={setSortBy}>
                                 <SelectTrigger className="h-12 w-[180px] flex-1 sm:flex-initial">
                                     <SelectValue placeholder="Sort by" />
@@ -198,13 +199,21 @@ export default function FindOffersPage() {
                                     <SelectItem value="popular">Most Popular</SelectItem>
                                 </SelectContent>
                             </Select>
+                            <div className="flex items-center gap-1 rounded-md bg-muted p-1 ml-2">
+                                <Button variant={view === 'list' ? 'default' : 'ghost'} size="icon" onClick={() => setView('list')}>
+                                    <List className="h-5 w-5"/>
+                                </Button>
+                                 <Button variant={view === 'map' ? 'default' : 'ghost'} size="icon" onClick={() => setView('map')}>
+                                    <Map className="h-5 w-5"/>
+                                </Button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Main Content Area */}
-            <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <main className="container mx-auto px-4 sm:px-6 lg:px-8 pb-8">
                 {loading ? (
                     <div className="flex justify-center items-center h-64">
                         <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -254,7 +263,7 @@ export default function FindOffersPage() {
                             </div>
                         )}
                         {view === 'map' && (
-                             <div className="h-[calc(100vh-250px)] w-full rounded-lg overflow-hidden border relative z-10">
+                             <div className="h-[calc(100vh-300px)] w-full rounded-lg overflow-hidden border relative z-10">
                                 <OfferMap offers={filteredAndSortedOffers} />
                             </div>
                         )}
