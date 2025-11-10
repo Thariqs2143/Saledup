@@ -70,37 +70,40 @@ export default function LandingPage() {
         const shopsSnapshot = await getDocs(shopsQuery);
         setShopsOnboarded(shopsSnapshot.size);
         
-        // Calculate cities covered
+        // --- CITIES COVERED CALCULATION ---
         const citySet = new Set<string>();
-        shopsSnapshot.docs.forEach(doc => {
-            const address = doc.data().address as string;
-            if (address) {
-                const parts = address.split(',').map(part => part.trim());
-                if (parts.length >= 3) {
-                    // A common pattern is Street, City, State PIN. The city is often the 3rd or 2nd last part.
-                    // Let's find the part before the state/pincode part.
-                    let cityPart = '';
-                    for (let i = parts.length - 1; i >= 0; i--) {
-                        // Find the part that likely contains the state and pincode
-                        if (/\d/.test(parts[i]) && i > 0) {
-                            // The part before this is likely the city
-                            cityPart = parts[i - 1];
-                            break;
-                        }
-                    }
-                    // Fallback for addresses without pincode in the last part
-                    if (!cityPart && parts.length > 1) {
-                       cityPart = parts[parts.length - 2];
-                    }
 
-                    if (cityPart && cityPart.toLowerCase() !== 'india') {
-                        citySet.add(cityPart.trim());
+        // Helper function for reverse geocoding
+        const getCityFromCoordinates = async (lat: number, lng: number): Promise<string | null> => {
+            try {
+                // Using a free, public reverse geocoding API (Nominatim)
+                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10&addressdetails=1`);
+                if (!response.ok) return null;
+                const data = await response.json();
+                // Nominatim provides address details. We can look for city, town, or village.
+                return data?.address?.city || data?.address?.town || data?.address?.village || null;
+            } catch (error) {
+                console.error("Reverse geocoding failed:", error);
+                return null;
+            }
+        };
+
+        const cityPromises: Promise<void>[] = [];
+
+        shopsSnapshot.docs.forEach(doc => {
+            const shop = doc.data();
+            if (shop.lat && shop.lng) {
+                const promise = getCityFromCoordinates(shop.lat, shop.lng).then(city => {
+                    if (city) {
+                        citySet.add(city);
                     }
-                }
+                });
+                cityPromises.push(promise);
             }
         });
+        
+        await Promise.all(cityPromises);
         setCitiesCovered(citySet.size);
-
 
       } catch (error) {
         console.error("Error fetching live stats: ", error);
