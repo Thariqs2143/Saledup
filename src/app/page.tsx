@@ -76,12 +76,25 @@ export default function LandingPage() {
             const address = doc.data().address as string;
             if (address) {
                 const parts = address.split(',').map(part => part.trim());
-                // Find the last part of the address that doesn't contain numbers
-                for (let i = parts.length - 1; i >= 0; i--) {
-                    const potentialCity = parts[i];
-                    if (potentialCity && !/\d/.test(potentialCity) && potentialCity.toLowerCase() !== 'india') {
-                        citySet.add(potentialCity.trim());
-                        break; // Found the city, break the loop
+                if (parts.length >= 3) {
+                    // A common pattern is Street, City, State PIN. The city is often the 3rd or 2nd last part.
+                    // Let's find the part before the state/pincode part.
+                    let cityPart = '';
+                    for (let i = parts.length - 1; i >= 0; i--) {
+                        // Find the part that likely contains the state and pincode
+                        if (/\d/.test(parts[i]) && i > 0) {
+                            // The part before this is likely the city
+                            cityPart = parts[i - 1];
+                            break;
+                        }
+                    }
+                    // Fallback for addresses without pincode in the last part
+                    if (!cityPart && parts.length > 1) {
+                       cityPart = parts[parts.length - 2];
+                    }
+
+                    if (cityPart && cityPart.toLowerCase() !== 'india') {
+                        citySet.add(cityPart.trim());
                     }
                 }
             }
@@ -412,7 +425,7 @@ const targetCustomers = [
                 <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
                     {placeholderImages.howItWorks.map((step, index) => (
                         <div key={index} className="flex flex-col items-center relative">
-                            <div className="absolute top-0 right-0 bg-primary text-primary-foreground rounded-full h-10 w-10 flex items-center justify-center font-bold text-xl z-10 -translate-y-4 translate-x-4 border-4 border-muted/30">
+                            <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full h-10 w-10 flex items-center justify-center font-bold text-xl z-10 border-4 border-muted/30">
                                 {index + 1}
                             </div>
                             <div className="relative group w-full overflow-hidden rounded-lg">
