@@ -370,9 +370,9 @@ const targetCustomers = [
                 </p>
                 <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
                     {placeholderImages.howItWorks.map((step, index) => (
-                        <div key={index} className="flex flex-col items-center">
-                            <div className="relative">
-                                <div className="absolute -top-5 -right-5 bg-primary text-primary-foreground rounded-full h-10 w-10 flex items-center justify-center font-bold text-xl">
+                        <div key={index} className="flex flex-col items-center group">
+                            <div className="relative overflow-hidden rounded-lg">
+                                <div className="absolute -top-5 -right-5 bg-primary text-primary-foreground rounded-full h-10 w-10 flex items-center justify-center font-bold text-xl z-10">
                                     {index + 1}
                                 </div>
                                 <Image
@@ -381,7 +381,7 @@ const targetCustomers = [
                                     data-ai-hint={step.hint}
                                     width={600}
                                     height={400}
-                                    className="rounded-lg w-full aspect-[3/2] object-cover"
+                                    className="rounded-lg w-full aspect-[3/2] object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
                                 />
                             </div>
                             <h3 className="mt-6 text-xl font-bold">{step.title}</h3>
