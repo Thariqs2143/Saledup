@@ -6,6 +6,9 @@ const withPWA = nextPWA({
   register: true,
   skipWaiting: true,
   disable: process.env.NODE_ENV === 'development', // PWA disabled in dev
+  customWorkerDir: 'public', // Tell next-pwa to look for a custom worker
+  customWorkerSrc: '/firebase-messaging-sw.js', // The custom worker file
+  customWorkerDest: 'sw.js', // The output service worker file
 });
 
 const nextConfig: NextConfig = {
