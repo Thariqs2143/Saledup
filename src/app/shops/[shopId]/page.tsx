@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { doc, getDoc, collection, query, where, getDocs, addDoc, serverTimestamp, Timestamp, updateDoc, increment, DocumentReference } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -92,7 +92,7 @@ export default function ShopOffersPage() {
     const { toast } = useToast();
 
     const [shop, setShop] = useState<Shop | null>(null);
-    const [offers, setOffers] = useState<Offer[]>([]);
+    const [allOffers, setAllOffers] = useState<Offer[]>([]);
     const [loading, setLoading] = useState(true);
 
     const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null);
@@ -130,11 +130,8 @@ export default function ShopOffersPage() {
                     where('__name__', '!=', 'template')
                 );
                 const offersSnapshot = await getDocs(offersQuery);
-                const offersList = offersSnapshot.docs
-                    .map(doc => ({ id: doc.id, ...doc.data() } as Offer))
-                    .filter(isOfferCurrentlyActive); // Filter by schedule client-side
-                
-                setOffers(offersList);
+                const offersList = offersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Offer));
+                setAllOffers(offersList);
 
             } catch (error) {
                 console.error("Error fetching shop data:", error);
@@ -146,6 +143,10 @@ export default function ShopOffersPage() {
 
         fetchData();
     }, [shopId, router, toast]);
+
+    const activeOffers = useMemo(() => {
+        return allOffers.filter(isOfferCurrentlyActive);
+    }, [allOffers]);
 
     const handleClaimOffer = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -239,10 +240,10 @@ export default function ShopOffersPage() {
 
         {/* Offers Grid */}
         <main className="container mx-auto p-4 sm:p-6 lg:p-8 flex-1">
-            <h2 className="text-xl font-bold mb-6 text-center sm:text-left">Available Offers ({offers.length})</h2>
-             {offers.length > 0 ? (
+            <h2 className="text-xl font-bold mb-6 text-center sm:text-left">Available Offers ({activeOffers.length})</h2>
+             {activeOffers.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {offers.map(offer => (
+                    {activeOffers.map(offer => (
                          <Link key={offer.id} href={`/offers/${offer.id}?shopId=${shopId}&from=shop`} className="block">
                             <Card className="flex flex-col bg-background transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group h-full">
                                 <CardHeader className="p-0 relative">
@@ -358,3 +359,5 @@ export default function ShopOffersPage() {
     </div>
     );
 }
+
+    

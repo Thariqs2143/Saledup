@@ -59,7 +59,7 @@ const isOfferCurrentlyActive = (offer: SingleOffer): boolean => {
 };
 
 export default function FindOffersPage() {
-    const [offers, setOffers] = useState<SingleOffer[]>([]);
+    const [allOffers, setAllOffers] = useState<SingleOffer[]>([]);
     const [loading, setLoading] = useState(true);
     const [view, setView] = useState<'list' | 'map'>('list');
     
@@ -116,7 +116,7 @@ export default function FindOffersPage() {
                     lng: shopsData[offer.shopId]?.lng,
                 })).filter(o => o.lat && o.lng); // Filter out offers without location
                 
-                setOffers(enrichedOffers);
+                setAllOffers(enrichedOffers);
 
             } catch (error) {
                 console.error("Error fetching offers: ", error);
@@ -128,7 +128,7 @@ export default function FindOffersPage() {
     }, []);
 
     const filteredAndSortedOffers = useMemo(() => {
-        let result = offers.filter(offer => {
+        let result = allOffers.filter(offer => {
             if (!isOfferCurrentlyActive(offer)) {
                 return false;
             }
@@ -151,7 +151,7 @@ export default function FindOffersPage() {
         }
 
         return result;
-    }, [offers, searchTerm, sortBy, selectedCategories]);
+    }, [allOffers, searchTerm, sortBy, selectedCategories]);
 
     const handleCategoryChange = (category: string) => {
         setSelectedCategories(prev => 
@@ -306,3 +306,5 @@ export default function FindOffersPage() {
         </div>
     );
 }
+
+    
