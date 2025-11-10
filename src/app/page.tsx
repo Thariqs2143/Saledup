@@ -76,11 +76,12 @@ export default function LandingPage() {
             const address = doc.data().address as string;
             if (address) {
                 const parts = address.split(',').map(part => part.trim());
-                if (parts.length >= 2) {
-                    // Assuming city is the second to last part before postal code
-                    const city = parts[parts.length - 2];
-                     if (city && isNaN(parseInt(city))) { // Ensure it's not just a number (like a pincode part)
-                        citySet.add(city);
+                // Find the last part of the address that doesn't contain numbers
+                for (let i = parts.length - 1; i >= 0; i--) {
+                    const potentialCity = parts[i];
+                    if (potentialCity && !/\d/.test(potentialCity) && potentialCity.toLowerCase() !== 'india') {
+                        citySet.add(potentialCity.trim());
+                        break; // Found the city, break the loop
                     }
                 }
             }
@@ -410,21 +411,19 @@ const targetCustomers = [
                 </p>
                 <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
                     {placeholderImages.howItWorks.map((step, index) => (
-                        <div key={index} className="flex flex-col items-center">
-                             <div className="relative group w-full">
-                                <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full h-10 w-10 flex items-center justify-center font-bold text-xl z-10">
-                                    {index + 1}
-                                </div>
-                                <div className="overflow-hidden rounded-lg">
-                                    <Image
-                                        src={step.src}
-                                        alt={step.alt}
-                                        data-ai-hint={step.hint}
-                                        width={600}
-                                        height={400}
-                                        className="rounded-lg w-full aspect-[3/2] object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
-                                    />
-                                </div>
+                        <div key={index} className="flex flex-col items-center relative">
+                            <div className="absolute top-0 right-0 bg-primary text-primary-foreground rounded-full h-10 w-10 flex items-center justify-center font-bold text-xl z-10 -translate-y-4 translate-x-4 border-4 border-muted/30">
+                                {index + 1}
+                            </div>
+                            <div className="relative group w-full overflow-hidden rounded-lg">
+                                <Image
+                                    src={step.src}
+                                    alt={step.alt}
+                                    data-ai-hint={step.hint}
+                                    width={600}
+                                    height={400}
+                                    className="rounded-lg w-full aspect-[3/2] object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
+                                />
                             </div>
                             <h3 className="mt-6 text-xl font-bold">{step.title}</h3>
                             <p className="mt-2 text-muted-foreground">{step.description}</p>
