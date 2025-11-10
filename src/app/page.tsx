@@ -34,6 +34,8 @@ const PercentIcon = () => (
 export default function LandingPage() {
   const [activeDeals, setActiveDeals] = useState(0);
   const [shopsOnboarded, setShopsOnboarded] = useState(0);
+  const [averageDiscount, setAverageDiscount] = useState(0);
+  const [citiesCovered, setCitiesCovered] = useState(0);
   const [loadingStats, setLoadingStats] = useState(true);
 
   useEffect(() => {
@@ -47,9 +49,43 @@ export default function LandingPage() {
         const offersSnapshot = await getDocs(offersQuery);
         setActiveDeals(offersSnapshot.size);
 
+        // Calculate average discount for percentage-based offers
+        let totalDiscount = 0;
+        let percentageOffersCount = 0;
+        offersSnapshot.docs.forEach(doc => {
+            const data = doc.data();
+            if (data.discountType === 'percentage' && typeof data.discountValue === 'string') {
+                const value = parseFloat(data.discountValue);
+                if (!isNaN(value)) {
+                    totalDiscount += value;
+                    percentageOffersCount++;
+                }
+            }
+        });
+        const avgDiscount = percentageOffersCount > 0 ? Math.round(totalDiscount / percentageOffersCount) : 0;
+        setAverageDiscount(avgDiscount);
+
+
         const shopsQuery = query(collection(db, 'shops'));
         const shopsSnapshot = await getDocs(shopsQuery);
         setShopsOnboarded(shopsSnapshot.size);
+        
+        // Calculate cities covered
+        const citySet = new Set<string>();
+        shopsSnapshot.docs.forEach(doc => {
+            const address = doc.data().address as string;
+            if (address) {
+                const parts = address.split(',').map(part => part.trim());
+                if (parts.length >= 2) {
+                    // Assuming city is the second to last part before postal code
+                    const city = parts[parts.length - 2];
+                     if (city && isNaN(parseInt(city))) { // Ensure it's not just a number (like a pincode part)
+                        citySet.add(city);
+                    }
+                }
+            }
+        });
+        setCitiesCovered(citySet.size);
 
 
       } catch (error) {
@@ -312,14 +348,18 @@ const targetCustomers = [
                          <div className="p-4 bg-red-100 dark:bg-red-900/30 rounded-full inline-block mb-4 shadow-md">
                             <PercentIcon className="h-8 w-8 text-primary" />
                         </div>
-                        <h3 className="text-4xl font-bold">0%</h3>
+                        <h3 className="text-4xl font-bold">
+                           {loadingStats ? '...' : <AnimatedCounter from={0} to={averageDiscount} />}%
+                        </h3>
                         <p className="mt-2 text-muted-foreground">Average Discount</p>
                     </Card>
                     <Card className="text-center p-6 transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-1 hover:border-primary">
                          <div className="p-4 bg-blue-100 dark:bg-blue-900/30 rounded-full inline-block mb-4 shadow-md">
                             <MapPin className="h-8 w-8 text-blue-600 dark:text-blue-400" />
                         </div>
-                        <h3 className="text-4xl font-bold">0</h3>
+                        <h3 className="text-4xl font-bold">
+                            {loadingStats ? '...' : <AnimatedCounter from={0} to={citiesCovered} />}
+                        </h3>
                         <p className="mt-2 text-muted-foreground">Cities Covered</p>
                     </Card>
                 </div>
