@@ -155,11 +155,9 @@ service cloud.firestore {
                    request.query.where[0].op.string_value == '==' &&
                    request.query.where[0].value.string_value == request.auth.uid);
 
-      allow read, get: if isShopOwner(shopId) ||
-                          isEmployee(shopId) ||
-                          (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-                           get(/databases/$(database)/documents/users/$(request.auth.uid)).data.shopId == shopId) ||
-                          isSuperAdmin();
+      allow get: if true; // Allow public read for shop pages
+      allow read: if isShopOwner(shopId) || isEmployee(shopId) || isSuperAdmin();
+      
       allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
       allow update, delete: if isShopOwner(shopId) || isSuperAdmin();
 
@@ -235,9 +233,8 @@ service cloud.firestore {
 
        // Offers Subcollection
       match /offers/{offerId} {
-        allow read, write: if isShopOwner(shopId);
-        // Allow public listing of offers within a shop.
-        allow list: if true; 
+        allow get: if true;
+        allow list, create, update, delete: if isShopOwner(shopId);
       }
       
       // Claims Subcollection
