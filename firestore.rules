@@ -149,12 +149,7 @@ service cloud.firestore {
     // Shops Collection
     // ----------------------
     match /shops/{shopId} {
-      allow list: if isSuperAdmin() || isSignedIn() ||
-                  (request.query.where.size() == 1 &&
-                   request.query.where[0].field.string_value == 'ownerId' &&
-                   request.query.where[0].op.string_value == '==' &&
-                   request.query.where[0].value.string_value == request.auth.uid);
-
+      allow list: if true; // Allow public listing of shops for stats and find-offers page
       allow get: if true; // Allow public read for shop pages
       allow read: if isShopOwner(shopId) || isEmployee(shopId) || isSuperAdmin();
       
