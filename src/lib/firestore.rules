@@ -22,7 +22,7 @@ service cloud.firestore {
       // Any user (including unauthenticated) can read the main shop details.
       // This is needed for the public-facing shop pages.
       allow get;
-      allow list;
+      allow list: if true; // Allow listing all shops for the find-offers page
 
 
       // --- SUBCOLLECTIONS ---
@@ -30,22 +30,24 @@ service cloud.firestore {
       // Offers subcollection
       match /offers/{offerId} {
         // Shop owner can manage their offers (read, write, delete).
-        // Any user can list offers for a public shop page.
-        allow read, write, delete: if isShopOwner(shopId);
-        allow list: if true; 
+        // The `list` rule is separate for the owner's dashboard vs public pages.
+        allow get, update, create, delete: if isShopOwner(shopId);
+
+        // A shop owner needs to be able to list their own offers for the admin dashboard.
+        allow list: if isShopOwner(shopId);
       }
       
       // Claims subcollection
       match /claims/{claimId} {
         // Shop owner can read/update/delete individual claims and list all of them.
-        allow get, list, update, delete: if isShopOwner(shopId);
+        allow read, list, update, delete: if isShopOwner(shopId);
         
         // Anyone can create a claim (since it's an unauthenticated action).
         allow create: if true;
       }
     }
 
-     // Allow unauthenticated users to list offers across all shops
+     // Allow unauthenticated users to list offers across all shops for the public "Find Offers" page.
     match /{path=**}/offers/{offerId} {
       allow list: if true;
     }
