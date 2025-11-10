@@ -370,11 +370,11 @@ const targetCustomers = [
                 </p>
                 <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
                     {placeholderImages.howItWorks.map((step, index) => (
-                        <div key={index} className="flex flex-col items-center group">
-                            <div className="relative overflow-hidden rounded-lg">
-                                <div className="absolute -top-5 -right-5 bg-primary text-primary-foreground rounded-full h-10 w-10 flex items-center justify-center font-bold text-xl z-10">
-                                    {index + 1}
-                                </div>
+                        <div key={index} className="flex flex-col items-center group relative">
+                             <div className="absolute -top-5 -right-5 bg-primary text-primary-foreground rounded-full h-10 w-10 flex items-center justify-center font-bold text-xl z-10">
+                                {index + 1}
+                            </div>
+                            <div className="overflow-hidden rounded-lg">
                                 <Image
                                     src={step.src}
                                     alt={step.alt}
