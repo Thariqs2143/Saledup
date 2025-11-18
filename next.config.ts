@@ -6,9 +6,7 @@ const withPWA = nextPWA({
   register: true,
   skipWaiting: true,
   disable: process.env.NODE_ENV === 'development',
-  workboxOptions: {
-    importScripts: ['/firebase-messaging-sw.js'],
-  },
+  sw: 'sw.js', // use the sw.js we created
 });
 
 const nextConfig: NextConfig = {
