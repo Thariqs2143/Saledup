@@ -1,4 +1,3 @@
-
 import type { NextConfig } from 'next';
 import nextPWA from 'next-pwa';
 
@@ -7,13 +6,10 @@ const withPWA = nextPWA({
   register: true,
   skipWaiting: true,
   disable: process.env.NODE_ENV === 'development',
-  workboxOptions: {
-    importScripts: ['/firebase-messaging-sw.js'],
-  },
 });
 
 const nextConfig: NextConfig = {
-  reactStrictMode: false, // 👈 Important: prevents Leaflet double-init error in dev
+  reactStrictMode: false,
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -22,28 +18,11 @@ const nextConfig: NextConfig = {
   },
   images: {
     remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'placehold.co',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'api.qrserver.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'picsum.photos',
-      },
-      {
-        protocol: 'https',
-        hostname: 'storage.googleapis.com',
-      },
-      {
-        protocol: 'https://',
-        hostname: 'res.cloudinary.com',
-      },
+      { protocol: 'https', hostname: 'placehold.co' },
+      { protocol: 'https', hostname: 'api.qrserver.com' },
+      { protocol: 'https', hostname: 'picsum.photos' },
+      { protocol: 'https', hostname: 'storage.googleapis.com' },
+      { protocol: 'https', hostname: 'res.cloudinary.com' },
     ],
   },
 };
