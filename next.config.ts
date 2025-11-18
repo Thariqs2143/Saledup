@@ -1,3 +1,4 @@
+
 import type { NextConfig } from 'next';
 import nextPWA from 'next-pwa';
 
@@ -5,10 +6,10 @@ const withPWA = nextPWA({
   dest: 'public',
   register: true,
   skipWaiting: true,
-  disable: process.env.NODE_ENV === 'development', // PWA disabled in dev
-  customWorkerDir: 'public', // Tell next-pwa to look for a custom worker
-  customWorkerSrc: '/firebase-messaging-sw.js', // The custom worker file
-  customWorkerDest: 'sw.js', // The output service worker file
+  disable: process.env.NODE_ENV === 'development',
+  workboxOptions: {
+    importScripts: ['/firebase-messaging-sw.js'],
+  },
 });
 
 const nextConfig: NextConfig = {
@@ -40,7 +41,7 @@ const nextConfig: NextConfig = {
         hostname: 'storage.googleapis.com',
       },
       {
-        protocol: 'https',
+        protocol: 'https://',
         hostname: 'res.cloudinary.com',
       },
     ],

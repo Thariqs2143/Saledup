@@ -70,8 +70,12 @@ export function LandingFooter() {
                     </div>
                 </div>
 
-                <div className="mt-12 pt-8 border-t flex justify-between items-center text-sm text-muted-foreground">
-                    <p>&copy; {new Date().getFullYear()} Saledup. All rights reserved.</p>
+                <div className="mt-12 pt-8 border-t flex flex-col-reverse sm:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
+                    <p className="text-center sm:text-left">
+                        Crafted with ❤️ in TamilNadu, India. <br className="sm:hidden" />
+                        <span className="font-extrabold text-lg">Sale</span>
+                        <span className="font-extrabold text-lg"> It Up !</span>
+                    </p>
                     <ThemeSwitcher />
                 </div>
             </div>
