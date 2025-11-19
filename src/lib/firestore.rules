@@ -83,8 +83,9 @@ service cloud.firestore {
       match /offers/{offerId} {
         // Owner and Managers can create and delete offers.
         allow create, delete: if isShopOwner(shopId) || getRole(shopId) == 'Manager';
-        // Allow public views to increment viewCount
-        allow update: if (isShopOwner(shopId) || getRole(shopId) == 'Manager') || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount']));
+        // Allow public views to increment viewCount, and owners/managers to edit anything.
+        allow update: if (isShopOwner(shopId) || getRole(shopId) == 'Manager') || 
+                       (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount']));
         // All staff can list offers.
         allow list: if isOwnerOrEmployee(shopId);
         // Public can view offers.
@@ -122,6 +123,11 @@ service cloud.firestore {
         allow delete: if isShopOwner(shopId);
         // No updates allowed
         allow update: if false;
+      }
+
+      // Config Subcollection
+      match /config/{docId} {
+        allow read, write: if isShopOwner(shopId);
       }
     }
     
