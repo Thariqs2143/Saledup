@@ -28,8 +28,9 @@ const adminNavItems: NavItem[] = [
   { href: '/admin', label: 'Home', iconName: 'LayoutDashboard' },
   { href: '/admin/offers', label: 'Offers', iconName: 'Tag' },
   { href: '/admin/redeem', label: 'Redeem', iconName: 'ScanLine' },
-  { href: '/admin/employees', label: 'Employees', iconName: 'Users' },
   { href: '/admin/customers', label: 'Customers', iconName: 'Users' },
+  { href: '/admin/analytics', label: 'Analytics', iconName: 'BarChart3' },
+  { href: '/admin/employees', label: 'Employees', iconName: 'Users' },
   { href: '/admin/profile', label: 'Profile', iconName: 'User' },
 ];
 
@@ -37,7 +38,7 @@ const mobileBottomNavItems: NavItem[] = [
   { href: '/admin', label: 'Home', iconName: 'LayoutDashboard' },
   { href: '/admin/offers', label: 'Offers', iconName: 'Tag' },
   { href: '/admin/redeem', label: 'Redeem', iconName: 'ScanLine' },
-  { href: '/admin/employees', label: 'Employees', iconName: 'Users' },
+  { href: '/admin/analytics', label: 'Analytics', iconName: 'BarChart3' },
   { href: '/admin/profile', label: 'Profile', iconName: 'User' },
 ];
 
