@@ -6,7 +6,7 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { doc, getDoc, addDoc, collection, serverTimestamp, updateDoc, increment, Timestamp, query, where, getDocs, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
-import { Loader2, ArrowLeft, Building, Tag, Info, Phone, Mail, MapPin, User as UserIcon, CheckCircle, Clock, Calendar, Gem, Eye } from 'lucide-react';
+import { Loader2, ArrowLeft, Building, Tag, Info, Phone, Mail, MapPin, User as UserIcon, CheckCircle, Clock, Calendar, Gem, Eye, Star, MessageSquare } from 'lucide-react';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
@@ -24,6 +24,9 @@ import { Input } from '@/components/ui/input';
 import { format, formatDistanceToNow } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
+import { cn } from '@/lib/utils';
+
 
 type Shop = {
     shopName: string;
@@ -72,6 +75,23 @@ const isOfferCurrentlyActive = (offer: Offer): boolean => {
     return true;
 };
 
+const StarRating = ({ rating, setRating, readOnly = false }: { rating: number, setRating?: (rating: number) => void, readOnly?: boolean }) => (
+    <div className="flex gap-1">
+        {[1, 2, 3, 4, 5].map((star) => (
+            <Star
+                key={star}
+                className={cn(
+                    "h-6 w-6",
+                    rating >= star ? "text-amber-400 fill-amber-400" : "text-muted-foreground/50",
+                    !readOnly && "cursor-pointer"
+                )}
+                onClick={() => !readOnly && setRating && setRating(star)}
+            />
+        ))}
+    </div>
+);
+
+
 export default function OfferDetailPage() {
     const params = useParams();
     const searchParams = useSearchParams();
@@ -90,6 +110,11 @@ export default function OfferDetailPage() {
     const [isClaiming, setIsClaiming] = useState(false);
     const [isClaimDialogOpen, setIsClaimDialogOpen] = useState(false);
     const [claimSuccessData, setClaimSuccessData] = useState<{qrCodeUrl: string, offerTitle: string, newPoints: number, totalPoints: number} | null>(null);
+    const [isReviewDialogOpen, setIsReviewDialogOpen] = useState(false);
+    const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+    const [reviewRating, setReviewRating] = useState(0);
+    const [reviewComment, setReviewComment] = useState('');
+
 
     const [customerName, setCustomerName] = useState('');
     const [customerPhone, setCustomerPhone] = useState('');
@@ -214,6 +239,34 @@ export default function OfferDetailPage() {
             toast({ title: "Claim Failed", description: "Something went wrong. Please try again.", variant: "destructive" });
         } finally {
             setIsClaiming(false);
+        }
+    };
+    
+    const handleReviewSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (reviewRating === 0 || !customerName || !reviewComment) {
+            toast({ title: "Missing fields", description: "Please provide your name, a rating, and a comment.", variant: "destructive" });
+            return;
+        }
+        setIsSubmittingReview(true);
+        try {
+            const reviewsCollectionRef = collection(db, 'shops', shopId!, 'reviews');
+            await addDoc(reviewsCollectionRef, {
+                name: customerName, // Use the name from the claim form
+                rating: reviewRating,
+                comment: reviewComment,
+                createdAt: serverTimestamp(),
+            });
+
+            toast({ title: "Review Submitted!", description: "Thank you for your feedback." });
+            setIsReviewDialogOpen(false); // Close review dialog
+            setReviewRating(0);
+            setReviewComment('');
+        } catch (error) {
+            console.error("Error submitting review:", error);
+            toast({ title: "Submission Failed", variant: "destructive" });
+        } finally {
+            setIsSubmittingReview(false);
         }
     };
 
@@ -429,7 +482,7 @@ export default function OfferDetailPage() {
             </Dialog>
 
             {/* Claim Success Dialog */}
-            <Dialog open={!!claimSuccessData} onOpenChange={resetClaimFlow}>
+            <Dialog open={!!claimSuccessData} onOpenChange={(open) => !open && resetClaimFlow()}>
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
@@ -455,6 +508,10 @@ export default function OfferDetailPage() {
                                 className="rounded-lg border p-2 bg-white"
                             />
                         )}
+                        <Button variant="outline" className="w-full" onClick={() => setIsReviewDialogOpen(true)}>
+                            <MessageSquare className="mr-2 h-4 w-4" />
+                            Leave a Review
+                        </Button>
                          <Link href="/my-points" className="w-full">
                             <Button variant="outline" className="w-full">
                                 <Gem className="mr-2 h-4 w-4"/>Check My Points Balance
@@ -466,6 +523,37 @@ export default function OfferDetailPage() {
                             <Button type="button" className="w-full">Done</Button>
                         </DialogClose>
                     </DialogFooter>
+                </DialogContent>
+            </Dialog>
+            
+            {/* Review Dialog */}
+            <Dialog open={isReviewDialogOpen} onOpenChange={setIsReviewDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>How was your experience at {shop?.shopName}?</DialogTitle>
+                        <DialogDescription>
+                            Your feedback helps other customers and the shop owner.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleReviewSubmit}>
+                        <div className="space-y-4 py-4">
+                             <div className="space-y-2">
+                                <Label>Your Rating*</Label>
+                                <StarRating rating={reviewRating} setRating={setReviewRating} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="review-comment">Your Comments*</Label>
+                                <Textarea id="review-comment" value={reviewComment} onChange={(e) => setReviewComment(e.target.value)} required />
+                            </div>
+                        </div>
+                        <DialogFooter>
+                             <Button type="button" variant="outline" onClick={() => setIsReviewDialogOpen(false)}>Cancel</Button>
+                            <Button type="submit" disabled={isSubmittingReview}>
+                                {isSubmittingReview && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
+                                Submit Review
+                            </Button>
+                        </DialogFooter>
+                    </form>
                 </DialogContent>
             </Dialog>
         </div>

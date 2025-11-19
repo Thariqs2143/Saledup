@@ -123,18 +123,13 @@ export default function ShopOffersPage() {
     const [reviews, setReviews] = useState<Review[]>([]);
     const [loading, setLoading] = useState(true);
 
-    // Review form state
-    const [reviewName, setReviewName] = useState('');
-    const [reviewRating, setReviewRating] = useState(0);
-    const [reviewComment, setReviewComment] = useState('');
-    const [isSubmittingReview, setIsSubmittingReview] = useState(false);
-
-
     useEffect(() => {
         if (!shopId) {
             setLoading(false);
             return;
         };
+
+        let unsubscribeReviews: () => void = () => {};
 
         const fetchData = async () => {
             setLoading(true);
@@ -160,13 +155,10 @@ export default function ShopOffersPage() {
 
                  // Listen for reviews
                 const reviewsQuery = query(collection(db, 'shops', shopId, 'reviews'), orderBy('createdAt', 'desc'));
-                const unsubscribeReviews = onSnapshot(reviewsQuery, (snapshot) => {
+                unsubscribeReviews = onSnapshot(reviewsQuery, (snapshot) => {
                     const reviewsList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Review));
                     setReviews(reviewsList);
                 });
-
-                // Return the unsubscribe function for cleanup, though it might not be called in this setup
-                return unsubscribeReviews;
 
             } catch (error) {
                 console.error("Error fetching shop data:", error);
@@ -177,6 +169,8 @@ export default function ShopOffersPage() {
         };
 
         fetchData();
+
+        return () => unsubscribeReviews();
     }, [shopId, router, toast]);
 
     const activeOffers = useMemo(() => {
@@ -189,35 +183,6 @@ export default function ShopOffersPage() {
         return total / reviews.length;
     }, [reviews]);
     
-    const handleReviewSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (reviewRating === 0 || !reviewName || !reviewComment) {
-            toast({ title: "Missing fields", description: "Please provide your name, a rating, and a comment.", variant: "destructive" });
-            return;
-        }
-        setIsSubmittingReview(true);
-        try {
-            const reviewsCollectionRef = collection(db, 'shops', shopId, 'reviews');
-            await addDoc(reviewsCollectionRef, {
-                name: reviewName,
-                rating: reviewRating,
-                comment: reviewComment,
-                createdAt: serverTimestamp(),
-            });
-
-            toast({ title: "Review Submitted!", description: "Thank you for your feedback." });
-            setReviewName('');
-            setReviewRating(0);
-            setReviewComment('');
-        } catch (error) {
-            console.error("Error submitting review:", error);
-            toast({ title: "Submission Failed", variant: "destructive" });
-        } finally {
-            setIsSubmittingReview(false);
-        }
-    };
-
-
     if (loading) {
         return (
             <div className="flex h-screen w-full items-center justify-center">
@@ -318,61 +283,35 @@ export default function ShopOffersPage() {
             )}
             
             {/* Reviews Section */}
-            <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-6">
-                    <h2 className="text-xl font-bold">Rate Your Experience</h2>
-                    <Card>
-                        <CardContent className="pt-6">
-                            <form onSubmit={handleReviewSubmit} className="space-y-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="review-name">Your Name</Label>
-                                    <Input id="review-name" value={reviewName} onChange={e => setReviewName(e.target.value)} required />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label>Your Rating</Label>
-                                    <StarRating rating={reviewRating} setRating={setReviewRating} />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="review-comment">Your Comments</Label>
-                                    <Textarea id="review-comment" value={reviewComment} onChange={e => setReviewComment(e.target.value)} required />
-                                </div>
-                                <Button type="submit" disabled={isSubmittingReview}>
-                                    {isSubmittingReview && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
-                                    Submit Review
-                                </Button>
-                            </form>
-                        </CardContent>
-                    </Card>
-                </div>
-                 <div className="space-y-6">
-                    <h2 className="text-xl font-bold">What Customers Are Saying ({reviews.length})</h2>
-                    {reviews.length > 0 ? (
-                        <div className="space-y-4 max-h-[500px] overflow-y-auto pr-4">
-                            {reviews.map(review => (
-                                <Card key={review.id}>
-                                    <CardContent className="pt-6">
-                                        <div className="flex justify-between items-start">
-                                            <div>
-                                                <p className="font-semibold">{review.name}</p>
-                                                <p className="text-xs text-muted-foreground">{formatDistanceToNow(review.createdAt.toDate(), { addSuffix: true })}</p>
-                                            </div>
-                                            <StarRating rating={review.rating} readOnly />
+            <div className="mt-12">
+                <h2 className="text-xl font-bold mb-6">What Customers Are Saying ({reviews.length})</h2>
+                {reviews.length > 0 ? (
+                    <div className="space-y-4">
+                        {reviews.map(review => (
+                            <Card key={review.id}>
+                                <CardContent className="pt-6">
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <p className="font-semibold">{review.name}</p>
+                                            <p className="text-xs text-muted-foreground">{formatDistanceToNow(review.createdAt.toDate(), { addSuffix: true })}</p>
                                         </div>
-                                        <p className="mt-4 text-muted-foreground text-sm">{review.comment}</p>
-                                    </CardContent>
-                                </Card>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="text-center py-16 text-muted-foreground bg-background rounded-lg border">
-                            <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50"/>
-                            <h3 className="font-semibold">No Reviews Yet</h3>
-                            <p className="text-sm">Be the first to share your experience!</p>
-                        </div>
-                    )}
-                 </div>
+                                        <StarRating rating={review.rating} readOnly />
+                                    </div>
+                                    <p className="mt-4 text-muted-foreground text-sm">{review.comment}</p>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="text-center py-16 text-muted-foreground bg-background rounded-lg border">
+                        <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50"/>
+                        <h3 className="font-semibold">No Reviews Yet</h3>
+                        <p className="text-sm">Be the first to share your experience by claiming an offer!</p>
+                    </div>
+                )}
             </div>
         </main>
     </div>
     );
 }
+
