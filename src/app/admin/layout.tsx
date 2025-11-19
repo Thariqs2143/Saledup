@@ -28,12 +28,18 @@ const adminNavItems: NavItem[] = [
   { href: '/admin', label: 'Home', iconName: 'LayoutDashboard' },
   { href: '/admin/offers', label: 'Offers', iconName: 'Tag' },
   { href: '/admin/redeem', label: 'Redeem', iconName: 'ScanLine' },
-  { href: '/admin/qr-code', label: 'QR', iconName: 'QrCode' },
+  { href: '/admin/employees', label: 'Employees', iconName: 'Users' },
   { href: '/admin/customers', label: 'Customers', iconName: 'Users' },
   { href: '/admin/profile', label: 'Profile', iconName: 'User' },
 ];
 
-const mobileBottomNavItems: NavItem[] = adminNavItems;
+const mobileBottomNavItems: NavItem[] = [
+  { href: '/admin', label: 'Home', iconName: 'LayoutDashboard' },
+  { href: '/admin/offers', label: 'Offers', iconName: 'Tag' },
+  { href: '/admin/redeem', label: 'Redeem', iconName: 'ScanLine' },
+  { href: '/admin/employees', label: 'Employees', iconName: 'Users' },
+  { href: '/admin/profile', label: 'Profile', iconName: 'User' },
+];
 
 
 export default function AdminLayout({ children }: PropsWithChildren) {
