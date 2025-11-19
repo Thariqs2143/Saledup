@@ -65,8 +65,9 @@ service cloud.firestore {
     // ----------------------
     match /shops/{shopId} {
       allow create: if isShopOwner(shopId); // A user can create their own shop document
-      allow read, update, delete: if isShopOwner(shopId); // Only owner can manage the main shop doc.
-      allow list: if true; // Public listing for "Find Offers" page.
+      allow update, delete: if isShopOwner(shopId); // Only owner can manage the main shop doc.
+      // Public can read shop details for shop pages and find-offers page
+      allow read: if true; 
 
       // --- Subcollections ---
       
@@ -80,8 +81,10 @@ service cloud.firestore {
       
       // Offers Subcollection
       match /offers/{offerId} {
-        // Owner and Managers can create, update, and delete offers.
-        allow write: if isShopOwner(shopId) || getRole(shopId) == 'Manager';
+        // Owner and Managers can create and delete offers.
+        allow create, delete: if isShopOwner(shopId) || getRole(shopId) == 'Manager';
+        // Allow public views to increment viewCount
+        allow update: if (isShopOwner(shopId) || getRole(shopId) == 'Manager') || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount']));
         // All staff can list offers.
         allow list: if isOwnerOrEmployee(shopId);
         // Public can view offers.

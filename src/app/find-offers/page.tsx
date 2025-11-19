@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
-import { Loader2, Search, Map, List, Building, Clock, Filter, X } from 'lucide-react';
+import { Loader2, Search, Map, List, Building, Clock, Filter, X, MapPin } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { formatDistanceToNow } from 'date-fns';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -255,10 +255,10 @@ export default function FindOffersPage() {
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
                                 {filteredAndSortedOffers.length > 0 ? (
                                     filteredAndSortedOffers.map(offer => (
-                                        <Link key={offer.id} href={`/offers/${offer.id}?shopId=${offer.shopId}&from=all`} className="block">
-                                            <Card className="flex flex-col transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group h-full">
-                                                <CardHeader className="p-0 relative">
-                                                        <Badge className="absolute top-2 right-2 z-10" variant='secondary'>
+                                        <Card key={offer.id} className="flex flex-col transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group h-full">
+                                            <CardHeader className="p-0 relative">
+                                                <Link href={`/offers/${offer.id}?shopId=${offer.shopId}&from=all`} className="block">
+                                                    <Badge className="absolute top-2 right-2 z-10" variant='secondary'>
                                                         {offer.discountValue ? `${offer.discountValue}${offer.discountType === 'percentage' ? '%' : ' OFF'}` : 'Special Deal'}
                                                     </Badge>
                                                     <Image 
@@ -268,23 +268,31 @@ export default function FindOffersPage() {
                                                         height={400}
                                                         className="aspect-[16/10] object-cover rounded-t-lg"
                                                     />
-                                                </CardHeader>
-                                                <CardContent className="p-3 md:p-4 flex-1">
-                                                    <div className="flex items-center gap-2 mb-2">
+                                                </Link>
+                                            </CardHeader>
+                                            <CardContent className="p-3 md:p-4 flex-1">
+                                                 <Link href={`/shops/${offer.shopId}`} className="block mb-2">
+                                                    <div className="flex items-center gap-2">
                                                         <Building className="h-4 w-4 text-muted-foreground" />
-                                                        <p className="text-sm font-semibold text-primary truncate">{offer.shopName || 'Local Shop'}</p>
+                                                        <p className="text-sm font-semibold text-primary truncate hover:underline">{offer.shopName || 'Local Shop'}</p>
                                                     </div>
+                                                    <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                                                         <MapPin className="h-3 w-3" />
+                                                         <p className="truncate">{offer.shopAddress}</p>
+                                                    </div>
+                                                 </Link>
+                                                <Link href={`/offers/${offer.id}?shopId=${offer.shopId}&from=all`} className="block">
                                                     <h3 className="font-bold text-base md:text-lg leading-snug truncate group-hover:text-primary" title={offer.title}>{offer.title}</h3>
-                                                </CardContent>
-                                                <CardFooter className="p-3 md:p-4 border-t flex justify-between items-center text-xs text-muted-foreground">
-                                                    <div className="flex items-center gap-1">
-                                                        <Clock className="h-3 w-3"/>
-                                                        <span>{formatDistanceToNow(new Date(offer.createdAt.seconds * 1000), { addSuffix: true })}</span>
-                                                    </div>
-                                                    {offer.shopBusinessType && <Badge variant="outline">{offer.shopBusinessType}</Badge>}
-                                                </CardFooter>
-                                            </Card>
-                                        </Link>
+                                                </Link>
+                                            </CardContent>
+                                            <CardFooter className="p-3 md:p-4 border-t flex justify-between items-center text-xs text-muted-foreground">
+                                                <div className="flex items-center gap-1">
+                                                    <Clock className="h-3 w-3"/>
+                                                    <span>{formatDistanceToNow(new Date(offer.createdAt.seconds * 1000), { addSuffix: true })}</span>
+                                                </div>
+                                                {offer.shopBusinessType && <Badge variant="outline">{offer.shopBusinessType}</Badge>}
+                                            </CardFooter>
+                                        </Card>
                                     ))
                                 ) : (
                                     <div className="col-span-full text-center py-20 text-muted-foreground">
