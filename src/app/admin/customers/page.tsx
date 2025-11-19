@@ -27,6 +27,9 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 
 // Extend jsPDF with autoTable
 declare module 'jspdf' {
@@ -54,6 +57,7 @@ export default function AdminCustomersPage() {
     const [authUser, setAuthUser] = useState<AuthUser | null>(null);
     const router = useRouter();
     const { toast } = useToast();
+    const [broadcastMessage, setBroadcastMessage] = useState('');
 
      useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -173,11 +177,22 @@ export default function AdminCustomersPage() {
             toast({ title: "Error", description: "Could not delete the claim.", variant: "destructive" });
         }
     };
+    
+    const handleSendBroadcast = () => {
+        if (!broadcastMessage) {
+            toast({title: "Empty Message", description: "Please write a message to send.", variant: "destructive"});
+            return;
+        }
+        const encodedMessage = encodeURIComponent(broadcastMessage);
+        const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
+        window.open(whatsappUrl, '_blank');
+        toast({title: "Message Ready!", description: "Your broadcast message is ready to be forwarded on WhatsApp."});
+    };
 
 
     return (
         <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div className="relative w-full">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                     <Input
@@ -189,8 +204,53 @@ export default function AdminCustomersPage() {
                     />
                 </div>
                  <div className="flex gap-2 w-full sm:w-auto">
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <Button variant="outline" className="h-12 flex-1">
+                                <Mail className="mr-2 h-4 w-4"/> Send Broadcast
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Send WhatsApp Broadcast</DialogTitle>
+                                <DialogDescription>
+                                    Compose a message to send to your customers. This will open WhatsApp with the message ready to be forwarded. Note: You'll need to manually select customers or create a broadcast list in WhatsApp.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <div className="space-y-4 py-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="broadcast-message">Message</Label>
+                                    <Textarea
+                                        id="broadcast-message"
+                                        placeholder="E.g., Hi! Don't miss our weekend special: 20% off all coffee. Come visit us!"
+                                        value={broadcastMessage}
+                                        onChange={(e) => setBroadcastMessage(e.target.value)}
+                                        rows={5}
+                                    />
+                                </div>
+                            </div>
+                            <DialogFooter>
+                                <Button onClick={handleSendBroadcast}>
+                                    Send Message via WhatsApp
+                                </Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+                     <Button onClick={handleExportPDF} variant="outline" size="icon" className="h-12 w-12">
+                        <Download className="h-5 w-5"/>
+                        <span className="sr-only">Export PDF</span>
+                    </Button>
+                </div>
+            </div>
+            <Card>
+            <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                     <CardTitle>Your Customers</CardTitle>
+                     <CardDescription>A list of unique customers who have claimed your offers.</CardDescription>
+                </div>
+                <div className="flex gap-2 w-full sm:w-auto">
                     <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as any)}>
-                        <SelectTrigger className="h-12 flex-1">
+                        <SelectTrigger className="flex-1">
                              <SelectValue placeholder="Filter by status" />
                         </SelectTrigger>
                         <SelectContent>
@@ -200,7 +260,7 @@ export default function AdminCustomersPage() {
                         </SelectContent>
                     </Select>
                      <Select value={activityFilter} onValueChange={(value) => setActivityFilter(value as any)}>
-                        <SelectTrigger className="h-12 flex-1">
+                        <SelectTrigger className="flex-1">
                              <SelectValue placeholder="Filter by activity" />
                         </SelectTrigger>
                         <SelectContent>
@@ -209,19 +269,15 @@ export default function AdminCustomersPage() {
                             <SelectItem value="inactive_30">Inactive for 30+ days</SelectItem>
                         </SelectContent>
                     </Select>
-                     <Button onClick={handleExportPDF} variant="outline" size="icon" className="h-12 w-12">
-                        <Download className="h-5 w-5"/>
-                        <span className="sr-only">Export PDF</span>
-                    </Button>
                 </div>
-            </div>
-            
+            </CardHeader>
+            <CardContent>
             {loading ? (
                 <div className="flex items-center justify-center h-64">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 </div>
             ) : filteredCustomers.length === 0 ? (
-                <div className="text-center py-20 text-muted-foreground rounded-lg border bg-background">
+                <div className="text-center py-20 text-muted-foreground rounded-lg border bg-muted/20">
                     <Users className="h-16 w-16 mx-auto mb-4 opacity-50"/>
                     <h3 className="text-xl font-semibold">No Customers Found</h3>
                     <p>When customers claim offers, they will appear here. Try adjusting your filters.</p>
@@ -290,6 +346,8 @@ export default function AdminCustomersPage() {
                     )})}
                 </div>
             )}
+            </CardContent>
+            </Card>
         </div>
     );
 }
