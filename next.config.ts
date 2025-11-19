@@ -1,3 +1,4 @@
+
 import type { NextConfig } from 'next';
 import nextPWA from 'next-pwa';
 
@@ -6,7 +7,8 @@ const withPWA = nextPWA({
   register: true,
   skipWaiting: true,
   disable: process.env.NODE_ENV === 'development',
-  sw: 'sw.js', // use the sw.js we created
+  sw: 'sw.js',
+  importScripts: ['/firebase-messaging-sw.js'], // Correct way to import the script
 });
 
 const nextConfig: NextConfig = {

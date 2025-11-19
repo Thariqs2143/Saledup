@@ -61,7 +61,7 @@ export const scheduledShiftReminder = functions.pubsub.schedule('every 15 minute
                             notification: {
                                 title: 'Shift Reminder',
                                 body: `Hi ${employee.name}, your shift at ${shopData.shopName} is starting soon at ${daySettings.startTime}. Don't forget to check in!`,
-                                icon: '/favicon.ico', // Optional: link to your app's icon
+                                icon: '/icons/icon-192x192.png',
                             },
                         };
                         console.log(`Sending reminder to ${employee.name} (Token: ${employee.fcmToken})`);
@@ -138,6 +138,7 @@ export const scheduledLateCheckAlert = functions.pubsub.schedule('every 30 minut
                             notification: {
                                 title: 'Employee Late Alert',
                                 body: `${employee.name} has not checked in for their ${daySettings.startTime} shift yet.`,
+                                icon: '/icons/icon-192x192.png',
                             },
                         };
                         console.log(`Sending LATE alert for ${employee.name} to admin of shop ${shopId}`);

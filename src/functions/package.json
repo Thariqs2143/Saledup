@@ -1,8 +1,8 @@
 
 
 {
-    "name": "attendry-functions",
-    "description": "Cloud Functions for Attendry",
+    "name": "saledup-functions",
+    "description": "Cloud Functions for Saledup",
     "scripts": {
       "lint": "eslint .",
       "serve": "firebase emulators:start --only functions",

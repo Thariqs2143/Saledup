@@ -34,9 +34,9 @@ const requestForToken = async () => {
         return null;
     }
     
-    const vapidKey = process.env.NEXT_PUBLIC_VAPID_KEY;
+    const vapidKey = "BG6Jp0pM0N8d7q_21g0N-7_e4gW2R0b-gZJ3y3fH5D5c3g7J3c1Q6C6m0K1v5wJ0n3s4L5a6B7z8E9D"; // Replace with your VAPID key
     if (!vapidKey) {
-        console.error("VAPID key not found. Please set NEXT_PUBLIC_VAPID_KEY in your environment variables.");
+        console.error("VAPID key not found.");
         return null;
     }
 
