@@ -35,7 +35,7 @@ declare module 'jspdf' {
     }
 }
 
-type Claim = {
+type Customer = {
     id: string;
     customerName: string;
     customerEmail?: string;
@@ -45,17 +45,8 @@ type Claim = {
     status: 'claimed' | 'redeemed';
 };
 
-type Customer = {
-    phone: string;
-    name: string;
-    email?: string;
-    lastClaim: Claim;
-    totalClaims: number;
-    allClaims: Claim[];
-};
-
 export default function AdminCustomersPage() {
-    const [allClaims, setAllClaims] = useState<Claim[]>([]);
+    const [allClaims, setAllClaims] = useState<Customer[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState<'all' | 'claimed' | 'redeemed'>('all');
@@ -81,7 +72,7 @@ export default function AdminCustomersPage() {
         const claimsQuery = query(collection(db, 'shops', authUser.uid, 'claims'), orderBy('claimedAt', 'desc'));
         
         const unsubscribe = onSnapshot(claimsQuery, (snapshot) => {
-            const claimsList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Claim));
+            const claimsList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Customer));
             setAllClaims(claimsList);
             setLoading(false);
         }, (error) => {
@@ -94,25 +85,18 @@ export default function AdminCustomersPage() {
     }, [authUser, toast]);
     
     const uniqueCustomers = useMemo(() => {
-        const customerMap = new Map<string, Customer>();
+        const customerMap = new Map<string, { lastClaim: Customer, totalClaims: number }>();
         allClaims.forEach(claim => {
             const existing = customerMap.get(claim.customerPhone);
             if (existing) {
                 existing.totalClaims += 1;
-                existing.allClaims.push(claim);
                 if (claim.claimedAt.toMillis() > existing.lastClaim.claimedAt.toMillis()) {
                     existing.lastClaim = claim;
-                    existing.name = claim.customerName; // Update name to the latest one
-                    existing.email = claim.customerEmail;
                 }
             } else {
                 customerMap.set(claim.customerPhone, {
-                    phone: claim.customerPhone,
-                    name: claim.customerName,
-                    email: claim.customerEmail,
                     lastClaim: claim,
                     totalClaims: 1,
-                    allClaims: [claim],
                 });
             }
         });
@@ -121,17 +105,18 @@ export default function AdminCustomersPage() {
 
     const filteredCustomers = useMemo(() => {
         const thirtyDaysAgo = subDays(new Date(), 30);
-        return uniqueCustomers.filter(customer => {
+        return uniqueCustomers.filter(customerData => {
+            const customer = customerData.lastClaim;
             // Search term filter
-            const searchMatch = customer.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                customer.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                customer.phone?.toLowerCase().includes(searchTerm.toLowerCase());
+            const searchMatch = customer.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                customer.customerEmail?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                customer.customerPhone?.toLowerCase().includes(searchTerm.toLowerCase());
 
             // Status filter (on last claim)
-            const statusMatch = statusFilter === 'all' || customer.lastClaim.status === statusFilter;
+            const statusMatch = statusFilter === 'all' || customer.status === statusFilter;
             
             // Activity filter
-            const lastClaimDate = customer.lastClaim.claimedAt.toDate();
+            const lastClaimDate = customer.claimedAt.toDate();
             const activityMatch = activityFilter === 'all' ||
                 (activityFilter === 'active_30' && lastClaimDate >= thirtyDaysAgo) ||
                 (activityFilter === 'inactive_30' && lastClaimDate < thirtyDaysAgo);
@@ -153,8 +138,8 @@ export default function AdminCustomersPage() {
             startY: 20,
             head: [['Customer Name', 'Phone', 'Last Offer Claimed', 'Last Active', 'Total Claims']],
             body: filteredCustomers.map(c => [
-                c.name,
-                c.phone,
+                c.lastClaim.customerName,
+                c.lastClaim.customerPhone,
                 c.lastClaim.offerTitle,
                 format(c.lastClaim.claimedAt.toDate(), 'PP'),
                 c.totalClaims
@@ -243,41 +228,43 @@ export default function AdminCustomersPage() {
                 </div>
             ) : (
                 <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                    {filteredCustomers.map(customer => (
-                        <Card key={customer.phone} className="flex flex-col">
+                    {filteredCustomers.map(customerData => {
+                        const customer = customerData.lastClaim;
+                        return (
+                        <Card key={customer.id} className="flex flex-col">
                             <CardHeader>
                                 <div className="flex justify-between items-start">
-                                    <p className="font-bold text-lg">{customer.name}</p>
-                                    <Badge variant={customer.lastClaim.status === 'redeemed' ? 'secondary' : 'outline'} className="whitespace-nowrap">
-                                        {customer.lastClaim.status === 'redeemed' ? <CheckCircle className="mr-1.5 h-3 w-3" /> : <Tag className="mr-1.5 h-3 w-3" />}
-                                        {customer.lastClaim.status === 'redeemed' ? 'Redeemed' : 'Claimed'}
+                                    <p className="font-bold text-lg">{customer.customerName}</p>
+                                    <Badge variant={customer.status === 'redeemed' ? 'secondary' : 'outline'} className="whitespace-nowrap">
+                                        {customer.status === 'redeemed' ? <CheckCircle className="mr-1.5 h-3 w-3" /> : <Tag className="mr-1.5 h-3 w-3" />}
+                                        {customer.status === 'redeemed' ? 'Redeemed' : 'Claimed'}
                                     </Badge>
                                 </div>
                                 <CardDescription className="text-sm">
-                                    Last claimed "{customer.lastClaim.offerTitle}"
+                                    Last claimed "{customer.offerTitle}"
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-3 text-sm text-muted-foreground flex-1">
                                 <div className="flex items-center gap-3">
                                     <Phone className="h-4 w-4 shrink-0" />
-                                    <span>{customer.phone}</span>
+                                    <span>{customer.customerPhone}</span>
                                 </div>
                                 <div className="flex items-center gap-3">
                                     <Mail className="h-4 w-4 shrink-0" />
-                                    <span className="truncate">{customer.email || 'No email'}</span>
+                                    <span className="truncate">{customer.customerEmail || 'No email'}</span>
                                 </div>
                                 <div className="flex items-center gap-3">
                                     <Calendar className="h-4 w-4 shrink-0" />
-                                    <span>Last active: {formatDistanceToNow(customer.lastClaim.claimedAt.toDate(), { addSuffix: true })}</span>
+                                    <span>Last active: {formatDistanceToNow(customer.claimedAt.toDate(), { addSuffix: true })}</span>
                                 </div>
                                 <div className="flex items-center gap-3">
                                     <Users className="h-4 w-4 shrink-0" />
-                                    <span>Total claims: {customer.totalClaims}</span>
+                                    <span>Total claims: {customerData.totalClaims}</span>
                                 </div>
                             </CardContent>
                             <CardContent className="border-t pt-4 flex justify-end gap-2">
-                                <Button size="sm" variant="outline" onClick={() => handleStatusToggle(customer.lastClaim.id, customer.lastClaim.status)}>
-                                    {customer.lastClaim.status === 'claimed' ? 'Mark as Redeemed' : 'Mark as Claimed'}
+                                <Button size="sm" variant="outline" onClick={() => handleStatusToggle(customer.id, customer.status)}>
+                                    {customer.status === 'claimed' ? 'Mark as Redeemed' : 'Mark as Claimed'}
                                 </Button>
                                 <AlertDialog>
                                     <AlertDialogTrigger asChild>
@@ -289,28 +276,20 @@ export default function AdminCustomersPage() {
                                         <AlertDialogHeader>
                                             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                                             <AlertDialogDescription>
-                                                This will permanently delete the latest claim for {customer.name}. This cannot be undone. To delete all data for this customer, contact support.
+                                                This will permanently delete the latest claim for {customer.customerName}. This cannot be undone. To delete all data for this customer, contact support.
                                             </AlertDialogDescription>
                                         </AlertDialogHeader>
                                         <AlertDialogFooter>
                                             <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                            <AlertDialogAction onClick={() => handleDeleteClaim(customer.lastClaim.id)} className="bg-destructive hover:bg-destructive/90">Delete Claim</AlertDialogAction>
+                                            <AlertDialogAction onClick={() => handleDeleteClaim(customer.id)} className="bg-destructive hover:bg-destructive/90">Delete Claim</AlertDialogAction>
                                         </AlertDialogFooter>
                                     </AlertDialogContent>
                                 </AlertDialog>
                             </CardContent>
                         </Card>
-                    ))}
+                    )})}
                 </div>
             )}
         </div>
     );
 }
-
-    
-
-    
-
-    
-
-    

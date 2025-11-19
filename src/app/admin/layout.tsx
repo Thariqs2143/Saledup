@@ -15,12 +15,12 @@ import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
-// Saledup: Updated types and nav items
 type ShopProfile = {
   shopName?: string;
-  name?: string; // Owner's name
+  ownerName?: string;
   email?: string;
   imageUrl?: string;
+  ownerImageUrl?: string;
   fallback?: string;
 }
 
@@ -58,7 +58,7 @@ export default function AdminLayout({ children }: PropsWithChildren) {
           if (shopSnap.exists()) {
               const shopData = shopSnap.data();
               setProfile({ 
-                name: shopData.ownerName,
+                ownerName: shopData.ownerName,
                 shopName: shopData.shopName,
                 email: shopData.ownerEmail,
                 imageUrl: shopData.imageUrl || shopData.ownerImageUrl, // Prioritize shop image, fallback to owner image
