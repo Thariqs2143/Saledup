@@ -3,14 +3,14 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { doc, getDoc, collection, query, where, getDocs, addDoc, serverTimestamp, Timestamp, updateDoc, increment, DocumentReference } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, getDocs, addDoc, serverTimestamp, Timestamp, updateDoc, increment, onSnapshot, orderBy } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Building, Clock, Loader2, Mail, MapPin, Phone, Tag, User as UserIcon, CheckCircle } from 'lucide-react';
+import { Building, Clock, Loader2, Mail, MapPin, Phone, Tag, User as UserIcon, CheckCircle, Star, MessageSquare } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
@@ -25,6 +25,8 @@ import {
   DialogClose,
 } from "@/components/ui/dialog"
 import Link from 'next/link';
+import { Textarea } from '@/components/ui/textarea';
+import { cn } from '@/lib/utils';
 
 type Shop = {
     shopName: string;
@@ -47,6 +49,31 @@ type Offer = {
     startTime?: string;
     endTime?: string;
 };
+
+type Review = {
+    id: string;
+    name: string;
+    rating: number;
+    comment: string;
+    createdAt: Timestamp;
+};
+
+const StarRating = ({ rating, setRating, readOnly = false }: { rating: number, setRating?: (rating: number) => void, readOnly?: boolean }) => (
+    <div className="flex gap-1">
+        {[1, 2, 3, 4, 5].map((star) => (
+            <Star
+                key={star}
+                className={cn(
+                    "h-6 w-6",
+                    rating >= star ? "text-amber-400 fill-amber-400" : "text-muted-foreground/50",
+                    !readOnly && "cursor-pointer"
+                )}
+                onClick={() => !readOnly && setRating && setRating(star)}
+            />
+        ))}
+    </div>
+);
+
 
 // Helper function to check if an offer is currently active based on its schedule
 const isOfferCurrentlyActive = (offer: Offer): boolean => {
@@ -93,15 +120,14 @@ export default function ShopOffersPage() {
 
     const [shop, setShop] = useState<Shop | null>(null);
     const [allOffers, setAllOffers] = useState<Offer[]>([]);
+    const [reviews, setReviews] = useState<Review[]>([]);
     const [loading, setLoading] = useState(true);
 
-    const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null);
-    const [isClaiming, setIsClaiming] = useState(false);
-    const [claimSuccessData, setClaimSuccessData] = useState<{qrCodeUrl: string, offerTitle: string} | null>(null);
-
-    const [customerName, setCustomerName] = useState('');
-    const [customerPhone, setCustomerPhone] = useState('');
-    const [customerEmail, setCustomerEmail] = useState('');
+    // Review form state
+    const [reviewName, setReviewName] = useState('');
+    const [reviewRating, setReviewRating] = useState(0);
+    const [reviewComment, setReviewComment] = useState('');
+    const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
 
     useEffect(() => {
@@ -126,12 +152,21 @@ export default function ShopOffersPage() {
                 // Fetch active offers
                 const offersQuery = query(
                     collection(db, 'shops', shopId, 'offers'),
-                    where('isActive', '==', true),
-                    where('__name__', '!=', 'template')
+                    where('isActive', '==', true)
                 );
                 const offersSnapshot = await getDocs(offersQuery);
                 const offersList = offersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Offer));
                 setAllOffers(offersList);
+
+                 // Listen for reviews
+                const reviewsQuery = query(collection(db, 'shops', shopId, 'reviews'), orderBy('createdAt', 'desc'));
+                const unsubscribeReviews = onSnapshot(reviewsQuery, (snapshot) => {
+                    const reviewsList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Review));
+                    setReviews(reviewsList);
+                });
+
+                // Return the unsubscribe function for cleanup, though it might not be called in this setup
+                return unsubscribeReviews;
 
             } catch (error) {
                 console.error("Error fetching shop data:", error);
@@ -148,50 +183,39 @@ export default function ShopOffersPage() {
         return allOffers.filter(isOfferCurrentlyActive);
     }, [allOffers]);
 
-    const handleClaimOffer = async (e: React.FormEvent) => {
+    const averageRating = useMemo(() => {
+        if (reviews.length === 0) return 0;
+        const total = reviews.reduce((acc, review) => acc + review.rating, 0);
+        return total / reviews.length;
+    }, [reviews]);
+    
+    const handleReviewSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!selectedOffer || !shopId) return;
-
-        setIsClaiming(true);
+        if (reviewRating === 0 || !reviewName || !reviewComment) {
+            toast({ title: "Missing fields", description: "Please provide your name, a rating, and a comment.", variant: "destructive" });
+            return;
+        }
+        setIsSubmittingReview(true);
         try {
-            // 1. Add claim to subcollection
-            const claimsCollectionRef = collection(db, 'shops', shopId, 'claims');
-            const claimDocRef = await addDoc(claimsCollectionRef, {
-                customerName,
-                customerPhone,
-                customerEmail,
-                offerId: selectedOffer.id,
-                offerTitle: selectedOffer.title,
-                claimedAt: serverTimestamp(),
-                status: 'claimed', // New status field
+            const reviewsCollectionRef = collection(db, 'shops', shopId, 'reviews');
+            await addDoc(reviewsCollectionRef, {
+                name: reviewName,
+                rating: reviewRating,
+                comment: reviewComment,
+                createdAt: serverTimestamp(),
             });
 
-            // 2. Increment claim count on the offer
-            const offerDocRef = doc(db, 'shops', shopId, 'offers', selectedOffer.id);
-            await updateDoc(offerDocRef, { claimCount: increment(1) });
-            
-            // 3. Generate QR for the claim
-            const claimId = claimDocRef.id;
-            const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(claimId)}`;
-            
-            // Set success data to show in the next dialog
-            setClaimSuccessData({qrCodeUrl, offerTitle: selectedOffer.title});
-            setSelectedOffer(null);
-
+            toast({ title: "Review Submitted!", description: "Thank you for your feedback." });
+            setReviewName('');
+            setReviewRating(0);
+            setReviewComment('');
         } catch (error) {
-            console.error("Error claiming offer:", error);
-            toast({ title: "Claim Failed", description: "Something went wrong. Please try again.", variant: "destructive" });
+            console.error("Error submitting review:", error);
+            toast({ title: "Submission Failed", variant: "destructive" });
         } finally {
-            setIsClaiming(false);
+            setIsSubmittingReview(false);
         }
     };
-    
-    const resetClaimFlow = () => {
-        setClaimSuccessData(null);
-        setCustomerName('');
-        setCustomerPhone('');
-        setCustomerEmail('');
-    }
 
 
     if (loading) {
@@ -231,9 +255,19 @@ export default function ShopOffersPage() {
                         <MapPin className="h-4 w-4"/>
                         <p>{shop.address}</p>
                     </div>
-                     {shop.businessType && (
-                        <Badge variant="outline" className="mt-2">{shop.businessType}</Badge>
-                     )}
+                    <div className="flex items-center gap-2 mt-2 justify-center sm:justify-start">
+                        {reviews.length > 0 && (
+                            <div className="flex items-center gap-2">
+                                <StarRating rating={averageRating} readOnly />
+                                <span className="text-sm font-semibold text-muted-foreground">
+                                    {averageRating.toFixed(1)} ({reviews.length} reviews)
+                                </span>
+                            </div>
+                        )}
+                         {shop.businessType && (
+                            <Badge variant="outline">{shop.businessType}</Badge>
+                         )}
+                    </div>
                 </div>
             </div>
         </header>
@@ -282,82 +316,63 @@ export default function ShopOffersPage() {
                     <p>This shop doesn't have any offers right now. Check back soon!</p>
                 </div>
             )}
-        </main>
-        
-         {/* Claim Offer Dialog */}
-         <Dialog open={!!selectedOffer} onOpenChange={(isOpen) => !isOpen && setSelectedOffer(null)}>
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle>Claim "{selectedOffer?.title}"</DialogTitle>
-                    <DialogDescription>
-                        Enter your details below to claim this offer. You'll receive a QR code to present at the counter.
-                    </DialogDescription>
-                </DialogHeader>
-                <form onSubmit={handleClaimOffer}>
-                    <div className="space-y-4 py-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="customer-name" className="flex items-center gap-2">
-                                <UserIcon className="h-4 w-4" /> Your Name*
-                            </Label>
-                            <Input id="customer-name" value={customerName} onChange={(e) => setCustomerName(e.target.value)} required />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="customer-phone" className="flex items-center gap-2">
-                                <Phone className="h-4 w-4" /> Your Phone Number*
-                            </Label>
-                            <Input id="customer-phone" type="tel" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} required />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="customer-email" className="flex items-center gap-2">
-                                <Mail className="h-4 w-4" /> Your Email (Optional)
-                            </Label>
-                            <Input id="customer-email" type="email" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} />
-                        </div>
-                    </div>
-                    <DialogFooter className="gap-2 sm:justify-between">
-                        <Button type="button" variant="outline" onClick={() => setSelectedOffer(null)}>Cancel</Button>
-                        <Button type="submit" disabled={isClaiming}>
-                            {isClaiming && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
-                            Confirm Claim
-                        </Button>
-                    </DialogFooter>
-                </form>
-            </DialogContent>
-        </Dialog>
-
-        {/* Claim Success Dialog */}
-        <Dialog open={!!claimSuccessData} onOpenChange={resetClaimFlow}>
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2">
-                        <CheckCircle className="h-6 w-6 text-green-500" />
-                        Offer Claimed Successfully!
-                    </DialogTitle>
-                     <DialogDescription>
-                        You have claimed the offer: "{claimSuccessData?.offerTitle}".
-                    </DialogDescription>
-                </DialogHeader>
-                <div className="py-4 flex flex-col items-center gap-4 text-center">
-                    <p className="text-sm text-muted-foreground">Show this QR code at the counter to redeem your offer.</p>
-                    {claimSuccessData?.qrCodeUrl && (
-                        <Image
-                            src={claimSuccessData.qrCodeUrl}
-                            alt="Your unique claim QR code"
-                            width={200}
-                            height={200}
-                            className="rounded-lg border p-2 bg-white"
-                        />
-                    )}
+            
+            {/* Reviews Section */}
+            <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-6">
+                    <h2 className="text-xl font-bold">Rate Your Experience</h2>
+                    <Card>
+                        <CardContent className="pt-6">
+                            <form onSubmit={handleReviewSubmit} className="space-y-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="review-name">Your Name</Label>
+                                    <Input id="review-name" value={reviewName} onChange={e => setReviewName(e.target.value)} required />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Your Rating</Label>
+                                    <StarRating rating={reviewRating} setRating={setReviewRating} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="review-comment">Your Comments</Label>
+                                    <Textarea id="review-comment" value={reviewComment} onChange={e => setReviewComment(e.target.value)} required />
+                                </div>
+                                <Button type="submit" disabled={isSubmittingReview}>
+                                    {isSubmittingReview && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
+                                    Submit Review
+                                </Button>
+                            </form>
+                        </CardContent>
+                    </Card>
                 </div>
-                <DialogFooter>
-                    <DialogClose asChild>
-                        <Button type="button" className="w-full">Done</Button>
-                    </DialogClose>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
+                 <div className="space-y-6">
+                    <h2 className="text-xl font-bold">What Customers Are Saying ({reviews.length})</h2>
+                    {reviews.length > 0 ? (
+                        <div className="space-y-4 max-h-[500px] overflow-y-auto pr-4">
+                            {reviews.map(review => (
+                                <Card key={review.id}>
+                                    <CardContent className="pt-6">
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <p className="font-semibold">{review.name}</p>
+                                                <p className="text-xs text-muted-foreground">{formatDistanceToNow(review.createdAt.toDate(), { addSuffix: true })}</p>
+                                            </div>
+                                            <StarRating rating={review.rating} readOnly />
+                                        </div>
+                                        <p className="mt-4 text-muted-foreground text-sm">{review.comment}</p>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-16 text-muted-foreground bg-background rounded-lg border">
+                            <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50"/>
+                            <h3 className="font-semibold">No Reviews Yet</h3>
+                            <p className="text-sm">Be the first to share your experience!</p>
+                        </div>
+                    )}
+                 </div>
+            </div>
+        </main>
     </div>
     );
 }
-
-    

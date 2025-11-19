@@ -108,6 +108,18 @@ service cloud.firestore {
           // Only owner can read logs for auditing.
           allow read, list: if isShopOwner(shopId);
       }
+      
+      // Reviews Subcollection
+      match /reviews/{reviewId} {
+        // Anyone can create a review
+        allow create: if true;
+        // Anyone can read reviews
+        allow read, list: if true;
+        // Only the shop owner can delete reviews
+        allow delete: if isShopOwner(shopId);
+        // No updates allowed
+        allow update: if false;
+      }
     }
     
     // --- Collection Group Queries ---
