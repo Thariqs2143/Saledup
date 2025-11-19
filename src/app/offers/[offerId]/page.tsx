@@ -6,7 +6,7 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { doc, getDoc, addDoc, collection, serverTimestamp, updateDoc, increment, Timestamp, query, where, getDocs, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
-import { Loader2, ArrowLeft, Building, Tag, Info, Phone, Mail, MapPin, User as UserIcon, CheckCircle, Clock, Calendar, Gem, Eye, Star, MessageSquare } from 'lucide-react';
+import { Loader2, ArrowLeft, Building, Tag, Info, Phone, Mail, MapPin, User as UserIcon, CheckCircle, Clock, Calendar, Gem, Eye, Star, MessageSquare, IndianRupee } from 'lucide-react';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
@@ -46,6 +46,7 @@ type Offer = {
     imageUrl?: string;
     discountType: string;
     discountValue?: string;
+    approximateValue?: number;
     terms?: string;
     createdAt: Timestamp;
     startDate?: Timestamp;
@@ -190,6 +191,7 @@ export default function OfferDetailPage() {
                 offerTitle: offer.title,
                 claimedAt: serverTimestamp(),
                 status: 'claimed',
+                approximateValue: offer.approximateValue || 0,
             });
 
             // Step 2: Increment the offer's claim count
@@ -344,6 +346,11 @@ export default function OfferDetailPage() {
                             {offer.discountValue && (
                                 <Badge variant='secondary' className="text-base py-1 px-3">
                                     {offer.discountValue}{offer.discountType === 'percentage' ? '%' : ''} OFF
+                                </Badge>
+                            )}
+                            {offer.approximateValue && offer.approximateValue > 0 && (
+                                <Badge variant='outline' className="text-base py-1 px-3 flex items-center">
+                                    <IndianRupee className="h-4 w-4 mr-1"/> Value: ~{offer.approximateValue}
                                 </Badge>
                             )}
                         </div>
@@ -559,5 +566,3 @@ export default function OfferDetailPage() {
         </div>
     );
 }
-
-    

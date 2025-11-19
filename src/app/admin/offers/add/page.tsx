@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Sparkles, Tag, Upload, ArrowLeft, Calendar as CalendarIcon, Clock } from 'lucide-react';
+import { Loader2, Sparkles, Tag, Upload, ArrowLeft, Calendar as CalendarIcon, Clock, IndianRupee } from 'lucide-react';
 import { addDoc, collection, doc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
 import { onAuthStateChanged, type User as AuthUser } from 'firebase/auth';
@@ -93,6 +93,7 @@ export default function AdminAddOfferPage() {
             description: formData.get('description') as string,
             discountType: formData.get('discountType') as string,
             discountValue: formData.get('discountValue') as string,
+            approximateValue: Number(formData.get('approximateValue')) || 0,
             terms: formData.get('terms') as string,
             imageUrl: imageUrl || `https://placehold.co/600x400?text=${(formData.get('title') as string).replace(/\s/g, '+')}`,
             isActive: true,
@@ -205,6 +206,14 @@ export default function AdminAddOfferPage() {
                             <Input id="discountValue" name="discountValue" placeholder="e.g., 20, 100, or 'Buy One Get One Free'" />
                              <p className="text-xs text-muted-foreground">Enter a number or a short text description.</p>
                         </div>
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="approximateValue">Approximate Order Value (₹) (Optional)</Label>
+                        <div className="relative">
+                            <IndianRupee className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input id="approximateValue" name="approximateValue" type="number" placeholder="e.g., 500" className="pl-10" />
+                        </div>
+                        <p className="text-xs text-muted-foreground">Helps us identify your high-spend customers. Enter the average amount a customer spends with this offer.</p>
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="terms">Terms & Conditions (Optional)</Label>

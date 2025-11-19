@@ -4,7 +4,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Loader2, Search, Users, Download, Mail, Tag, Calendar, Phone, CheckCircle, XCircle, Trash2, Filter } from "lucide-react";
+import { Loader2, Search, Users, Download, Mail, Tag, Calendar, Phone, CheckCircle, XCircle, Trash2, Filter, IndianRupee } from "lucide-react";
 import { collection, query, onSnapshot, orderBy, type Timestamp, doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
 import { format, formatDistanceToNow, subDays } from 'date-fns';
@@ -47,12 +47,13 @@ type Claim = {
     offerTitle: string;
     claimedAt: Timestamp;
     status: 'claimed' | 'redeemed';
+    approximateValue?: number;
 };
 
 type CustomerData = {
     lastClaim: Claim;
     totalClaims: number;
-    isNew: boolean;
+    totalSpend: number;
 };
 
 export default function AdminCustomersPage() {
@@ -60,7 +61,7 @@ export default function AdminCustomersPage() {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState<'all' | 'claimed' | 'redeemed'>('all');
-    const [segmentFilter, setSegmentFilter] = useState<'all' | 'new' | 'repeat'>('all');
+    const [segmentFilter, setSegmentFilter] = useState<'all' | 'new' | 'repeat' | 'high-spenders'>('all');
     const [authUser, setAuthUser] = useState<AuthUser | null>(null);
     const router = useRouter();
     const { toast } = useToast();
@@ -99,17 +100,19 @@ export default function AdminCustomersPage() {
         const customerMap = new Map<string, CustomerData>();
         allClaims.forEach(claim => {
             const existing = customerMap.get(claim.customerPhone);
+            const claimValue = claim.approximateValue || 0;
+
             if (existing) {
                 existing.totalClaims += 1;
+                existing.totalSpend += claimValue;
                 if (claim.claimedAt.toMillis() > existing.lastClaim.claimedAt.toMillis()) {
                     existing.lastClaim = claim;
                 }
-                existing.isNew = false; 
             } else {
                 customerMap.set(claim.customerPhone, {
                     lastClaim: claim,
                     totalClaims: 1,
-                    isNew: true,
+                    totalSpend: claimValue,
                 });
             }
         });
@@ -119,18 +122,17 @@ export default function AdminCustomersPage() {
     const filteredCustomers = useMemo(() => {
         return uniqueCustomers.filter(customerData => {
             const customer = customerData.lastClaim;
-            // Search term filter
             const searchMatch = customer.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 customer.customerEmail?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 customer.customerPhone?.toLowerCase().includes(searchTerm.toLowerCase());
 
-            // Status filter (on last claim)
             const statusMatch = statusFilter === 'all' || customer.status === statusFilter;
             
-            // Segment filter
+            const HIGH_SPENDER_THRESHOLD = 2000;
             const segmentMatch = segmentFilter === 'all' ||
-                (segmentFilter === 'new' && customerData.isNew) ||
-                (segmentFilter === 'repeat' && !customerData.isNew);
+                (segmentFilter === 'new' && customerData.totalClaims === 1) ||
+                (segmentFilter === 'repeat' && customerData.totalClaims > 1) ||
+                (segmentFilter === 'high-spenders' && customerData.totalSpend > HIGH_SPENDER_THRESHOLD);
 
             return searchMatch && statusMatch && segmentMatch;
         });
@@ -147,13 +149,14 @@ export default function AdminCustomersPage() {
         doc.text("Customer Report", 14, 15);
         doc.autoTable({
             startY: 20,
-            head: [['Customer Name', 'Phone', 'Last Offer Claimed', 'Last Active', 'Total Claims']],
+            head: [['Customer Name', 'Phone', 'Last Offer Claimed', 'Last Active', 'Total Claims', 'Total Spend (₹)']],
             body: filteredCustomers.map(c => [
                 c.lastClaim.customerName,
                 c.lastClaim.customerPhone,
                 c.lastClaim.offerTitle,
                 format(c.lastClaim.claimedAt.toDate(), 'PP'),
-                c.totalClaims
+                c.totalClaims,
+                c.totalSpend.toFixed(2),
             ]),
         });
         doc.save(`customer_report.pdf`);
@@ -246,10 +249,11 @@ export default function AdminCustomersPage() {
 
             <Tabs defaultValue="all" onValueChange={(value) => setSegmentFilter(value as any)} className="w-full">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                     <TabsList className="grid w-full sm:w-auto grid-cols-3">
+                     <TabsList className="grid w-full sm:w-auto grid-cols-4">
                         <TabsTrigger value="all">All Customers</TabsTrigger>
                         <TabsTrigger value="new">New</TabsTrigger>
                         <TabsTrigger value="repeat">Repeat</TabsTrigger>
+                        <TabsTrigger value="high-spenders">High Spenders</TabsTrigger>
                     </TabsList>
                     <div className="flex gap-2 w-full sm:w-auto">
                         <div className="relative flex-1">
@@ -290,13 +294,14 @@ export default function AdminCustomersPage() {
                     <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                         {filteredCustomers.map(customerData => {
                             const customer = customerData.lastClaim;
+                            const isNew = customerData.totalClaims === 1;
                             return (
                             <Card key={customer.id} className="flex flex-col">
                                 <CardHeader>
                                     <div className="flex justify-between items-start">
                                         <p className="font-bold text-lg">{customer.customerName}</p>
-                                        <Badge variant={customerData.isNew ? 'outline' : 'default'} className="whitespace-nowrap">
-                                            {customerData.isNew ? 'New' : 'Repeat'}
+                                        <Badge variant={isNew ? 'outline' : 'default'} className="whitespace-nowrap">
+                                            {isNew ? 'New' : 'Repeat'}
                                         </Badge>
                                     </div>
                                     <CardDescription className="text-sm">
@@ -319,6 +324,10 @@ export default function AdminCustomersPage() {
                                     <div className="flex items-center gap-3">
                                         <Users className="h-4 w-4 shrink-0" />
                                         <span>Total claims: {customerData.totalClaims}</span>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <IndianRupee className="h-4 w-4 shrink-0" />
+                                        <span>Total spend: ₹{customerData.totalSpend.toFixed(2)}</span>
                                     </div>
                                 </CardContent>
                                 <CardContent className="border-t pt-4 flex justify-end gap-2">

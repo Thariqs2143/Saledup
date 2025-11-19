@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Tag, Upload, ArrowLeft, Save, Trash2, Calendar as CalendarIcon, Clock } from 'lucide-react';
+import { Loader2, Tag, Upload, ArrowLeft, Save, Trash2, Calendar as CalendarIcon, Clock, IndianRupee } from 'lucide-react';
 import { doc, getDoc, updateDoc, deleteDoc, serverTimestamp, type Timestamp } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
 import { onAuthStateChanged, type User as AuthUser } from 'firebase/auth';
@@ -37,6 +37,7 @@ type Offer = {
     description: string;
     discountType: string;
     discountValue?: string;
+    approximateValue?: number;
     terms?: string;
     imageUrl?: string;
     // New scheduling fields
@@ -105,7 +106,7 @@ export default function AdminEditOfferPage() {
 
     }, [authUser, offerId, router, toast]);
 
-    const handleFieldChange = (field: keyof Offer, value: string) => {
+    const handleFieldChange = (field: keyof Offer, value: string | number) => {
         setOffer(prev => prev ? { ...prev, [field]: value } : null);
     };
 
@@ -272,6 +273,14 @@ export default function AdminEditOfferPage() {
                                 <Label htmlFor="discountValue">Discount Value</Label>
                                 <Input id="discountValue" name="discountValue" value={offer.discountValue || ''} onChange={e => handleFieldChange('discountValue', e.target.value)} placeholder="e.g., 20, 100, or 'Buy One Get One Free'" />
                             </div>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="approximateValue">Approximate Order Value (₹) (Optional)</Label>
+                             <div className="relative">
+                                <IndianRupee className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Input id="approximateValue" name="approximateValue" type="number" value={offer.approximateValue || ''} onChange={e => handleFieldChange('approximateValue', Number(e.target.value))} placeholder="e.g., 500" className="pl-10" />
+                            </div>
+                            <p className="text-xs text-muted-foreground">Helps us identify your high-spend customers.</p>
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="terms">Terms & Conditions (Optional)</Label>
