@@ -3,10 +3,10 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { doc, getDoc, addDoc, collection, serverTimestamp, updateDoc, increment, Timestamp, query, where, getDocs } from 'firebase/firestore';
+import { doc, getDoc, addDoc, collection, serverTimestamp, updateDoc, increment, Timestamp, query, where, getDocs, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
-import { Loader2, ArrowLeft, Building, Tag, Info, Phone, Mail, MapPin, User as UserIcon, CheckCircle, Clock, Calendar } from 'lucide-react';
+import { Loader2, ArrowLeft, Building, Tag, Info, Phone, Mail, MapPin, User as UserIcon, CheckCircle, Clock, Calendar, Gem } from 'lucide-react';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
@@ -89,7 +89,7 @@ export default function OfferDetailPage() {
 
     const [isClaiming, setIsClaiming] = useState(false);
     const [isClaimDialogOpen, setIsClaimDialogOpen] = useState(false);
-    const [claimSuccessData, setClaimSuccessData] = useState<{qrCodeUrl: string, offerTitle: string} | null>(null);
+    const [claimSuccessData, setClaimSuccessData] = useState<{qrCodeUrl: string, offerTitle: string, newPoints: number, totalPoints: number} | null>(null);
 
     const [customerName, setCustomerName] = useState('');
     const [customerPhone, setCustomerPhone] = useState('');
@@ -155,6 +155,7 @@ export default function OfferDetailPage() {
 
         setIsClaiming(true);
         try {
+            // Step 1: Create the claim document in the shop's subcollection
             const claimsCollectionRef = collection(db, 'shops', shopId, 'claims');
             const claimDocRef = await addDoc(claimsCollectionRef, {
                 customerName,
@@ -166,13 +167,46 @@ export default function OfferDetailPage() {
                 status: 'claimed',
             });
 
+            // Step 2: Increment the offer's claim count
             const offerDocRef = doc(db, 'shops', shopId, 'offers', offer.id);
             await updateDoc(offerDocRef, { claimCount: increment(1) });
             
+            // Step 3: Create/Update the global customer profile and award points
+            const customerDocRef = doc(db, 'customers', customerPhone);
+            const POINTS_PER_CLAIM = 10;
+            const customerSnap = await getDoc(customerDocRef);
+            let totalPoints = POINTS_PER_CLAIM;
+
+            if (customerSnap.exists()) {
+                await updateDoc(customerDocRef, { 
+                    saledupPoints: increment(POINTS_PER_CLAIM),
+                    lastActivity: serverTimestamp(),
+                    // Update name if it wasn't set before
+                    name: customerSnap.data().name || customerName,
+                    email: customerSnap.data().email || customerEmail
+                });
+                totalPoints = (customerSnap.data().saledupPoints || 0) + POINTS_PER_CLAIM;
+            } else {
+                await setDoc(customerDocRef, {
+                    phone: customerPhone,
+                    name: customerName,
+                    email: customerEmail,
+                    saledupPoints: POINTS_PER_CLAIM,
+                    createdAt: serverTimestamp(),
+                    lastActivity: serverTimestamp()
+                });
+            }
+            
+            // Step 4: Prepare data for the success dialog
             const claimId = claimDocRef.id;
             const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(claimId)}`;
             
-            setClaimSuccessData({qrCodeUrl, offerTitle: offer.title});
+            setClaimSuccessData({
+                qrCodeUrl, 
+                offerTitle: offer.title,
+                newPoints: POINTS_PER_CLAIM,
+                totalPoints: totalPoints
+            });
             setIsClaimDialogOpen(false);
 
         } catch (error) {
@@ -400,6 +434,10 @@ export default function OfferDetailPage() {
                         </DialogDescription>
                     </DialogHeader>
                     <div className="py-4 flex flex-col items-center gap-4 text-center">
+                        <div className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 p-3 rounded-lg text-center">
+                            <p className="font-bold">You earned {claimSuccessData?.newPoints} Saledup Points!</p>
+                            <p className="text-sm">Your new balance is <span className="font-bold">{claimSuccessData?.totalPoints}</span> points.</p>
+                        </div>
                         <p className="text-sm text-muted-foreground">Show this QR code at the counter to redeem your offer.</p>
                         {claimSuccessData?.qrCodeUrl && (
                             <Image
@@ -410,6 +448,11 @@ export default function OfferDetailPage() {
                                 className="rounded-lg border p-2 bg-white"
                             />
                         )}
+                         <Link href="/my-points" className="w-full">
+                            <Button variant="outline" className="w-full">
+                                <Gem className="mr-2 h-4 w-4"/>Check My Points Balance
+                            </Button>
+                        </Link>
                     </div>
                     <DialogFooter>
                         <DialogClose asChild>
@@ -421,3 +464,5 @@ export default function OfferDetailPage() {
         </div>
     );
 }
+
+    
