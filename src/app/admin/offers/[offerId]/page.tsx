@@ -270,7 +270,7 @@ export default function AdminEditOfferPage() {
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="discountValue">Discount Value</Label>
-                                <Input id="discountValue" name="discountValue" value={offer.discountValue || ''} onChange={e => handleFieldChange('discountValue', e.target.value)} />
+                                <Input id="discountValue" name="discountValue" value={offer.discountValue || ''} onChange={e => handleFieldChange('discountValue', e.target.value)} placeholder="e.g., 20, 100, or 'Buy One Get One Free'" />
                             </div>
                         </div>
                         <div className="space-y-2">

@@ -6,7 +6,7 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { doc, getDoc, addDoc, collection, serverTimestamp, updateDoc, increment, Timestamp, query, where, getDocs, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
-import { Loader2, ArrowLeft, Building, Tag, Info, Phone, Mail, MapPin, User as UserIcon, CheckCircle, Clock, Calendar, Gem } from 'lucide-react';
+import { Loader2, ArrowLeft, Building, Tag, Info, Phone, Mail, MapPin, User as UserIcon, CheckCircle, Clock, Calendar, Gem, Eye } from 'lucide-react';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
@@ -272,9 +272,16 @@ export default function OfferDetailPage() {
                         className="aspect-[16/6] object-cover w-full"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-                    <div className="absolute bottom-0 left-0 p-6">
-                        <h1 className="text-3xl font-bold text-white">{shop.shopName}</h1>
-                        <p className="text-base text-white/80">{shop.businessType}</p>
+                    <div className="absolute bottom-0 left-0 p-6 flex items-end justify-between w-full">
+                        <div>
+                            <h1 className="text-3xl font-bold text-white">{shop.shopName}</h1>
+                            <p className="text-base text-white/80">{shop.businessType}</p>
+                        </div>
+                         <Button asChild variant="secondary">
+                            <Link href={`/shops/${shopId}`}>
+                                <Eye className="mr-2 h-4 w-4"/> View Shop
+                            </Link>
+                        </Button>
                     </div>
                 </div>
                 
