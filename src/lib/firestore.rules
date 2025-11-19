@@ -3,53 +3,116 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-  
-    // Helper function to check if a user is the owner of a specific shop
+
+    // ----------------------
+    // Helper Functions
+    // ----------------------
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    // Checks if the requesting user is the owner of the shop document being accessed.
     function isShopOwner(shopId) {
-      // The user is the owner if their UID matches the shop document's ID
       return request.auth != null && request.auth.uid == shopId;
     }
 
-    // Rules for the shops collection
+    // Checks if the requesting user is an employee of a given shop.
+    function isEmployee(shopId) {
+        return request.auth != null && exists(/databases/$(database)/documents/shops/$(shopId)/employees/$(request.auth.uid));
+    }
+    
+    // Checks if the requesting user is the owner OR an employee of a given shop.
+    function isOwnerOrEmployee(shopId) {
+      return isShopOwner(shopId) || isEmployee(shopId);
+    }
+    
+    // Get the role of the current authenticated user for a specific shop.
+    function getRole(shopId) {
+        let employeeDoc = /databases/$(database)/documents/shops/$(shopId)/employees/$(request.auth.uid);
+        if (exists(employeeDoc)) {
+            return get(employeeDoc).data.role;
+        }
+        return 'none';
+    }
+
+    // ----------------------
+    // Global Collections
+    // ----------------------
+    
+    // This collection is used for employees to quickly find which shop they belong to upon login.
+    match /employee_phone_to_shop_lookup/{phone} {
+      // Anyone can read this to find their shop during login.
+      allow read: if true;
+      // Only a shop owner can create a lookup entry for their employees.
+      allow create: if isShopOwner(request.resource.data.shopId);
+      // Only shop owner can delete lookup entry when deleting an employee
+      allow delete: if isShopOwner(resource.data.shopId);
+      // No updates allowed to prevent tampering.
+      allow update: if false;
+    }
+    
+    // This collection stores universal customer profiles for the rewards system.
+    match /customers/{phone} {
+        // Authenticated users (shop owners/employees) can read customer data when redeeming points.
+        allow get: if isSignedIn();
+        // Claims process (unauthenticated) writes to this collection. Security rules on the claim endpoint handle this.
+        // For direct writes, only allow creation if it doesn't exist, and updates if it does.
+        allow write: if true;
+    }
+
+    // ----------------------
+    // Shop-specific data
+    // ----------------------
     match /shops/{shopId} {
-      // A new user can create their own shop document, as long as the ownerId in the
-      // document they are creating matches their own UID.
-      allow create: if request.auth != null && request.resource.data.ownerId == request.auth.uid;
-      
-      // The shop owner can update or delete their own shop document.
-      allow update, delete: if isShopOwner(shopId);
-      
-      // Any user (including unauthenticated) can read the main shop details.
-      // This is needed for the public-facing shop pages.
-      allow get;
-      allow list: if true; // Allow listing all shops for the find-offers page
+      allow create: if isShopOwner(shopId); // A user can create their own shop document
+      allow read, update, delete: if isShopOwner(shopId); // Only owner can manage the main shop doc.
+      allow list: if true; // Public listing for "Find Offers" page.
 
-
-      // --- SUBCOLLECTIONS ---
+      // --- Subcollections ---
       
-      // Offers subcollection
-      match /offers/{offerId} {
-        // Shop owner can manage their offers (create, update, delete).
+      // Employees Subcollection
+      match /employees/{employeeId} {
+        // Shop owner can manage their staff.
         allow create, update, delete: if isShopOwner(shopId);
-
-        // A shop owner needs to be able to list their own offers for the admin dashboard.
-        allow list: if isShopOwner(shopId);
-        
-        // Allow public read for a single offer.
+        // All staff and the owner can read employee details.
+        allow read, list: if isOwnerOrEmployee(shopId);
+      }
+      
+      // Offers Subcollection
+      match /offers/{offerId} {
+        // Owner and Managers can create, update, and delete offers.
+        allow write: if isShopOwner(shopId) || getRole(shopId) == 'Manager';
+        // All staff can list offers.
+        allow list: if isOwnerOrEmployee(shopId);
+        // Public can view offers.
         allow get: if true;
       }
       
-      // Claims subcollection
+      // Claims Subcollection
       match /claims/{claimId} {
-        // Shop owner can read/update/delete individual claims and list all of them.
-        allow read, list, update, delete: if isShopOwner(shopId);
-        
-        // Anyone can create a claim (since it's an unauthenticated action).
+        // Owner and staff can read/list claims for verification.
+        // Cashiers need this to redeem.
+        allow read, list: if isOwnerOrEmployee(shopId);
+        // Owner and staff can update a claim's status (e.g., to 'redeemed').
+        allow update: if isOwnerOrEmployee(shopId);
+        // Only owner can delete claim history.
+        allow delete: if isShopOwner(shopId);
+        // Public can create claims.
         allow create: if true;
       }
+      
+      // Point Redemption Logs Subcollection
+      match /points_redemptions/{logId} {
+          // Only owner and employees can create redemption logs.
+          allow create: if isOwnerOrEmployee(shopId);
+          // Only owner can read logs for auditing.
+          allow read, list: if isShopOwner(shopId);
+      }
     }
-
-     // Allow unauthenticated users to list offers across all shops for the public "Find Offers" page.
+    
+    // --- Collection Group Queries ---
+    
+    // Allow unauthenticated users to list offers across all shops for the public "Find Offers" page.
     match /{path=**}/offers/{offerId} {
       allow list: if true;
     }

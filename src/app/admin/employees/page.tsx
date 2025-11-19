@@ -20,7 +20,7 @@ import { Loader2, PlusCircle, Search, User, Trash2, Edit } from "lucide-react";
 import Link from 'next/link';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { collection, onSnapshot, query, orderBy, doc, deleteDoc } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, doc, deleteDoc, writeBatch } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { onAuthStateChanged, type User as AuthUser } from 'firebase/auth';
@@ -78,6 +78,11 @@ export default function AdminEmployeesPage() {
               operation: 'list'
             });
             errorEmitter.emit('permission-error', permissionError);
+            toast({
+                title: "Permission Denied",
+                description: "You do not have permission to view employees.",
+                variant: "destructive"
+            });
             setLoading(false);
         });
 
@@ -99,19 +104,31 @@ export default function AdminEmployeesPage() {
         }
     };
     
-    const handleDeleteEmployee = async (employeeId: string) => {
+    const handleDeleteEmployee = async (employee: User) => {
         if (!authUser) return;
 
-        const employeeDocRef = doc(db, 'shops', authUser.uid, 'employees', employeeId);
+        const employeeDocRef = doc(db, 'shops', authUser.uid, 'employees', employee.id);
+        const phoneLookupRef = doc(db, 'employee_phone_to_shop_lookup', employee.phone);
+
         try {
-            await deleteDoc(employeeDocRef);
+            const batch = writeBatch(db);
+            batch.delete(employeeDocRef);
+            batch.delete(phoneLookupRef);
+            await batch.commit();
+            
             toast({ title: "Employee Removed", description: "The employee has been removed from your shop." });
         } catch (error) {
-             const permissionError = new FirestorePermissionError({
+            console.error("Error deleting employee:", error);
+            const permissionError = new FirestorePermissionError({
               path: employeeDocRef.path,
               operation: 'delete'
             });
             errorEmitter.emit('permission-error', permissionError);
+            toast({
+                title: "Error",
+                description: "Could not remove employee.",
+                variant: "destructive",
+            });
         }
     };
 
@@ -201,7 +218,7 @@ export default function AdminEmployeesPage() {
                                                     </AlertDialogHeader>
                                                     <AlertDialogFooter>
                                                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                        <AlertDialogAction onClick={() => handleDeleteEmployee(emp.id)} className="bg-destructive hover:bg-destructive/90">
+                                                        <AlertDialogAction onClick={() => handleDeleteEmployee(emp)} className="bg-destructive hover:bg-destructive/90">
                                                             Delete Employee
                                                         </AlertDialogAction>
                                                     </AlertDialogFooter>

@@ -16,6 +16,8 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
 import { Label } from "@/components/ui/label";
+import { errorEmitter } from '@/lib/error-emitter';
+import { FirestorePermissionError } from '@/lib/errors';
 
 type Offer = {
     id: string;
@@ -55,7 +57,12 @@ export default function AdminOffersPage() {
             setLoading(false);
         }, (error) => {
             console.error("Error fetching offers: ", error);
-            toast({ title: "Error", description: "Could not fetch your offers.", variant: "destructive"});
+             const permissionError = new FirestorePermissionError({
+              path: `shops/${authUser.uid}/offers`,
+              operation: 'list'
+            });
+            errorEmitter.emit('permission-error', permissionError);
+            toast({ title: "Permission Denied", description: "You don't have permission to view offers.", variant: "destructive"});
             setLoading(false);
         });
 
@@ -73,7 +80,13 @@ export default function AdminOffersPage() {
             });
         } catch (error) {
             console.error("Error updating status:", error);
-            toast({ title: "Update Failed", variant: "destructive" });
+            const permissionError = new FirestorePermissionError({
+              path: offerDocRef.path,
+              operation: 'update',
+              requestResourceData: { isActive: !currentStatus }
+            });
+            errorEmitter.emit('permission-error', permissionError);
+            toast({ title: "Update Failed", description: "You don't have permission to change the status.", variant: "destructive" });
         }
     };
 

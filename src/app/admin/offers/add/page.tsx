@@ -128,6 +128,7 @@ export default function AdminAddOfferPage() {
                   requestResourceData: offerData,
                 });
                 errorEmitter.emit('permission-error', permissionError);
+                 toast({ title: "Permission Denied", description: "You don't have permission to create offers.", variant: "destructive" });
             })
             .finally(() => {
                 setLoading(false);

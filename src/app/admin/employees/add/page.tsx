@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, UserPlus, ArrowLeft, Phone } from 'lucide-react';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, doc, setDoc } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
 import { onAuthStateChanged, type User as AuthUser } from 'firebase/auth';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -69,19 +69,35 @@ export default function AdminAddEmployeePage() {
         const employeesCollectionRef = collection(db, "shops", authUser.uid, "employees");
         
         try {
-            await addDoc(employeesCollectionRef, employeeData);
+            // Firestore security rules will handle permissions.
+            const employeeDocRef = await addDoc(employeesCollectionRef, employeeData);
+
+            // Create a lookup document for the employee to find their shop
+            const phoneLookupRef = doc(db, 'employee_phone_to_shop_lookup', phone);
+            await setDoc(phoneLookupRef, { 
+                shopId: authUser.uid,
+                employeeDocId: employeeDocRef.id,
+                uid: null, // Will be filled when employee completes onboarding
+            });
+            
             toast({
                 title: "Employee Invited!",
-                description: `${name} has been added. They will need to complete onboarding.`,
+                description: `${name} has been added. They will need to log in to complete onboarding.`,
             });
             router.push('/admin/employees');
         } catch (error) {
+            console.error("Error adding employee:", error);
             const permissionError = new FirestorePermissionError({
               path: employeesCollectionRef.path,
               operation: 'create',
               requestResourceData: employeeData,
             });
             errorEmitter.emit('permission-error', permissionError);
+             toast({
+                title: "Error",
+                description: "Could not add employee. Please check your permissions.",
+                variant: "destructive",
+            });
         } finally {
             setLoading(false);
         }
@@ -129,6 +145,12 @@ export default function AdminAddEmployeePage() {
                                 placeholder="10-digit mobile number"
                                 required
                                 className="flex-1"
+                                pattern="[0-9]{10}"
+                                title="Please enter a 10-digit mobile number"
+                                onChange={(e) => {
+                                    const value = e.target.value.replace(/\D/g, '').slice(0,10);
+                                    e.target.value = value;
+                                }}
                             />
                         </div>
                     </div>
