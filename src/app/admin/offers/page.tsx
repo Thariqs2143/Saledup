@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, PlusCircle, Tag, Check, X, Users, Eye, Edit } from "lucide-react";
+import { Loader2, PlusCircle, Tag, Check, X, Users, Eye, Edit, BarChart3 } from "lucide-react";
 import Link from 'next/link';
 import { collection, onSnapshot, query, orderBy, doc, updateDoc, type Timestamp } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
@@ -25,6 +25,7 @@ type Offer = {
     imageUrl?: string;
     isActive: boolean;
     claimCount: number;
+    viewCount?: number;
     createdAt: Timestamp;
 };
 
@@ -97,12 +98,20 @@ export default function AdminOffersPage() {
                     <h1 className="text-3xl font-bold tracking-tight">Manage Offers</h1>
                     <p className="text-muted-foreground">Here you can create, view, and manage all your offers.</p>
                 </div>
-                <Button asChild>
-                    <Link href="/admin/offers/add">
-                        <PlusCircle className="mr-2 h-4 w-4" />
-                        Create New Offer
-                    </Link>
-                </Button>
+                 <div className="flex gap-2">
+                    <Button asChild>
+                        <Link href="/admin/offers/add">
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Create New Offer
+                        </Link>
+                    </Button>
+                     <Button asChild variant="outline">
+                        <Link href="/admin/analytics">
+                           <BarChart3 className="mr-2 h-4 w-4" />
+                            View Analytics
+                        </Link>
+                    </Button>
+                </div>
             </div>
             
             {loading ? (
@@ -145,9 +154,15 @@ export default function AdminOffersPage() {
                                 <p className="text-xs text-muted-foreground mt-1">
                                     Created {formatDistanceToNow(offer.createdAt.toDate(), { addSuffix: true })}
                                 </p>
-                                <div className="flex items-center gap-2 mt-4 text-sm text-muted-foreground">
-                                    <Users className="h-4 w-4" />
-                                    <span>{offer.claimCount || 0} claims</span>
+                               <div className="flex items-center justify-between gap-4 mt-4 text-sm text-muted-foreground">
+                                    <div className="flex items-center gap-2">
+                                        <Users className="h-4 w-4" />
+                                        <span>{offer.claimCount || 0} claims</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Eye className="h-4 w-4" />
+                                        <span>{offer.viewCount || 0} views</span>
+                                    </div>
                                 </div>
                             </CardContent>
                             <CardFooter className="p-4 border-t flex justify-between items-center gap-2">

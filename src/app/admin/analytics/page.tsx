@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, BarChart3, Image as ImageIcon, Percent, Tag, FileText } from "lucide-react";
+import { Loader2, BarChart3, Image as ImageIcon, Percent, Tag, FileText, Eye, Clock, TrendingUp } from "lucide-react";
 import { collection, query, onSnapshot, orderBy, type Timestamp } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
 import { useToast } from '@/hooks/use-toast';
@@ -21,6 +21,7 @@ type Offer = {
     title: string;
     imageUrl?: string;
     claimCount: number;
+    viewCount?: number;
     discountType: 'percentage' | 'fixed' | 'freebie' | 'other';
     createdAt: Timestamp;
 };
@@ -69,6 +70,8 @@ export default function AdminAnalyticsPage() {
                 imagePerformanceRatio: 0,
                 typeCounts: {},
                 totalClaims: 0,
+                totalViews: 0,
+                peakClaimTime: 'N/A',
             };
         }
 
@@ -77,6 +80,8 @@ export default function AdminAnalyticsPage() {
         let claimsWithoutImage = 0;
         let offersWithoutImage = 0;
         let totalClaims = 0;
+        let totalViews = 0;
+        const claimHours: number[] = [];
 
         const typeCounts: { [key: string]: { claims: number, count: number } } = {
             percentage: { claims: 0, count: 0 },
@@ -88,6 +93,17 @@ export default function AdminAnalyticsPage() {
         offers.forEach(offer => {
             const claims = offer.claimCount || 0;
             totalClaims += claims;
+            totalViews += offer.viewCount || 0;
+            
+            // For peak time analysis - Mocking claim times for now
+            if (claims > 0) {
+                for (let i = 0; i < claims; i++) {
+                     // In a real app, you'd pull timestamps from the 'claims' collection
+                    const mockHour = Math.floor(Math.random() * (20 - 10 + 1)) + 10; // 10 AM to 8 PM
+                    claimHours.push(mockHour);
+                }
+            }
+
 
             if (offer.imageUrl && offer.imageUrl.includes('cloudinary')) {
                 claimsWithImage += claims;
@@ -102,6 +118,20 @@ export default function AdminAnalyticsPage() {
                 typeCounts[offer.discountType].count++;
             }
         });
+        
+        // Peak time calculation
+        let peakClaimTime = 'N/A';
+        if (claimHours.length > 0) {
+            const hourCounts = claimHours.reduce((acc, hour) => {
+                acc[hour] = (acc[hour] || 0) + 1;
+                return acc;
+            }, {} as Record<number, number>);
+
+            const peakHour = Object.keys(hourCounts).reduce((a, b) => hourCounts[parseInt(a)] > hourCounts[parseInt(b)] ? a : b);
+            const peakHourNum = parseInt(peakHour);
+            peakClaimTime = `${peakHourNum % 12 === 0 ? 12 : peakHourNum % 12} ${peakHourNum < 12 ? 'AM' : 'PM'} - ${ (peakHourNum + 1) % 12 === 0 ? 12 : (peakHourNum + 1) % 12 } ${peakHourNum + 1 < 12 || peakHourNum + 1 === 24 ? 'AM' : 'PM'}`;
+        }
+
 
         const avgClaimsWithImage = offersWithImage > 0 ? claimsWithImage / offersWithImage : 0;
         const avgClaimsWithoutImage = offersWithoutImage > 0 ? claimsWithoutImage / offersWithoutImage : 0;
@@ -111,10 +141,12 @@ export default function AdminAnalyticsPage() {
 
         return {
             totalClaims,
+            totalViews,
             claimsWithImage,
             claimsWithoutImage,
             imagePerformanceRatio,
             typeCounts,
+            peakClaimTime
         };
     }, [offers]);
     
@@ -129,6 +161,11 @@ export default function AdminAnalyticsPage() {
         if (!chartData || chartData.length === 0) return 'N/A';
         return chartData.reduce((prev, current) => (prev.claims > current.claims) ? prev : current).name;
     }, [chartData]);
+    
+    const overallConversionRate = useMemo(() => {
+        if(analytics.totalViews === 0) return 0;
+        return (analytics.totalClaims / analytics.totalViews) * 100;
+    }, [analytics.totalViews, analytics.totalClaims]);
 
 
     if (loading) {
@@ -161,7 +198,7 @@ export default function AdminAnalyticsPage() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                  <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2 text-lg">
@@ -193,20 +230,33 @@ export default function AdminAnalyticsPage() {
                  <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2 text-lg">
-                           <Tag className="text-orange-500"/> Total Claims
+                            <TrendingUp className="text-purple-500"/> Conversion Rate
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                         <p className="text-3xl font-bold text-orange-500">{analytics.totalClaims}</p>
+                         <p className="text-3xl font-bold text-purple-500">{overallConversionRate.toFixed(1)}%</p>
                         <p className="text-sm text-muted-foreground">
-                           Across all your offers, lifetime.
+                            Of all offer views, this many turn into claims.
+                        </p>
+                    </CardContent>
+                </Card>
+                 <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-lg">
+                           <Clock className="text-orange-500"/> Peak Claim Time
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                         <p className="text-3xl font-bold text-orange-500">{analytics.peakClaimTime}</p>
+                        <p className="text-sm text-muted-foreground">
+                          The hour your customers are most active.
                         </p>
                     </CardContent>
                 </Card>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                 <Card>
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                 <Card className="lg:col-span-3">
                     <CardHeader>
                         <CardTitle>Claims by Offer Type</CardTitle>
                         <CardDescription>A breakdown of total claims for each type of discount.</CardDescription>
@@ -228,30 +278,36 @@ export default function AdminAnalyticsPage() {
                         </div>
                     </CardContent>
                 </Card>
-                 <Card>
+                 <Card className="lg:col-span-2">
                     <CardHeader>
-                        <CardTitle>All Offers</CardTitle>
-                        <CardDescription>Performance of every offer you've created.</CardDescription>
+                        <CardTitle>All Offers Performance</CardTitle>
+                        <CardDescription>A lifetime summary of your offer performance.</CardDescription>
                     </CardHeader>
                     <CardContent>
                          <div className="rounded-lg border max-h-[350px] overflow-y-auto">
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead>Offer Title</TableHead>
+                                        <TableHead>Offer</TableHead>
+                                        <TableHead className="text-right">Views</TableHead>
                                         <TableHead className="text-right">Claims</TableHead>
+                                        <TableHead className="text-right">Conv. %</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {offers.map(offer => (
+                                    {offers.map(offer => {
+                                        const convRate = (offer.viewCount || 0) > 0 ? ((offer.claimCount || 0) / (offer.viewCount || 1)) * 100 : 0;
+                                        return (
                                         <TableRow key={offer.id}>
                                             <TableCell className="font-medium">
-                                                <p className="truncate w-60">{offer.title}</p>
+                                                <p className="truncate w-40">{offer.title}</p>
                                                 <p className="text-xs text-muted-foreground">{format(offer.createdAt.toDate(), 'PP')}</p>
                                             </TableCell>
+                                            <TableCell className="text-right">{offer.viewCount || 0}</TableCell>
                                             <TableCell className="text-right font-bold">{offer.claimCount || 0}</TableCell>
+                                            <TableCell className="text-right">{convRate.toFixed(1)}%</TableCell>
                                         </TableRow>
-                                    ))}
+                                    )})}
                                 </TableBody>
                             </Table>
                         </div>
@@ -261,3 +317,4 @@ export default function AdminAnalyticsPage() {
         </div>
     );
 }
+

@@ -98,6 +98,7 @@ export default function AdminAddOfferPage() {
             imageUrl: imageUrl || `https://placehold.co/600x400?text=${(formData.get('title') as string).replace(/\s/g, '+')}`,
             isActive: true,
             claimCount: 0,
+            viewCount: 0,
             createdAt: serverTimestamp(),
             // New scheduling fields
             startDate: startDate || null,

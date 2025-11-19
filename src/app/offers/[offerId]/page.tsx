@@ -133,8 +133,10 @@ export default function OfferDetailPage() {
         const fetchData = async () => {
             setLoading(true);
             try {
-                // Fetch Offer
+                // Fetch Offer and increment view count
                 const offerDocRef = doc(db, 'shops', shopId, 'offers', offerId);
+                await updateDoc(offerDocRef, { viewCount: increment(1) }); // Increment view count
+                
                 const offerSnap = await getDoc(offerDocRef);
                 if (!offerSnap.exists()) {
                     throw new Error("Offer not found.");
@@ -569,5 +571,3 @@ export default function OfferDetailPage() {
         </div>
     );
 }
-
-    
