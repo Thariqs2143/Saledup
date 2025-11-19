@@ -192,6 +192,9 @@ export default function OfferDetailPage() {
                 claimedAt: serverTimestamp(),
                 status: 'claimed',
                 approximateValue: offer.approximateValue || 0,
+                // Add discount info for hunter logic
+                discountType: offer.discountType,
+                discountValue: offer.discountValue
             });
 
             // Step 2: Increment the offer's claim count
@@ -566,3 +569,5 @@ export default function OfferDetailPage() {
         </div>
     );
 }
+
+    

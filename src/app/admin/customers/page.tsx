@@ -2,9 +2,9 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Loader2, Search, Users, Download, Mail, Tag, Calendar, Phone, CheckCircle, XCircle, Trash2, Filter, IndianRupee } from "lucide-react";
+import { Loader2, Search, Users, Download, Mail, Tag, Calendar, Phone, CheckCircle, XCircle, Trash2, Filter, IndianRupee, Percent } from "lucide-react";
 import { collection, query, onSnapshot, orderBy, type Timestamp, doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
 import { format, formatDistanceToNow, subDays } from 'date-fns';
@@ -45,23 +45,33 @@ type Claim = {
     customerEmail?: string;
     customerPhone: string;
     offerTitle: string;
+    offerId: string;
     claimedAt: Timestamp;
     status: 'claimed' | 'redeemed';
     approximateValue?: number;
+    discountType?: 'percentage' | 'fixed' | 'freebie' | 'other';
+    discountValue?: string;
 };
 
 type CustomerData = {
+    phone: string;
+    name: string;
     lastClaim: Claim;
     totalClaims: number;
     totalSpend: number;
+    isCouponHunter: boolean;
 };
+
+const HIGH_SPENDER_THRESHOLD = 2000; // Total spend > 2000 INR
+const COUPON_HUNTER_DISCOUNT_PERCENTAGE = 40; // Offer discount >= 40%
+const COUPON_HUNTER_RATIO = 0.75; // >= 75% of claims are high-discount
 
 export default function AdminCustomersPage() {
     const [allClaims, setAllClaims] = useState<Claim[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState<'all' | 'claimed' | 'redeemed'>('all');
-    const [segmentFilter, setSegmentFilter] = useState<'all' | 'new' | 'repeat' | 'high-spenders'>('all');
+    const [segmentFilter, setSegmentFilter] = useState<'all' | 'new' | 'repeat' | 'high-spenders' | 'coupon-hunters'>('all');
     const [authUser, setAuthUser] = useState<AuthUser | null>(null);
     const router = useRouter();
     const { toast } = useToast();
@@ -97,42 +107,62 @@ export default function AdminCustomersPage() {
     }, [authUser, toast]);
     
     const uniqueCustomers = useMemo(() => {
-        const customerMap = new Map<string, CustomerData>();
+        const customerMap = new Map<string, { claims: Claim[], totalSpend: number }>();
         allClaims.forEach(claim => {
             const existing = customerMap.get(claim.customerPhone);
             const claimValue = claim.approximateValue || 0;
 
             if (existing) {
-                existing.totalClaims += 1;
+                existing.claims.push(claim);
                 existing.totalSpend += claimValue;
-                if (claim.claimedAt.toMillis() > existing.lastClaim.claimedAt.toMillis()) {
-                    existing.lastClaim = claim;
-                }
             } else {
                 customerMap.set(claim.customerPhone, {
-                    lastClaim: claim,
-                    totalClaims: 1,
+                    claims: [claim],
                     totalSpend: claimValue,
                 });
             }
         });
-        return Array.from(customerMap.values());
+
+        const processedCustomers: CustomerData[] = [];
+        customerMap.forEach((data, phone) => {
+            const sortedClaims = data.claims.sort((a, b) => b.claimedAt.toMillis() - a.claimedAt.toMillis());
+            const lastClaim = sortedClaims[0];
+
+            // Coupon Hunter Logic
+            let highDiscountClaims = 0;
+            sortedClaims.forEach(c => {
+                 if(c.discountType === 'percentage' && parseFloat(c.discountValue || '0') >= COUPON_HUNTER_DISCOUNT_PERCENTAGE) {
+                    highDiscountClaims++;
+                 }
+            });
+            const isCouponHunter = sortedClaims.length > 2 && (highDiscountClaims / sortedClaims.length) >= COUPON_HUNTER_RATIO;
+            
+            processedCustomers.push({
+                phone,
+                name: lastClaim.customerName,
+                lastClaim: lastClaim,
+                totalClaims: sortedClaims.length,
+                totalSpend: data.totalSpend,
+                isCouponHunter: isCouponHunter,
+            });
+        });
+
+        return processedCustomers;
     }, [allClaims]);
 
     const filteredCustomers = useMemo(() => {
-        return uniqueCustomers.filter(customerData => {
-            const customer = customerData.lastClaim;
-            const searchMatch = customer.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                customer.customerEmail?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                customer.customerPhone?.toLowerCase().includes(searchTerm.toLowerCase());
+        return uniqueCustomers.filter(customer => {
+            const searchMatch = customer.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                customer.lastClaim.customerEmail?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                customer.phone?.toLowerCase().includes(searchTerm.toLowerCase());
 
-            const statusMatch = statusFilter === 'all' || customer.status === statusFilter;
+            const statusMatch = statusFilter === 'all' || customer.lastClaim.status === statusFilter;
             
-            const HIGH_SPENDER_THRESHOLD = 2000;
             const segmentMatch = segmentFilter === 'all' ||
-                (segmentFilter === 'new' && customerData.totalClaims === 1) ||
-                (segmentFilter === 'repeat' && customerData.totalClaims > 1) ||
-                (segmentFilter === 'high-spenders' && customerData.totalSpend > HIGH_SPENDER_THRESHOLD);
+                (segmentFilter === 'new' && customer.totalClaims === 1) ||
+                (segmentFilter === 'repeat' && customer.totalClaims > 1) ||
+                (segmentFilter === 'high-spenders' && customer.totalSpend > HIGH_SPENDER_THRESHOLD) ||
+                (segmentFilter === 'coupon-hunters' && customer.isCouponHunter);
 
             return searchMatch && statusMatch && segmentMatch;
         });
@@ -205,7 +235,7 @@ export default function AdminCustomersPage() {
              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">Your Customers</h1>
-                    <p className="text-muted-foreground">View, manage, and engage with your customer base.</p>
+                    <p className="text-muted-foreground">View, segment, and engage with your customer base.</p>
                 </div>
                  <div className="flex gap-2 w-full sm:w-auto">
                     <Dialog>
@@ -249,11 +279,12 @@ export default function AdminCustomersPage() {
 
             <Tabs defaultValue="all" onValueChange={(value) => setSegmentFilter(value as any)} className="w-full">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                     <TabsList className="grid w-full sm:w-auto grid-cols-4">
-                        <TabsTrigger value="all">All Customers</TabsTrigger>
+                     <TabsList className="grid w-full sm:w-auto grid-cols-3 sm:grid-cols-5">
+                        <TabsTrigger value="all">All</TabsTrigger>
                         <TabsTrigger value="new">New</TabsTrigger>
                         <TabsTrigger value="repeat">Repeat</TabsTrigger>
                         <TabsTrigger value="high-spenders">High Spenders</TabsTrigger>
+                        <TabsTrigger value="coupon-hunters">Coupon Hunters</TabsTrigger>
                     </TabsList>
                     <div className="flex gap-2 w-full sm:w-auto">
                         <div className="relative flex-1">
@@ -292,52 +323,59 @@ export default function AdminCustomersPage() {
                     </div>
                 ) : (
                     <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                        {filteredCustomers.map(customerData => {
-                            const customer = customerData.lastClaim;
-                            const isNew = customerData.totalClaims === 1;
+                        {filteredCustomers.map(customer => {
+                            const isNew = customer.totalClaims === 1;
+                            const isHighSpender = customer.totalSpend > HIGH_SPENDER_THRESHOLD;
                             return (
-                            <Card key={customer.id} className="flex flex-col">
+                            <Card key={customer.phone} className="flex flex-col">
                                 <CardHeader>
                                     <div className="flex justify-between items-start">
-                                        <p className="font-bold text-lg">{customer.customerName}</p>
-                                        <Badge variant={isNew ? 'outline' : 'default'} className="whitespace-nowrap">
-                                            {isNew ? 'New' : 'Repeat'}
-                                        </Badge>
+                                        <p className="font-bold text-lg">{customer.name}</p>
+                                        <div className="flex gap-1.5">
+                                            <Badge variant={isNew ? 'outline' : 'default'} className="whitespace-nowrap">
+                                                {isNew ? 'New' : 'Repeat'}
+                                            </Badge>
+                                             {customer.isCouponHunter && (
+                                                <Badge variant="secondary" className="whitespace-nowrap">
+                                                    <Tag className="mr-1 h-3 w-3"/> Hunter
+                                                </Badge>
+                                            )}
+                                        </div>
                                     </div>
                                     <CardDescription className="text-sm">
-                                        Last claimed "{customer.offerTitle}"
+                                        Last claimed "{customer.lastClaim.offerTitle}"
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-3 text-sm text-muted-foreground flex-1">
                                     <div className="flex items-center gap-3">
                                         <Phone className="h-4 w-4 shrink-0" />
-                                        <span>{customer.customerPhone}</span>
+                                        <span>{customer.phone}</span>
                                     </div>
                                     <div className="flex items-center gap-3">
                                         <Mail className="h-4 w-4 shrink-0" />
-                                        <span className="truncate">{customer.customerEmail || 'No email'}</span>
+                                        <span className="truncate">{customer.lastClaim.customerEmail || 'No email'}</span>
                                     </div>
                                     <div className="flex items-center gap-3">
                                         <Calendar className="h-4 w-4 shrink-0" />
-                                        <span>Last active: {formatDistanceToNow(customer.claimedAt.toDate(), { addSuffix: true })}</span>
+                                        <span>Last active: {formatDistanceToNow(customer.lastClaim.claimedAt.toDate(), { addSuffix: true })}</span>
                                     </div>
                                     <div className="flex items-center gap-3">
                                         <Users className="h-4 w-4 shrink-0" />
-                                        <span>Total claims: {customerData.totalClaims}</span>
+                                        <span>Total claims: {customer.totalClaims}</span>
                                     </div>
-                                    <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-3 font-medium">
                                         <IndianRupee className="h-4 w-4 shrink-0" />
-                                        <span>Total spend: ₹{customerData.totalSpend.toFixed(2)}</span>
+                                        <span className={isHighSpender ? 'text-primary' : ''}>Total spend: ₹{customer.totalSpend.toFixed(2)}</span>
                                     </div>
                                 </CardContent>
-                                <CardContent className="border-t pt-4 flex justify-end gap-2">
-                                     <Button size="sm" variant={customer.status === 'claimed' ? 'default' : 'secondary'} onClick={() => handleStatusToggle(customer.id, customer.status)}>
-                                        {customer.status === 'claimed' ? <CheckCircle className="mr-2 h-4 w-4"/> : <XCircle className="mr-2 h-4 w-4"/> }
-                                        {customer.status === 'claimed' ? 'Mark Redeemed' : 'Mark Claimed'}
+                                <CardFooter className="border-t pt-4 flex justify-end gap-2">
+                                     <Button size="sm" variant={customer.lastClaim.status === 'claimed' ? 'default' : 'secondary'} onClick={() => handleStatusToggle(customer.lastClaim.id, customer.lastClaim.status)}>
+                                        {customer.lastClaim.status === 'claimed' ? <CheckCircle className="mr-2 h-4 w-4"/> : <XCircle className="mr-2 h-4 w-4"/> }
+                                        {customer.lastClaim.status === 'claimed' ? 'Mark Redeemed' : 'Mark Claimed'}
                                     </Button>
                                     <AlertDialog>
                                         <AlertDialogTrigger asChild>
-                                            <Button size="sm" variant="destructive">
+                                            <Button size="sm" variant="destructive" className="h-9 w-9 p-0">
                                                 <Trash2 className="h-4 w-4"/>
                                             </Button>
                                         </AlertDialogTrigger>
@@ -345,16 +383,16 @@ export default function AdminCustomersPage() {
                                             <AlertDialogHeader>
                                                 <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                                                 <AlertDialogDescription>
-                                                    This will permanently delete the latest claim for {customer.customerName}. This cannot be undone. To delete all data for this customer, contact support.
+                                                    This will permanently delete the latest claim for {customer.name}. This cannot be undone. To delete all data for this customer, contact support.
                                                 </AlertDialogDescription>
                                             </AlertDialogHeader>
                                             <AlertDialogFooter>
                                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                <AlertDialogAction onClick={() => handleDeleteClaim(customer.id)} className="bg-destructive hover:bg-destructive/90">Delete Claim</AlertDialogAction>
+                                                <AlertDialogAction onClick={() => handleDeleteClaim(customer.lastClaim.id)} className="bg-destructive hover:bg-destructive/90">Delete Claim</AlertDialogAction>
                                             </AlertDialogFooter>
                                         </AlertDialogContent>
                                     </AlertDialog>
-                                </CardContent>
+                                </CardFooter>
                             </Card>
                         )})}
                     </div>
@@ -364,3 +402,5 @@ export default function AdminCustomersPage() {
         </div>
     );
 }
+
+    
