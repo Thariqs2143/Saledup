@@ -92,57 +92,6 @@ export default function AdminCustomersPage() {
     const [broadcastMessage, setBroadcastMessage] = useState('');
     
     const scrollRef = useRef<HTMLDivElement | null>(null);
-    const isDown = useRef(false);
-    const startX = useRef(0);
-    const scrollLeft = useRef(0);
-
-    // Drag-to-scroll (pointer events) for touch + mouse
-    useEffect(() => {
-        const el = scrollRef.current;
-        if (!el) return;
-
-        const onPointerDown = (e: PointerEvent) => {
-            isDown.current = true;
-            try { el.setPointerCapture(e.pointerId); } catch {}
-            startX.current = e.clientX - el.getBoundingClientRect().left;
-            scrollLeft.current = el.scrollLeft;
-            el.classList.add("dragging");
-        };
-
-        const onPointerMove = (e: PointerEvent) => {
-            if (!isDown.current) return;
-            const x = e.clientX - el.getBoundingClientRect().left;
-            const walk = (x - startX.current) * 1; // adjust multiplier for speed
-            el.scrollLeft = scrollLeft.current - walk;
-        };
-
-        const onPointerUp = (e: PointerEvent) => {
-            isDown.current = false;
-            try { el.releasePointerCapture(e.pointerId); } catch {}
-            el.classList.remove("dragging");
-        };
-
-        el.addEventListener("pointerdown", onPointerDown);
-        el.addEventListener("pointermove", onPointerMove);
-        el.addEventListener("pointerup", onPointerUp);
-
-        return () => {
-            el.removeEventListener("pointerdown", onPointerDown);
-            window.removeEventListener("pointermove", onPointerMove);
-            window.removeEventListener("pointerup", onPointerUp);
-        };
-    }, []);
-
-    // Auto-center the selected chip in the scroll container
-    useEffect(() => {
-        const el = scrollRef.current;
-        if (!el) return;
-        const active = el.querySelector<HTMLElement>("[data-state='active']");
-        if (!active) return;
-
-        const offset = active.offsetLeft + active.offsetWidth / 2 - el.clientWidth / 2;
-        el.scrollTo({ left: offset, behavior: "smooth" });
-    }, [segmentFilter]);
 
      useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -337,23 +286,18 @@ export default function AdminCustomersPage() {
                         </Select>
                     </div>
 
-                    <div className="relative w-full">
-                        <div className="pointer-events-none absolute left-0 top-0 h-full w-4 bg-gradient-to-r from-background to-transparent z-10" />
-                        <div className="pointer-events-none absolute right-0 top-0 h-full w-4 bg-gradient-to-l from-background to-transparent z-10" />
-                        
-                        <div ref={scrollRef} className="overflow-x-auto scrollbar-hide">
-                            <TabsList className="relative bg-transparent p-0 m-0 border-none w-max inline-flex gap-3 whitespace-nowrap px-1">
-                                {customerSegments.map((segment) => (
-                                    <TabsTrigger
-                                        key={segment.value}
-                                        value={segment.value}
-                                        className="text-sm py-2 px-4 rounded-full transition-all duration-300 border shadow-sm shrink-0 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg bg-background/60 backdrop-blur-sm hover:scale-[1.02]"
-                                    >
-                                        {segment.label}
-                                    </TabsTrigger>
-                                ))}
-                            </TabsList>
-                        </div>
+                    <div className="overflow-x-auto scrollbar-hide">
+                         <TabsList className="bg-transparent p-0 m-0 border-none w-max inline-flex gap-2 whitespace-nowrap px-1">
+                            {customerSegments.map((segment) => (
+                                <TabsTrigger
+                                    key={segment.value}
+                                    value={segment.value}
+                                    className="px-4 py-2 text-sm font-semibold rounded-full border border-border bg-card data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary"
+                                >
+                                    {segment.label}
+                                </TabsTrigger>
+                            ))}
+                        </TabsList>
                     </div>
 
                      <div className="flex gap-2 w-full md:hidden">
@@ -487,3 +431,5 @@ export default function AdminCustomersPage() {
         </div>
     );
 }
+
+    
