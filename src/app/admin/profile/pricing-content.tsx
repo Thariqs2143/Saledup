@@ -94,22 +94,23 @@ export default function PricingPageContent() {
 
   return (
     <div className="space-y-12">
-        <div className="text-center">
-            <h1 className="text-3xl font-extrabold tracking-tight">Find the Perfect Plan for Your Business</h1>
-            <p className="mt-2 max-w-2xl mx-auto text-muted-foreground">
+        <div>
+            <h1 className="text-3xl font-extrabold tracking-tight">Pricing & Billing</h1>
+             <p className="mt-2 text-muted-foreground">
                 Simple, transparent pricing. Choose the plan that fits your needs and start growing today.
             </p>
-            <div className="mt-6 flex items-center justify-center gap-4">
-                <span className={cn("font-medium", !isYearly && "text-primary")}>Monthly</span>
-                <Switch
-                    checked={isYearly}
-                    onCheckedChange={setIsYearly}
-                    aria-label="Toggle between monthly and yearly pricing"
-                />
-                <span className={cn("font-medium", isYearly && "text-primary")}>
-                    Yearly <span className="text-green-600 font-semibold"> (Save 15%)</span>
-                </span>
-            </div>
+        </div>
+        
+        <div className="mt-6 flex items-center justify-start gap-4">
+            <span className={cn("font-medium", !isYearly && "text-primary")}>Monthly</span>
+            <Switch
+                checked={isYearly}
+                onCheckedChange={setIsYearly}
+                aria-label="Toggle between monthly and yearly pricing"
+            />
+            <span className={cn("font-medium", isYearly && "text-primary")}>
+                Yearly <span className="text-green-600 font-semibold"> (Save 15%)</span>
+            </span>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">

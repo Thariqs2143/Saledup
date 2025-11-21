@@ -286,14 +286,18 @@ export default function AdminCustomersPage() {
                         </Select>
                     </div>
 
-                    <div className="overflow-x-auto scrollbar-hide">
+                    <div className="grid grid-cols-3 gap-2 overflow-x-auto scrollbar-hide">
                         <TabsList className="bg-transparent p-0 m-0 border-none inline-flex gap-2">
                             {customerSegments.map((segment) => (
                                 <TabsTrigger
                                     key={segment.value}
                                     value={segment.value}
-                                    className="px-4 py-2 text-sm font-semibold rounded-full border border-border bg-card data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary shrink-0 basis-1/3 sm:basis-auto"
-                                >
+                                    className="
+                                    px-4 py-2 text-sm font-semibold rounded-full border-2 border-border bg-card
+                                    data-[state=active]:bg-primary data-[state=active]:text-primary-foreground 
+                                    data-[state=active]:border-primary 
+                                    shrink-0 basis-1/3 sm:basis-auto
+                                  " >
                                     {segment.label}
                                 </TabsTrigger>
                             ))}
