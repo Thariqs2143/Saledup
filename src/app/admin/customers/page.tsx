@@ -243,6 +243,18 @@ export default function AdminCustomersPage() {
 
     return (
         <div className="space-y-6">
+             <style jsx>{`
+                @keyframes marquee {
+                    from { transform: translateX(0); }
+                    to { transform: translateX(-50%); }
+                }
+                .scrolling-wrapper {
+                    animation: marquee 30s linear infinite;
+                }
+                .scrolling-wrapper-container:hover .scrolling-wrapper {
+                    animation-play-state: paused;
+                }
+            `}</style>
              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">Customers</h1>
@@ -252,8 +264,8 @@ export default function AdminCustomersPage() {
 
             <Tabs value={segmentFilter} onValueChange={(value) => setSegmentFilter(value as any)}>
                 <div className="space-y-4">
-                    <div className="flex items-center gap-2">
-                         <div className="relative flex-1">
+                    <div className="flex flex-col sm:flex-row items-center gap-2">
+                         <div className="relative flex-1 w-full">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                             <Input
                                 type="search"
@@ -264,7 +276,7 @@ export default function AdminCustomersPage() {
                             />
                         </div>
                         <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as any)}>
-                            <SelectTrigger className="w-auto">
+                            <SelectTrigger className="w-full sm:w-auto">
                                 <SelectValue placeholder="Filter by status" />
                             </SelectTrigger>
                             <SelectContent>
@@ -275,19 +287,19 @@ export default function AdminCustomersPage() {
                         </Select>
                     </div>
                      <div className="flex flex-col md:flex-row gap-4 items-center">
-                        <Carousel className="w-full md:flex-1" opts={{ align: "start", dragFree: true }}>
-                            <CarouselContent>
-                                <TabsList className="bg-transparent p-0 m-0 border-none">
-                                    {customerSegments.map((segment) => (
-                                        <CarouselItem key={segment.value} className="basis-1/3 sm:basis-1/4 md:basis-auto">
-                                            <TabsTrigger value={segment.value} className="text-xs sm:text-sm py-2 px-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full transition-all duration-300 border">
-                                                <span>{segment.label}</span>
-                                            </TabsTrigger>
-                                        </CarouselItem>
-                                    ))}
-                                </TabsList>
-                            </CarouselContent>
-                        </Carousel>
+                        <div className="w-full md:flex-1 relative overflow-hidden scrolling-wrapper-container [mask-image:_linear-gradient(to_right,transparent_0,_black_128px,_black_calc(100%-128px),transparent_100%)]">
+                            <TabsList className="bg-transparent p-0 m-0 border-none flex w-max scrolling-wrapper">
+                                {[...customerSegments, ...customerSegments].map((segment, index) => (
+                                    <TabsTrigger 
+                                        key={`${segment.value}-${index}`} 
+                                        value={segment.value} 
+                                        className="text-xs sm:text-sm py-2 px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full transition-all duration-300 border whitespace-nowrap mx-2"
+                                    >
+                                        <span>{segment.label}</span>
+                                    </TabsTrigger>
+                                ))}
+                            </TabsList>
+                        </div>
                          <div className="hidden md:flex items-center gap-2">
                             <Dialog>
                                 <DialogTrigger asChild>
@@ -466,3 +478,4 @@ export default function AdminCustomersPage() {
     
 
     
+
