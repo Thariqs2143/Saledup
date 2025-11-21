@@ -253,7 +253,7 @@ export default function AdminCustomersPage() {
             <Tabs value={segmentFilter} onValueChange={(value) => setSegmentFilter(value as any)}>
                 <div className="space-y-4">
                     <div className="flex flex-row items-center gap-2">
-                         <div className="relative flex-1 w-full">
+                         <div className="relative flex-1">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                             <Input
                                 type="search"
@@ -274,13 +274,13 @@ export default function AdminCustomersPage() {
                             </SelectContent>
                         </Select>
                     </div>
-                    <div className="flex flex-col md:flex-row gap-4">
-                         <TabsList className="grid w-full grid-cols-5 h-auto border-2">
+                     <div className="flex flex-col md:flex-row gap-4 items-center">
+                        <TabsList className="grid w-full grid-cols-5 h-auto border-2">
                             {customerSegments.map((segment) => {
                                 const Icon = segment.icon;
                                 return (
                                     <TabsTrigger key={segment.value} value={segment.value} className="text-xs sm:text-sm py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-md transition-all duration-300">
-                                        <Icon className="h-5 w-5 lg:mr-2" /><span className="hidden lg:inline">{segment.label}</span>
+                                        <span>{segment.label}</span>
                                     </TabsTrigger>
                                 )
                             })}
