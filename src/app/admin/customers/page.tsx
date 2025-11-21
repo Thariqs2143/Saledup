@@ -73,8 +73,11 @@ const customerSegments = [
     { value: 'all', label: 'All' },
     { value: 'new', label: 'New' },
     { value: 'repeat', label: 'Repeat' },
+    { value: 'loyal', label: 'Loyal (5+ claims)'},
     { value: 'high-spenders', label: 'High Spenders' },
     { value: 'coupon-hunters', label: 'Coupon Hunters' },
+    { value: 'recent-7d', label: 'Active in 7 days'},
+    { value: 'inactive-30d', label: 'Inactive (30d)'},
 ];
 
 export default function AdminCustomersPage() {
@@ -82,7 +85,7 @@ export default function AdminCustomersPage() {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState<'all' | 'claimed' | 'redeemed'>('all');
-    const [segmentFilter, setSegmentFilter] = useState<'all' | 'new' | 'repeat' | 'high-spenders' | 'coupon-hunters'>('all');
+    const [segmentFilter, setSegmentFilter] = useState<'all' | 'new' | 'repeat' | 'high-spenders' | 'coupon-hunters' | 'loyal' | 'recent-7d' | 'inactive-30d'>('all');
     const [authUser, setAuthUser] = useState<AuthUser | null>(null);
     const router = useRouter();
     const { toast } = useToast();
@@ -222,11 +225,17 @@ export default function AdminCustomersPage() {
 
             const statusMatch = statusFilter === 'all' || customer.lastClaim.status === statusFilter;
             
+            const thirtyDaysAgo = subDays(new Date(), 30);
+            const sevenDaysAgo = subDays(new Date(), 7);
+
             const segmentMatch = segmentFilter === 'all' ||
                 (segmentFilter === 'new' && customer.totalClaims === 1) ||
                 (segmentFilter === 'repeat' && customer.totalClaims > 1) ||
+                (segmentFilter === 'loyal' && customer.totalClaims >= 5) ||
                 (segmentFilter === 'high-spenders' && customer.totalSpend > HIGH_SPENDER_THRESHOLD) ||
-                (segmentFilter === 'coupon-hunters' && customer.isCouponHunter);
+                (segmentFilter === 'coupon-hunters' && customer.isCouponHunter) ||
+                (segmentFilter === 'recent-7d' && customer.lastClaim.claimedAt.toDate() >= sevenDaysAgo) ||
+                (segmentFilter === 'inactive-30d' && customer.lastClaim.claimedAt.toDate() < thirtyDaysAgo);
 
             return searchMatch && statusMatch && segmentMatch;
         });
@@ -333,7 +342,7 @@ export default function AdminCustomersPage() {
                         <div className="pointer-events-none absolute right-0 top-0 h-full w-4 bg-gradient-to-l from-background to-transparent z-10" />
                         
                         <TabsList className="relative bg-transparent p-0 m-0 border-none w-full">
-                            <div ref={scrollRef} className="inline-flex gap-3 whitespace-nowrap px-1 overflow-x-auto scrollbar-hide">
+                            <div ref={scrollRef} className="inline-flex gap-3 whitespace-nowrap px-1 overflow-x-auto">
                                 {customerSegments.map((segment) => (
                                     <TabsTrigger
                                         key={segment.value}
