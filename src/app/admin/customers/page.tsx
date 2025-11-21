@@ -250,7 +250,7 @@ export default function AdminCustomersPage() {
 
              <div className="space-y-4">
                 <div className="flex items-center gap-2">
-                    <div className="relative flex-1 w-full">
+                    <div className="relative flex-1">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                         <Input
                             type="search"
@@ -277,15 +277,15 @@ export default function AdminCustomersPage() {
                             align: "start",
                             dragFree: true,
                         }}
-                        className="w-full sm:flex-1"
+                        className="w-full"
                     >
                         <CarouselContent>
                             {customerSegments.map((segment) => (
-                                <CarouselItem key={segment.value} className="basis-auto">
+                                <CarouselItem key={segment.value} className="basis-1/3.5">
                                     <Button
                                         variant={segmentFilter === segment.value ? 'default' : 'outline'}
                                         onClick={() => setSegmentFilter(segment.value as any)}
-                                        className="shrink-0"
+                                        className="w-full"
                                     >
                                         {segment.label}
                                     </Button>
@@ -293,44 +293,43 @@ export default function AdminCustomersPage() {
                             ))}
                         </CarouselContent>
                     </Carousel>
-                    
-                    <div className="flex gap-2 w-full sm:w-auto shrink-0">
-                        <Dialog>
-                            <DialogTrigger asChild>
-                                <Button variant="outline" className="flex-1">
-                                    <Mail className="mr-2 h-4 w-4"/> Send Broadcast
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                                <DialogHeader>
-                                    <DialogTitle>Send WhatsApp Broadcast</DialogTitle>
-                                    <DialogDescription>
-                                        Compose a message to send to your customers. This will open WhatsApp with the message ready to be forwarded. You can send it to individuals or broadcast lists you've created in WhatsApp.
-                                    </DialogDescription>
-                                </DialogHeader>
-                                <div className="space-y-4 py-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="broadcast-message">Message</Label>
-                                        <Textarea
-                                            id="broadcast-message"
-                                            placeholder="E.g., Hi! Don't miss our weekend special: 20% off all coffee. Come visit us!"
-                                            value={broadcastMessage}
-                                            onChange={(e) => setBroadcastMessage(e.target.value)}
-                                            rows={5}
-                                        />
-                                    </div>
+                </div>
+                 <div className="flex gap-2 w-full">
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <Button variant="outline" className="flex-1">
+                                <Mail className="mr-2 h-4 w-4"/> Send Broadcast
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Send WhatsApp Broadcast</DialogTitle>
+                                <DialogDescription>
+                                    Compose a message to send to your customers. This will open WhatsApp with the message ready to be forwarded. You can send it to individuals or broadcast lists you've created in WhatsApp.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <div className="space-y-4 py-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="broadcast-message">Message</Label>
+                                    <Textarea
+                                        id="broadcast-message"
+                                        placeholder="E.g., Hi! Don't miss our weekend special: 20% off all coffee. Come visit us!"
+                                        value={broadcastMessage}
+                                        onChange={(e) => setBroadcastMessage(e.target.value)}
+                                        rows={5}
+                                    />
                                 </div>
-                                <DialogFooter>
-                                    <Button onClick={handleSendBroadcast}>
-                                        Send Message via WhatsApp
-                                    </Button>
-                                </DialogFooter>
-                            </DialogContent>
-                        </Dialog>
-                        <Button onClick={handleExportPDF} variant="outline" className="flex-1">
-                            <Download className="mr-2 h-4 w-4"/> Export PDF
-                        </Button>
-                    </div>
+                            </div>
+                            <DialogFooter>
+                                <Button onClick={handleSendBroadcast}>
+                                    Send Message via WhatsApp
+                                </Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+                    <Button onClick={handleExportPDF} variant="outline" className="flex-1">
+                        <Download className="mr-2 h-4 w-4"/> Export PDF
+                    </Button>
                 </div>
             </div>
 
@@ -429,6 +428,8 @@ export default function AdminCustomersPage() {
     
 
       
+
+    
 
     
 
