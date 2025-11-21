@@ -112,7 +112,7 @@ export default function RedeemOfferPage() {
         return () => {
             cancelAnimationFrame(animationFrameId);
         };
-    }, [hasCameraPermission, isDialogOpen, isProcessing]);
+    }, [hasCameraPermission, isDialogOpen, isProcessing, activeTab]);
     
     const handleQrCodeScanned = async (scannedData: string) => {
         if (!authUser) return;
@@ -128,28 +128,19 @@ export default function RedeemOfferPage() {
                  } else {
                       toast({ variant: 'destructive', title: 'Invalid Offer QR', description: 'This QR code is not a valid offer claim for your shop.' });
                  }
+                 setIsProcessing(false);
                  return; // Exit after handling
             }
 
             // Logic for Voucher Claims
             if (activeTab === 'vouchers') {
-                const url = new URL(scannedData);
-                const pathParts = url.pathname.split('/');
-                const voucherId = pathParts[pathParts.length - 1];
-                const shopId = url.searchParams.get('shopId');
-
-                if (shopId !== authUser.uid) {
-                    toast({ variant: 'destructive', title: 'Invalid Voucher QR', description: 'This gift voucher is not valid for your shop.' });
-                    return;
-                }
-
-                const voucherDocRef = doc(db, 'shops', authUser.uid, 'vouchers', voucherId);
+                const voucherDocRef = doc(db, 'shops', authUser.uid, 'vouchers', scannedData);
                 const voucherSnap = await getDoc(voucherDocRef);
 
                 if (voucherSnap.exists()) {
                     setScannedVoucher({ id: voucherSnap.id, ...voucherSnap.data() } as GiftVoucher);
                 } else {
-                    toast({ variant: 'destructive', title: 'Voucher Not Found', description: 'The scanned voucher does not exist.' });
+                    toast({ variant: 'destructive', title: 'Voucher Not Found', description: 'The scanned voucher does not exist or is not for this shop.' });
                 }
             }
 
