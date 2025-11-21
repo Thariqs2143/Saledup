@@ -118,7 +118,7 @@ export default function GenerateQrPage() {
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
                 <Card className="w-full transition-all duration-300 ease-out hover:shadow-lg">
-                    <CardHeader>
+                    <CardHeader className="hidden lg:block">
                         <CardTitle className="flex items-center gap-2"><QrCode /> Permanent Shop QR Code</CardTitle>
                         <CardDescription>
                             This single QR code links customers directly to your shop's offer page.
