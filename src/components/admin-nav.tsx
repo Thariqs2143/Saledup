@@ -39,9 +39,10 @@ const iconMap: { [key: string]: any } = {
 
 type ShopProfile = {
   shopName?: string;
-  name?: string; // Owner's name
+  ownerName?: string;
   email?: string;
   imageUrl?: string;
+  ownerImageUrl?: string;
   fallback?: string;
 }
 
@@ -69,14 +70,6 @@ export function AdminNav({ navItems, profile, isDesktop }: AdminNavProps) {
       toast({ title: 'Logout Failed', variant: 'destructive' });
     }
   };
-
-  const activePath = useMemo(() => {
-    const matches = navItems.filter((item) => pathname.startsWith(item.href));
-    if (matches.length === 0) return null;
-    return matches.reduce((longest, current) =>
-      current.href.length > longest.href.length ? current : longest
-    ).href;
-  }, [pathname, navItems]);
 
   const NavContent = () => (
     <>
@@ -124,12 +117,12 @@ export function AdminNav({ navItems, profile, isDesktop }: AdminNavProps) {
               <Link href="/admin/profile">
                 <div className="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-muted">
                     <Avatar className="h-10 w-10 border-2 border-primary">
-                    <AvatarImage src={profile?.imageUrl} />
+                    <AvatarImage src={profile?.imageUrl ?? profile?.ownerImageUrl} />
                     <AvatarFallback>{profile?.fallback || 'A'}</AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col overflow-hidden">
                     <span className="text-sm font-bold text-foreground truncate">
-                        {profile?.name || 'Shop Owner'}
+                        {profile?.ownerName || 'Shop Owner'}
                     </span>
                     <span className="text-xs text-muted-foreground truncate font-bold">
                         {profile?.shopName || 'My Business'}

@@ -60,6 +60,19 @@ service cloud.firestore {
         allow write: if true;
     }
 
+    // This collection stores all gift vouchers, accessible via their unique ID.
+    match /vouchers/{voucherId} {
+      // Shop owners can create vouchers for their shop.
+      allow create: if isShopOwner(request.resource.data.shopId);
+      // Public can read for verification page. Staff can read for redemption.
+      allow read: if true; 
+      // Only staff of the specific shop can update a voucher (to redeem it).
+      allow update: if isOwnerOrEmployee(resource.data.shopId);
+      // Only the shop owner can delete a voucher.
+      allow delete: if isShopOwner(resource.data.shopId);
+    }
+
+
     // ----------------------
     // Shop-specific data
     // ----------------------

@@ -25,11 +25,6 @@ type OfferClaim = {
     claimedAt: Timestamp;
 };
 
-// Customer Type
-type Customer = {
-    saledupPoints: number;
-}
-
 // Gift Voucher Type
 type GiftVoucher = {
     id: string;
@@ -49,8 +44,6 @@ export default function RedeemOfferPage() {
     // State for Dialogs
     const [scannedOffer, setScannedOffer] = useState<OfferClaim | null>(null);
     const [scannedVoucher, setScannedVoucher] = useState<GiftVoucher | null>(null);
-    const [customer, setCustomer] = useState<Customer | null>(null);
-    const [redeemAmount, setRedeemAmount] = useState<number>(0);
     
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -121,20 +114,15 @@ export default function RedeemOfferPage() {
         };
     }, [hasCameraPermission, isDialogOpen, isProcessing]);
     
-    const handleQrCodeScanned = async (scannedId: string) => {
+    const handleQrCodeScanned = async (scannedData: string) => {
         if (!authUser) return;
         setIsProcessing(true);
 
         try {
-            if (activeTab === 'offers') {
-                const claimDocRef = doc(db, 'shops', authUser.uid, 'claims', scannedId);
-                const claimSnap = await getDoc(claimDocRef);
-                if (claimSnap.exists()) {
-                    setScannedOffer({ id: claimSnap.id, ...claimSnap.data() } as OfferClaim);
-                } else {
-                     toast({ variant: 'destructive', title: 'Invalid Offer QR', description: 'This QR code is not a valid offer claim for your shop.' });
-                }
-            } else if (activeTab === 'vouchers') {
+            // Check if it's a verification URL
+            if (scannedData.includes('/vouchers/')) {
+                 const urlParts = scannedData.split('/');
+                 const scannedId = urlParts[urlParts.length - 1];
                  const voucherDocRef = doc(db, 'vouchers', scannedId);
                  const voucherSnap = await getDoc(voucherDocRef);
                  if (voucherSnap.exists() && voucherSnap.data().shopId === authUser.uid) {
@@ -142,6 +130,14 @@ export default function RedeemOfferPage() {
                  } else {
                      toast({ variant: 'destructive', title: 'Invalid Voucher QR', description: 'This gift voucher is not valid for your shop.' });
                  }
+            } else if (activeTab === 'offers') {
+                const claimDocRef = doc(db, 'shops', authUser.uid, 'claims', scannedData);
+                const claimSnap = await getDoc(claimDocRef);
+                if (claimSnap.exists()) {
+                    setScannedOffer({ id: claimSnap.id, ...claimSnap.data() } as OfferClaim);
+                } else {
+                     toast({ variant: 'destructive', title: 'Invalid Offer QR', description: 'This QR code is not a valid offer claim for your shop.' });
+                }
             }
         } catch (error) {
             toast({ variant: 'destructive', title: 'Error', description: 'Could not verify the QR code.' });
@@ -177,7 +173,11 @@ export default function RedeemOfferPage() {
 
         try {
             const voucherDocRef = doc(db, 'vouchers', scannedVoucher.id);
-            await updateDoc(voucherDocRef, { status: 'redeemed' });
+            await updateDoc(voucherDocRef, { 
+                status: 'redeemed',
+                redeemedAt: serverTimestamp(),
+                redeemedBy: authUser.uid // Track which staff member redeemed
+            });
 
             toast({
                 title: 'Voucher Redeemed!',
@@ -195,9 +195,7 @@ export default function RedeemOfferPage() {
     const closeDialog = () => {
         setScannedOffer(null);
         setScannedVoucher(null);
-        setCustomer(null);
         setIsProcessing(false);
-        setRedeemAmount(0);
     };
 
     return (
@@ -293,13 +291,16 @@ export default function RedeemOfferPage() {
                                 <DialogDescription>Verify the voucher details before redeeming.</DialogDescription>
                             </DialogHeader>
                              <div className="py-4 space-y-4">
-                                {scannedVoucher.status !== 'valid' ? (
+                                {scannedVoucher.status === 'redeemed' ? (
                                      <Alert variant="destructive">
                                         <XCircle className="h-4 w-4"/>
-                                        <AlertTitle>Voucher Not Valid</AlertTitle>
-                                        <AlertDescription>
-                                            This voucher is '{scannedVoucher.status}'. It cannot be redeemed.
-                                        </AlertDescription>
+                                        <AlertTitle>Voucher Already Redeemed</AlertTitle>
+                                    </Alert>
+                                ) : scannedVoucher.status === 'expired' ? (
+                                    <Alert variant="destructive">
+                                        <XCircle className="h-4 w-4"/>
+                                        <AlertTitle>Voucher Expired</AlertTitle>
+                                        <AlertDescription>This voucher expired on {scannedVoucher.expiresAt.toDate().toLocaleDateString()}.</AlertDescription>
                                     </Alert>
                                 ) : (
                                      <Alert>
