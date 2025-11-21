@@ -244,15 +244,18 @@ export default function AdminCustomersPage() {
     return (
         <div className="space-y-6">
              <style jsx>{`
-                @keyframes marquee {
-                    from { transform: translateX(0); }
-                    to { transform: translateX(-50%); }
+                .scroll-container {
+                    overflow-x: auto;
+                    -webkit-overflow-scrolling: touch;
                 }
-                .scrolling-wrapper {
-                    animation: marquee 30s linear infinite;
+                /* Hide scrollbar for Chrome, Safari and Opera */
+                .scroll-container::-webkit-scrollbar {
+                    display: none;
                 }
-                .scrolling-wrapper-container:hover .scrolling-wrapper {
-                    animation-play-state: paused;
+                /* Hide scrollbar for IE, Edge and Firefox */
+                .scroll-container {
+                    -ms-overflow-style: none;  /* IE and Edge */
+                    scrollbar-width: none;  /* Firefox */
                 }
             `}</style>
              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -287,11 +290,11 @@ export default function AdminCustomersPage() {
                         </Select>
                     </div>
                      <div className="flex flex-col md:flex-row gap-4 items-center">
-                        <div className="w-full md:flex-1 relative overflow-hidden scrolling-wrapper-container [mask-image:_linear-gradient(to_right,transparent_0,_black_128px,_black_calc(100%-128px),transparent_100%)]">
-                            <TabsList className="bg-transparent p-0 m-0 border-none flex w-max scrolling-wrapper">
-                                {[...customerSegments, ...customerSegments].map((segment, index) => (
+                        <div className="scroll-container w-full">
+                            <TabsList className="bg-transparent p-0 m-0 border-none flex w-max">
+                                {customerSegments.map((segment) => (
                                     <TabsTrigger 
-                                        key={`${segment.value}-${index}`} 
+                                        key={segment.value}
                                         value={segment.value} 
                                         className="text-xs sm:text-sm py-2 px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full transition-all duration-300 border whitespace-nowrap mx-2"
                                     >
@@ -478,4 +481,5 @@ export default function AdminCustomersPage() {
     
 
     
+
 
