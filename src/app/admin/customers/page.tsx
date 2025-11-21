@@ -250,54 +250,51 @@ export default function AdminCustomersPage() {
             </div>
 
              <div className="space-y-4">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <Carousel
-                        opts={{
-                            align: "start",
-                            dragFree: true,
-                        }}
-                        className="w-full"
-                    >
-                        <CarouselContent>
-                            {customerSegments.map((segment) => (
-                                <CarouselItem key={segment.value} className="basis-auto md:basis-1/5">
-                                    <Button
-                                        variant={segmentFilter === segment.value ? 'default' : 'outline'}
-                                        onClick={() => setSegmentFilter(segment.value as any)}
-                                        className="shrink-0 w-full"
-                                    >
-                                        {segment.label}
-                                    </Button>
-                                </CarouselItem>
-                            ))}
-                        </CarouselContent>
-                        <CarouselPrevious className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 bg-background/80 backdrop-blur-sm" />
-                        <CarouselNext className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 bg-background/80 backdrop-blur-sm" />
-                    </Carousel>
-
-                    <div className="flex gap-2 w-full sm:w-auto">
-                        <div className="relative flex-1">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                            <Input
-                                type="search"
-                                placeholder={`Search ${filteredCustomers.length} customers...`}
-                                className="w-full rounded-lg bg-background pl-10"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                            />
-                        </div>
-                        <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as any)}>
-                            <SelectTrigger className="w-[180px]">
-                                <SelectValue placeholder="Filter by status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All Statuses</SelectItem>
-                                <SelectItem value="claimed">Claimed</SelectItem>
-                                <SelectItem value="redeemed">Redeemed</SelectItem>
-                            </SelectContent>
-                        </Select>
+                <div className="flex flex-col sm:flex-row items-center gap-2">
+                    <div className="relative flex-1 w-full">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        <Input
+                            type="search"
+                            placeholder={`Search ${filteredCustomers.length} customers...`}
+                            className="w-full rounded-lg bg-background pl-10"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
                     </div>
+                    <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as any)}>
+                        <SelectTrigger className="w-full sm:w-[180px]">
+                            <SelectValue placeholder="Filter by status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Statuses</SelectItem>
+                            <SelectItem value="claimed">Claimed</SelectItem>
+                            <SelectItem value="redeemed">Redeemed</SelectItem>
+                        </SelectContent>
+                    </Select>
                 </div>
+
+                <Carousel
+                    opts={{
+                        align: "start",
+                        dragFree: true,
+                    }}
+                    className="w-full"
+                >
+                    <CarouselContent className="-ml-1">
+                        {customerSegments.map((segment) => (
+                            <CarouselItem key={segment.value} className="basis-auto">
+                                <Button
+                                    variant={segmentFilter === segment.value ? 'default' : 'outline'}
+                                    onClick={() => setSegmentFilter(segment.value as any)}
+                                    className="shrink-0"
+                                >
+                                    {segment.label}
+                                </Button>
+                            </CarouselItem>
+                        ))}
+                    </CarouselContent>
+                </Carousel>
+                
                  <div className="flex gap-2 w-full sm:w-auto">
                     <Dialog>
                         <DialogTrigger asChild>
@@ -432,6 +429,8 @@ export default function AdminCustomersPage() {
     
 
       
+
+    
 
     
 
