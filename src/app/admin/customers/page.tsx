@@ -271,7 +271,7 @@ export default function AdminCustomersPage() {
                         </SelectContent>
                     </Select>
                 </div>
-                <div className="flex flex-col sm:flex-row items-center gap-4">
+                <div className="flex flex-col sm:flex-row items-center gap-2">
                     <Carousel
                         opts={{
                             align: "start",
@@ -281,7 +281,7 @@ export default function AdminCustomersPage() {
                     >
                         <CarouselContent>
                             {customerSegments.map((segment) => (
-                                <CarouselItem key={segment.value} className="basis-1/3.5">
+                                <CarouselItem key={segment.value} className="basis-1/3 sm:basis-1/4 md:basis-1/5">
                                     <Button
                                         variant={segmentFilter === segment.value ? 'default' : 'outline'}
                                         onClick={() => setSegmentFilter(segment.value as any)}
@@ -424,21 +424,5 @@ export default function AdminCustomersPage() {
         </div>
     );
 }
-
-    
-
-      
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
 
     
