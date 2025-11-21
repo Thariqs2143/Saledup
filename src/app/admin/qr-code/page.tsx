@@ -113,7 +113,7 @@ export default function GenerateQrPage() {
     return (
         <div className="space-y-8">
              <div>
-                <h1 className="text-3xl font-bold tracking-tight">Your Shop QR Code</h1>
+                <h1 className="text-3xl font-bold tracking-tight">Shop's QR Code</h1>
                 <p className="text-muted-foreground hidden md:block">Print this code and display it in your shop for customers to scan.</p>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
