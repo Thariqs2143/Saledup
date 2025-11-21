@@ -96,7 +96,7 @@ export default function AdminOffersPage() {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">Manage Offers</h1>
-                    <p className="text-muted-foreground">Here you can create, view, and manage all your offers.</p>
+                    <p className="text-muted-foreground hidden sm:block">Here you can create, view, and manage all your offers.</p>
                 </div>
                  <div className="flex gap-2">
                     <Button asChild>
