@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { BottomNav, type NavItem } from '@/components/bottom-nav';
 import Link from 'next/link';
 import { AdminNav } from '@/components/admin-nav';
-import { Bell, Loader2, PanelLeft } from 'lucide-react';
+import { Bell, Loader2, PanelLeft, QrCode } from 'lucide-react';
 import { InstallPWA } from '@/components/install-pwa';
 import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
@@ -39,7 +39,8 @@ const mobileBottomNavItems: NavItem[] = [
   { href: '/admin', label: 'Home', iconName: 'LayoutDashboard' },
   { href: '/admin/offers', label: 'Offers', iconName: 'Tag' },
   { href: '/admin/redeem', label: 'Redeem', iconName: 'ScanLine' },
-  { href: '/admin/analytics', label: 'Analytics', iconName: 'BarChart3' },
+  { href: '/admin/qr-code', label: 'QR', iconName: 'QrCode' },
+  { href: '/admin/customers', label: 'Customers', iconName: 'Users' },
   { href: '/admin/profile', label: 'Profile', iconName: 'User' },
 ];
 
