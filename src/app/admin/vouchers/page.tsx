@@ -209,47 +209,49 @@ export default function AdminVouchersPage() {
                     </div>
                  </div>
 
-                 <div className="relative w-full sm:max-w-xs">
-                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                        type="search"
-                        placeholder="Search by name or ID..."
-                        className="w-full rounded-lg bg-background pl-8"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                </div>
+                <div className="space-y-4">
+                    <div className="relative w-full sm:max-w-xs">
+                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            type="search"
+                            placeholder="Search by name or ID..."
+                            className="w-full rounded-lg bg-background pl-8"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
 
-                <div className="flex flex-col sm:flex-row gap-2 pt-2">
-                    <Button asChild className="flex-grow sm:flex-grow-0">
-                        <Link href="/admin/vouchers/add">
-                            <PlusCircle className="mr-2 h-4 w-4" />
-                            <span className="font-bold">Generate Vouchers</span>
-                        </Link>
-                    </Button>
-                    <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                            <Button variant="destructive" disabled={vouchers.length === 0 || deleting} className="flex-grow sm:flex-grow-0">
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                <span className="font-bold">Delete All</span>
-                            </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    This will permanently delete all {vouchers.length} vouchers. This action cannot be undone and the data cannot be recovered.
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={handleDeleteAll} disabled={deleting} className="bg-destructive hover:bg-destructive/90">
-                                    {deleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                    Yes, Delete Everything
-                                </AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
+                    <div className="flex gap-2">
+                        <Button asChild>
+                            <Link href="/admin/vouchers/add">
+                                <PlusCircle className="mr-2 h-4 w-4" />
+                                <span className="font-bold">Generate Vouchers</span>
+                            </Link>
+                        </Button>
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button variant="destructive" disabled={vouchers.length === 0 || deleting}>
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    <span className="font-bold">Delete All</span>
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        This will permanently delete all {vouchers.length} vouchers. This action cannot be undone and the data cannot be recovered.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={handleDeleteAll} disabled={deleting} className="bg-destructive hover:bg-destructive/90">
+                                        {deleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                        Yes, Delete Everything
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    </div>
                 </div>
 
 
