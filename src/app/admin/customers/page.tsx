@@ -242,13 +242,15 @@ export default function AdminCustomersPage() {
             <Tabs defaultValue="all" onValueChange={(value) => setSegmentFilter(value as any)} className="w-full">
                 <div className="space-y-4">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                        <TabsList className="grid w-full sm:w-auto grid-cols-3 sm:grid-cols-5">
-                            <TabsTrigger value="all">All</TabsTrigger>
-                            <TabsTrigger value="new">New</TabsTrigger>
-                            <TabsTrigger value="repeat">Repeat</TabsTrigger>
-                            <TabsTrigger value="high-spenders">High Spenders</TabsTrigger>
-                            <TabsTrigger value="coupon-hunters">Coupon Hunters</TabsTrigger>
-                        </TabsList>
+                        <div className="w-full sm:w-auto overflow-x-auto pb-2">
+                             <TabsList className="grid-cols-5">
+                                <TabsTrigger value="all">All</TabsTrigger>
+                                <TabsTrigger value="new">New</TabsTrigger>
+                                <TabsTrigger value="repeat">Repeat</TabsTrigger>
+                                <TabsTrigger value="high-spenders">High Spenders</TabsTrigger>
+                                <TabsTrigger value="coupon-hunters">Coupon Hunters</TabsTrigger>
+                            </TabsList>
+                        </div>
                         <div className="flex gap-2 w-full sm:w-auto">
                             <div className="relative flex-1">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -405,3 +407,5 @@ export default function AdminCustomersPage() {
 }
 
     
+
+      
