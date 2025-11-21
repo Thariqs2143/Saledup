@@ -342,18 +342,16 @@ export default function AdminCustomersPage() {
                         <div className="pointer-events-none absolute right-0 top-0 h-full w-4 bg-gradient-to-l from-background to-transparent z-10" />
                         
                         <div ref={scrollRef} className="overflow-x-auto scrollbar-hide">
-                            <TabsList className="relative bg-transparent p-0 m-0 border-none w-max">
-                                <div className="inline-flex gap-3 whitespace-nowrap px-1">
-                                    {customerSegments.map((segment) => (
-                                        <TabsTrigger
-                                            key={segment.value}
-                                            value={segment.value}
-                                            className="text-sm py-2 px-4 rounded-full transition-all duration-300 border shadow-sm shrink-0 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg bg-background/60 backdrop-blur-sm hover:scale-[1.02]"
-                                        >
-                                            {segment.label}
-                                        </TabsTrigger>
-                                    ))}
-                                </div>
+                            <TabsList className="relative bg-transparent p-0 m-0 border-none w-max inline-flex gap-3 whitespace-nowrap px-1">
+                                {customerSegments.map((segment) => (
+                                    <TabsTrigger
+                                        key={segment.value}
+                                        value={segment.value}
+                                        className="text-sm py-2 px-4 rounded-full transition-all duration-300 border shadow-sm shrink-0 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg bg-background/60 backdrop-blur-sm hover:scale-[1.02]"
+                                    >
+                                        {segment.label}
+                                    </TabsTrigger>
+                                ))}
                             </TabsList>
                         </div>
                     </div>
