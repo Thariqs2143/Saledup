@@ -123,18 +123,20 @@ export default function AdminProfilePage() {
             <h1 className="text-3xl font-bold tracking-tight">Profile</h1>
         </div>
         
-        <Card className="text-center p-2">
-            <CardContent className="pt-4">
-                <Avatar className="h-24 w-24 border-4 border-primary/50 mx-auto">
+        <Card>
+            <CardContent className="p-6 flex items-center gap-4">
+                <Avatar className="h-16 w-16 border-2 border-primary">
                     <AvatarImage src={profile.imageUrl ?? profile.ownerImageUrl} />
                     <AvatarFallback>
                         {profile.ownerName?.charAt(0) || 'A'}
                     </AvatarFallback>
                 </Avatar>
-                <h3 className="text-2xl font-bold mt-3">{profile.ownerName}</h3>
-                <div className="inline-flex items-center gap-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-3 py-1 rounded-full text-sm font-semibold mt-2">
-                    <CheckCircle className="h-4 w-4" />
-                    Business Owner
+                <div>
+                    <h3 className="text-2xl font-bold">{profile.ownerName}</h3>
+                    <div className="inline-flex items-center gap-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-3 py-1 rounded-full text-sm font-semibold mt-1">
+                        <CheckCircle className="h-4 w-4" />
+                        Business Owner
+                    </div>
                 </div>
             </CardContent>
         </Card>
