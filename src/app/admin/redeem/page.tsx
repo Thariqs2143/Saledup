@@ -119,28 +119,43 @@ export default function RedeemOfferPage() {
         setIsProcessing(true);
 
         try {
-            // Check if it's a verification URL
-            if (scannedData.includes('/vouchers/')) {
-                 const urlParts = scannedData.split('/');
-                 const scannedId = urlParts[urlParts.length - 1];
-                 const voucherDocRef = doc(db, 'vouchers', scannedId);
-                 const voucherSnap = await getDoc(voucherDocRef);
-                 if (voucherSnap.exists() && voucherSnap.data().shopId === authUser.uid) {
-                     setScannedVoucher({ id: voucherSnap.id, ...voucherSnap.data() } as GiftVoucher);
+            // Logic for Offer Claims
+            if (activeTab === 'offers') {
+                 const claimDocRef = doc(db, 'shops', authUser.uid, 'claims', scannedData);
+                 const claimSnap = await getDoc(claimDocRef);
+                 if (claimSnap.exists()) {
+                     setScannedOffer({ id: claimSnap.id, ...claimSnap.data() } as OfferClaim);
                  } else {
-                     toast({ variant: 'destructive', title: 'Invalid Voucher QR', description: 'This gift voucher is not valid for your shop.' });
+                      toast({ variant: 'destructive', title: 'Invalid Offer QR', description: 'This QR code is not a valid offer claim for your shop.' });
                  }
-            } else if (activeTab === 'offers') {
-                const claimDocRef = doc(db, 'shops', authUser.uid, 'claims', scannedData);
-                const claimSnap = await getDoc(claimDocRef);
-                if (claimSnap.exists()) {
-                    setScannedOffer({ id: claimSnap.id, ...claimSnap.data() } as OfferClaim);
+                 return; // Exit after handling
+            }
+
+            // Logic for Voucher Claims
+            if (activeTab === 'vouchers') {
+                const url = new URL(scannedData);
+                const pathParts = url.pathname.split('/');
+                const voucherId = pathParts[pathParts.length - 1];
+                const shopId = url.searchParams.get('shopId');
+
+                if (shopId !== authUser.uid) {
+                    toast({ variant: 'destructive', title: 'Invalid Voucher QR', description: 'This gift voucher is not valid for your shop.' });
+                    return;
+                }
+
+                const voucherDocRef = doc(db, 'shops', authUser.uid, 'vouchers', voucherId);
+                const voucherSnap = await getDoc(voucherDocRef);
+
+                if (voucherSnap.exists()) {
+                    setScannedVoucher({ id: voucherSnap.id, ...voucherSnap.data() } as GiftVoucher);
                 } else {
-                     toast({ variant: 'destructive', title: 'Invalid Offer QR', description: 'This QR code is not a valid offer claim for your shop.' });
+                    toast({ variant: 'destructive', title: 'Voucher Not Found', description: 'The scanned voucher does not exist.' });
                 }
             }
+
         } catch (error) {
-            toast({ variant: 'destructive', title: 'Error', description: 'Could not verify the QR code.' });
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not verify the QR code. Ensure it is a valid Saledup QR code.' });
+            console.error("QR Scan Error:", error);
         } finally {
             setIsProcessing(false);
         }
@@ -172,7 +187,7 @@ export default function RedeemOfferPage() {
         setIsProcessing(true);
 
         try {
-            const voucherDocRef = doc(db, 'vouchers', scannedVoucher.id);
+            const voucherDocRef = doc(db, 'shops', authUser.uid, 'vouchers', scannedVoucher.id);
             await updateDoc(voucherDocRef, { 
                 status: 'redeemed',
                 redeemedAt: serverTimestamp(),

@@ -30,8 +30,8 @@ export default function AdminAddVoucherPage() {
                 router.replace('/login');
             } else {
                 setAuthUser(user);
-                // Fetch shop name
-                const shopDoc = await getDoc(doc(db, 'shops', user.uid));
+                const shopDocRef = doc(db, 'shops', user.uid);
+                const shopDoc = await getDoc(shopDocRef);
                 if (shopDoc.exists()) {
                     setShopName(shopDoc.data().shopName);
                 }
@@ -76,8 +76,8 @@ export default function AdminAddVoucherPage() {
             doc.text(`Issued to: ${voucher.customerName}`, 15, yPos + 45);
             doc.text(`Expires: ${format(voucher.expiresAt.toDate(), 'PP')}`, 15, yPos + 50);
             
-             // QR Code
-            const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${window.location.origin}/vouchers/${voucher.id}`;
+            const publicVerificationUrl = `${window.location.origin}/vouchers/${voucher.id}?shopId=${authUser?.uid}`;
+            const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(publicVerificationUrl)}`;
             const img = new Image();
             img.crossOrigin = "Anonymous";
             img.src = qrCodeUrl;
@@ -121,10 +121,11 @@ export default function AdminAddVoucherPage() {
             const expiresAt = new Date();
             expiresAt.setMonth(expiresAt.getMonth() + 6);
 
+            const vouchersCollectionRef = collection(db, 'shops', authUser.uid, 'vouchers');
+
             for (let i = 0; i < quantity; i++) {
-                const voucherRef = doc(collection(db, 'vouchers'));
+                const voucherRef = doc(vouchersCollectionRef);
                 const voucherData = {
-                    shopId: authUser.uid,
                     customerName,
                     value,
                     status: 'valid' as const,

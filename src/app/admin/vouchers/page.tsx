@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from "@/components/ui/button";
 import { Loader2, PlusCircle, Gift, CheckCircle, Clock, Search, IndianRupee } from "lucide-react";
 import Link from 'next/link';
-import { collection, onSnapshot, query, where, Timestamp } from 'firebase/firestore';
+import { collection, onSnapshot, query, where, Timestamp, orderBy } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { onAuthStateChanged, type User as AuthUser } from 'firebase/auth';
@@ -49,7 +49,7 @@ export default function AdminVouchersPage() {
     useEffect(() => {
         if (!authUser) return;
 
-        const vouchersQuery = query(collection(db, 'vouchers'), where('shopId', '==', authUser.uid));
+        const vouchersQuery = query(collection(db, 'shops', authUser.uid, 'vouchers'), orderBy('createdAt', 'desc'));
         
         const unsubscribe = onSnapshot(vouchersQuery, (snapshot) => {
             const now = new Date();
@@ -62,7 +62,6 @@ export default function AdminVouchersPage() {
                 }
                 return voucher;
             });
-            vouchersList.sort((a, b) => b.createdAt.toDate().getTime() - a.createdAt.toDate().getTime());
             setVouchers(vouchersList);
             setLoading(false);
         }, (error) => {
