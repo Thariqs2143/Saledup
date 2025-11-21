@@ -171,7 +171,7 @@ export default function PublicVoucherViewPage() {
                             <Clock className="h-4 w-4 mt-1 text-muted-foreground"/>
                             <div>
                                 <p className="text-muted-foreground">Expires On</p>
-                                <p className="font-semibold">{format(voucher.expiresAt.toDate(), 'PP')}</p>
+                                <p className="font-semibold">{format(voucher.expiresAt.toDate(), 'PPpp')}</p>
                             </div>
                         </div>
                          {voucher.redeemedAt && (
@@ -179,7 +179,7 @@ export default function PublicVoucherViewPage() {
                                 <CheckCircle className="h-4 w-4 mt-1 text-muted-foreground"/>
                                 <div>
                                     <p className="text-muted-foreground">Redeemed On</p>
-                                    <p className="font-semibold">{format(voucher.redeemedAt.toDate(), 'PP')}</p>
+                                    <p className="font-semibold">{format(voucher.redeemedAt.toDate(), 'PPpp')}</p>
                                 </div>
                             </div>
                          )}

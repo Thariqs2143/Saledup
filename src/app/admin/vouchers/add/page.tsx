@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Gift, ArrowLeft, Download, IndianRupee, FileText, Bot } from 'lucide-react';
-import { addDoc, collection, doc, serverTimestamp, writeBatch, getDoc } from 'firebase/firestore';
+import { Loader2, Gift, ArrowLeft, Download, IndianRupee, FileText, Bot, Calendar as CalendarIcon, Clock } from 'lucide-react';
+import { addDoc, collection, doc, serverTimestamp, writeBatch, getDoc, Timestamp } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
 import { onAuthStateChanged, type User as AuthUser } from 'firebase/auth';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -16,6 +16,9 @@ import Link from 'next/link';
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { format } from 'date-fns';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { cn } from '@/lib/utils';
 
 export default function AdminAddVoucherPage() {
     const router = useRouter();
@@ -27,6 +30,8 @@ export default function AdminAddVoucherPage() {
     // State for live preview
     const [previewValue, setPreviewValue] = useState('500');
     const [previewCustomerName, setPreviewCustomerName] = useState('Corporate Client Name');
+    const [expiresAtDate, setExpiresAtDate] = useState<Date | undefined>();
+    const [expiresAtTime, setExpiresAtTime] = useState('');
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -78,7 +83,7 @@ export default function AdminAddVoucherPage() {
             // Details
             doc.setFontSize(8);
             doc.text(`Issued to: ${voucher.customerName}`, 15, yPos + 45);
-            doc.text(`Expires: ${format(voucher.expiresAt.toDate(), 'PP')}`, 15, yPos + 50);
+            doc.text(`Expires: ${format(voucher.expiresAt.toDate(), 'PPpp')}`, 15, yPos + 50);
             
             const publicVerificationUrl = `${window.location.origin}/vouchers/${voucher.id}?shopId=${authUser?.uid}`;
             const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(publicVerificationUrl)}`;
@@ -118,14 +123,24 @@ export default function AdminAddVoucherPage() {
             toast({ title: "Invalid Input", description: "Please provide a valid quantity, value, and customer/company name.", variant: "destructive" });
             return;
         }
+        
+        let finalExpiresAt: Date;
+        if (expiresAtDate) {
+            finalExpiresAt = new Date(expiresAtDate);
+            if (expiresAtTime) {
+                const [hours, minutes] = expiresAtTime.split(':').map(Number);
+                finalExpiresAt.setHours(hours, minutes, 0, 0);
+            }
+        } else {
+            finalExpiresAt = new Date();
+            finalExpiresAt.setMonth(finalExpiresAt.getMonth() + 6);
+        }
+
 
         setLoading(true);
         try {
             const batch = writeBatch(db);
             const vouchersForPDF = [];
-            const expiresAt = new Date();
-            expiresAt.setMonth(expiresAt.getMonth() + 6);
-
             const vouchersCollectionRef = collection(db, 'shops', authUser.uid, 'vouchers');
 
             for (let i = 0; i < quantity; i++) {
@@ -135,11 +150,11 @@ export default function AdminAddVoucherPage() {
                     value,
                     status: 'valid' as const,
                     createdAt: serverTimestamp(),
-                    expiresAt: expiresAt,
+                    expiresAt: Timestamp.fromDate(finalExpiresAt),
                     shopId: authUser.uid,
                 };
                 batch.set(voucherRef, voucherData);
-                vouchersForPDF.push({ id: voucherRef.id, ...voucherData });
+                vouchersForPDF.push({ id: voucherRef.id, ...voucherData, expiresAt: finalExpiresAt });
             }
 
             await batch.commit();
@@ -217,6 +232,27 @@ export default function AdminAddVoucherPage() {
                             />
                             <p className="text-xs text-muted-foreground">This name will be printed on all vouchers in this batch.</p>
                         </div>
+                        <div className="space-y-4 border-t pt-6">
+                             <Label>Expiry Date & Time (Optional)</Label>
+                             <p className="text-xs text-muted-foreground -mt-2">If left blank, vouchers will expire 6 months from today.</p>
+                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !expiresAtDate && "text-muted-foreground")}>
+                                            <CalendarIcon className="mr-2 h-4 w-4" />
+                                            {expiresAtDate ? format(expiresAtDate, "PPP") : <span>Pick an expiry date</span>}
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0">
+                                        <Calendar mode="single" selected={expiresAtDate} onSelect={setExpiresAtDate} initialFocus />
+                                    </PopoverContent>
+                                </Popover>
+                                 <div className="relative">
+                                    <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                    <Input id="endTime" type="time" value={expiresAtTime} onChange={(e) => setExpiresAtTime(e.target.value)} className="pl-10" />
+                                </div>
+                             </div>
+                        </div>
                     </CardContent>
                     
                     <CardFooter className="border-t pt-6 flex justify-end">
@@ -245,7 +281,7 @@ export default function AdminAddVoucherPage() {
                          </div>
                          <div className="space-y-1 text-sm">
                              <p><span className="font-semibold">Issued to:</span> {previewCustomerName || '...'}</p>
-                             <p><span className="font-semibold">Expires:</span> 6 months from issue date</p>
+                             <p><span className="font-semibold">Expires:</span> {expiresAtDate ? format(expiresAtDate, 'PP') : '6 months from issue'}</p>
                              <p><span className="font-semibold">Status:</span> VALID</p>
                          </div>
                      </div>
@@ -255,3 +291,4 @@ export default function AdminAddVoucherPage() {
     </div>
   );
 }
+

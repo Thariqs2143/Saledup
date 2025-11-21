@@ -14,6 +14,7 @@ import { Loader2, ScanLine, Ticket, User as UserIcon, CheckCircle, XCircle, Came
 import jsQR from 'jsqr';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { format } from 'date-fns';
 
 // Offer Claim Type
 type OfferClaim = {
@@ -138,7 +139,12 @@ export default function RedeemOfferPage() {
                 const voucherSnap = await getDoc(voucherDocRef);
 
                 if (voucherSnap.exists()) {
-                    setScannedVoucher({ id: voucherSnap.id, ...voucherSnap.data() } as GiftVoucher);
+                    let voucherData = { id: voucherSnap.id, ...voucherSnap.data() } as GiftVoucher;
+                     // Client-side expiry check
+                    if (voucherData.status === 'valid' && voucherData.expiresAt.toDate() < new Date()) {
+                        voucherData.status = 'expired';
+                    }
+                    setScannedVoucher(voucherData);
                 } else {
                     toast({ variant: 'destructive', title: 'Voucher Not Found', description: 'The scanned voucher does not exist or is not for this shop.' });
                 }
@@ -306,7 +312,7 @@ export default function RedeemOfferPage() {
                                     <Alert variant="destructive">
                                         <XCircle className="h-4 w-4"/>
                                         <AlertTitle>Voucher Expired</AlertTitle>
-                                        <AlertDescription>This voucher expired on {scannedVoucher.expiresAt.toDate().toLocaleDateString()}.</AlertDescription>
+                                        <AlertDescription>This voucher expired on {format(scannedVoucher.expiresAt.toDate(), 'PP')}.</AlertDescription>
                                     </Alert>
                                 ) : (
                                      <Alert>
@@ -325,7 +331,7 @@ export default function RedeemOfferPage() {
                                     </div>
                                     <div className="flex items-center gap-3 text-sm">
                                         <Ticket className="h-4 w-4 text-muted-foreground"/>
-                                        <span>Expires on: {scannedVoucher.expiresAt.toDate().toLocaleDateString()}</span>
+                                        <span>Expires on: {format(scannedVoucher.expiresAt.toDate(), 'PPpp')}</span>
                                     </div>
                                 </div>
                             </div>
