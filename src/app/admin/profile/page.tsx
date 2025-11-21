@@ -10,7 +10,7 @@ import { onAuthStateChanged, type User as AuthUser } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   AlertDialog,
@@ -38,10 +38,10 @@ type ShopProfile = {
     email?: string;
 };
 
-const InfoRow = ({ icon: Icon, label, value }: { icon: React.ElementType, label: string, value?: string }) => (
+const InfoRow = ({ icon: Icon, label, value, iconClass }: { icon: React.ElementType, label: string, value?: string, iconClass?: string }) => (
     <div className="flex items-center gap-4 py-4 border-b last:border-b-0">
         <div className="p-3 bg-primary/10 rounded-full">
-            <Icon className="h-5 w-5 text-primary" />
+            <Icon className={`h-5 w-5 text-primary ${iconClass}`} />
         </div>
         <div className="flex-1">
             <p className="text-xs text-muted-foreground">{label}</p>
@@ -63,6 +63,7 @@ const SettingsRow = ({ icon: Icon, label, href }: { icon: React.ElementType, lab
 
 export default function AdminProfilePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [profile, setProfile] = useState<ShopProfile>({});
