@@ -53,30 +53,41 @@ export default function AdminAnalyticsPage() {
         if (!authUser) return;
 
         setLoading(true);
+        let offersLoaded = false;
+        let claimsLoaded = false;
+
+        const checkLoadingComplete = () => {
+            if (offersLoaded && claimsLoaded) {
+                setLoading(false);
+            }
+        };
+
         const offersQuery = query(collection(db, 'shops', authUser.uid, 'offers'), orderBy('createdAt', 'desc'));
         const unsubscribeOffers = onSnapshot(offersQuery, (snapshot) => {
             const offersList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Offer));
             setOffers(offersList);
-            if(!loadingClaims) setLoading(false);
+            offersLoaded = true;
+            checkLoadingComplete();
         }, (error) => {
             console.error("Error fetching offers: ", error);
             toast({ title: "Error", description: "You don't have permission to view offers.", variant: "destructive" });
-            setLoading(false);
+            offersLoaded = true;
+            checkLoadingComplete();
         });
         
         const claimsQuery = query(collection(db, 'shops', authUser.uid, 'claims'));
         const unsubscribeClaims = onSnapshot(claimsQuery, (snapshot) => {
             const claimsList = snapshot.docs.map(doc => doc.data() as Claim);
             setClaims(claimsList);
-            if(!loadingOffers) setLoading(false);
+            claimsLoaded = true;
+            checkLoadingComplete();
         }, (error) => {
             console.error("Error fetching claims: ", error);
             toast({ title: "Error", description: "Could not fetch claims data for analytics.", variant: "destructive" });
-            setLoading(false);
+            claimsLoaded = true;
+            checkLoadingComplete();
         });
 
-        const loadingOffers = true;
-        const loadingClaims = true;
 
         return () => {
             unsubscribeOffers();
