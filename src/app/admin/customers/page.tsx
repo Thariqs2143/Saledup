@@ -223,11 +223,7 @@ export default function AdminCustomersPage() {
             toast({ title: "Claim Deleted", description: "The customer claim has been removed."});
         } catch (error) {
             console.error(error);
-             try {
-                 toast({ title: "Error", description: "Could not delete the claim.", variant: "destructive" });
-             } catch (toastError) {
-                 console.error("Error displaying toast:", toastError);
-             }
+             toast({ title: "Error", description: "Could not delete the claim.", variant: "destructive" });
         }
     };
     
@@ -254,7 +250,7 @@ export default function AdminCustomersPage() {
 
              <div className="space-y-4">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                     <div className="w-full overflow-x-auto pb-2">
+                     <div className="w-full overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                         <div className="flex space-x-2">
                             {customerSegments.map((segment) => (
                                 <Button
@@ -426,6 +422,8 @@ export default function AdminCustomersPage() {
     
 
       
+
+    
 
     
 
