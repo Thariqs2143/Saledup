@@ -123,7 +123,7 @@ export default function AdminProfilePage() {
             <h1 className="text-3xl font-bold tracking-tight">Profile</h1>
         </div>
         
-        <Card className="text-center p-4">
+        <Card className="text-center p-2">
             <CardContent className="pt-4">
                 <Avatar className="h-24 w-24 border-4 border-primary/50 mx-auto">
                     <AvatarImage src={profile.imageUrl ?? profile.ownerImageUrl} />
@@ -157,7 +157,7 @@ export default function AdminProfilePage() {
                 <CardContent className="pt-6">
                     <SettingsRow icon={Edit} label="Edit Profile" href="/admin/profile/edit" />
                     <SettingsRow icon={Bell} label="Notifications" href="/admin/notifications" />
-                    <SettingsRow icon={Tag} label="Pricing & Billing" href="/admin/profile?tab=pricing-redirect" />
+                    <SettingsRow icon={Tag} label="Pricing & Billing" href="/admin/profile/pricing-content" />
                     <SettingsRow icon={HelpCircle} label="Help & Support" href="/contact" />
                 </CardContent>
             </Card>
@@ -166,9 +166,9 @@ export default function AdminProfilePage() {
         <div className="space-y-4 pt-4">
             <AlertDialog>
                 <AlertDialogTrigger asChild>
-                    <Button variant="outline" className="w-full text-destructive hover:text-destructive hover:bg-destructive/5 border-destructive/30 hover:border-destructive/50">
-                        <LogOut className="mr-2 h-4 w-4"/>
-                        <span className="font-medium">Logout</span>
+                    <Button variant="outline" className="w-full text-destructive hover:text-destructive h-12 bg-white hover:bg-red-50 border-destructive/50 hover:border-destructive text-base font-bold">
+                        <LogOut className="mr-2 h-5 w-5"/>
+                        <span>Logout</span>
                     </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
@@ -186,22 +186,6 @@ export default function AdminProfilePage() {
             </AlertDialog>
             <p className="text-center text-xs text-muted-foreground">Version 1.0.0</p>
         </div>
-
-        {/* This is a hidden redirect handler for the pricing tab */}
-        {searchParams.get('tab') === 'pricing-redirect' && <PricingRedirect />}
     </div>
   );
-}
-
-// A simple component to handle the tab switch logic for pricing
-function PricingRedirect() {
-    const router = useRouter();
-    useEffect(() => {
-        // This is a bit of a trick: we land here, then immediately replace the URL
-        // to show the correct tab on the separate pricing page, which is now part of the profile page.
-        // For a real app, this logic would be inside a single component, but we are working with separate pages.
-        // A better long term solution is to merge pricing-content into profile page fully.
-        router.replace('/admin/profile/pricing-content');
-    }, [router]);
-    return null;
 }
