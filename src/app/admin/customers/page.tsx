@@ -267,7 +267,7 @@ export default function AdminCustomersPage() {
 
             <Tabs value={segmentFilter} onValueChange={(value) => setSegmentFilter(value as any)}>
                 <div className="space-y-4">
-                    <div className="flex flex-col sm:flex-row items-center gap-2">
+                    <div className="flex items-center gap-2">
                          <div className="relative flex-1 w-full">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                             <Input
@@ -279,7 +279,7 @@ export default function AdminCustomersPage() {
                             />
                         </div>
                         <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as any)}>
-                            <SelectTrigger className="w-full sm:w-auto">
+                            <SelectTrigger className="w-auto">
                                 <SelectValue placeholder="Filter by status" />
                             </SelectTrigger>
                             <SelectContent>
@@ -483,3 +483,6 @@ export default function AdminCustomersPage() {
     
 
 
+
+
+    
