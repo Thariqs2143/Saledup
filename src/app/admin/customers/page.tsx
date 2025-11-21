@@ -31,6 +31,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 
 // Extend jsPDF with autoTable
 declare module 'jspdf' {
@@ -242,15 +243,25 @@ export default function AdminCustomersPage() {
             <Tabs defaultValue="all" onValueChange={(value) => setSegmentFilter(value as any)} className="w-full">
                 <div className="space-y-4">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                        <div className="w-full overflow-x-auto pb-2">
-                             <TabsList className="inline-flex h-auto items-center justify-start rounded-md bg-muted p-1 text-muted-foreground border-2 min-w-max">
-                                <TabsTrigger value="all">All</TabsTrigger>
-                                <TabsTrigger value="new">New</TabsTrigger>
-                                <TabsTrigger value="repeat">Repeat</TabsTrigger>
-                                <TabsTrigger value="high-spenders">High Spenders</TabsTrigger>
-                                <TabsTrigger value="coupon-hunters">Coupon Hunters</TabsTrigger>
-                            </TabsList>
+                        <div className="w-full sm:hidden">
+                            <Carousel opts={{ align: "start", dragFree: true }}>
+                                <CarouselContent className="-ml-1">
+                                    <CarouselItem className="basis-auto pl-1"><TabsTrigger value="all">All</TabsTrigger></CarouselItem>
+                                    <CarouselItem className="basis-auto pl-1"><TabsTrigger value="new">New</TabsTrigger></CarouselItem>
+                                    <CarouselItem className="basis-auto pl-1"><TabsTrigger value="repeat">Repeat</TabsTrigger></CarouselItem>
+                                    <CarouselItem className="basis-auto pl-1"><TabsTrigger value="high-spenders">High Spenders</TabsTrigger></CarouselItem>
+                                    <CarouselItem className="basis-auto pl-1"><TabsTrigger value="coupon-hunters">Coupon Hunters</TabsTrigger></CarouselItem>
+                                </CarouselContent>
+                            </Carousel>
                         </div>
+                        <TabsList className="hidden sm:inline-flex h-auto items-center justify-start rounded-md bg-muted p-1 text-muted-foreground border-2">
+                            <TabsTrigger value="all">All</TabsTrigger>
+                            <TabsTrigger value="new">New</TabsTrigger>
+                            <TabsTrigger value="repeat">Repeat</TabsTrigger>
+                            <TabsTrigger value="high-spenders">High Spenders</TabsTrigger>
+                            <TabsTrigger value="coupon-hunters">Coupon Hunters</TabsTrigger>
+                        </TabsList>
+
                         <div className="flex gap-2 w-full sm:w-auto">
                             <div className="relative flex-1">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -409,3 +420,5 @@ export default function AdminCustomersPage() {
     
 
       
+
+    
