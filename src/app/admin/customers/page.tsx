@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -272,65 +271,66 @@ export default function AdminCustomersPage() {
                         </SelectContent>
                     </Select>
                 </div>
-
-                <Carousel
-                    opts={{
-                        align: "start",
-                        dragFree: true,
-                    }}
-                    className="w-full"
-                >
-                    <CarouselContent className="-ml-1">
-                        {customerSegments.map((segment) => (
-                            <CarouselItem key={segment.value} className="basis-auto">
-                                <Button
-                                    variant={segmentFilter === segment.value ? 'default' : 'outline'}
-                                    onClick={() => setSegmentFilter(segment.value as any)}
-                                    className="shrink-0"
-                                >
-                                    {segment.label}
+                <div className="flex flex-col sm:flex-row items-center gap-4">
+                    <Carousel
+                        opts={{
+                            align: "start",
+                            dragFree: true,
+                        }}
+                        className="w-full sm:flex-1"
+                    >
+                        <CarouselContent>
+                            {customerSegments.map((segment) => (
+                                <CarouselItem key={segment.value} className="basis-auto">
+                                    <Button
+                                        variant={segmentFilter === segment.value ? 'default' : 'outline'}
+                                        onClick={() => setSegmentFilter(segment.value as any)}
+                                        className="shrink-0"
+                                    >
+                                        {segment.label}
+                                    </Button>
+                                </CarouselItem>
+                            ))}
+                        </CarouselContent>
+                    </Carousel>
+                    
+                    <div className="flex gap-2 w-full sm:w-auto shrink-0">
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Button variant="outline" className="flex-1">
+                                    <Mail className="mr-2 h-4 w-4"/> Send Broadcast
                                 </Button>
-                            </CarouselItem>
-                        ))}
-                    </CarouselContent>
-                </Carousel>
-                
-                 <div className="flex gap-2 w-full sm:w-auto">
-                    <Dialog>
-                        <DialogTrigger asChild>
-                            <Button variant="outline" className="flex-1">
-                                <Mail className="mr-2 h-4 w-4"/> Send Broadcast
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                            <DialogHeader>
-                                <DialogTitle>Send WhatsApp Broadcast</DialogTitle>
-                                <DialogDescription>
-                                    Compose a message to send to your customers. This will open WhatsApp with the message ready to be forwarded. You can send it to individuals or broadcast lists you've created in WhatsApp.
-                                </DialogDescription>
-                            </DialogHeader>
-                            <div className="space-y-4 py-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="broadcast-message">Message</Label>
-                                    <Textarea
-                                        id="broadcast-message"
-                                        placeholder="E.g., Hi! Don't miss our weekend special: 20% off all coffee. Come visit us!"
-                                        value={broadcastMessage}
-                                        onChange={(e) => setBroadcastMessage(e.target.value)}
-                                        rows={5}
-                                    />
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>Send WhatsApp Broadcast</DialogTitle>
+                                    <DialogDescription>
+                                        Compose a message to send to your customers. This will open WhatsApp with the message ready to be forwarded. You can send it to individuals or broadcast lists you've created in WhatsApp.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <div className="space-y-4 py-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="broadcast-message">Message</Label>
+                                        <Textarea
+                                            id="broadcast-message"
+                                            placeholder="E.g., Hi! Don't miss our weekend special: 20% off all coffee. Come visit us!"
+                                            value={broadcastMessage}
+                                            onChange={(e) => setBroadcastMessage(e.target.value)}
+                                            rows={5}
+                                        />
+                                    </div>
                                 </div>
-                            </div>
-                            <DialogFooter>
-                                <Button onClick={handleSendBroadcast}>
-                                    Send Message via WhatsApp
-                                </Button>
-                            </DialogFooter>
-                        </DialogContent>
-                    </Dialog>
-                    <Button onClick={handleExportPDF} variant="outline" className="flex-1">
-                        <Download className="mr-2 h-4 w-4"/> Export PDF
-                    </Button>
+                                <DialogFooter>
+                                    <Button onClick={handleSendBroadcast}>
+                                        Send Message via WhatsApp
+                                    </Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
+                        <Button onClick={handleExportPDF} variant="outline" className="flex-1">
+                            <Download className="mr-2 h-4 w-4"/> Export PDF
+                        </Button>
+                    </div>
                 </div>
             </div>
 
@@ -346,7 +346,7 @@ export default function AdminCustomersPage() {
                     <p>When customers claim offers, they will appear here. Try adjusting your filters.</p>
                 </div>
             ) : (
-                <div className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {filteredCustomers.map(customer => {
                         const isNew = customer.totalClaims === 1;
                         const isHighSpender = customer.totalSpend > HIGH_SPENDER_THRESHOLD;
@@ -429,6 +429,8 @@ export default function AdminCustomersPage() {
     
 
       
+
+    
 
     
 
