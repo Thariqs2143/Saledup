@@ -155,46 +155,13 @@ export default function AdminVouchersPage() {
 
     return (
         <div className="space-y-8">
-            {/* Page header for larger screens */}
-            <div className="hidden sm:flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">Gift Vouchers</h1>
                     <p className="text-muted-foreground font-semibold">Create, manage, and track corporate and individual gift vouchers.</p>
                 </div>
-                <div className="flex gap-2">
-                    <Button asChild>
-                        <Link href="/admin/vouchers/add">
-                            <PlusCircle className="mr-2 h-4 w-4" />
-                            <span className="font-bold">Generate Vouchers</span>
-                        </Link>
-                    </Button>
-                    <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                            <Button variant="destructive" disabled={vouchers.length === 0 || deleting}>
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                <span className="font-bold">Delete All</span>
-                            </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    This will permanently delete all {vouchers.length} vouchers. This action cannot be undone and the data cannot be recovered.
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={handleDeleteAll} disabled={deleting} className="bg-destructive hover:bg-destructive/90">
-                                    {deleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                    Yes, Delete Everything
-                                </AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
-                </div>
             </div>
             
-            {/* Stats Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
                  <Card className="transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/50 dark:to-indigo-900/50 border-blue-200 dark:border-blue-800">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -234,24 +201,57 @@ export default function AdminVouchersPage() {
                 </Card>
             </div>
 
-            {/* Voucher History Section */}
             <div className="space-y-4">
                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                      <div>
                         <h2 className="text-2xl font-bold tracking-tight">Voucher History</h2>
                         <p className="text-muted-foreground font-semibold">A complete log of all generated gift vouchers.</p>
                     </div>
-                     <div className="relative w-full sm:max-w-xs">
-                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            type="search"
-                            placeholder="Search by name or ID..."
-                            className="w-full rounded-lg bg-background pl-8"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </div>
+                 </div>
+
+                 <div className="relative w-full sm:max-w-xs">
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                        type="search"
+                        placeholder="Search by name or ID..."
+                        className="w-full rounded-lg bg-background pl-8"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
                 </div>
+
+                <div className="flex flex-col sm:flex-row gap-2 pt-2">
+                    <Button asChild className="flex-grow sm:flex-grow-0">
+                        <Link href="/admin/vouchers/add">
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            <span className="font-bold">Generate Vouchers</span>
+                        </Link>
+                    </Button>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button variant="destructive" disabled={vouchers.length === 0 || deleting} className="flex-grow sm:flex-grow-0">
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                <span className="font-bold">Delete All</span>
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    This will permanently delete all {vouchers.length} vouchers. This action cannot be undone and the data cannot be recovered.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={handleDeleteAll} disabled={deleting} className="bg-destructive hover:bg-destructive/90">
+                                    {deleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    Yes, Delete Everything
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                </div>
+
 
                  {vouchers.length === 0 ? (
                      <div className="text-center py-20 text-muted-foreground rounded-lg border bg-muted/20">
@@ -297,41 +297,8 @@ export default function AdminVouchersPage() {
                     </div>
                  )}
             </div>
-
-            {/* Buttons for mobile */}
-             <div className="flex sm:hidden flex-col gap-4">
-                <Button asChild size="lg">
-                    <Link href="/admin/vouchers/add">
-                        <PlusCircle className="mr-2 h-4 w-4" />
-                        <span className="font-bold">Generate Vouchers</span>
-                    </Link>
-                </Button>
-                <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                        <Button variant="destructive" size="lg" disabled={vouchers.length === 0 || deleting}>
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            <span className="font-bold">Delete All</span>
-                        </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                                This will permanently delete all {vouchers.length} vouchers. This action cannot be undone.
-                            </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={handleDeleteAll} disabled={deleting} className="bg-destructive hover:bg-destructive/90">
-                                {deleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                Yes, Delete Everything
-                            </AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
-            </div>
-
         </div>
     );
 
     
+}
