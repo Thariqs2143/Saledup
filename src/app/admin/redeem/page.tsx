@@ -234,8 +234,8 @@ export default function RedeemOfferPage() {
         <div className="space-y-6">
              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="offers" className="font-bold"><Ticket className="mr-2"/> Redeem Offer</TabsTrigger>
-                    <TabsTrigger value="vouchers" className="font-bold"><Gift className="mr-2"/> Redeem Voucher</TabsTrigger>
+                    <TabsTrigger value="offers" className="font-bold"><Gift className="mr-2"/> Redeem Offer</TabsTrigger>
+                    <TabsTrigger value="vouchers" className="font-bold"><Ticket className="mr-2"/> Redeem Voucher</TabsTrigger>
                 </TabsList>
             </Tabs>
             
