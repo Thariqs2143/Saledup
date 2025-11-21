@@ -388,7 +388,7 @@ export default function AdminCustomersPage() {
                         const isNew = customer.totalClaims === 1;
                         const isHighSpender = customer.totalSpend > HIGH_SPENDER_THRESHOLD;
                         return (
-                        <Card key={customer.phone} className="flex flex-col">
+                        <Card key={customer.phone} className="flex flex-col border-2 border-border hover:border-primary transition-all">
                             <CardHeader>
                                 <div className="flex justify-between items-start">
                                     <p className="font-bold text-lg">{customer.name}</p>
