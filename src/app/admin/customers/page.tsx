@@ -246,16 +246,11 @@ export default function AdminCustomersPage() {
              <style jsx>{`
                 .scroll-container {
                     overflow-x: auto;
-                    -webkit-overflow-scrolling: touch;
+                    -webkit-overflow-scrolling: touch; /* for smooth scrolling on iOS */
+                    scrollbar-width: none; /* for Firefox */
                 }
-                /* Hide scrollbar for Chrome, Safari and Opera */
                 .scroll-container::-webkit-scrollbar {
-                    display: none;
-                }
-                /* Hide scrollbar for IE, Edge and Firefox */
-                .scroll-container {
-                    -ms-overflow-style: none;  /* IE and Edge */
-                    scrollbar-width: none;  /* Firefox */
+                    display: none; /* for Chrome, Safari, and Opera */
                 }
             `}</style>
              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -267,7 +262,7 @@ export default function AdminCustomersPage() {
 
             <Tabs value={segmentFilter} onValueChange={(value) => setSegmentFilter(value as any)}>
                 <div className="space-y-4">
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-row items-center gap-2">
                          <div className="relative flex-1 w-full">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                             <Input
@@ -291,12 +286,12 @@ export default function AdminCustomersPage() {
                     </div>
                      <div className="flex flex-col md:flex-row gap-4 items-center">
                         <div className="scroll-container w-full">
-                            <TabsList className="bg-transparent p-0 m-0 border-none flex w-max">
+                             <TabsList className="bg-transparent p-0 m-0 border-none flex w-max whitespace-nowrap">
                                 {customerSegments.map((segment) => (
                                     <TabsTrigger 
                                         key={segment.value}
                                         value={segment.value} 
-                                        className="text-xs sm:text-sm py-2 px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full transition-all duration-300 border whitespace-nowrap mx-2"
+                                        className="text-xs sm:text-sm py-2 px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full transition-all duration-300 border mx-1"
                                     >
                                         <span>{segment.label}</span>
                                     </TabsTrigger>
@@ -484,5 +479,7 @@ export default function AdminCustomersPage() {
 
 
 
+
+    
 
     
