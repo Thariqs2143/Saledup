@@ -349,7 +349,7 @@ export default function AdminCustomersPage() {
                     <p>When customers claim offers, they will appear here. Try adjusting your filters.</p>
                 </div>
             ) : (
-                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                <div className="space-y-4">
                     {filteredCustomers.map(customer => {
                         const isNew = customer.totalClaims === 1;
                         const isHighSpender = customer.totalSpend > HIGH_SPENDER_THRESHOLD;
@@ -432,6 +432,8 @@ export default function AdminCustomersPage() {
     
 
       
+
+    
 
     
 
