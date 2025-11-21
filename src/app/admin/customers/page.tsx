@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Loader2, Search, Users, Download, Mail, Tag, Calendar, Phone, CheckCircle, XCircle, Trash2, Filter, IndianRupee, Percent, User as UserIcon, Repeat, Star, Award } from "lucide-react";
@@ -87,6 +87,59 @@ export default function AdminCustomersPage() {
     const router = useRouter();
     const { toast } = useToast();
     const [broadcastMessage, setBroadcastMessage] = useState('');
+    
+    const scrollRef = useRef<HTMLDivElement | null>(null);
+    const isDown = useRef(false);
+    const startX = useRef(0);
+    const scrollLeft = useRef(0);
+
+    // Drag-to-scroll (pointer events) for touch + mouse
+    useEffect(() => {
+        const el = scrollRef.current;
+        if (!el) return;
+
+        const onPointerDown = (e: PointerEvent) => {
+            isDown.current = true;
+            try { el.setPointerCapture(e.pointerId); } catch {}
+            startX.current = e.clientX - el.getBoundingClientRect().left;
+            scrollLeft.current = el.scrollLeft;
+            el.classList.add("dragging");
+        };
+
+        const onPointerMove = (e: PointerEvent) => {
+            if (!isDown.current) return;
+            const x = e.clientX - el.getBoundingClientRect().left;
+            const walk = (x - startX.current) * 1; // adjust multiplier for speed
+            el.scrollLeft = scrollLeft.current - walk;
+        };
+
+        const onPointerUp = (e: PointerEvent) => {
+            isDown.current = false;
+            try { el.releasePointerCapture(e.pointerId); } catch {}
+            el.classList.remove("dragging");
+        };
+
+        el.addEventListener("pointerdown", onPointerDown);
+        el.addEventListener("pointermove", onPointerMove);
+        el.addEventListener("pointerup", onPointerUp);
+
+        return () => {
+            el.removeEventListener("pointerdown", onPointerDown);
+            window.removeEventListener("pointermove", onPointerMove);
+            window.removeEventListener("pointerup", onPointerUp);
+        };
+    }, []);
+
+    // Auto-center the selected chip in the scroll container
+    useEffect(() => {
+        const el = scrollRef.current;
+        if (!el) return;
+        const active = el.querySelector<HTMLElement>("[data-state='active']");
+        if (!active) return;
+
+        const offset = active.offsetLeft + active.offsetWidth / 2 - el.clientWidth / 2;
+        el.scrollTo({ left: offset, behavior: "smooth" });
+    }, [segmentFilter]);
 
      useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -243,15 +296,6 @@ export default function AdminCustomersPage() {
 
     return (
         <div className="space-y-6">
-             <style jsx>{`
-                .scrollbar-hide::-webkit-scrollbar {
-                    display: none;
-                }
-                .scrollbar-hide {
-                    -ms-overflow-style: none;
-                    scrollbar-width: none;
-                }
-            `}</style>
              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">Customers</h1>
@@ -261,7 +305,7 @@ export default function AdminCustomersPage() {
 
             <Tabs value={segmentFilter} onValueChange={(value) => setSegmentFilter(value as any)}>
                 <div className="space-y-4">
-                    <div className="flex flex-row items-center gap-2">
+                     <div className="flex flex-row items-center gap-2">
                          <div className="relative flex-1 w-full">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                             <Input
@@ -284,57 +328,23 @@ export default function AdminCustomersPage() {
                         </Select>
                     </div>
 
-                    <div className="flex flex-col md:flex-row gap-4 items-center">
-                        <div className="w-full overflow-x-auto scrollbar-hide">
-                            <TabsList className="h-auto items-center justify-start rounded-md text-muted-foreground border-2 bg-transparent p-0 m-0 border-none flex w-max whitespace-nowrap">
+                    <div className="relative w-full">
+                        <div className="pointer-events-none absolute left-0 top-0 h-full w-4 bg-gradient-to-r from-background to-transparent z-10" />
+                        <div className="pointer-events-none absolute right-0 top-0 h-full w-4 bg-gradient-to-l from-background to-transparent z-10" />
+                        
+                        <TabsList className="relative bg-transparent p-0 m-0 border-none w-full">
+                            <div ref={scrollRef} className="inline-flex gap-3 whitespace-nowrap px-1 overflow-x-auto scrollbar-hide">
                                 {customerSegments.map((segment) => (
                                     <TabsTrigger
                                         key={segment.value}
                                         value={segment.value}
-                                        className="text-xs sm:text-sm py-2 px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full transition-all duration-300 border"
+                                        className="text-sm py-2 px-4 rounded-full transition-all duration-300 border shadow-sm shrink-0 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg bg-background/60 backdrop-blur-sm hover:scale-[1.02]"
                                     >
                                         {segment.label}
                                     </TabsTrigger>
                                 ))}
-                            </TabsList>
-                        </div>
-                         <div className="hidden md:flex items-center gap-2">
-                            <Dialog>
-                                <DialogTrigger asChild>
-                                    <Button variant="outline">
-                                        <Mail className="mr-2 h-4 w-4"/> Send Broadcast
-                                    </Button>
-                                </DialogTrigger>
-                                <DialogContent>
-                                    <DialogHeader>
-                                        <DialogTitle>Send WhatsApp Broadcast</DialogTitle>
-                                        <DialogDescription>
-                                            Compose a message to send to your customers. This will open WhatsApp with the message ready to be forwarded. You can send it to individuals or broadcast lists you've created in WhatsApp.
-                                        </DialogDescription>
-                                    </DialogHeader>
-                                    <div className="space-y-4 py-4">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="broadcast-message">Message</Label>
-                                            <Textarea
-                                                id="broadcast-message"
-                                                placeholder="E.g., Hi! Don't miss our weekend special: 20% off all coffee. Come visit us!"
-                                                value={broadcastMessage}
-                                                onChange={(e) => setBroadcastMessage(e.target.value)}
-                                                rows={5}
-                                            />
-                                        </div>
-                                    </div>
-                                    <DialogFooter>
-                                        <Button onClick={handleSendBroadcast}>
-                                            Send Message via WhatsApp
-                                        </Button>
-                                    </DialogFooter>
-                                </DialogContent>
-                            </Dialog>
-                            <Button onClick={handleExportPDF} variant="outline">
-                                <Download className="mr-2 h-4 w-4"/> Export PDF
-                            </Button>
-                        </div>
+                            </div>
+                        </TabsList>
                     </div>
 
                      <div className="flex gap-2 w-full md:hidden">
@@ -468,20 +478,3 @@ export default function AdminCustomersPage() {
         </div>
     );
 }
-
-    
-
-    
-
-    
-
-    
-
-
-
-
-    
-
-    
-
-    
