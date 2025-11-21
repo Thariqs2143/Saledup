@@ -32,7 +32,7 @@ type Voucher = {
     value: number;
     status: 'valid' | 'redeemed' | 'expired';
     createdAt: Timestamp;
-    expiresAt: Timestamp;
+    expiresAt: Timestamp | Date;
     redeemedAt?: Timestamp;
     shopId: string;
 };
@@ -65,7 +65,21 @@ export default function AdminVoucherViewPage() {
         const voucherDocRef = doc(db, 'shops', authUser.uid, 'vouchers', voucherId);
         getDoc(voucherDocRef).then(docSnap => {
             if (docSnap.exists()) {
-                setVoucher({ id: docSnap.id, ...docSnap.data() } as Voucher);
+                const data = docSnap.data();
+                const expiryDate = data.expiresAt instanceof Timestamp ? data.expiresAt.toDate() : data.expiresAt;
+                
+                let status = data.status;
+                if(status === 'valid' && expiryDate < new Date()){
+                    status = 'expired';
+                }
+
+                setVoucher({ 
+                    id: docSnap.id, 
+                    ...data,
+                    expiresAt: expiryDate, // Always store as Date object
+                    status: status
+                } as Voucher);
+
             } else {
                 toast({ title: "Voucher not found", variant: "destructive" });
                 router.push('/admin/vouchers');
@@ -195,7 +209,7 @@ export default function AdminVoucherViewPage() {
                                 <Calendar className="h-4 w-4 mt-1 text-muted-foreground"/>
                                 <div>
                                     <p className="text-muted-foreground">Expires On</p>
-                                    <p className="font-semibold">{format(voucher.expiresAt.toDate(), 'PPpp')}</p>
+                                    <p className="font-semibold">{format(voucher.expiresAt, 'PPpp')}</p>
                                 </div>
                             </div>
                              {voucher.redeemedAt && (
@@ -221,3 +235,5 @@ export default function AdminVoucherViewPage() {
         </div>
     )
 }
+
+    

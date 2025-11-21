@@ -83,7 +83,7 @@ export default function AdminAddVoucherPage() {
             // Details
             doc.setFontSize(8);
             doc.text(`Issued to: ${voucher.customerName}`, 15, yPos + 45);
-            doc.text(`Expires: ${format(voucher.expiresAt.toDate(), 'PPpp')}`, 15, yPos + 50);
+            doc.text(`Expires: ${format(voucher.expiresAt, 'PPpp')}`, 15, yPos + 50);
             
             const publicVerificationUrl = `${window.location.origin}/vouchers/${voucher.id}?shopId=${authUser?.uid}`;
             const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(publicVerificationUrl)}`;
@@ -292,3 +292,5 @@ export default function AdminAddVoucherPage() {
   );
 }
 
+
+    

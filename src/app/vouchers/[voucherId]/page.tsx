@@ -20,7 +20,7 @@ type Voucher = {
     value: number;
     status: 'valid' | 'redeemed' | 'expired';
     createdAt: Timestamp;
-    expiresAt: Timestamp;
+    expiresAt: Timestamp | Date; // Allow both for robustness
     redeemedAt?: Timestamp;
     shopId: string;
 };
@@ -58,13 +58,23 @@ export default function PublicVoucherViewPage() {
                 if (!voucherSnap.exists()) {
                     throw new Error("This voucher does not exist or is invalid.");
                 }
-                let voucherData = { id: voucherSnap.id, ...voucherSnap.data() } as Voucher;
-
-                // Client-side expiry check
-                const now = new Date();
-                if (voucherData.status === 'valid' && voucherData.expiresAt.toDate() < now) {
-                    voucherData.status = 'expired';
+                const data = voucherSnap.data();
+                
+                // Convert timestamp to date for consistent handling
+                const expiryDate = data.expiresAt instanceof Timestamp ? data.expiresAt.toDate() : data.expiresAt;
+                
+                let status = data.status;
+                if (status === 'valid' && expiryDate < new Date()) {
+                    status = 'expired';
                 }
+
+                const voucherData: Voucher = {
+                    id: voucherSnap.id,
+                    ...data,
+                    expiresAt: expiryDate, // Store as a Date object
+                    status: status,
+                } as Voucher;
+
                 setVoucher(voucherData);
                 
                 // Fetch shop details
@@ -171,7 +181,7 @@ export default function PublicVoucherViewPage() {
                             <Clock className="h-4 w-4 mt-1 text-muted-foreground"/>
                             <div>
                                 <p className="text-muted-foreground">Expires On</p>
-                                <p className="font-semibold">{format(voucher.expiresAt.toDate(), 'PPpp')}</p>
+                                <p className="font-semibold">{format(voucher.expiresAt, 'PPpp')}</p>
                             </div>
                         </div>
                          {voucher.redeemedAt && (
@@ -202,3 +212,5 @@ export default function PublicVoucherViewPage() {
         </div>
     )
 }
+
+    
