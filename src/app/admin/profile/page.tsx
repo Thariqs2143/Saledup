@@ -123,15 +123,15 @@ export default function AdminProfilePage() {
             <h1 className="text-3xl font-bold tracking-tight">Profile</h1>
         </div>
         
-        <Card className="text-center p-6">
-            <CardContent className="pt-6">
+        <Card className="text-center p-4">
+            <CardContent className="pt-4">
                 <Avatar className="h-24 w-24 border-4 border-primary/50 mx-auto">
                     <AvatarImage src={profile.imageUrl ?? profile.ownerImageUrl} />
                     <AvatarFallback>
                         {profile.ownerName?.charAt(0) || 'A'}
                     </AvatarFallback>
                 </Avatar>
-                <h3 className="text-2xl font-bold mt-4">{profile.ownerName}</h3>
+                <h3 className="text-2xl font-bold mt-3">{profile.ownerName}</h3>
                 <div className="inline-flex items-center gap-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-3 py-1 rounded-full text-sm font-semibold mt-2">
                     <CheckCircle className="h-4 w-4" />
                     Business Owner
@@ -163,32 +163,29 @@ export default function AdminProfilePage() {
             </Card>
         </div>
 
-        <Card>
-            <CardContent className="pt-6">
-                 <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                        <Button variant="ghost" className="w-full text-destructive hover:text-destructive hover:bg-destructive/10 justify-start p-0 h-auto">
-                            <div className="flex items-center gap-4 py-3 w-full">
-                                <LogOut className="h-5 w-5"/>
-                                <span className="flex-1 font-medium">Logout</span>
-                            </div>
-                        </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                        <AlertDialogHeader>
-                        <AlertDialogTitle>Are you sure you want to log out?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            You will be returned to the login screen.
-                        </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                        <AlertDialogCancel>No, Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleLogout}>Yes, Logout</AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
-            </CardContent>
-        </Card>
+        <div className="space-y-4 pt-4">
+            <AlertDialog>
+                <AlertDialogTrigger asChild>
+                    <Button variant="outline" className="w-full text-destructive hover:text-destructive hover:bg-destructive/5 border-destructive/30 hover:border-destructive/50">
+                        <LogOut className="mr-2 h-4 w-4"/>
+                        <span className="font-medium">Logout</span>
+                    </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                    <AlertDialogTitle>Are you sure you want to log out?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        You will be returned to the login screen.
+                    </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                    <AlertDialogCancel>No, Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleLogout}>Yes, Logout</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+            <p className="text-center text-xs text-muted-foreground">Version 1.0.0</p>
+        </div>
 
         {/* This is a hidden redirect handler for the pricing tab */}
         {searchParams.get('tab') === 'pricing-redirect' && <PricingRedirect />}
