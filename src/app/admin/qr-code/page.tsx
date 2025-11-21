@@ -117,7 +117,7 @@ export default function GenerateQrPage() {
                 <p className="text-muted-foreground hidden md:block">Print this code and display it in your shop for customers to scan.</p>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-                <Card className="w-full transition-all duration-300 ease-out hover:shadow-lg">
+                <Card className="w-full transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
                     <CardHeader className="hidden lg:block">
                         <CardTitle className="flex items-center gap-2"><QrCode /> Permanent Shop QR Code</CardTitle>
                         <CardDescription>
@@ -152,7 +152,7 @@ export default function GenerateQrPage() {
                     </CardFooter>
                 </Card>
 
-                 <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg">
+                 <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground hover:border-primary">
                     <CardHeader>
                         <div className="flex items-center gap-3">
                         <Activity className="h-6 w-6 text-primary"/>
