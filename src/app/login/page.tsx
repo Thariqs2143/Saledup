@@ -205,8 +205,8 @@ export default function LoginPage() {
         <Image
             src="https://res.cloudinary.com/dyov4r11v/image/upload/v1762585069/WhatsApp_Image_2025-11-08_at_12.26.33_9ac0131f_qj21tx.jpg"
             alt="Background"
-            layout="fill"
-            objectFit="cover"
+            fill
+            style={{objectFit: 'cover'}}
             className="dark:brightness-[0.6]"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent"></div>

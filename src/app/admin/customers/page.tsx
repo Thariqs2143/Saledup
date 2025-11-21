@@ -281,7 +281,7 @@ export default function AdminCustomersPage() {
                     >
                         <CarouselContent className="-ml-2">
                             {customerSegments.map((segment) => (
-                                <CarouselItem key={segment.value} className="pl-2 basis-auto">
+                                <CarouselItem key={segment.value} className="pl-2 w-full basis-1/2">
                                     <Button
                                         variant={segmentFilter === segment.value ? 'default' : 'outline'}
                                         onClick={() => setSegmentFilter(segment.value as any)}
