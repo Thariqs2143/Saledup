@@ -52,6 +52,7 @@ export default function AdminAddVoucherPage() {
     const generateVoucherPDF = async (vouchers: any[]) => {
         const doc = new jsPDF();
         const vouchersPerPage = 4;
+        const primaryColor = "#FF4136"; // Saledup Red
 
         const loadImage = (url: string): Promise<HTMLImageElement> => {
             return new Promise((resolve, reject) => {
@@ -64,7 +65,6 @@ export default function AdminAddVoucherPage() {
         };
 
         try {
-            // Pre-load all QR code images
             const qrImages = await Promise.all(
                 vouchers.map(voucher => {
                     const publicVerificationUrl = `${window.location.origin}/vouchers/${voucher.id}?shopId=${authUser?.uid}`;
@@ -73,7 +73,6 @@ export default function AdminAddVoucherPage() {
                 })
             );
 
-            // Now that all images are loaded, create the PDF
             vouchers.forEach((voucher, index) => {
                 if (index > 0 && index % vouchersPerPage === 0) {
                     doc.addPage();
@@ -81,33 +80,42 @@ export default function AdminAddVoucherPage() {
 
                 const yPos = (index % vouchersPerPage) * 70 + 15;
 
-                // Voucher border
-                doc.setDrawColor(200);
-                doc.roundedRect(10, yPos, 190, 60, 3, 3);
+                // Main voucher card
+                doc.setFillColor(255, 255, 255);
+                doc.setDrawColor(220, 220, 220);
+                doc.roundedRect(10, yPos, 190, 60, 5, 5, 'FD');
                 
+                // Red Accent bar
+                doc.setFillColor(primaryColor);
+                doc.rect(10, yPos, 5, 60, 'F');
+
                 // Shop Name
                 doc.setFontSize(16);
                 doc.setFont('helvetica', 'bold');
-                doc.text(shopName || "Your Shop", 15, yPos + 10);
+                doc.setTextColor(40, 40, 40);
+                doc.text(shopName || "Your Shop", 20, yPos + 12);
                 
-                // Title
-                doc.setFontSize(12);
+                // "Gift Voucher" title
+                doc.setFontSize(10);
                 doc.setFont('helvetica', 'normal');
-                doc.text("Corporate Gift Voucher", 15, yPos + 18);
+                doc.setTextColor(150, 150, 150);
+                doc.text("Corporate Gift Voucher", 20, yPos + 18);
 
                 // Value
-                doc.setFontSize(22);
+                doc.setFontSize(28);
                 doc.setFont('helvetica', 'bold');
-                doc.text(`₹${voucher.value}`, 15, yPos + 35);
+                doc.setTextColor(primaryColor);
+                doc.text(`₹${voucher.value}`, 20, yPos + 35);
                 
                 // Details
                 doc.setFontSize(8);
-                doc.text(`Issued to: ${voucher.customerName}`, 15, yPos + 45);
-                doc.text(`Expires: ${format(voucher.expiresAt, 'PPpp')}`, 15, yPos + 50);
+                doc.setTextColor(100, 100, 100);
+                doc.text(`Issued to: ${voucher.customerName}`, 20, yPos + 45);
+                doc.text(`Expires: ${format(voucher.expiresAt, 'PPpp')}`, 20, yPos + 50);
 
-                // Draw the pre-loaded image
+                // Draw QR Code
                 const qrImage = qrImages[index];
-                doc.addImage(qrImage, 'PNG', 145, yPos + 10, 45, 45);
+                doc.addImage(qrImage, 'PNG', 148, yPos + 12.5, 45, 45);
             });
 
             doc.save(`vouchers_${vouchers[0].customerName.replace(/\s+/g, '_')}.pdf`);
@@ -164,7 +172,6 @@ export default function AdminAddVoucherPage() {
                     status: 'valid' as const,
                     createdAt: serverTimestamp(),
                     expiresAt: Timestamp.fromDate(finalExpiresAt),
-                    shopId: authUser.uid,
                 };
                 batch.set(voucherRef, voucherData);
                 vouchersForPDF.push({ id: voucherRef.id, ...voucherData, expiresAt: finalExpiresAt });
