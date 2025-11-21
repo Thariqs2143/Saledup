@@ -249,31 +249,54 @@ export default function AdminCustomersPage() {
             </div>
 
              <div className="space-y-4">
-                <div className="flex flex-col md:flex-row items-center gap-2">
-                    <div className="relative flex-1 w-full">
+                <div className="flex items-center gap-2">
+                    <div className="relative flex-1">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                         <Input
                             type="search"
-                            placeholder={`Search ${filteredCustomers.length} customers...`}
+                            placeholder={`Search customers...`}
                             className="w-full rounded-lg bg-background pl-10"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
-                    <div className="flex w-full md:w-auto gap-2">
-                        <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as any)}>
-                            <SelectTrigger className="flex-1">
-                                <SelectValue placeholder="Filter by status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All Statuses</SelectItem>
-                                <SelectItem value="claimed">Claimed</SelectItem>
-                                <SelectItem value="redeemed">Redeemed</SelectItem>
-                            </SelectContent>
-                        </Select>
+                    <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as any)}>
+                        <SelectTrigger className="w-auto">
+                            <SelectValue placeholder="Filter by status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Statuses</SelectItem>
+                            <SelectItem value="claimed">Claimed</SelectItem>
+                            <SelectItem value="redeemed">Redeemed</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+                 <div className="flex flex-col md:flex-row items-center gap-2">
+                    <Carousel
+                        opts={{
+                            align: "start",
+                            dragFree: true,
+                        }}
+                        className="w-full overflow-hidden"
+                    >
+                        <CarouselContent className="-ml-2">
+                            {customerSegments.map((segment) => (
+                                <CarouselItem key={segment.value} className="pl-2 basis-auto">
+                                    <Button
+                                        variant={segmentFilter === segment.value ? 'default' : 'outline'}
+                                        onClick={() => setSegmentFilter(segment.value as any)}
+                                        className="whitespace-nowrap"
+                                    >
+                                        {segment.label}
+                                    </Button>
+                                </CarouselItem>
+                            ))}
+                        </CarouselContent>
+                    </Carousel>
+                    <div className="hidden md:flex gap-2">
                         <Dialog>
                             <DialogTrigger asChild>
-                                <Button variant="outline" className="hidden md:flex">
+                                <Button variant="outline">
                                     <Mail className="mr-2 h-4 w-4"/> Send Broadcast
                                 </Button>
                             </DialogTrigger>
@@ -303,35 +326,12 @@ export default function AdminCustomersPage() {
                                 </DialogFooter>
                             </DialogContent>
                         </Dialog>
-                        <Button onClick={handleExportPDF} variant="outline" className="hidden md:flex">
+                        <Button onClick={handleExportPDF} variant="outline">
                             <Download className="mr-2 h-4 w-4"/> Export PDF
                         </Button>
                     </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-center gap-2">
-                    <Carousel
-                        opts={{
-                            align: "start",
-                            dragFree: true,
-                        }}
-                        className="w-full"
-                    >
-                        <CarouselContent>
-                            {customerSegments.map((segment) => (
-                                <CarouselItem key={segment.value} className="basis-1/3 sm:basis-1/4 md:basis-auto">
-                                    <Button
-                                        variant={segmentFilter === segment.value ? 'default' : 'outline'}
-                                        onClick={() => setSegmentFilter(segment.value as any)}
-                                        className="w-full whitespace-nowrap"
-                                    >
-                                        {segment.label}
-                                    </Button>
-                                </CarouselItem>
-                            ))}
-                        </CarouselContent>
-                    </Carousel>
-                </div>
                  <div className="flex gap-2 w-full md:hidden">
                     <Dialog>
                         <DialogTrigger asChild>
