@@ -1,4 +1,3 @@
-
 rules_version = '2';
 
 service cloud.firestore {
@@ -62,10 +61,11 @@ service cloud.firestore {
 
     // This collection stores all gift vouchers, accessible via their unique ID.
     match /vouchers/{voucherId} {
-      // A user can read a specific voucher if they are the owner of the associated shop OR it's a public verification.
+      // Public can GET a specific voucher for the public verification page.
       allow get: if true;
-      // A user can list vouchers only if the query is filtering for their own shopId.
-      allow list: if isSignedIn() && request.query.get('shopId') == request.auth.uid;
+      // A user can list vouchers ONLY IF their query is filtering by their own shopId.
+      // This is the crucial rule that makes the dashboard work securely.
+      allow list: if request.auth != null && request.query.where.shopId == request.auth.uid;
       // Shop owners can create vouchers for their shop.
       allow create: if isShopOwner(request.resource.data.shopId);
       // Only staff of the specific shop can update a voucher (to redeem it).
