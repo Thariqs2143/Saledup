@@ -275,12 +275,12 @@ export default function AdminCustomersPage() {
                         </Select>
                     </div>
                      <div className="flex flex-col md:flex-row gap-4 items-center">
-                        <Carousel className="w-full" opts={{ align: "start", dragFree: true }}>
-                            <CarouselContent className="-ml-2">
+                        <Carousel className="w-full md:flex-1" opts={{ align: "start", dragFree: true }}>
+                            <CarouselContent>
                                 <TabsList className="bg-transparent p-0 m-0 border-none">
                                     {customerSegments.map((segment) => (
-                                        <CarouselItem key={segment.value} className="pl-2 basis-auto">
-                                            <TabsTrigger value={segment.value} className="text-xs sm:text-sm py-2 px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full transition-all duration-300 border">
+                                        <CarouselItem key={segment.value} className="basis-1/3 sm:basis-1/4 md:basis-auto">
+                                            <TabsTrigger value={segment.value} className="text-xs sm:text-sm py-2 px-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full transition-all duration-300 border">
                                                 <span>{segment.label}</span>
                                             </TabsTrigger>
                                         </CarouselItem>
@@ -458,8 +458,6 @@ export default function AdminCustomersPage() {
         </div>
     );
 }
-
-    
 
     
 
