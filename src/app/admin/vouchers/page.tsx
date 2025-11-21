@@ -23,7 +23,7 @@ type Voucher = {
     value: number;
     status: 'valid' | 'redeemed' | 'expired';
     createdAt: Timestamp;
-    expiresAt: Timestamp;
+    expiresAt: Timestamp | Date; // Can be either
     redeemedAt?: Timestamp;
 };
 
@@ -56,8 +56,14 @@ export default function AdminVouchersPage() {
             const vouchersList = snapshot.docs.map(doc => {
                 const data = doc.data();
                 const voucher = { id: doc.id, ...data } as Voucher;
+
+                // Ensure expiresAt is a Date object for comparison
+                const expiryDate = voucher.expiresAt instanceof Timestamp 
+                    ? voucher.expiresAt.toDate() 
+                    : voucher.expiresAt;
+
                 // Check for expiry client-side if status isn't already expired
-                if (voucher.status === 'valid' && voucher.expiresAt.toDate() < now) {
+                if (voucher.status === 'valid' && expiryDate < now) {
                     voucher.status = 'expired';
                 }
                 return voucher;
