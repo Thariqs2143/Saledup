@@ -70,11 +70,11 @@ const COUPON_HUNTER_DISCOUNT_PERCENTAGE = 40; // Offer discount >= 40%
 const COUPON_HUNTER_RATIO = 0.75; // >= 75% of claims are high-discount
 
 const customerSegments = [
-    { value: 'all', label: 'All', icon: Users },
-    { value: 'new', label: 'New', icon: UserIcon },
-    { value: 'repeat', label: 'Repeat', icon: Repeat },
-    { value: 'high-spenders', label: 'High Spenders', icon: Award },
-    { value: 'coupon-hunters', label: 'Coupon Hunters', icon: Star },
+    { value: 'all', label: 'All' },
+    { value: 'new', label: 'New' },
+    { value: 'repeat', label: 'Repeat' },
+    { value: 'high-spenders', label: 'High Spenders' },
+    { value: 'coupon-hunters', label: 'Coupon Hunters' },
 ];
 
 export default function AdminCustomersPage() {
@@ -275,16 +275,19 @@ export default function AdminCustomersPage() {
                         </Select>
                     </div>
                      <div className="flex flex-col md:flex-row gap-4 items-center">
-                        <TabsList className="grid w-full grid-cols-5 h-auto border-2">
-                            {customerSegments.map((segment) => {
-                                const Icon = segment.icon;
-                                return (
-                                    <TabsTrigger key={segment.value} value={segment.value} className="text-xs sm:text-sm py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-md transition-all duration-300">
-                                        <span>{segment.label}</span>
-                                    </TabsTrigger>
-                                )
-                            })}
-                        </TabsList>
+                        <Carousel className="w-full" opts={{ align: "start", dragFree: true }}>
+                            <CarouselContent className="-ml-2">
+                                <TabsList className="bg-transparent p-0 m-0 border-none">
+                                    {customerSegments.map((segment) => (
+                                        <CarouselItem key={segment.value} className="pl-2 basis-auto">
+                                            <TabsTrigger value={segment.value} className="text-xs sm:text-sm py-2 px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full transition-all duration-300 border">
+                                                <span>{segment.label}</span>
+                                            </TabsTrigger>
+                                        </CarouselItem>
+                                    ))}
+                                </TabsList>
+                            </CarouselContent>
+                        </Carousel>
                          <div className="hidden md:flex items-center gap-2">
                             <Dialog>
                                 <DialogTrigger asChild>
@@ -455,6 +458,8 @@ export default function AdminCustomersPage() {
         </div>
     );
 }
+
+    
 
     
 
