@@ -244,13 +244,12 @@ export default function AdminCustomersPage() {
     return (
         <div className="space-y-6">
              <style jsx>{`
-                .scroll-container {
-                    overflow-x: auto;
-                    -webkit-overflow-scrolling: touch;
-                    scrollbar-width: none;
-                }
-                .scroll-container::-webkit-scrollbar {
+                .scrollbar-hide::-webkit-scrollbar {
                     display: none;
+                }
+                .scrollbar-hide {
+                    -ms-overflow-style: none;
+                    scrollbar-width: none;
                 }
             `}</style>
              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -284,16 +283,17 @@ export default function AdminCustomersPage() {
                             </SelectContent>
                         </Select>
                     </div>
-                     <div className="flex flex-col md:flex-row gap-4 items-center">
-                        <div className="w-full scroll-container">
-                             <TabsList className="bg-transparent p-0 m-0 border-none flex w-max whitespace-nowrap">
+
+                    <div className="flex flex-col md:flex-row gap-4 items-center">
+                        <div className="w-full overflow-x-auto scrollbar-hide">
+                            <TabsList className="h-auto items-center justify-start rounded-md text-muted-foreground border-2 bg-transparent p-0 m-0 border-none flex w-max whitespace-nowrap">
                                 {customerSegments.map((segment) => (
-                                    <TabsTrigger 
+                                    <TabsTrigger
                                         key={segment.value}
-                                        value={segment.value} 
-                                        className="text-xs sm:text-sm py-2 px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full transition-all duration-300 border mx-1"
+                                        value={segment.value}
+                                        className="text-xs sm:text-sm py-2 px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full transition-all duration-300 border"
                                     >
-                                        <span>{segment.label}</span>
+                                        {segment.label}
                                     </TabsTrigger>
                                 ))}
                             </TabsList>
