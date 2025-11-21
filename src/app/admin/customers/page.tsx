@@ -246,11 +246,11 @@ export default function AdminCustomersPage() {
              <style jsx>{`
                 .scroll-container {
                     overflow-x: auto;
-                    -webkit-overflow-scrolling: touch; /* for smooth scrolling on iOS */
-                    scrollbar-width: none; /* for Firefox */
+                    -webkit-overflow-scrolling: touch;
+                    scrollbar-width: none;
                 }
                 .scroll-container::-webkit-scrollbar {
-                    display: none; /* for Chrome, Safari, and Opera */
+                    display: none;
                 }
             `}</style>
              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -285,7 +285,7 @@ export default function AdminCustomersPage() {
                         </Select>
                     </div>
                      <div className="flex flex-col md:flex-row gap-4 items-center">
-                        <div className="scroll-container w-full">
+                        <div className="w-full scroll-container">
                              <TabsList className="bg-transparent p-0 m-0 border-none flex w-max whitespace-nowrap">
                                 {customerSegments.map((segment) => (
                                     <TabsTrigger 
@@ -479,6 +479,8 @@ export default function AdminCustomersPage() {
 
 
 
+
+    
 
     
 
