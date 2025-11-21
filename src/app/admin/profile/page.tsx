@@ -158,7 +158,7 @@ export default function AdminProfilePage() {
                     <SettingsRow icon={Edit} label="Edit Profile" href="/admin/profile/edit" />
                     <SettingsRow icon={Bell} label="Notifications" href="/admin/notifications" />
                     <SettingsRow icon={Tag} label="Pricing & Billing" href="/admin/profile/pricing-content" />
-                    <SettingsRow icon={HelpCircle} label="Help & Support" href="/contact" />
+                    <SettingsRow icon={HelpCircle} label="Help & Support" href="/admin/support" />
                 </CardContent>
             </Card>
         </div>
