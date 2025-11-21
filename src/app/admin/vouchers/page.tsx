@@ -4,9 +4,9 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, PlusCircle, Gift, CheckCircle, Clock, Search, IndianRupee } from "lucide-react";
+import { Loader2, PlusCircle, Gift, CheckCircle, Clock, Search, IndianRupee, Trash2 } from "lucide-react";
 import Link from 'next/link';
-import { collection, onSnapshot, query, where, Timestamp, orderBy } from 'firebase/firestore';
+import { collection, onSnapshot, query, where, Timestamp, orderBy, getDocs, writeBatch } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { onAuthStateChanged, type User as AuthUser } from 'firebase/auth';
@@ -16,6 +16,17 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { AnimatedCounter } from '@/components/animated-counter';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 type Voucher = {
     id: string;
@@ -30,6 +41,7 @@ type Voucher = {
 export default function AdminVouchersPage() {
     const [vouchers, setVouchers] = useState<Voucher[]>([]);
     const [loading, setLoading] = useState(true);
+    const [deleting, setDeleting] = useState(false);
     const [authUser, setAuthUser] = useState<AuthUser | null>(null);
     const router = useRouter();
     const { toast } = useToast();
@@ -103,6 +115,35 @@ export default function AdminVouchersPage() {
             default: return 'outline';
         }
     };
+    
+    const handleDeleteAll = async () => {
+        if (!authUser || vouchers.length === 0) return;
+        setDeleting(true);
+        try {
+            const vouchersCollectionRef = collection(db, 'shops', authUser.uid, 'vouchers');
+            const vouchersSnapshot = await getDocs(vouchersCollectionRef);
+            
+            if (vouchersSnapshot.empty) {
+                 toast({ title: "No Vouchers to Delete", description: "There are no vouchers to delete." });
+                 setDeleting(false);
+                 return;
+            }
+
+            const batch = writeBatch(db);
+            vouchersSnapshot.docs.forEach(doc => {
+                batch.delete(doc.ref);
+            });
+            await batch.commit();
+
+            toast({ title: "All Vouchers Deleted", description: "All voucher records have been permanently removed." });
+
+        } catch (error) {
+            console.error("Error deleting all vouchers:", error);
+            toast({ title: "Deletion Failed", description: "Could not delete all vouchers.", variant: "destructive" });
+        } finally {
+            setDeleting(false);
+        }
+    };
 
     if (loading) {
         return (
@@ -119,12 +160,37 @@ export default function AdminVouchersPage() {
                     <h1 className="text-3xl font-bold tracking-tight">Gift Vouchers</h1>
                     <p className="text-muted-foreground">Create, manage, and track corporate and individual gift vouchers.</p>
                 </div>
-                <Button asChild>
-                    <Link href="/admin/vouchers/add">
-                        <PlusCircle className="mr-2 h-4 w-4" />
-                        Generate Vouchers
-                    </Link>
-                </Button>
+                <div className="flex gap-2">
+                    <Button asChild>
+                        <Link href="/admin/vouchers/add">
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Generate Vouchers
+                        </Link>
+                    </Button>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button variant="destructive" disabled={vouchers.length === 0 || deleting}>
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete All
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    This will permanently delete all {vouchers.length} vouchers. This action cannot be undone and the data cannot be recovered.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={handleDeleteAll} disabled={deleting} className="bg-destructive hover:bg-destructive/90">
+                                    {deleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    Yes, Delete Everything
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                </div>
             </div>
             
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
