@@ -221,8 +221,8 @@ export default function AdminVouchersPage() {
                         />
                     </div>
 
-                    <div className="flex gap-2">
-                        <Button asChild>
+                    <div className="flex gap-2 w-full">
+                        <Button asChild className="flex-1">
                             <Link href="/admin/vouchers/add">
                                 <PlusCircle className="mr-2 h-4 w-4" />
                                 <span className="font-bold">Generate Vouchers</span>
@@ -230,7 +230,7 @@ export default function AdminVouchersPage() {
                         </Button>
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
-                                <Button variant="destructive" disabled={vouchers.length === 0 || deleting}>
+                                <Button variant="destructive" disabled={vouchers.length === 0 || deleting} className="flex-1">
                                     <Trash2 className="mr-2 h-4 w-4" />
                                     <span className="font-bold">Delete All</span>
                                 </Button>
