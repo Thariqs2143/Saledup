@@ -49,64 +49,77 @@ export default function AdminAddVoucherPage() {
         return () => unsubscribe();
     }, [router]);
     
-    const generateVoucherPDF = (vouchers: any[]) => {
+    const generateVoucherPDF = async (vouchers: any[]) => {
         const doc = new jsPDF();
         const vouchersPerPage = 4;
-        let voucherCount = 0;
 
-        vouchers.forEach((voucher, index) => {
-            if (index > 0 && index % vouchersPerPage === 0) {
-                doc.addPage();
-            }
+        const loadImage = (url: string): Promise<HTMLImageElement> => {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = "Anonymous";
+                img.onload = () => resolve(img);
+                img.onerror = (err) => reject(err);
+                img.src = url;
+            });
+        };
 
-            const yPos = (index % vouchersPerPage) * 70 + 15;
+        try {
+            // Pre-load all QR code images
+            const qrImages = await Promise.all(
+                vouchers.map(voucher => {
+                    const publicVerificationUrl = `${window.location.origin}/vouchers/${voucher.id}?shopId=${authUser?.uid}`;
+                    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(publicVerificationUrl)}`;
+                    return loadImage(qrCodeUrl);
+                })
+            );
 
-            // Voucher border
-            doc.setDrawColor(200);
-            doc.roundedRect(10, yPos, 190, 60, 3, 3);
-            
-            // Shop Name
-            doc.setFontSize(16);
-            doc.setFont('helvetica', 'bold');
-            doc.text(shopName || "Your Shop", 15, yPos + 10);
-            
-            // Title
-            doc.setFontSize(12);
-            doc.setFont('helvetica', 'normal');
-            doc.text("Corporate Gift Voucher", 15, yPos + 18);
-
-            // Value
-            doc.setFontSize(22);
-            doc.setFont('helvetica', 'bold');
-            doc.text(`₹${voucher.value}`, 15, yPos + 35);
-            
-            // Details
-            doc.setFontSize(8);
-            doc.text(`Issued to: ${voucher.customerName}`, 15, yPos + 45);
-            doc.text(`Expires: ${format(voucher.expiresAt, 'PPpp')}`, 15, yPos + 50);
-            
-            const publicVerificationUrl = `${window.location.origin}/vouchers/${voucher.id}?shopId=${authUser?.uid}`;
-            const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(publicVerificationUrl)}`;
-            
-            const img = new Image();
-            img.crossOrigin = "Anonymous";
-            img.src = qrCodeUrl;
-            img.onload = () => {
-                doc.addImage(img, 'PNG', 145, yPos + 10, 45, 45);
-                voucherCount++;
-                if (voucherCount === vouchers.length) {
-                    doc.save(`vouchers_${voucher.customerName.replace(/\s+/g, '_')}.pdf`);
+            // Now that all images are loaded, create the PDF
+            vouchers.forEach((voucher, index) => {
+                if (index > 0 && index % vouchersPerPage === 0) {
+                    doc.addPage();
                 }
-            }
-             // Fallback for image loading issue
-            if(index === vouchers.length - 1 && voucherCount < vouchers.length) {
-                setTimeout(() => {
-                     if (voucherCount >= vouchers.length -1) { // be a bit lenient
-                        doc.save(`vouchers_${voucher.customerName.replace(/\s+/g, '_')}.pdf`);
-                     }
-                }, 1000 * vouchers.length);
-            }
-        });
+
+                const yPos = (index % vouchersPerPage) * 70 + 15;
+
+                // Voucher border
+                doc.setDrawColor(200);
+                doc.roundedRect(10, yPos, 190, 60, 3, 3);
+                
+                // Shop Name
+                doc.setFontSize(16);
+                doc.setFont('helvetica', 'bold');
+                doc.text(shopName || "Your Shop", 15, yPos + 10);
+                
+                // Title
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'normal');
+                doc.text("Corporate Gift Voucher", 15, yPos + 18);
+
+                // Value
+                doc.setFontSize(22);
+                doc.setFont('helvetica', 'bold');
+                doc.text(`₹${voucher.value}`, 15, yPos + 35);
+                
+                // Details
+                doc.setFontSize(8);
+                doc.text(`Issued to: ${voucher.customerName}`, 15, yPos + 45);
+                doc.text(`Expires: ${format(voucher.expiresAt, 'PPpp')}`, 15, yPos + 50);
+
+                // Draw the pre-loaded image
+                const qrImage = qrImages[index];
+                doc.addImage(qrImage, 'PNG', 145, yPos + 10, 45, 45);
+            });
+
+            doc.save(`vouchers_${vouchers[0].customerName.replace(/\s+/g, '_')}.pdf`);
+
+        } catch (error) {
+            console.error("PDF Generation Error:", error);
+            toast({
+                title: "PDF Generation Failed",
+                description: "There was an issue loading QR codes for the PDF.",
+                variant: "destructive"
+            });
+        }
     };
 
 
@@ -164,7 +177,7 @@ export default function AdminAddVoucherPage() {
                 description: `${quantity} vouchers have been created. Preparing PDF for download.`,
             });
             
-            generateVoucherPDF(vouchersForPDF);
+            await generateVoucherPDF(vouchersForPDF);
 
             router.push('/admin/vouchers');
         } catch (error) {
@@ -291,6 +304,3 @@ export default function AdminAddVoucherPage() {
     </div>
   );
 }
-
-
-    
