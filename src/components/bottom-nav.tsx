@@ -3,7 +3,7 @@
 
 import { useRouter, usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { LayoutDashboard, QrCode, Users, Settings, ScanLine, History, User, Trophy, CalendarOff, BarChart3, type LucideIcon, Crown, Store, Gem, BookLock, Megaphone, Bell, Tag } from 'lucide-react';
+import { LayoutDashboard, QrCode, Users, Settings, ScanLine, History, User, Trophy, CalendarOff, BarChart3, type LucideIcon, Crown, Store, Gem, BookLock, Megaphone, Bell, Tag, Gift } from 'lucide-react';
 
 
 const iconMap: { [key: string]: LucideIcon } = {
@@ -24,6 +24,7 @@ const iconMap: { [key: string]: LucideIcon } = {
   Megaphone,
   Bell,
   Tag,
+  Gift,
 };
 
 

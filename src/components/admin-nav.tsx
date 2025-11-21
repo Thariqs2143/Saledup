@@ -11,6 +11,7 @@ import {
   LogOut,
   ScanLine,
   BarChart3,
+  Gift,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { NavItem } from './bottom-nav';
@@ -33,6 +34,7 @@ const iconMap: { [key: string]: any } = {
   Bell,
   ScanLine,
   BarChart3,
+  Gift,
 };
 
 type ShopProfile = {

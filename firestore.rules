@@ -117,6 +117,17 @@ service cloud.firestore {
       allow update: if request.auth.uid == userId || isSuperAdmin();
       allow delete: if request.auth.uid == userId || isSuperAdmin();
     }
+    
+    // ----------------------
+    // Vouchers Collection
+    // ----------------------
+    match /vouchers/{voucherId} {
+      // Owner of the voucher's shop can create it
+      allow create: if isShopOwner(request.resource.data.shopId);
+      // Owner can read/manage it, public cannot access it directly
+      allow read, update, delete: if isShopOwner(resource.data.shopId);
+    }
+
 
     // ----------------------
     // Employee Phone Lookup

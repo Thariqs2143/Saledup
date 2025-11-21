@@ -27,6 +27,7 @@ type ShopProfile = {
 const adminNavItems: NavItem[] = [
   { href: '/admin', label: 'Home', iconName: 'LayoutDashboard' },
   { href: '/admin/offers', label: 'Offers', iconName: 'Tag' },
+  { href: '/admin/vouchers', label: 'Gift Vouchers', iconName: 'Gift' },
   { href: '/admin/redeem', label: 'Redeem', iconName: 'ScanLine' },
   { href: '/admin/customers', label: 'Customers', iconName: 'Users' },
   { href: '/admin/analytics', label: 'Analytics', iconName: 'BarChart3' },
