@@ -234,15 +234,15 @@ export default function RedeemOfferPage() {
         <div className="space-y-6">
              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="offers"><Ticket className="mr-2"/> Redeem Offer</TabsTrigger>
-                    <TabsTrigger value="vouchers"><Gift className="mr-2"/> Redeem Voucher</TabsTrigger>
+                    <TabsTrigger value="offers" className="font-bold"><Ticket className="mr-2"/> Redeem Offer</TabsTrigger>
+                    <TabsTrigger value="vouchers" className="font-bold"><Gift className="mr-2"/> Redeem Voucher</TabsTrigger>
                 </TabsList>
             </Tabs>
             
             <Card>
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><ScanLine /> QR Code Scanner</CardTitle>
-                    <CardDescription>Position the customer's {activeTab === 'offers' ? 'offer' : 'voucher'} QR code within the frame.</CardDescription>
+                    <CardTitle className="flex items-center gap-2 font-bold"><ScanLine /> QR Code Scanner</CardTitle>
+                    <CardDescription className="font-semibold">Position the customer's {activeTab === 'offers' ? 'offer' : 'voucher'} QR code within the frame.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div className="aspect-square max-w-md mx-auto bg-muted rounded-lg overflow-hidden relative">
@@ -375,5 +375,3 @@ export default function RedeemOfferPage() {
         </div>
     );
 }
-
-    
