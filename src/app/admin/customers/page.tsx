@@ -260,11 +260,11 @@ export default function AdminCustomersPage() {
                     >
                         <CarouselContent>
                             {customerSegments.map((segment) => (
-                                <CarouselItem key={segment.value} className="basis-auto">
+                                <CarouselItem key={segment.value} className="basis-auto md:basis-1/5">
                                     <Button
                                         variant={segmentFilter === segment.value ? 'default' : 'outline'}
                                         onClick={() => setSegmentFilter(segment.value as any)}
-                                        className="shrink-0"
+                                        className="shrink-0 w-full"
                                     >
                                         {segment.label}
                                     </Button>
