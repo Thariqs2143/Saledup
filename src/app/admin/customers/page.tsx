@@ -243,8 +243,8 @@ export default function AdminCustomersPage() {
             <Tabs defaultValue="all" onValueChange={(value) => setSegmentFilter(value as any)} className="w-full">
                 <div className="space-y-4">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                        <div className="w-full sm:hidden">
-                            <Carousel opts={{ align: "start", dragFree: true }}>
+                        <TabsList className="sm:hidden w-full p-0 border-0 bg-transparent">
+                            <Carousel opts={{ align: "start", dragFree: true }} className="w-full">
                                 <CarouselContent className="-ml-1">
                                     <CarouselItem className="basis-auto pl-1"><TabsTrigger value="all">All</TabsTrigger></CarouselItem>
                                     <CarouselItem className="basis-auto pl-1"><TabsTrigger value="new">New</TabsTrigger></CarouselItem>
@@ -253,7 +253,7 @@ export default function AdminCustomersPage() {
                                     <CarouselItem className="basis-auto pl-1"><TabsTrigger value="coupon-hunters">Coupon Hunters</TabsTrigger></CarouselItem>
                                 </CarouselContent>
                             </Carousel>
-                        </div>
+                        </TabsList>
                         <TabsList className="hidden sm:inline-flex h-auto items-center justify-start rounded-md bg-muted p-1 text-muted-foreground border-2">
                             <TabsTrigger value="all">All</TabsTrigger>
                             <TabsTrigger value="new">New</TabsTrigger>
