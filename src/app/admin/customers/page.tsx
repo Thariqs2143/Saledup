@@ -30,8 +30,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
+import { cn } from '@/lib/utils';
 
 // Extend jsPDF with autoTable
 declare module 'jspdf' {
@@ -66,6 +66,14 @@ type CustomerData = {
 const HIGH_SPENDER_THRESHOLD = 2000; // Total spend > 2000 INR
 const COUPON_HUNTER_DISCOUNT_PERCENTAGE = 40; // Offer discount >= 40%
 const COUPON_HUNTER_RATIO = 0.75; // >= 75% of claims are high-discount
+
+const customerSegments = [
+    { value: 'all', label: 'All' },
+    { value: 'new', label: 'New' },
+    { value: 'repeat', label: 'Repeat' },
+    { value: 'high-spenders', label: 'High Spenders' },
+    { value: 'coupon-hunters', label: 'Coupon Hunters' },
+];
 
 export default function AdminCustomersPage() {
     const [allClaims, setAllClaims] = useState<Claim[]>([]);
@@ -215,7 +223,11 @@ export default function AdminCustomersPage() {
             toast({ title: "Claim Deleted", description: "The customer claim has been removed."});
         } catch (error) {
             console.error(error);
-            toast({ title: "Error", description: "Could not delete the claim.", variant: "destructive" });
+             try {
+                 toast({ title: "Error", description: "Could not delete the claim.", variant: "destructive" });
+             } catch (toastError) {
+                 console.error("Error displaying toast:", toastError);
+             }
         }
     };
     
@@ -240,179 +252,173 @@ export default function AdminCustomersPage() {
                 </div>
             </div>
 
-            <Tabs defaultValue="all" onValueChange={(value) => setSegmentFilter(value as any)} className="w-full">
-                <div className="space-y-4">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                        <TabsList className="sm:hidden w-full p-0 border-0 bg-transparent">
-                            <Carousel opts={{ align: "start", dragFree: true }} className="w-full">
-                                <CarouselContent className="-ml-1">
-                                    <CarouselItem className="basis-auto pl-1"><TabsTrigger value="all">All</TabsTrigger></CarouselItem>
-                                    <CarouselItem className="basis-auto pl-1"><TabsTrigger value="new">New</TabsTrigger></CarouselItem>
-                                    <CarouselItem className="basis-auto pl-1"><TabsTrigger value="repeat">Repeat</TabsTrigger></CarouselItem>
-                                    <CarouselItem className="basis-auto pl-1"><TabsTrigger value="high-spenders">High Spenders</TabsTrigger></CarouselItem>
-                                    <CarouselItem className="basis-auto pl-1"><TabsTrigger value="coupon-hunters">Coupon Hunters</TabsTrigger></CarouselItem>
-                                </CarouselContent>
-                            </Carousel>
-                        </TabsList>
-                        <TabsList className="hidden sm:inline-flex h-auto items-center justify-start rounded-md bg-muted p-1 text-muted-foreground border-2">
-                            <TabsTrigger value="all">All</TabsTrigger>
-                            <TabsTrigger value="new">New</TabsTrigger>
-                            <TabsTrigger value="repeat">Repeat</TabsTrigger>
-                            <TabsTrigger value="high-spenders">High Spenders</TabsTrigger>
-                            <TabsTrigger value="coupon-hunters">Coupon Hunters</TabsTrigger>
-                        </TabsList>
-
-                        <div className="flex gap-2 w-full sm:w-auto">
-                            <div className="relative flex-1">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                                <Input
-                                    type="search"
-                                    placeholder={`Search ${filteredCustomers.length} customers...`}
-                                    className="w-full rounded-lg bg-background pl-10"
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                />
-                            </div>
-                            <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as any)}>
-                                <SelectTrigger className="w-[180px]">
-                                    <SelectValue placeholder="Filter by status" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Statuses</SelectItem>
-                                    <SelectItem value="claimed">Claimed</SelectItem>
-                                    <SelectItem value="redeemed">Redeemed</SelectItem>
-                                </SelectContent>
-                            </Select>
+             <div className="space-y-4">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                     <div className="w-full overflow-x-auto pb-2">
+                        <div className="flex space-x-2">
+                            {customerSegments.map((segment) => (
+                                <Button
+                                    key={segment.value}
+                                    variant={segmentFilter === segment.value ? 'default' : 'outline'}
+                                    onClick={() => setSegmentFilter(segment.value as any)}
+                                    className="shrink-0"
+                                >
+                                    {segment.label}
+                                </Button>
+                            ))}
                         </div>
                     </div>
-                     <div className="flex gap-2 w-full sm:w-auto">
-                        <Dialog>
-                            <DialogTrigger asChild>
-                                <Button variant="outline" className="flex-1">
-                                    <Mail className="mr-2 h-4 w-4"/> Send Broadcast
+
+                    <div className="flex gap-2 w-full sm:w-auto">
+                        <div className="relative flex-1">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                            <Input
+                                type="search"
+                                placeholder={`Search ${filteredCustomers.length} customers...`}
+                                className="w-full rounded-lg bg-background pl-10"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+                        <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as any)}>
+                            <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="Filter by status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Statuses</SelectItem>
+                                <SelectItem value="claimed">Claimed</SelectItem>
+                                <SelectItem value="redeemed">Redeemed</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+                 <div className="flex gap-2 w-full sm:w-auto">
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <Button variant="outline" className="flex-1">
+                                <Mail className="mr-2 h-4 w-4"/> Send Broadcast
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Send WhatsApp Broadcast</DialogTitle>
+                                <DialogDescription>
+                                    Compose a message to send to your customers. This will open WhatsApp with the message ready to be forwarded. You can send it to individuals or broadcast lists you've created in WhatsApp.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <div className="space-y-4 py-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="broadcast-message">Message</Label>
+                                    <Textarea
+                                        id="broadcast-message"
+                                        placeholder="E.g., Hi! Don't miss our weekend special: 20% off all coffee. Come visit us!"
+                                        value={broadcastMessage}
+                                        onChange={(e) => setBroadcastMessage(e.target.value)}
+                                        rows={5}
+                                    />
+                                </div>
+                            </div>
+                            <DialogFooter>
+                                <Button onClick={handleSendBroadcast}>
+                                    Send Message via WhatsApp
                                 </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                                <DialogHeader>
-                                    <DialogTitle>Send WhatsApp Broadcast</DialogTitle>
-                                    <DialogDescription>
-                                        Compose a message to send to your customers. This will open WhatsApp with the message ready to be forwarded. You can send it to individuals or broadcast lists you've created in WhatsApp.
-                                    </DialogDescription>
-                                </DialogHeader>
-                                <div className="space-y-4 py-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="broadcast-message">Message</Label>
-                                        <Textarea
-                                            id="broadcast-message"
-                                            placeholder="E.g., Hi! Don't miss our weekend special: 20% off all coffee. Come visit us!"
-                                            value={broadcastMessage}
-                                            onChange={(e) => setBroadcastMessage(e.target.value)}
-                                            rows={5}
-                                        />
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+                    <Button onClick={handleExportPDF} variant="outline" className="flex-1">
+                        <Download className="mr-2 h-4 w-4"/> Export PDF
+                    </Button>
+                </div>
+            </div>
+
+            <div className="mt-6">
+            {loading ? (
+                <div className="flex items-center justify-center h-64">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+            ) : filteredCustomers.length === 0 ? (
+                <div className="text-center py-20 text-muted-foreground rounded-lg border bg-muted/20">
+                    <Users className="h-16 w-16 mx-auto mb-4 opacity-50"/>
+                    <h3 className="text-xl font-semibold">No Customers Found</h3>
+                    <p>When customers claim offers, they will appear here. Try adjusting your filters.</p>
+                </div>
+            ) : (
+                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    {filteredCustomers.map(customer => {
+                        const isNew = customer.totalClaims === 1;
+                        const isHighSpender = customer.totalSpend > HIGH_SPENDER_THRESHOLD;
+                        return (
+                        <Card key={customer.phone} className="flex flex-col">
+                            <CardHeader>
+                                <div className="flex justify-between items-start">
+                                    <p className="font-bold text-lg">{customer.name}</p>
+                                    <div className="flex gap-1.5">
+                                        <Badge variant={isNew ? 'outline' : 'default'} className="whitespace-nowrap">
+                                            {isNew ? 'New' : 'Repeat'}
+                                        </Badge>
+                                         {customer.isCouponHunter && (
+                                            <Badge variant="secondary" className="whitespace-nowrap">
+                                                <Tag className="mr-1 h-3 w-3"/> Hunter
+                                            </Badge>
+                                        )}
                                     </div>
                                 </div>
-                                <DialogFooter>
-                                    <Button onClick={handleSendBroadcast}>
-                                        Send Message via WhatsApp
-                                    </Button>
-                                </DialogFooter>
-                            </DialogContent>
-                        </Dialog>
-                        <Button onClick={handleExportPDF} variant="outline" className="flex-1">
-                            <Download className="mr-2 h-4 w-4"/> Export PDF
-                        </Button>
-                    </div>
+                                <CardDescription className="text-sm">
+                                    Last claimed "{customer.lastClaim.offerTitle}"
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-3 text-sm text-muted-foreground flex-1">
+                                <div className="flex items-center gap-3">
+                                    <Phone className="h-4 w-4 shrink-0" />
+                                    <span>{customer.phone}</span>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <Mail className="h-4 w-4 shrink-0" />
+                                    <span className="truncate">{customer.lastClaim.customerEmail || 'No email'}</span>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <Calendar className="h-4 w-4 shrink-0" />
+                                    <span>Last active: {formatDistanceToNow(customer.lastClaim.claimedAt.toDate(), { addSuffix: true })}</span>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <Users className="h-4 w-4 shrink-0" />
+                                    <span>Total claims: {customer.totalClaims}</span>
+                                </div>
+                                <div className="flex items-center gap-3 font-medium">
+                                    <IndianRupee className="h-4 w-4 shrink-0" />
+                                    <span className={isHighSpender ? 'text-primary' : ''}>Total spend: ₹{customer.totalSpend.toFixed(2)}</span>
+                                </div>
+                            </CardContent>
+                            <CardFooter className="border-t pt-4 flex justify-end gap-2">
+                                 <Button size="sm" variant={customer.lastClaim.status === 'claimed' ? 'default' : 'secondary'} onClick={() => handleStatusToggle(customer.lastClaim.id, customer.lastClaim.status)}>
+                                    {customer.lastClaim.status === 'claimed' ? <CheckCircle className="mr-2 h-4 w-4"/> : <XCircle className="mr-2 h-4 w-4"/> }
+                                    {customer.lastClaim.status === 'claimed' ? 'Mark Redeemed' : 'Mark Claimed'}
+                                </Button>
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <Button size="sm" variant="destructive" className="h-9 w-9 p-0">
+                                            <Trash2 className="h-4 w-4"/>
+                                        </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                This will permanently delete the latest claim for {customer.name}. This cannot be undone. To delete all data for this customer, contact support.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                            <AlertDialogAction onClick={() => handleDeleteClaim(customer.lastClaim.id)} className="bg-destructive hover:bg-destructive/90">Delete Claim</AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            </CardFooter>
+                        </Card>
+                    )})}
                 </div>
-
-                <div className="mt-6">
-                {loading ? (
-                    <div className="flex items-center justify-center h-64">
-                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                    </div>
-                ) : filteredCustomers.length === 0 ? (
-                    <div className="text-center py-20 text-muted-foreground rounded-lg border bg-muted/20">
-                        <Users className="h-16 w-16 mx-auto mb-4 opacity-50"/>
-                        <h3 className="text-xl font-semibold">No Customers Found</h3>
-                        <p>When customers claim offers, they will appear here. Try adjusting your filters.</p>
-                    </div>
-                ) : (
-                    <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                        {filteredCustomers.map(customer => {
-                            const isNew = customer.totalClaims === 1;
-                            const isHighSpender = customer.totalSpend > HIGH_SPENDER_THRESHOLD;
-                            return (
-                            <Card key={customer.phone} className="flex flex-col">
-                                <CardHeader>
-                                    <div className="flex justify-between items-start">
-                                        <p className="font-bold text-lg">{customer.name}</p>
-                                        <div className="flex gap-1.5">
-                                            <Badge variant={isNew ? 'outline' : 'default'} className="whitespace-nowrap">
-                                                {isNew ? 'New' : 'Repeat'}
-                                            </Badge>
-                                             {customer.isCouponHunter && (
-                                                <Badge variant="secondary" className="whitespace-nowrap">
-                                                    <Tag className="mr-1 h-3 w-3"/> Hunter
-                                                </Badge>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <CardDescription className="text-sm">
-                                        Last claimed "{customer.lastClaim.offerTitle}"
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-3 text-sm text-muted-foreground flex-1">
-                                    <div className="flex items-center gap-3">
-                                        <Phone className="h-4 w-4 shrink-0" />
-                                        <span>{customer.phone}</span>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <Mail className="h-4 w-4 shrink-0" />
-                                        <span className="truncate">{customer.lastClaim.customerEmail || 'No email'}</span>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <Calendar className="h-4 w-4 shrink-0" />
-                                        <span>Last active: {formatDistanceToNow(customer.lastClaim.claimedAt.toDate(), { addSuffix: true })}</span>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <Users className="h-4 w-4 shrink-0" />
-                                        <span>Total claims: {customer.totalClaims}</span>
-                                    </div>
-                                    <div className="flex items-center gap-3 font-medium">
-                                        <IndianRupee className="h-4 w-4 shrink-0" />
-                                        <span className={isHighSpender ? 'text-primary' : ''}>Total spend: ₹{customer.totalSpend.toFixed(2)}</span>
-                                    </div>
-                                </CardContent>
-                                <CardFooter className="border-t pt-4 flex justify-end gap-2">
-                                     <Button size="sm" variant={customer.lastClaim.status === 'claimed' ? 'default' : 'secondary'} onClick={() => handleStatusToggle(customer.lastClaim.id, customer.lastClaim.status)}>
-                                        {customer.lastClaim.status === 'claimed' ? <CheckCircle className="mr-2 h-4 w-4"/> : <XCircle className="mr-2 h-4 w-4"/> }
-                                        {customer.lastClaim.status === 'claimed' ? 'Mark Redeemed' : 'Mark Claimed'}
-                                    </Button>
-                                    <AlertDialog>
-                                        <AlertDialogTrigger asChild>
-                                            <Button size="sm" variant="destructive" className="h-9 w-9 p-0">
-                                                <Trash2 className="h-4 w-4"/>
-                                            </Button>
-                                        </AlertDialogTrigger>
-                                        <AlertDialogContent>
-                                            <AlertDialogHeader>
-                                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                                <AlertDialogDescription>
-                                                    This will permanently delete the latest claim for {customer.name}. This cannot be undone. To delete all data for this customer, contact support.
-                                                </AlertDialogDescription>
-                                            </AlertDialogHeader>
-                                            <AlertDialogFooter>
-                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                <AlertDialogAction onClick={() => handleDeleteClaim(customer.lastClaim.id)} className="bg-destructive hover:bg-destructive/90">Delete Claim</AlertDialogAction>
-                                            </AlertDialogFooter>
-                                        </AlertDialogContent>
-                                    </AlertDialog>
-                                </CardFooter>
-                            </Card>
-                        )})}
-                    </div>
-                )}
-                </div>
-            </Tabs>
+            )}
+            </div>
         </div>
     );
 }
@@ -420,5 +426,7 @@ export default function AdminCustomersPage() {
     
 
       
+
+    
 
     
