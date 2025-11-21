@@ -234,79 +234,80 @@ export default function AdminCustomersPage() {
         <div className="space-y-6">
              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Your Customers</h1>
-                    <p className="text-muted-foreground">View, segment, and engage with your customer base.</p>
-                </div>
-                 <div className="flex gap-2 w-full sm:w-auto">
-                    <Dialog>
-                        <DialogTrigger asChild>
-                            <Button variant="outline" className="flex-1">
-                                <Mail className="mr-2 h-4 w-4"/> Send Broadcast
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                            <DialogHeader>
-                                <DialogTitle>Send WhatsApp Broadcast</DialogTitle>
-                                <DialogDescription>
-                                    Compose a message to send to your customers. This will open WhatsApp with the message ready to be forwarded. You can send it to individuals or broadcast lists you've created in WhatsApp.
-                                </DialogDescription>
-                            </DialogHeader>
-                            <div className="space-y-4 py-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="broadcast-message">Message</Label>
-                                    <Textarea
-                                        id="broadcast-message"
-                                        placeholder="E.g., Hi! Don't miss our weekend special: 20% off all coffee. Come visit us!"
-                                        value={broadcastMessage}
-                                        onChange={(e) => setBroadcastMessage(e.target.value)}
-                                        rows={5}
-                                    />
-                                </div>
-                            </div>
-                            <DialogFooter>
-                                <Button onClick={handleSendBroadcast}>
-                                    Send Message via WhatsApp
-                                </Button>
-                            </DialogFooter>
-                        </DialogContent>
-                    </Dialog>
-                     <Button onClick={handleExportPDF} variant="outline" size="icon" className="w-12 h-12">
-                        <Download className="h-5 w-5"/>
-                        <span className="sr-only">Export PDF</span>
-                    </Button>
+                    <h1 className="text-3xl font-bold tracking-tight">Customers</h1>
+                    <p className="text-muted-foreground hidden sm:block">View, segment, and engage with your customer base.</p>
                 </div>
             </div>
 
             <Tabs defaultValue="all" onValueChange={(value) => setSegmentFilter(value as any)} className="w-full">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                     <TabsList className="grid w-full sm:w-auto grid-cols-3 sm:grid-cols-5">
-                        <TabsTrigger value="all">All</TabsTrigger>
-                        <TabsTrigger value="new">New</TabsTrigger>
-                        <TabsTrigger value="repeat">Repeat</TabsTrigger>
-                        <TabsTrigger value="high-spenders">High Spenders</TabsTrigger>
-                        <TabsTrigger value="coupon-hunters">Coupon Hunters</TabsTrigger>
-                    </TabsList>
-                    <div className="flex gap-2 w-full sm:w-auto">
-                        <div className="relative flex-1">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                            <Input
-                                type="search"
-                                placeholder={`Search ${filteredCustomers.length} customers...`}
-                                className="w-full rounded-lg bg-background pl-10"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                            />
+                <div className="space-y-4">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <TabsList className="grid w-full sm:w-auto grid-cols-3 sm:grid-cols-5">
+                            <TabsTrigger value="all">All</TabsTrigger>
+                            <TabsTrigger value="new">New</TabsTrigger>
+                            <TabsTrigger value="repeat">Repeat</TabsTrigger>
+                            <TabsTrigger value="high-spenders">High Spenders</TabsTrigger>
+                            <TabsTrigger value="coupon-hunters">Coupon Hunters</TabsTrigger>
+                        </TabsList>
+                        <div className="flex gap-2 w-full sm:w-auto">
+                            <div className="relative flex-1">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                <Input
+                                    type="search"
+                                    placeholder={`Search ${filteredCustomers.length} customers...`}
+                                    className="w-full rounded-lg bg-background pl-10"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+                            </div>
+                            <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as any)}>
+                                <SelectTrigger className="w-[180px]">
+                                    <SelectValue placeholder="Filter by status" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Statuses</SelectItem>
+                                    <SelectItem value="claimed">Claimed</SelectItem>
+                                    <SelectItem value="redeemed">Redeemed</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
-                        <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as any)}>
-                            <SelectTrigger className="w-[180px]">
-                                <SelectValue placeholder="Filter by status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All Statuses</SelectItem>
-                                <SelectItem value="claimed">Claimed</SelectItem>
-                                <SelectItem value="redeemed">Redeemed</SelectItem>
-                            </SelectContent>
-                        </Select>
+                    </div>
+                     <div className="flex gap-2 w-full sm:w-auto">
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Button variant="outline" className="flex-1">
+                                    <Mail className="mr-2 h-4 w-4"/> Send Broadcast
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>Send WhatsApp Broadcast</DialogTitle>
+                                    <DialogDescription>
+                                        Compose a message to send to your customers. This will open WhatsApp with the message ready to be forwarded. You can send it to individuals or broadcast lists you've created in WhatsApp.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <div className="space-y-4 py-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="broadcast-message">Message</Label>
+                                        <Textarea
+                                            id="broadcast-message"
+                                            placeholder="E.g., Hi! Don't miss our weekend special: 20% off all coffee. Come visit us!"
+                                            value={broadcastMessage}
+                                            onChange={(e) => setBroadcastMessage(e.target.value)}
+                                            rows={5}
+                                        />
+                                    </div>
+                                </div>
+                                <DialogFooter>
+                                    <Button onClick={handleSendBroadcast}>
+                                        Send Message via WhatsApp
+                                    </Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
+                        <Button onClick={handleExportPDF} variant="outline" className="flex-1">
+                            <Download className="mr-2 h-4 w-4"/> Export PDF
+                        </Button>
                     </div>
                 </div>
 
