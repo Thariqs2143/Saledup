@@ -116,32 +116,49 @@ export default function RedeemOfferPage() {
     }, [hasCameraPermission, isDialogOpen, isProcessing, activeTab]);
     
     const handleQrCodeScanned = async (scannedData: string) => {
-        if (!authUser) return;
+        if (!authUser || isProcessing) return;
         setIsProcessing(true);
 
+        let entityId = scannedData;
+
+        // --- Robust ID Parsing ---
         try {
-            // Logic for Offer Claims
+            // If the scanned data is a full URL, try to extract the ID from the pathname.
+            if (scannedData.startsWith('http')) {
+                const url = new URL(scannedData);
+                const pathParts = url.pathname.split('/').filter(part => part); // filter out empty strings
+                if (pathParts.length > 0) {
+                    entityId = pathParts[pathParts.length - 1]; // Assume the ID is the last part of the path
+                }
+            }
+        } catch (e) {
+            // Not a valid URL, treat the whole string as the potential ID.
+            entityId = scannedData;
+        }
+
+        if (!entityId || entityId.includes('/')) {
+            toast({ variant: 'destructive', title: 'Invalid QR Code', description: 'The scanned code is not in a valid format.' });
+            setIsProcessing(false);
+            return;
+        }
+
+        try {
             if (activeTab === 'offers') {
-                 const claimDocRef = doc(db, 'shops', authUser.uid, 'claims', scannedData);
+                 const claimDocRef = doc(db, 'shops', authUser.uid, 'claims', entityId);
                  const claimSnap = await getDoc(claimDocRef);
                  if (claimSnap.exists()) {
                      setScannedOffer({ id: claimSnap.id, ...claimSnap.data() } as OfferClaim);
                  } else {
                       toast({ variant: 'destructive', title: 'Invalid Offer QR', description: 'This QR code is not a valid offer claim for your shop.' });
                  }
-                 setIsProcessing(false);
-                 return; // Exit after handling
-            }
-
-            // Logic for Voucher Claims
-            if (activeTab === 'vouchers') {
-                const voucherDocRef = doc(db, 'shops', authUser.uid, 'vouchers', scannedData);
+            } else if (activeTab === 'vouchers') {
+                const voucherDocRef = doc(db, 'shops', authUser.uid, 'vouchers', entityId);
                 const voucherSnap = await getDoc(voucherDocRef);
 
                 if (voucherSnap.exists()) {
                     let voucherData = { id: voucherSnap.id, ...voucherSnap.data() } as GiftVoucher;
-                     // Client-side expiry check
-                    if (voucherData.status === 'valid' && voucherData.expiresAt.toDate() < new Date()) {
+                    const expiresAt = voucherData.expiresAt.toDate();
+                    if (voucherData.status === 'valid' && expiresAt < new Date()) {
                         voucherData.status = 'expired';
                     }
                     setScannedVoucher(voucherData);
@@ -149,14 +166,17 @@ export default function RedeemOfferPage() {
                     toast({ variant: 'destructive', title: 'Voucher Not Found', description: 'The scanned voucher does not exist or is not for this shop.' });
                 }
             }
-
         } catch (error) {
-            toast({ variant: 'destructive', title: 'Error', description: 'Could not verify the QR code. Ensure it is a valid Saledup QR code.' });
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not verify the QR code. Please ensure it is valid.' });
             console.error("QR Scan Error:", error);
         } finally {
-            setIsProcessing(false);
+            // Only set isProcessing to false if no dialog is opened
+            if (!scannedOffer && !scannedVoucher) {
+                setTimeout(() => setIsProcessing(false), 1000); // Add a small delay to prevent rapid re-scans of invalid codes
+            }
         }
     };
+
 
     const handleRedeemOffer = async () => {
         if (!scannedOffer || !authUser || scannedOffer.status === 'redeemed') return;
@@ -355,3 +375,5 @@ export default function RedeemOfferPage() {
         </div>
     );
 }
+
+    
