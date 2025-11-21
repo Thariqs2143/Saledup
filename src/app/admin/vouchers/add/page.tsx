@@ -1,0 +1,210 @@
+
+'use client';
+
+import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from '@/hooks/use-toast';
+import { Loader2, Gift, ArrowLeft, Download, IndianRupee, FileText, Bot } from 'lucide-react';
+import { addDoc, collection, doc, serverTimestamp, writeBatch } from 'firebase/firestore';
+import { db, auth } from '@/lib/firebase';
+import { onAuthStateChanged, type User as AuthUser } from 'firebase/auth';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import Link from 'next/link';
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+import { format } from 'date-fns';
+
+export default function AdminAddVoucherPage() {
+    const router = useRouter();
+    const { toast } = useToast();
+    const [loading, setLoading] = useState(false);
+    const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+    const [shopName, setShopName] = useState('');
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+             if (!user) {
+                router.replace('/login');
+            } else {
+                setAuthUser(user);
+                // Fetch shop name
+                const shopDoc = await doc(db, 'shops', user.uid).get();
+                if (shopDoc.exists()) {
+                    setShopName(shopDoc.data().shopName);
+                }
+            }
+        });
+        return () => unsubscribe();
+    }, [router]);
+    
+    const generateVoucherPDF = (vouchers: any[]) => {
+        const doc = new jsPDF();
+        const vouchersPerPage = 4;
+        let voucherCount = 0;
+
+        vouchers.forEach((voucher, index) => {
+            if (index % vouchersPerPage === 0 && index !== 0) {
+                doc.addPage();
+            }
+
+            const yPos = (index % vouchersPerPage) * 70 + 15;
+
+            // Voucher border
+            doc.setDrawColor(200);
+            doc.roundedRect(10, yPos, 190, 60, 3, 3);
+            
+            // Shop Name
+            doc.setFontSize(16);
+            doc.setFont('helvetica', 'bold');
+            doc.text(shopName || "Your Shop", 15, yPos + 10);
+            
+            // Title
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'normal');
+            doc.text("Corporate Gift Voucher", 15, yPos + 18);
+
+            // Value
+            doc.setFontSize(22);
+            doc.setFont('helvetica', 'bold');
+            doc.text(`₹${voucher.value}`, 15, yPos + 35);
+            
+            // Details
+            doc.setFontSize(8);
+            doc.text(`Issued to: ${voucher.customerName}`, 15, yPos + 45);
+            doc.text(`Expires: ${format(voucher.expiresAt.toDate(), 'PP')}`, 15, yPos + 50);
+            
+             // QR Code
+            const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${window.location.origin}/vouchers/${voucher.id}`;
+            const img = new Image();
+            img.crossOrigin = "Anonymous";
+            img.src = qrCodeUrl;
+            img.onload = () => {
+                doc.addImage(img, 'PNG', 145, yPos + 10, 45, 45);
+                voucherCount++;
+                if (voucherCount === vouchers.length) {
+                    doc.save(`vouchers_${voucher.customerName.replace(/\s+/g, '_')}.pdf`);
+                }
+            }
+            // Fallback for image loading issue
+            if(index === vouchers.length - 1 && voucherCount < vouchers.length) {
+                setTimeout(() => {
+                     if (voucherCount === vouchers.length) {
+                        doc.save(`vouchers_${voucher.customerName.replace(/\s+/g, '_')}.pdf`);
+                     }
+                }, 1000 * vouchers.length); // Wait a bit for images to load
+            }
+        });
+    };
+
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        if (!authUser) return;
+
+        const formData = new FormData(e.currentTarget);
+        const quantity = parseInt(formData.get('quantity') as string, 10);
+        const value = parseInt(formData.get('value') as string, 10);
+        const customerName = formData.get('customerName') as string;
+
+        if (isNaN(quantity) || quantity <= 0 || isNaN(value) || value <= 0 || !customerName) {
+            toast({ title: "Invalid Input", description: "Please provide a valid quantity, value, and customer/company name.", variant: "destructive" });
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const batch = writeBatch(db);
+            const vouchersForPDF = [];
+            const expiresAt = new Date();
+            expiresAt.setMonth(expiresAt.getMonth() + 6);
+
+            for (let i = 0; i < quantity; i++) {
+                const voucherRef = doc(collection(db, 'vouchers'));
+                const voucherData = {
+                    shopId: authUser.uid,
+                    customerName,
+                    value,
+                    status: 'valid' as const,
+                    createdAt: serverTimestamp(),
+                    expiresAt: expiresAt,
+                };
+                batch.set(voucherRef, voucherData);
+                vouchersForPDF.push({ id: voucherRef.id, ...voucherData });
+            }
+
+            await batch.commit();
+            
+            toast({
+                title: "Vouchers Generated!",
+                description: `${quantity} vouchers have been created. Preparing PDF for download.`,
+            });
+            
+            generateVoucherPDF(vouchersForPDF);
+
+            router.push('/admin/vouchers');
+        } catch (error) {
+            console.error("Error generating vouchers:", error);
+            toast({ title: "Generation Failed", description: "Could not create the vouchers.", variant: "destructive" });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+  return (
+    <div className="space-y-6">
+        <div className="flex items-center gap-4">
+             <Link href="/admin/vouchers">
+                <Button variant="outline" size="icon" className="h-8 w-8">
+                    <ArrowLeft className="h-4 w-4" />
+                    <span className="sr-only">Back</span>
+                </Button>
+            </Link>
+            <div>
+                <h1 className="text-2xl font-bold tracking-tight">Generate Gift Vouchers</h1>
+                <p className="text-muted-foreground">Create a batch of unique corporate or individual gift vouchers.</p>
+            </div>
+        </div>
+
+        <Card>
+            <form onSubmit={handleSubmit}>
+                <CardHeader>
+                    <CardTitle>Bulk Voucher Generation</CardTitle>
+                    <CardDescription>
+                        This tool will generate a set of unique vouchers and provide a printable PDF.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <Label htmlFor="quantity">Number of Vouchers</Label>
+                            <Input id="quantity" name="quantity" type="number" placeholder="e.g., 100" required />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="value">Voucher Value (in ₹)</Label>
+                            <div className="relative">
+                                <IndianRupee className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Input id="value" name="value" type="number" placeholder="e.g., 500" className="pl-10" required />
+                            </div>
+                        </div>
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="customerName">Customer / Company Name</Label>
+                        <Input id="customerName" name="customerName" placeholder="e.g., TechSolutions Inc." required />
+                        <p className="text-xs text-muted-foreground">This name will be printed on all vouchers in this batch.</p>
+                    </div>
+                </CardContent>
+                
+                 <CardContent className="border-t pt-6 flex justify-end">
+                    <Button type="submit" disabled={loading}>
+                        {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileText className="mr-2 h-4 w-4" />}
+                        Generate & Download PDF
+                    </Button>
+                </CardContent>
+            </form>
+        </Card>
+    </div>
+  );
+}
