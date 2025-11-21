@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -30,7 +31,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { cn } from '@/lib/utils';
 
 // Extend jsPDF with autoTable
@@ -250,20 +251,29 @@ export default function AdminCustomersPage() {
 
              <div className="space-y-4">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                     <div className="w-full overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                        <div className="flex space-x-2">
+                    <Carousel
+                        opts={{
+                            align: "start",
+                            dragFree: true,
+                        }}
+                        className="w-full"
+                    >
+                        <CarouselContent>
                             {customerSegments.map((segment) => (
-                                <Button
-                                    key={segment.value}
-                                    variant={segmentFilter === segment.value ? 'default' : 'outline'}
-                                    onClick={() => setSegmentFilter(segment.value as any)}
-                                    className="shrink-0"
-                                >
-                                    {segment.label}
-                                </Button>
+                                <CarouselItem key={segment.value} className="basis-auto">
+                                    <Button
+                                        variant={segmentFilter === segment.value ? 'default' : 'outline'}
+                                        onClick={() => setSegmentFilter(segment.value as any)}
+                                        className="shrink-0"
+                                    >
+                                        {segment.label}
+                                    </Button>
+                                </CarouselItem>
                             ))}
-                        </div>
-                    </div>
+                        </CarouselContent>
+                        <CarouselPrevious className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 bg-background/80 backdrop-blur-sm" />
+                        <CarouselNext className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 bg-background/80 backdrop-blur-sm" />
+                    </Carousel>
 
                     <div className="flex gap-2 w-full sm:w-auto">
                         <div className="relative flex-1">
