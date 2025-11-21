@@ -26,8 +26,13 @@ type Offer = {
     createdAt: Timestamp;
 };
 
+type Claim = {
+    claimedAt: Timestamp;
+};
+
 export default function AdminAnalyticsPage() {
     const [offers, setOffers] = useState<Offer[]>([]);
+    const [claims, setClaims] = useState<Claim[]>([]);
     const [loading, setLoading] = useState(true);
     const [authUser, setAuthUser] = useState<AuthUser | null>(null);
     const router = useRouter();
@@ -47,19 +52,36 @@ export default function AdminAnalyticsPage() {
     useEffect(() => {
         if (!authUser) return;
 
+        setLoading(true);
         const offersQuery = query(collection(db, 'shops', authUser.uid, 'offers'), orderBy('createdAt', 'desc'));
-        
-        const unsubscribe = onSnapshot(offersQuery, (snapshot) => {
+        const unsubscribeOffers = onSnapshot(offersQuery, (snapshot) => {
             const offersList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Offer));
             setOffers(offersList);
-            setLoading(false);
+            if(!loadingClaims) setLoading(false);
         }, (error) => {
             console.error("Error fetching offers: ", error);
-            toast({ title: "Error", description: "You don't have permission to view analytics.", variant: "destructive" });
+            toast({ title: "Error", description: "You don't have permission to view offers.", variant: "destructive" });
+            setLoading(false);
+        });
+        
+        const claimsQuery = query(collection(db, 'shops', authUser.uid, 'claims'));
+        const unsubscribeClaims = onSnapshot(claimsQuery, (snapshot) => {
+            const claimsList = snapshot.docs.map(doc => doc.data() as Claim);
+            setClaims(claimsList);
+            if(!loadingOffers) setLoading(false);
+        }, (error) => {
+            console.error("Error fetching claims: ", error);
+            toast({ title: "Error", description: "Could not fetch claims data for analytics.", variant: "destructive" });
             setLoading(false);
         });
 
-        return () => unsubscribe();
+        const loadingOffers = true;
+        const loadingClaims = true;
+
+        return () => {
+            unsubscribeOffers();
+            unsubscribeClaims();
+        };
     }, [authUser, toast]);
 
     const analytics = useMemo(() => {
@@ -81,7 +103,6 @@ export default function AdminAnalyticsPage() {
         let offersWithoutImage = 0;
         let totalClaims = 0;
         let totalViews = 0;
-        const claimHours: number[] = [];
 
         const typeCounts: { [key: string]: { claims: number, count: number } } = {
             percentage: { claims: 0, count: 0 },
@@ -91,45 +112,44 @@ export default function AdminAnalyticsPage() {
         };
 
         offers.forEach(offer => {
-            const claims = offer.claimCount || 0;
-            totalClaims += claims;
+            const claimsCount = offer.claimCount || 0;
+            totalClaims += claimsCount;
             totalViews += offer.viewCount || 0;
-            
-            // For peak time analysis - Mocking claim times for now
-            if (claims > 0) {
-                for (let i = 0; i < claims; i++) {
-                     // In a real app, you'd pull timestamps from the 'claims' collection
-                    const mockHour = Math.floor(Math.random() * (20 - 10 + 1)) + 10; // 10 AM to 8 PM
-                    claimHours.push(mockHour);
-                }
-            }
-
 
             if (offer.imageUrl && offer.imageUrl.includes('cloudinary')) {
-                claimsWithImage += claims;
+                claimsWithImage += claimsCount;
                 offersWithImage++;
             } else {
-                claimsWithoutImage += claims;
+                claimsWithoutImage += claimsCount;
                 offersWithoutImage++;
             }
 
             if (typeCounts[offer.discountType]) {
-                typeCounts[offer.discountType].claims += claims;
+                typeCounts[offer.discountType].claims += claimsCount;
                 typeCounts[offer.discountType].count++;
             }
         });
         
-        // Peak time calculation
+        // Peak time calculation from actual claims
         let peakClaimTime = 'N/A';
-        if (claimHours.length > 0) {
-            const hourCounts = claimHours.reduce((acc, hour) => {
+        if (claims.length > 0) {
+            const hourCounts = claims.reduce((acc, claim) => {
+                const hour = claim.claimedAt.toDate().getHours();
                 acc[hour] = (acc[hour] || 0) + 1;
                 return acc;
             }, {} as Record<number, number>);
 
             const peakHour = Object.keys(hourCounts).reduce((a, b) => hourCounts[parseInt(a)] > hourCounts[parseInt(b)] ? a : b);
             const peakHourNum = parseInt(peakHour);
-            peakClaimTime = `${peakHourNum % 12 === 0 ? 12 : peakHourNum % 12} ${peakHourNum < 12 ? 'AM' : 'PM'} - ${ (peakHourNum + 1) % 12 === 0 ? 12 : (peakHourNum + 1) % 12 } ${peakHourNum + 1 < 12 || peakHourNum + 1 === 24 ? 'AM' : 'PM'}`;
+            const nextHour = (peakHourNum + 1) % 24;
+            
+            const formatHour = (h: number) => {
+                const hour12 = h % 12 === 0 ? 12 : h % 12;
+                const ampm = h < 12 || h === 24 ? 'AM' : 'PM';
+                return `${hour12} ${ampm}`;
+            }
+
+            peakClaimTime = `${formatHour(peakHourNum)} - ${formatHour(nextHour)}`;
         }
 
 
@@ -148,7 +168,7 @@ export default function AdminAnalyticsPage() {
             typeCounts,
             peakClaimTime
         };
-    }, [offers]);
+    }, [offers, claims]);
     
     const chartData = useMemo(() => {
         return Object.entries(analytics.typeCounts).map(([name, data]) => ({
@@ -317,4 +337,3 @@ export default function AdminAnalyticsPage() {
         </div>
     );
 }
-
