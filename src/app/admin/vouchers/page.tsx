@@ -158,20 +158,20 @@ export default function AdminVouchersPage() {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">Gift Vouchers</h1>
-                    <p className="text-muted-foreground">Create, manage, and track corporate and individual gift vouchers.</p>
+                    <p className="text-muted-foreground font-semibold">Create, manage, and track corporate and individual gift vouchers.</p>
                 </div>
                 <div className="flex gap-2">
                     <Button asChild>
                         <Link href="/admin/vouchers/add">
                             <PlusCircle className="mr-2 h-4 w-4" />
-                            Generate Vouchers
+                            <span className="font-bold">Generate Vouchers</span>
                         </Link>
                     </Button>
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
                             <Button variant="destructive" disabled={vouchers.length === 0 || deleting}>
                                 <Trash2 className="mr-2 h-4 w-4" />
-                                Delete All
+                                <span className="font-bold">Delete All</span>
                             </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
@@ -235,7 +235,7 @@ export default function AdminVouchersPage() {
             <Card>
                 <CardHeader>
                     <CardTitle>Voucher History</CardTitle>
-                    <CardDescription>A complete log of all generated gift vouchers.</CardDescription>
+                    <CardDescription className="font-semibold">A complete log of all generated gift vouchers.</CardDescription>
                      <div className="relative pt-4 sm:max-w-xs">
                         <Search className="absolute left-2.5 top-6 h-4 w-4 text-muted-foreground" />
                         <Input
@@ -282,7 +282,7 @@ export default function AdminVouchersPage() {
                                         </TableCell>
                                         <TableCell className="text-right">
                                              <Link href={`/admin/vouchers/${voucher.id}`} passHref>
-                                                <Button variant="outline" size="sm">View</Button>
+                                                <Button variant="outline" size="sm"><span className="font-bold">View</span></Button>
                                              </Link>
                                         </TableCell>
                                     </TableRow>
