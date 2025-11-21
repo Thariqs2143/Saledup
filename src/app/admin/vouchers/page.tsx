@@ -154,7 +154,7 @@ export default function AdminVouchersPage() {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">Gift Vouchers</h1>
@@ -232,12 +232,14 @@ export default function AdminVouchersPage() {
                 </Card>
             </div>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>Voucher History</CardTitle>
-                    <CardDescription className="font-semibold">A complete log of all generated gift vouchers.</CardDescription>
-                     <div className="relative pt-4 sm:max-w-xs">
-                        <Search className="absolute left-2.5 top-6 h-4 w-4 text-muted-foreground" />
+            <div className="space-y-4">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                     <div>
+                        <h2 className="text-2xl font-bold tracking-tight">Voucher History</h2>
+                        <p className="text-muted-foreground font-semibold">A complete log of all generated gift vouchers.</p>
+                    </div>
+                     <div className="relative w-full sm:max-w-xs">
+                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
                             type="search"
                             placeholder="Search by name or ID..."
@@ -246,8 +248,8 @@ export default function AdminVouchersPage() {
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
-                </CardHeader>
-                <CardContent>
+                </div>
+
                  {vouchers.length === 0 ? (
                      <div className="text-center py-20 text-muted-foreground rounded-lg border bg-muted/20">
                         <Gift className="h-16 w-16 mx-auto mb-4 opacity-50"/>
@@ -255,7 +257,7 @@ export default function AdminVouchersPage() {
                         <p>Click "Generate Vouchers" to create your first gift voucher.</p>
                     </div>
                  ) : (
-                    <div className="rounded-lg border">
+                    <div className="rounded-lg border bg-card">
                         <Table>
                             <TableHeader>
                                 <TableRow>
@@ -291,9 +293,7 @@ export default function AdminVouchersPage() {
                         </Table>
                     </div>
                  )}
-                </CardContent>
-            </Card>
+            </div>
         </div>
     );
-
-    
+}
