@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Gift, ArrowLeft, Download, IndianRupee, FileText, Bot } from 'lucide-react';
-import { addDoc, collection, doc, serverTimestamp, writeBatch } from 'firebase/firestore';
+import { addDoc, collection, doc, serverTimestamp, writeBatch, getDoc } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
 import { onAuthStateChanged, type User as AuthUser } from 'firebase/auth';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -31,7 +31,7 @@ export default function AdminAddVoucherPage() {
             } else {
                 setAuthUser(user);
                 // Fetch shop name
-                const shopDoc = await doc(db, 'shops', user.uid).get();
+                const shopDoc = await getDoc(doc(db, 'shops', user.uid));
                 if (shopDoc.exists()) {
                     setShopName(shopDoc.data().shopName);
                 }
