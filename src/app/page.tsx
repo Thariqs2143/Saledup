@@ -337,48 +337,48 @@ const targetCustomers = [
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-12">
                     <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight">
-                        Live Statistics
+                        Live From the Saledup Platform
                     </h2>
                     <p className="mt-4 max-w-2xl mx-auto text-muted-foreground text-lg">
-                        Real-time data from our platform.
+                        Our community of local shops is growing every day. Here's a real-time look at our collective impact.
                     </p>
                 </div>
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
-                    <Card className="text-center p-6 transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-1 hover:border-primary flex flex-col">
-                        <div className="p-4 bg-orange-100 dark:bg-orange-900/30 rounded-full inline-block mb-4 shadow-md">
-                            <Store className="h-8 w-8 text-orange-600 dark:text-orange-400" />
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 max-w-6xl mx-auto">
+                    <Card className="text-center p-4 md:p-6 transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/50 dark:to-indigo-900/50 border-blue-200 dark:border-blue-800">
+                        <div className="p-3 bg-blue-100 dark:bg-blue-900/80 rounded-full inline-block mb-2">
+                            <Store className="h-6 w-6 md:h-8 md:w-8 text-blue-600 dark:text-blue-300" />
                         </div>
-                        <h3 className="text-4xl font-bold">
+                        <h3 className="text-3xl md:text-4xl font-bold text-blue-900 dark:text-blue-100">
                             {loadingStats ? '...' : <AnimatedCounter from={0} to={activeDeals} />}
                         </h3>
-                        <p className="mt-2 text-muted-foreground">Active Deals</p>
+                        <p className="mt-1 text-sm md:text-base text-blue-700 dark:text-blue-200">Active Deals</p>
                     </Card>
-                     <Card className="text-center p-6 transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-1 hover:border-primary flex flex-col">
-                        <div className="p-4 bg-green-100 dark:bg-green-900/30 rounded-full inline-block mb-4 shadow-md">
-                            <BuildingIcon className="h-8 w-8 text-green-600 dark:text-green-400" />
+                     <Card className="text-center p-4 md:p-6 transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-900/50 dark:to-emerald-900/50 border-green-200 dark:border-green-800">
+                        <div className="p-3 bg-green-100 dark:bg-green-900/80 rounded-full inline-block mb-2">
+                            <BuildingIcon className="h-6 w-6 md:h-8 md:w-8 text-green-600 dark:text-green-300" />
                         </div>
-                        <h3 className="text-4xl font-bold">
+                        <h3 className="text-3xl md:text-4xl font-bold text-green-900 dark:text-green-100">
                             {loadingStats ? '...' : <AnimatedCounter from={0} to={shopsOnboarded} />}
                         </h3>
-                        <p className="mt-2 text-muted-foreground">Shops Onboarded</p>
+                        <p className="mt-1 text-sm md:text-base text-green-700 dark:text-green-200">Shops Onboarded</p>
                     </Card>
-                    <Card className="text-center p-6 transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-1 hover:border-primary flex flex-col">
-                         <div className="p-4 bg-red-100 dark:bg-red-900/30 rounded-full inline-block mb-4 shadow-md">
-                            <PercentIcon className="h-8 w-8 text-primary" />
+                    <Card className="text-center p-4 md:p-6 transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br from-red-50 to-rose-100 dark:from-red-900/50 dark:to-rose-900/50 border-red-200 dark:border-red-800">
+                         <div className="p-3 bg-red-100 dark:bg-red-900/80 rounded-full inline-block mb-2">
+                            <Percent className="h-6 w-6 md:h-8 md:w-8 text-primary" />
                         </div>
-                        <h3 className="text-4xl font-bold">
+                        <h3 className="text-3xl md:text-4xl font-bold text-red-900 dark:text-red-100">
                            {loadingStats ? '...' : <AnimatedCounter from={0} to={averageDiscount} />}%
                         </h3>
-                        <p className="mt-2 text-muted-foreground">Average Discount</p>
+                        <p className="mt-1 text-sm md:text-base text-red-700 dark:text-red-200">Average Discount</p>
                     </Card>
-                    <Card className="text-center p-6 transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-1 hover:border-primary flex flex-col">
-                         <div className="p-4 bg-blue-100 dark:bg-blue-900/30 rounded-full inline-block mb-4 shadow-md">
-                            <MapPin className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+                    <Card className="text-center p-4 md:p-6 transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br from-amber-50 to-orange-100 dark:from-amber-900/50 dark:to-orange-900/50 border-amber-200 dark:border-amber-800">
+                         <div className="p-3 bg-amber-100 dark:bg-amber-900/80 rounded-full inline-block mb-2">
+                            <MapPin className="h-6 w-6 md:h-8 md:w-8 text-amber-600 dark:text-amber-300" />
                         </div>
-                        <h3 className="text-4xl font-bold">
+                        <h3 className="text-3xl md:text-4xl font-bold text-amber-900 dark:text-amber-100">
                             {loadingStats ? '...' : <AnimatedCounter from={0} to={citiesCovered} />}
                         </h3>
-                        <p className="mt-2 text-muted-foreground">Cities Covered</p>
+                        <p className="mt-1 text-sm md:text-base text-amber-700 dark:text-amber-200">Cities Covered</p>
                     </Card>
                 </div>
             </div>
