@@ -242,8 +242,8 @@ export default function AdminCustomersPage() {
             <Tabs defaultValue="all" onValueChange={(value) => setSegmentFilter(value as any)} className="w-full">
                 <div className="space-y-4">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                        <div className="w-full sm:w-auto overflow-x-auto pb-2">
-                             <TabsList className="grid-cols-5">
+                        <div className="w-full overflow-x-auto pb-2">
+                             <TabsList className="inline-flex h-auto items-center justify-start rounded-md bg-muted p-1 text-muted-foreground border-2 min-w-max">
                                 <TabsTrigger value="all">All</TabsTrigger>
                                 <TabsTrigger value="new">New</TabsTrigger>
                                 <TabsTrigger value="repeat">Repeat</TabsTrigger>
