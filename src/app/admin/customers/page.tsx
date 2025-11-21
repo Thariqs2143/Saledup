@@ -249,8 +249,8 @@ export default function AdminCustomersPage() {
             </div>
 
              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                    <div className="relative flex-1">
+                <div className="flex flex-col md:flex-row items-center gap-2">
+                    <div className="relative flex-1 w-full">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                         <Input
                             type="search"
@@ -260,17 +260,55 @@ export default function AdminCustomersPage() {
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
-                    <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as any)}>
-                        <SelectTrigger className="w-auto">
-                            <SelectValue placeholder="Filter by status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">All Statuses</SelectItem>
-                            <SelectItem value="claimed">Claimed</SelectItem>
-                            <SelectItem value="redeemed">Redeemed</SelectItem>
-                        </SelectContent>
-                    </Select>
+                    <div className="flex w-full md:w-auto gap-2">
+                        <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as any)}>
+                            <SelectTrigger className="flex-1">
+                                <SelectValue placeholder="Filter by status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Statuses</SelectItem>
+                                <SelectItem value="claimed">Claimed</SelectItem>
+                                <SelectItem value="redeemed">Redeemed</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Button variant="outline" className="hidden md:flex">
+                                    <Mail className="mr-2 h-4 w-4"/> Send Broadcast
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>Send WhatsApp Broadcast</DialogTitle>
+                                    <DialogDescription>
+                                        Compose a message to send to your customers. This will open WhatsApp with the message ready to be forwarded. You can send it to individuals or broadcast lists you've created in WhatsApp.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <div className="space-y-4 py-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="broadcast-message">Message</Label>
+                                        <Textarea
+                                            id="broadcast-message"
+                                            placeholder="E.g., Hi! Don't miss our weekend special: 20% off all coffee. Come visit us!"
+                                            value={broadcastMessage}
+                                            onChange={(e) => setBroadcastMessage(e.target.value)}
+                                            rows={5}
+                                        />
+                                    </div>
+                                </div>
+                                <DialogFooter>
+                                    <Button onClick={handleSendBroadcast}>
+                                        Send Message via WhatsApp
+                                    </Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
+                        <Button onClick={handleExportPDF} variant="outline" className="hidden md:flex">
+                            <Download className="mr-2 h-4 w-4"/> Export PDF
+                        </Button>
+                    </div>
                 </div>
+
                 <div className="flex flex-col sm:flex-row items-center gap-2">
                     <Carousel
                         opts={{
@@ -281,11 +319,11 @@ export default function AdminCustomersPage() {
                     >
                         <CarouselContent>
                             {customerSegments.map((segment) => (
-                                <CarouselItem key={segment.value} className="basis-1/3 sm:basis-1/4 md:basis-1/5">
+                                <CarouselItem key={segment.value} className="basis-1/3 sm:basis-1/4 md:basis-auto">
                                     <Button
                                         variant={segmentFilter === segment.value ? 'default' : 'outline'}
                                         onClick={() => setSegmentFilter(segment.value as any)}
-                                        className="w-full"
+                                        className="w-full whitespace-nowrap"
                                     >
                                         {segment.label}
                                     </Button>
@@ -294,11 +332,11 @@ export default function AdminCustomersPage() {
                         </CarouselContent>
                     </Carousel>
                 </div>
-                 <div className="flex gap-2 w-full">
+                 <div className="flex gap-2 w-full md:hidden">
                     <Dialog>
                         <DialogTrigger asChild>
                             <Button variant="outline" className="flex-1">
-                                <Mail className="mr-2 h-4 w-4"/> Send Broadcast
+                                <Mail className="mr-2 h-4 w-4"/> Broadcast
                             </Button>
                         </DialogTrigger>
                         <DialogContent>
@@ -310,9 +348,9 @@ export default function AdminCustomersPage() {
                             </DialogHeader>
                             <div className="space-y-4 py-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="broadcast-message">Message</Label>
+                                    <Label htmlFor="broadcast-message-mobile">Message</Label>
                                     <Textarea
-                                        id="broadcast-message"
+                                        id="broadcast-message-mobile"
                                         placeholder="E.g., Hi! Don't miss our weekend special: 20% off all coffee. Come visit us!"
                                         value={broadcastMessage}
                                         onChange={(e) => setBroadcastMessage(e.target.value)}
@@ -328,7 +366,7 @@ export default function AdminCustomersPage() {
                         </DialogContent>
                     </Dialog>
                     <Button onClick={handleExportPDF} variant="outline" className="flex-1">
-                        <Download className="mr-2 h-4 w-4"/> Export PDF
+                        <Download className="mr-2 h-4 w-4"/> Export
                     </Button>
                 </div>
             </div>
