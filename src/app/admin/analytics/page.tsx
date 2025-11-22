@@ -126,9 +126,9 @@ export default function AdminAnalyticsPage() {
     const analytics = useMemo(() => {
         // Offer-specific calculations
         let claimsWithImage = 0;
-        let offersWithImage = 0;
+        let offersWithImageCount = 0;
         let claimsWithoutImage = 0;
-        let offersWithoutImage = 0;
+        let offersWithoutImageCount = 0;
         let totalViews = 0;
 
         const offerTypeCounts: { [key: string]: { claims: number, count: number } } = {
@@ -143,19 +143,15 @@ export default function AdminAnalyticsPage() {
         filteredData.claims.forEach(claim => {
             const offer = offerMap.get(claim.offerId);
             if (!offer) return;
-            
-            const claimsCount = offer.claimCount || 0;
 
             if (offer.imageUrl && offer.imageUrl.includes('cloudinary')) {
-                claimsWithImage += 1;
-                if (!offersWithImage.hasOwnProperty(offer.id)) offersWithImage++;
+                claimsWithImage++;
             } else {
-                claimsWithoutImage += 1;
-                if (!offersWithoutImage.hasOwnProperty(offer.id)) offersWithoutImage++;
+                claimsWithoutImage++;
             }
 
             if (offerTypeCounts[offer.discountType]) {
-                offerTypeCounts[offer.discountType].claims += 1;
+                offerTypeCounts[offer.discountType].claims++;
             }
         });
         
@@ -163,11 +159,16 @@ export default function AdminAnalyticsPage() {
             if (offerTypeCounts[offer.discountType]) {
                 offerTypeCounts[offer.discountType].count++;
             }
+            if (offer.imageUrl && offer.imageUrl.includes('cloudinary')) {
+                offersWithImageCount++;
+            } else {
+                offersWithoutImageCount++;
+            }
             totalViews += offer.viewCount || 0;
         });
 
-        const avgClaimsWithImage = offersWithImage > 0 ? claimsWithImage / offersWithImage : 0;
-        const avgClaimsWithoutImage = offersWithoutImage > 0 ? claimsWithoutImage / offersWithoutImage : 0;
+        const avgClaimsWithImage = offersWithImageCount > 0 ? claimsWithImage / offersWithImageCount : 0;
+        const avgClaimsWithoutImage = offersWithoutImageCount > 0 ? claimsWithoutImage / offersWithoutImageCount : 0;
         const imagePerformanceRatio = avgClaimsWithoutImage > 0 ? ((avgClaimsWithImage - avgClaimsWithoutImage) / avgClaimsWithoutImage) * 100 : (avgClaimsWithImage > 0 ? 100 : 0);
 
         // Peak time calculation
@@ -175,13 +176,17 @@ export default function AdminAnalyticsPage() {
         let peakActivityTime = 'N/A';
         if (allActivity.length > 0) {
             const hourCounts = allActivity.reduce((acc, item) => {
+                if(!item) return acc;
                 const hour = item.toDate().getHours();
                 acc[hour] = (acc[hour] || 0) + 1;
                 return acc;
             }, {} as Record<number, number>);
-            const peakHour = Object.keys(hourCounts).reduce((a, b) => hourCounts[parseInt(a)] > hourCounts[parseInt(b)] ? a : b);
-            const peakHourNum = parseInt(peakHour);
-            peakActivityTime = `${peakHourNum % 12 === 0 ? 12 : peakHourNum % 12} ${peakHourNum < 12 ? 'AM' : 'PM'}`;
+
+            if(Object.keys(hourCounts).length > 0) {
+                const peakHour = Object.keys(hourCounts).reduce((a, b) => hourCounts[parseInt(a)] > hourCounts[parseInt(b)] ? a : b);
+                const peakHourNum = parseInt(peakHour);
+                peakActivityTime = `${peakHourNum % 12 === 0 ? 12 : peakHourNum % 12} ${peakHourNum < 12 ? 'AM' : 'PM'}`;
+            }
         }
 
         return {
@@ -252,7 +257,7 @@ export default function AdminAnalyticsPage() {
                         <Users className="h-5 w-5 text-indigo-200" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-4xl font-bold"><AnimatedCounter to={analytics.totalClaimsAndRedemptions} /></div>
+                        <div className="text-4xl font-bold"><AnimatedCounter to={analytics.totalClaimsAndRedemptions || 0} /></div>
                         <p className="text-xs text-indigo-100 mt-1">Total customer engagements</p>
                     </CardContent>
                 </Card>
@@ -262,7 +267,7 @@ export default function AdminAnalyticsPage() {
                         <IndianRupee className="h-5 w-5 text-cyan-200" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-4xl font-bold">₹<AnimatedCounter to={analytics.totalValueRedeemed} /></div>
+                        <div className="text-4xl font-bold">₹<AnimatedCounter to={analytics.totalValueRedeemed || 0} /></div>
                          <p className="text-xs text-cyan-100 mt-1">Approximate value redeemed by customers</p>
                     </CardContent>
                 </Card>
@@ -277,9 +282,9 @@ export default function AdminAnalyticsPage() {
                 {/* OFFERS CONTENT */}
                 <TabsContent value="offers" className="mt-6 space-y-6">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <Card><CardHeader><CardTitle>Image Impact</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-blue-500">{analytics.imagePerformanceRatio >= 0 ? '+' : ''}{analytics.imagePerformanceRatio.toFixed(0)}%</p><p className="text-xs text-muted-foreground">Claim rate for offers with images.</p></CardContent></Card>
+                        <Card><CardHeader><CardTitle>Image Impact</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-blue-500">{analytics.imagePerformanceRatio >= 0 ? '+' : ''}{(analytics.imagePerformanceRatio || 0).toFixed(0)}%</p><p className="text-xs text-muted-foreground">Claim rate for offers with images.</p></CardContent></Card>
                         <Card><CardHeader><CardTitle>Most Popular Type</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-green-500">{mostPopularType}</p><p className="text-xs text-muted-foreground">This offer type gets the most claims.</p></CardContent></Card>
-                        <Card><CardHeader><CardTitle>Conversion Rate</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-purple-500">{analytics.overallConversionRate.toFixed(1)}%</p><p className="text-xs text-muted-foreground">Views that turned into claims.</p></CardContent></Card>
+                        <Card><CardHeader><CardTitle>Conversion Rate</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-purple-500">{(analytics.overallConversionRate || 0).toFixed(1)}%</p><p className="text-xs text-muted-foreground">Views that turned into claims.</p></CardContent></Card>
                         <Card><CardHeader><CardTitle>Peak Activity</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-orange-500">{analytics.peakActivityTime}</p><p className="text-xs text-muted-foreground">Hour with most claims &amp; redemptions.</p></CardContent></Card>
                     </div>
 
@@ -350,7 +355,3 @@ export default function AdminAnalyticsPage() {
         </div>
     );
 }
-
-    
-
-    
