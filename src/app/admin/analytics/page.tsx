@@ -282,7 +282,7 @@ export default function AdminAnalyticsPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="text-4xl font-bold"><AnimatedCounter to={analytics.totalClaimsAndRedemptions} /></div>
-                        <p className="text-xs text-indigo-100 mt-1">Total customer engagements</p>
+                        <p className="text-xs text-indigo-100 mt-1">Total engagements</p>
                     </CardContent>
                 </Card>
                  <Card className="relative overflow-hidden transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br from-cyan-500 to-sky-600 text-white border-none">
