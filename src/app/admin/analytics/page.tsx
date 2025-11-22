@@ -155,7 +155,7 @@ export default function AdminAnalyticsPage() {
             }
         });
         
-        offers.forEach(offer => {
+        filteredData.offers.forEach(offer => {
             if (offerTypeCounts[offer.discountType]) {
                 offerTypeCounts[offer.discountType].count++;
             }
@@ -192,10 +192,12 @@ export default function AdminAnalyticsPage() {
         return {
             totalClaimsAndRedemptions: filteredData.claims.length + filteredData.redeemedVouchers.length,
             totalValueRedeemed: filteredData.redeemedVouchers.reduce((sum, v) => sum + v.value, 0) + filteredData.claims.reduce((sum, c) => sum + (c.approximateValue || 0), 0),
+            totalViews,
+            totalClaims: filteredData.claims.length,
             imagePerformanceRatio,
             offerTypeCounts,
             peakActivityTime,
-            overallConversionRate: totalViews > 0 ? (claims.length / totalViews) * 100 : 0
+            overallConversionRate: totalViews > 0 ? (filteredData.claims.length / totalViews) * 100 : 0
         };
     }, [offers, claims, filteredData]);
     
@@ -250,14 +252,14 @@ export default function AdminAnalyticsPage() {
                 </div>
             </Tabs>
             
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-6">
                 <Card className="relative overflow-hidden transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br from-indigo-500 to-purple-600 text-white border-none">
                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-bold text-indigo-100">Claims &amp; Redemptions</CardTitle>
                         <Users className="h-5 w-5 text-indigo-200" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-4xl font-bold"><AnimatedCounter to={analytics.totalClaimsAndRedemptions || 0} /></div>
+                        <div className="text-4xl font-bold"><AnimatedCounter to={analytics.totalClaimsAndRedemptions} /></div>
                         <p className="text-xs text-indigo-100 mt-1">Total customer engagements</p>
                     </CardContent>
                 </Card>
@@ -267,8 +269,28 @@ export default function AdminAnalyticsPage() {
                         <IndianRupee className="h-5 w-5 text-cyan-200" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-4xl font-bold">₹<AnimatedCounter to={analytics.totalValueRedeemed || 0} /></div>
-                         <p className="text-xs text-cyan-100 mt-1">Approximate value redeemed by customers</p>
+                        <div className="text-4xl font-bold">₹<AnimatedCounter to={analytics.totalValueRedeemed} /></div>
+                         <p className="text-xs text-cyan-100 mt-1">Approx value redeemed</p>
+                    </CardContent>
+                </Card>
+                <Card className="relative overflow-hidden transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br from-violet-500 to-fuchsia-600 text-white border-none">
+                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-bold text-violet-100">Total Views</CardTitle>
+                        <Eye className="h-5 w-5 text-violet-200" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-4xl font-bold"><AnimatedCounter to={analytics.totalViews} /></div>
+                         <p className="text-xs text-violet-100 mt-1">Offer page views</p>
+                    </CardContent>
+                </Card>
+                <Card className="relative overflow-hidden transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br from-rose-500 to-red-600 text-white border-none">
+                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-bold text-rose-100">Total Claims</CardTitle>
+                        <Tag className="h-5 w-5 text-rose-200" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-4xl font-bold"><AnimatedCounter to={analytics.totalClaims} /></div>
+                         <p className="text-xs text-rose-100 mt-1">Offers claimed by customers</p>
                     </CardContent>
                 </Card>
             </div>
@@ -282,9 +304,9 @@ export default function AdminAnalyticsPage() {
                 {/* OFFERS CONTENT */}
                 <TabsContent value="offers" className="mt-6 space-y-6">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <Card><CardHeader><CardTitle>Image Impact</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-blue-500">{analytics.imagePerformanceRatio >= 0 ? '+' : ''}{(analytics.imagePerformanceRatio || 0).toFixed(0)}%</p><p className="text-xs text-muted-foreground">Claim rate for offers with images.</p></CardContent></Card>
+                        <Card><CardHeader><CardTitle>Image Impact</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-blue-500">{analytics.imagePerformanceRatio >= 0 ? '+' : ''}{analytics.imagePerformanceRatio.toFixed(0)}%</p><p className="text-xs text-muted-foreground">Claim rate for offers with images.</p></CardContent></Card>
                         <Card><CardHeader><CardTitle>Most Popular Type</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-green-500">{mostPopularType}</p><p className="text-xs text-muted-foreground">This offer type gets the most claims.</p></CardContent></Card>
-                        <Card><CardHeader><CardTitle>Conversion Rate</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-purple-500">{(analytics.overallConversionRate || 0).toFixed(1)}%</p><p className="text-xs text-muted-foreground">Views that turned into claims.</p></CardContent></Card>
+                        <Card><CardHeader><CardTitle>Conversion Rate</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-purple-500">{analytics.overallConversionRate.toFixed(1)}%</p><p className="text-xs text-muted-foreground">Views that turned into claims.</p></CardContent></Card>
                         <Card><CardHeader><CardTitle>Peak Activity</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-orange-500">{analytics.peakActivityTime}</p><p className="text-xs text-muted-foreground">Hour with most claims &amp; redemptions.</p></CardContent></Card>
                     </div>
 
