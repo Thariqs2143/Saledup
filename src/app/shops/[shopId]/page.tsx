@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -214,7 +215,7 @@ export default function ShopOffersPage() {
         {/* Shop Header */}
         <header className="bg-background shadow-sm">
             <div className="container mx-auto max-w-5xl">
-                <div className="relative h-48 md:h-64 w-full bg-muted">
+                <div className="relative w-full bg-muted aspect-video md:aspect-[21/9]">
                     {shop.coverImageUrl ? (
                         <Image
                             src={shop.coverImageUrl}
@@ -227,8 +228,8 @@ export default function ShopOffersPage() {
                         <div className="w-full h-full bg-gradient-to-t from-slate-200 to-slate-300 dark:from-slate-800 dark:to-slate-700"></div>
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                    <div className="absolute -bottom-12 left-6">
-                        <Avatar className="h-24 w-24 md:h-32 md:w-32 border-4 border-background bg-muted">
+                    <div className="absolute -bottom-10 left-6">
+                        <Avatar className="h-24 w-24 md:h-28 md:w-28 border-4 border-background bg-muted">
                             <AvatarImage src={shop.imageUrl} />
                             <AvatarFallback>
                                 <Building className="h-10 w-10 md:h-12 md:w-12"/>
@@ -236,7 +237,7 @@ export default function ShopOffersPage() {
                         </Avatar>
                     </div>
                 </div>
-                 <div className="pt-16 pb-6 px-6">
+                 <div className="pt-14 pb-6 px-6">
                     <h1 className="text-2xl sm:text-3xl font-bold">{shop.shopName}</h1>
                     <div className="flex items-center gap-2 text-muted-foreground mt-1">
                         <MapPin className="h-4 w-4"/>
