@@ -62,7 +62,7 @@ export function BottomNav({ navItems }: BottomNavProps) {
               key={item.href}
               onClick={() => handleNavigate(item.href)}
               className={cn(
-                'flex flex-1 flex-col items-center justify-center gap-1 text-xs font-extrabold transition-colors',
+                'flex flex-1 flex-col items-center justify-center gap-1 text-xs font-semibold transition-colors',
                 isActive ? 'text-primary' : 'text-muted-foreground hover:text-primary'
               )}
             >
