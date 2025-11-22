@@ -186,19 +186,28 @@ export default function AdminAnalyticsPage() {
         const allActivity = [...filteredData.claims.map(c => c.claimedAt), ...filteredData.redeemedVouchers.map(v => v.redeemedAt!)];
         let peakActivityTime = 'N/A';
         if (allActivity.length > 0) {
-            const hourCounts = allActivity.reduce((acc, item) => {
-                if(!item) return acc;
-                const hour = item.toDate().getHours();
-                acc[hour] = (acc[hour] || 0) + 1;
-                return acc;
-            }, {} as Record<number, number>);
+            const hourCounts: Record<number, number> = Array.from({ length: 24 }, () => 0);
+            allActivity.forEach(item => {
+                if (item) {
+                    const hour = item.toDate().getHours();
+                    hourCounts[hour]++;
+                }
+            });
 
-            if(Object.keys(hourCounts).length > 0) {
-                const peakHour = Object.keys(hourCounts).reduce((a, b) => hourCounts[parseInt(a)] > hourCounts[parseInt(b)] ? a : b);
-                const peakHourNum = parseInt(peakHour);
-                const ampm = peakHourNum >= 12 ? 'PM' : 'AM';
-                const hour12 = peakHourNum % 12 === 0 ? 12 : peakHourNum % 12;
-                peakActivityTime = `${hour12} ${ampm}`;
+            const maxActivity = Math.max(...Object.values(hourCounts));
+            if (maxActivity > 0) {
+                const peakHour = Object.keys(hourCounts).map(Number).find(h => hourCounts[h] === maxActivity) || 0;
+                
+                const formatHour = (h: number) => {
+                    const hour12 = h % 12 === 0 ? 12 : h % 12;
+                    const ampm = h >= 12 ? 'PM' : 'AM';
+                    return `${hour12}${ampm}`;
+                };
+
+                const startHour = peakHour;
+                const endHour = (peakHour + 2) % 24; // 3-hour window
+                
+                peakActivityTime = `${formatHour(startHour)} - ${formatHour(endHour + 1)}`;
             }
         }
         
@@ -318,7 +327,7 @@ export default function AdminAnalyticsPage() {
                 <TabsContent value="offers" className="mt-6 space-y-6">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <Card><CardHeader><CardTitle>Image Impact</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-blue-500">{analytics.imagePerformanceRatio >= 0 ? '+' : ''}{analytics.imagePerformanceRatio.toFixed(0)}%</p><p className="text-xs text-muted-foreground">Claim rate for offers with images.</p></CardContent></Card>
-                        <Card><CardHeader><CardTitle>Most Popular Type</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-green-500">{offerTypeDisplayMap[mostPopularType]}</p><p className="text-xs text-muted-foreground">This offer type gets the most claims.</p></CardContent></Card>
+                        <Card><CardHeader><CardTitle>Most Popular</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-green-500">{offerTypeDisplayMap[mostPopularType]}</p><p className="text-xs text-muted-foreground">This offer type gets the most claims.</p></CardContent></Card>
                         <Card><CardHeader><CardTitle>Conversion Rate</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-purple-500">{analytics.overallConversionRate.toFixed(1)}%</p><p className="text-xs text-muted-foreground">Views that turned into claims.</p></CardContent></Card>
                         <Card><CardHeader><CardTitle>Peak Activity</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-orange-500">{analytics.peakActivityTime}</p><p className="text-xs text-muted-foreground">Hour with most claims &amp; redemptions.</p></CardContent></Card>
                     </div>
