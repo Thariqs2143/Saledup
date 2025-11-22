@@ -223,11 +223,11 @@ export default function AdminAddOfferPage() {
 
                 </CardContent>
                 
-                 <CardContent>
-                    <CardHeader className="p-0 mb-4 -ml-6">
-                        <CardTitle>Scheduling (Optional)</CardTitle>
-                        <CardDescription>Set a specific time frame for this offer. Leave blank for the offer to be always active.</CardDescription>
-                    </CardHeader>
+                 <CardHeader>
+                    <CardTitle>Scheduling (Optional)</CardTitle>
+                    <CardDescription>Set a specific time frame for this offer. Leave blank for the offer to be always active.</CardDescription>
+                </CardHeader>
+                <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                             <Label htmlFor="startDate">Start Date</Label>
