@@ -187,6 +187,7 @@ export default function OfferDetailPage() {
         setIsClaiming(true);
         try {
             // Step 1: Create the claim document in the shop's subcollection
+            // The onClaimCreated Cloud Function will handle incrementing the offer's claim count.
             const claimsCollectionRef = collection(db, 'shops', shopId, 'claims');
             const claimDocRef = await addDoc(claimsCollectionRef, {
                 customerName,
@@ -201,12 +202,8 @@ export default function OfferDetailPage() {
                 discountType: offer.discountType,
                 discountValue: offer.discountValue
             });
-
-            // Step 2: Increment the offer's claim count
-            const offerDocRef = doc(db, 'shops', shopId, 'offers', offer.id);
-            await updateDoc(offerDocRef, { claimCount: increment(1) });
             
-            // Step 3: Create/Update the global customer profile and award points
+            // Step 2: Create/Update the global customer profile and award points
             const customerDocRef = doc(db, 'customers', customerPhone);
             const POINTS_PER_CLAIM = 10;
             const customerSnap = await getDoc(customerDocRef);
@@ -232,7 +229,7 @@ export default function OfferDetailPage() {
                 });
             }
             
-            // Step 4: Prepare data for the success dialog
+            // Step 3: Prepare data for the success dialog
             const claimId = claimDocRef.id;
             const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(claimId)}`;
             

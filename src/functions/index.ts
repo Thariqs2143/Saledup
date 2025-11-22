@@ -1,4 +1,5 @@
 
+
 'use strict';
 
 import * as functions from 'firebase-functions';
@@ -10,6 +11,37 @@ import * as crypto from 'crypto';
 admin.initializeApp();
 const db = admin.firestore();
 const messaging = admin.messaging();
+
+/**
+ * A Cloud Function that triggers when a new claim is created.
+ * It increments the `claimCount` on the corresponding offer document.
+ */
+export const onClaimCreated = functions.firestore
+    .document('shops/{shopId}/claims/{claimId}')
+    .onCreate(async (snap, context) => {
+        const claimData = snap.data();
+        const { offerId } = claimData;
+        const { shopId } = context.params;
+
+        if (!offerId || !shopId) {
+            console.error('Missing offerId or shopId in claim document or context.');
+            return null;
+        }
+
+        const offerDocRef = db.collection('shops').doc(shopId).collection('offers').doc(offerId);
+
+        try {
+            // Atomically increment the claimCount field.
+            await offerDocRef.update({
+                claimCount: admin.firestore.FieldValue.increment(1)
+            });
+            console.log(`Successfully incremented claimCount for offer ${offerId} in shop ${shopId}.`);
+        } catch (error) {
+            console.error(`Failed to increment claimCount for offer ${offerId}. Error:`, error);
+        }
+        return null;
+    });
+
 
 /**
  * A scheduled function that runs every 15 minutes to send shift start reminders.
