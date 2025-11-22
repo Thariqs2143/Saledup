@@ -185,7 +185,9 @@ export default function AdminAnalyticsPage() {
             if(Object.keys(hourCounts).length > 0) {
                 const peakHour = Object.keys(hourCounts).reduce((a, b) => hourCounts[parseInt(a)] > hourCounts[parseInt(b)] ? a : b);
                 const peakHourNum = parseInt(peakHour);
-                peakActivityTime = `${peakHourNum % 12 === 0 ? 12 : peakHourNum % 12} ${peakHourNum < 12 ? 'AM' : 'PM'}`;
+                const ampm = peakHourNum >= 12 ? 'PM' : 'AM';
+                const hour12 = peakHourNum % 12 === 0 ? 12 : peakHourNum % 12;
+                peakActivityTime = `${hour12} ${ampm}`;
             }
         }
 
@@ -259,7 +261,7 @@ export default function AdminAnalyticsPage() {
                         <Users className="h-5 w-5 text-indigo-200" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-4xl font-bold"><AnimatedCounter to={analytics.totalClaimsAndRedemptions} /></div>
+                        <div className="text-4xl font-bold"><AnimatedCounter to={analytics.totalClaimsAndRedemptions || 0} /></div>
                         <p className="text-xs text-indigo-100 mt-1">Total customer engagements</p>
                     </CardContent>
                 </Card>
@@ -269,7 +271,7 @@ export default function AdminAnalyticsPage() {
                         <IndianRupee className="h-5 w-5 text-cyan-200" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-4xl font-bold">₹<AnimatedCounter to={analytics.totalValueRedeemed} /></div>
+                        <div className="text-4xl font-bold">₹<AnimatedCounter to={analytics.totalValueRedeemed || 0} /></div>
                          <p className="text-xs text-cyan-100 mt-1">Approx value redeemed</p>
                     </CardContent>
                 </Card>
@@ -279,7 +281,7 @@ export default function AdminAnalyticsPage() {
                         <Eye className="h-5 w-5 text-green-200" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-4xl font-bold"><AnimatedCounter to={analytics.totalViews} /></div>
+                        <div className="text-4xl font-bold"><AnimatedCounter to={analytics.totalViews || 0} /></div>
                          <p className="text-xs text-green-100 mt-1">Offer page views</p>
                     </CardContent>
                 </Card>
@@ -289,7 +291,7 @@ export default function AdminAnalyticsPage() {
                         <Tag className="h-5 w-5 text-rose-200" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-4xl font-bold"><AnimatedCounter to={analytics.totalClaims} /></div>
+                        <div className="text-4xl font-bold"><AnimatedCounter to={analytics.totalClaims || 0} /></div>
                          <p className="text-xs text-rose-100 mt-1">Offers claimed by customers</p>
                     </CardContent>
                 </Card>

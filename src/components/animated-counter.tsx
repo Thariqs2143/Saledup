@@ -11,10 +11,10 @@ type AnimatedCounterProps = {
 
 export function AnimatedCounter({ from = 0, to, duration = 1000 }: AnimatedCounterProps) {
   const [count, setCount] = useState(from);
+  const finalTo = !isNaN(Number(to)) ? Number(to) : 0;
 
   useEffect(() => {
     let startTimestamp: number | null = null;
-    const finalTo = !isNaN(Number(to)) ? Number(to) : 0;
     const finalFrom = !isNaN(Number(from)) ? Number(from) : 0;
     
     const step = (timestamp: number) => {
@@ -26,7 +26,7 @@ export function AnimatedCounter({ from = 0, to, duration = 1000 }: AnimatedCount
       }
     };
     window.requestAnimationFrame(step);
-  }, [from, to, duration]);
+  }, [from, finalTo, duration]);
 
-  return <span>{count}</span>;
+  return <span>{count.toLocaleString()}</span>;
 }
