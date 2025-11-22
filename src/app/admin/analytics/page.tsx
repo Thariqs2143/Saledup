@@ -42,6 +42,16 @@ type Voucher = {
     redeemedAt?: Timestamp;
 };
 
+// --- HELPER MAPPING FOR DISPLAY ---
+const offerTypeDisplayMap: { [key: string]: string } = {
+    'Percentage': '%',
+    'Fixed': 'Fixed',
+    'Freebie': 'Freebie',
+    'Other': 'Other',
+    'N/A': 'N/A'
+};
+
+
 // --- MAIN COMPONENT ---
 export default function AdminAnalyticsPage() {
     // --- STATE MANAGEMENT ---
@@ -191,16 +201,16 @@ export default function AdminAnalyticsPage() {
                 peakActivityTime = `${hour12} ${ampm}`;
             }
         }
-
+        
         return {
-            totalClaimsAndRedemptions: filteredData.claims.length + filteredData.redeemedVouchers.length,
-            totalValueRedeemed: filteredData.redeemedVouchers.reduce((sum, v) => sum + v.value, 0) + filteredData.claims.reduce((sum, c) => sum + (c.approximateValue || 0), 0),
-            totalViews,
-            totalClaims: filteredData.claims.length,
-            imagePerformanceRatio: imagePerformanceRatio,
+            totalClaimsAndRedemptions: (filteredData.claims?.length || 0) + (filteredData.redeemedVouchers?.length || 0),
+            totalValueRedeemed: (filteredData.redeemedVouchers?.reduce((sum, v) => sum + v.value, 0) || 0) + (filteredData.claims?.reduce((sum, c) => sum + (c.approximateValue || 0), 0) || 0),
+            totalViews: totalViews || 0,
+            totalClaims: filteredData.claims?.length || 0,
+            imagePerformanceRatio: imagePerformanceRatio || 0,
             offerTypeCounts: offerTypeCounts,
             peakActivityTime: peakActivityTime,
-            overallConversionRate: totalViews > 0 ? (claims.length / totalViews) * 100 : 0,
+            overallConversionRate: totalViews > 0 ? (filteredData.claims.length / totalViews) * 100 : 0,
         };
     }, [offers, claims, vouchers, filteredData]);
     
@@ -308,7 +318,7 @@ export default function AdminAnalyticsPage() {
                 <TabsContent value="offers" className="mt-6 space-y-6">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <Card><CardHeader><CardTitle>Image Impact</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-blue-500">{analytics.imagePerformanceRatio >= 0 ? '+' : ''}{analytics.imagePerformanceRatio.toFixed(0)}%</p><p className="text-xs text-muted-foreground">Claim rate for offers with images.</p></CardContent></Card>
-                        <Card><CardHeader><CardTitle>Most Popular Type</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-green-500">{mostPopularType}</p><p className="text-xs text-muted-foreground">This offer type gets the most claims.</p></CardContent></Card>
+                        <Card><CardHeader><CardTitle>Most Popular Type</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-green-500">{offerTypeDisplayMap[mostPopularType]}</p><p className="text-xs text-muted-foreground">This offer type gets the most claims.</p></CardContent></Card>
                         <Card><CardHeader><CardTitle>Conversion Rate</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-purple-500">{analytics.overallConversionRate.toFixed(1)}%</p><p className="text-xs text-muted-foreground">Views that turned into claims.</p></CardContent></Card>
                         <Card><CardHeader><CardTitle>Peak Activity</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-orange-500">{analytics.peakActivityTime}</p><p className="text-xs text-muted-foreground">Hour with most claims &amp; redemptions.</p></CardContent></Card>
                     </div>
