@@ -329,7 +329,7 @@ export default function AdminAnalyticsPage() {
                         <Card><CardHeader><CardTitle>Image Impact</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-blue-500">{analytics.imagePerformanceRatio >= 0 ? '+' : ''}{analytics.imagePerformanceRatio.toFixed(0)}%</p><p className="text-xs text-muted-foreground">Claim rate for offers with images.</p></CardContent></Card>
                         <Card><CardHeader><CardTitle>Most Popular</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-green-500">{offerTypeDisplayMap[mostPopularType]}</p><p className="text-xs text-muted-foreground">This offer type gets the most claims.</p></CardContent></Card>
                         <Card><CardHeader><CardTitle>Conversion Rate</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-purple-500">{analytics.overallConversionRate.toFixed(1)}%</p><p className="text-xs text-muted-foreground">Views that turned into claims.</p></CardContent></Card>
-                        <Card><CardHeader><CardTitle>Peak Activity</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-orange-500">{analytics.peakActivityTime}</p><p className="text-xs text-muted-foreground">Hour with most claims &amp; redemptions.</p></CardContent></Card>
+                        <Card><CardHeader><CardTitle>Peak Activity</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-orange-500">{analytics.peakActivityTime}</p><p className="text-xs text-muted-foreground">Hour in peak actions</p></CardContent></Card>
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
