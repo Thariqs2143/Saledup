@@ -205,9 +205,9 @@ export default function AdminAnalyticsPage() {
                 };
 
                 const startHour = peakHour;
-                const endHour = (peakHour + 2) % 24; // 3-hour window
+                const endHour = (peakHour + 2);
                 
-                peakActivityTime = `${formatHour(startHour)} - ${formatHour(endHour + 1)}`;
+                peakActivityTime = `${formatHour(startHour)} - ${formatHour(endHour % 24)}`;
             }
         }
         
@@ -319,8 +319,8 @@ export default function AdminAnalyticsPage() {
             
             <Tabs defaultValue="offers" className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="offers"><Tag className="mr-2 h-4 w-4"/> Offers Analytics</TabsTrigger>
-                    <TabsTrigger value="vouchers"><Gift className="mr-2 h-4 w-4"/> Vouchers Analytics</TabsTrigger>
+                    <TabsTrigger value="offers"><Tag className="mr-2 h-4 w-4"/> Offers</TabsTrigger>
+                    <TabsTrigger value="vouchers"><Gift className="mr-2 h-4 w-4"/> Vouchers</TabsTrigger>
                 </TabsList>
 
                 {/* OFFERS CONTENT */}
