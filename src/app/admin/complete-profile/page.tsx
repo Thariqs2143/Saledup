@@ -16,6 +16,7 @@ import { errorEmitter } from '@/lib/error-emitter';
 import { FirestorePermissionError } from '@/lib/errors';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AddressInput } from '@/components/address-input';
+import Image from 'next/image';
 
 
 export default function AdminCompleteProfilePage() {
@@ -24,8 +25,11 @@ export default function AdminCompleteProfilePage() {
     const [loading, setLoading] = useState(false);
     const [authUser, setAuthUser] = useState<AuthUser | null>(null);
     const [imageUrl, setImageUrl] = useState<string | null>(null);
-    const [uploading, setUploading] = useState(false);
-    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
+    const [uploadingLogo, setUploadingLogo] = useState(false);
+    const [uploadingCover, setUploadingCover] = useState(false);
+    const logoInputRef = useRef<HTMLInputElement>(null);
+    const coverInputRef = useRef<HTMLInputElement>(null);
     const [ownerName, setOwnerName] = useState('');
     const [ownerEmail, setOwnerEmail] = useState('');
     const [phone, setPhone] = useState('');
@@ -49,10 +53,12 @@ export default function AdminCompleteProfilePage() {
         return () => unsubscribe();
     }, [router, toast]);
     
-    const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'cover') => {
         if (!e.target.files || e.target.files.length === 0) return;
         const file = e.target.files[0];
-        setUploading(true);
+        
+        if (type === 'logo') setUploadingLogo(true);
+        else setUploadingCover(true);
 
         const formData = new FormData();
         formData.append('file', file);
@@ -67,14 +73,21 @@ export default function AdminCompleteProfilePage() {
             if (!response.ok) throw new Error('Upload failed');
             
             const data = await response.json();
-            setImageUrl(data.secure_url);
-            toast({ title: "Photo Uploaded!", description: "Your shop photo has been updated." });
+
+            if (type === 'logo') {
+                setImageUrl(data.secure_url);
+                toast({ title: "Logo Uploaded!", description: "Your shop logo has been set." });
+            } else {
+                setCoverImageUrl(data.secure_url);
+                toast({ title: "Cover Photo Uploaded!", description: "Your shop cover photo has been set." });
+            }
 
         } catch (error) {
             console.error("Error uploading photo:", error);
             toast({ title: "Upload Failed", description: "Could not upload your photo.", variant: "destructive" });
         } finally {
-            setUploading(false);
+             if (type === 'logo') setUploadingLogo(false);
+             else setUploadingCover(false);
         }
     };
 
@@ -115,6 +128,7 @@ export default function AdminCompleteProfilePage() {
             lng: location.lng,
             status: 'active',
             imageUrl: imageUrl || `https://placehold.co/400x300.png?text=${fallback}`,
+            coverImageUrl: coverImageUrl || `https://placehold.co/1200x400.png?text=${fallback}`,
             createdAt: new Date(),
         };
 
@@ -153,16 +167,35 @@ export default function AdminCompleteProfilePage() {
             </div>
             
             <div className="space-y-6">
-                 <div className="flex flex-col items-center gap-4">
-                    <Avatar className="h-24 w-24 border-2 border-primary">
-                        <AvatarImage src={imageUrl ?? undefined} />
-                        <AvatarFallback><Store className="h-10 w-10"/></AvatarFallback>
-                    </Avatar>
-                     <input type="file" ref={fileInputRef} onChange={handlePhotoUpload} accept="image/*" className="hidden" />
-                    <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
-                      {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Upload className="mr-2 h-4 w-4"/>}
-                      Upload Shop Photo
+                 <div className="space-y-2">
+                     <Label>Shop Cover Photo</Label>
+                     <div className="relative w-full aspect-[16/6] bg-muted rounded-lg overflow-hidden flex items-center justify-center">
+                        {coverImageUrl ? (
+                            <Image src={coverImageUrl} alt="Cover preview" layout="fill" objectFit="cover" />
+                        ) : (
+                            <p className="text-sm text-muted-foreground">Recommended: 1200x400</p>
+                        )}
+                         <input type="file" ref={coverInputRef} onChange={(e) => handlePhotoUpload(e, 'cover')} accept="image/*" className="hidden" />
+                     </div>
+                     <Button type="button" variant="outline" size="sm" onClick={() => coverInputRef.current?.click()} disabled={uploadingCover}>
+                      {uploadingCover ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Upload className="mr-2 h-4 w-4"/>}
+                      Upload Cover Photo
                     </Button>
+                 </div>
+
+                 <div className="flex flex-col items-start gap-4">
+                    <Label>Shop Logo</Label>
+                    <div className="flex items-center gap-4">
+                        <Avatar className="h-24 w-24 border-2 border-primary">
+                            <AvatarImage src={imageUrl ?? undefined} />
+                            <AvatarFallback><Store className="h-10 w-10"/></AvatarFallback>
+                        </Avatar>
+                        <input type="file" ref={logoInputRef} onChange={(e) => handlePhotoUpload(e, 'logo')} accept="image/*" className="hidden" />
+                        <Button type="button" variant="outline" onClick={() => logoInputRef.current?.click()} disabled={uploadingLogo}>
+                        {uploadingLogo ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Upload className="mr-2 h-4 w-4"/>}
+                        Upload Logo
+                        </Button>
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -212,7 +245,7 @@ export default function AdminCompleteProfilePage() {
                 </div>
             </div>
             <div className="flex justify-center pt-4">
-                <Button type="submit" size="lg" className="w-full max-w-sm" disabled={loading || uploading}>
+                <Button type="submit" size="lg" className="w-full max-w-sm" disabled={loading || uploadingLogo || uploadingCover}>
                     {loading && <Loader2 className="mr-2 animate-spin" />}
                     <Store className="mr-2 h-4 w-4" />
                     Complete Setup

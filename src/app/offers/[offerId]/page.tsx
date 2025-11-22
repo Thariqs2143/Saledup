@@ -26,12 +26,14 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 
 type Shop = {
     shopName: string;
     address: string;
     imageUrl?: string;
+    coverImageUrl?: string;
     ownerName: string;
     phone: string;
     ownerEmail: string;
@@ -323,26 +325,36 @@ export default function OfferDetailPage() {
             </Link>
 
             <Card className="bg-card text-card-foreground shadow-2xl overflow-hidden">
-                <div className="relative">
-                     <Image
-                        src={shop.imageUrl || `https://placehold.co/1200x400?text=${shop.shopName.replace(/\s/g, '+')}`}
-                        alt={shop.shopName}
-                        width={1200}
-                        height={400}
-                        className="aspect-[16/6] object-cover w-full"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-                    <div className="absolute bottom-0 left-0 p-6 flex items-end justify-between w-full">
-                        <div>
-                            <h1 className="text-3xl font-bold text-white">{shop.shopName}</h1>
-                            <p className="text-base text-white/80">{shop.businessType}</p>
-                        </div>
-                         <Button asChild variant="secondary">
+                <div className="relative h-48 md:h-64 w-full">
+                    {shop.coverImageUrl && (
+                        <Image
+                            src={shop.coverImageUrl}
+                            alt={`${shop.shopName} cover image`}
+                            layout="fill"
+                            objectFit="cover"
+                            className="w-full h-full"
+                        />
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                    <div className="absolute -bottom-10 left-6">
+                        <Avatar className="h-24 w-24 border-4 border-background bg-muted">
+                            <AvatarImage src={shop.imageUrl} />
+                            <AvatarFallback>
+                                <Building className="h-10 w-10"/>
+                            </AvatarFallback>
+                        </Avatar>
+                    </div>
+                     <div className="absolute bottom-4 right-6">
+                        <Button asChild variant="secondary">
                             <Link href={`/shops/${shopId}`}>
                                 <Eye className="mr-2 h-4 w-4"/> View Shop
                             </Link>
                         </Button>
                     </div>
+                </div>
+                 <div className="pt-16 p-6">
+                    <h1 className="text-2xl font-bold text-foreground">{shop.shopName}</h1>
+                    <p className="text-base text-muted-foreground">{shop.businessType}</p>
                 </div>
                 
                 <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-8">

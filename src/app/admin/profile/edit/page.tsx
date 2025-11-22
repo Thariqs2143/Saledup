@@ -17,12 +17,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Link from 'next/link';
 import { AddressInput } from '@/components/address-input';
+import Image from 'next/image';
 
 type ShopProfile = {
     ownerName?: string;
     shopName?: string;
     ownerImageUrl?: string;
     imageUrl?: string;
+    coverImageUrl?: string;
     businessType?: string;
     address?: string;
     gstNumber?: string;
@@ -39,10 +41,10 @@ export default function AdminEditProfilePage() {
   const [profile, setProfile] = useState<ShopProfile>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [initialProfile, setInitialProfile] = useState<ShopProfile>({});
+  const [uploading, setUploading] = useState<'logo' | 'cover' | null>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
   
-  // New state for location
   const [address, setAddress] = useState('');
   const [location, setLocation] = useState<{lat: number, lng: number} | null>(null);
 
@@ -61,7 +63,6 @@ export default function AdminEditProfilePage() {
             phone: user.phoneNumber || data.phone,
           };
           setProfile(currentProfile);
-          setInitialProfile(currentProfile);
           setAddress(data.address || '');
           if (data.lat && data.lng) {
               setLocation({lat: data.lat, lng: data.lng});
@@ -80,10 +81,10 @@ export default function AdminEditProfilePage() {
     setProfile((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'cover') => {
     if (!authUser || !e.target.files || e.target.files.length === 0) return;
     const file = e.target.files[0];
-    setSaving(true);
+    setUploading(type);
 
     const formData = new FormData();
     formData.append('file', file);
@@ -100,14 +101,19 @@ export default function AdminEditProfilePage() {
         const data = await response.json();
         const newImageUrl = data.secure_url;
         
-        setProfile((prev) => ({ ...prev, imageUrl: newImageUrl }));
-        toast({ title: "Photo Uploaded!", description: "Your shop photo has been updated. Save changes to apply." });
+        if (type === 'logo') {
+            setProfile((prev) => ({ ...prev, imageUrl: newImageUrl }));
+            toast({ title: "Logo Uploaded!", description: "Your new shop logo is ready. Save changes to apply." });
+        } else {
+            setProfile((prev) => ({ ...prev, coverImageUrl: newImageUrl }));
+            toast({ title: "Cover Photo Uploaded!", description: "Your new cover photo is ready. Save changes to apply." });
+        }
 
     } catch (error) {
         console.error("Error uploading photo:", error);
         toast({ title: "Upload Failed", description: "Could not upload your photo.", variant: "destructive" });
     } finally {
-        setSaving(false);
+        setUploading(null);
     }
   };
 
@@ -123,9 +129,6 @@ export default function AdminEditProfilePage() {
           changes.lat = location.lat;
           changes.lng = location.lng;
       }
-      
-      // We are updating all fields for simplicity, instead of checking one-by-one.
-      // Firestore `updateDoc` is efficient and only writes changed fields anyway.
       
       if(Object.keys(changes).length > 0) {
         await updateDoc(shopDocRef, changes);
@@ -184,17 +187,33 @@ export default function AdminEditProfilePage() {
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-                <div className="flex flex-col items-center gap-4">
+                <div className="space-y-2">
+                     <Label>Shop Cover Photo</Label>
+                     <div className="relative w-full aspect-[16/6] bg-muted rounded-lg overflow-hidden flex items-center justify-center">
+                        {profile.coverImageUrl ? (
+                            <Image src={profile.coverImageUrl} alt="Cover preview" layout="fill" objectFit="cover" />
+                        ) : (
+                            <p className="text-sm text-muted-foreground">No cover photo set</p>
+                        )}
+                         <input type="file" ref={coverInputRef} onChange={(e) => handlePhotoUpload(e, 'cover')} accept="image/*" className="hidden" />
+                     </div>
+                     <Button type="button" variant="outline" size="sm" onClick={() => coverInputRef.current?.click()} disabled={uploading === 'cover'}>
+                      {uploading === 'cover' ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Upload className="mr-2 h-4 w-4"/>}
+                      Change Cover Photo
+                    </Button>
+                 </div>
+
+                <div className="flex items-center gap-4">
                     <Avatar className="h-24 w-24 border-2 border-primary">
                         <AvatarImage src={profile.imageUrl ?? profile.ownerImageUrl} />
                         <AvatarFallback>
                             <Building className="h-10 w-10"/>
                         </AvatarFallback>
                     </Avatar>
-                    <input type="file" ref={fileInputRef} onChange={handlePhotoUpload} accept="image/*" className="hidden" />
-                    <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={saving}>
-                    {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Upload className="mr-2 h-4 w-4"/>}
-                    Change Shop Photo
+                    <input type="file" ref={logoInputRef} onChange={(e) => handlePhotoUpload(e, 'logo')} accept="image/*" className="hidden" />
+                    <Button type="button" variant="outline" onClick={() => logoInputRef.current?.click()} disabled={uploading === 'logo'}>
+                    {uploading === 'logo' ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Upload className="mr-2 h-4 w-4"/>}
+                    Change Logo
                     </Button>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -274,7 +293,7 @@ export default function AdminEditProfilePage() {
              <Link href="/admin/profile">
                 <Button type="button" variant="outline">Cancel</Button>
             </Link>
-            <Button type="submit" disabled={saving}>
+            <Button type="submit" disabled={saving || !!uploading}>
                 {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                 Save Changes
             </Button>

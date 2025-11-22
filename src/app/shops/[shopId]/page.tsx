@@ -32,6 +32,7 @@ type Shop = {
     shopName: string;
     address: string;
     imageUrl?: string;
+    coverImageUrl?: string;
     businessType?: string;
 };
 
@@ -207,20 +208,36 @@ export default function ShopOffersPage() {
     <div className="flex flex-col min-h-screen bg-muted/30">
         {/* Shop Header */}
         <header className="bg-background shadow-sm">
-            <div className="container mx-auto p-4 sm:p-6 flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
-                <Avatar className="h-20 w-20 sm:h-24 sm:w-24 border-2 border-primary">
-                    <AvatarImage src={shop.imageUrl} alt={shop.shopName} />
-                    <AvatarFallback>
-                        <Building className="h-10 w-10 text-muted-foreground"/>
-                    </AvatarFallback>
-                </Avatar>
-                <div className="text-center sm:text-left">
+            <div className="container mx-auto">
+                <div className="relative h-48 md:h-64 w-full">
+                    {shop.coverImageUrl ? (
+                        <Image
+                            src={shop.coverImageUrl}
+                            alt={`${shop.shopName} cover image`}
+                            layout="fill"
+                            objectFit="cover"
+                            className="w-full h-full"
+                        />
+                    ) : (
+                        <div className="w-full h-full bg-muted"></div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                    <div className="absolute -bottom-12 left-6">
+                        <Avatar className="h-24 w-24 md:h-32 md:w-32 border-4 border-background bg-muted">
+                            <AvatarImage src={shop.imageUrl} />
+                            <AvatarFallback>
+                                <Building className="h-10 w-10 md:h-12 md:w-12"/>
+                            </AvatarFallback>
+                        </Avatar>
+                    </div>
+                </div>
+                 <div className="pt-16 pb-6 px-6">
                     <h1 className="text-2xl sm:text-3xl font-bold">{shop.shopName}</h1>
-                    <div className="flex items-center gap-2 text-muted-foreground mt-1 justify-center sm:justify-start">
+                    <div className="flex items-center gap-2 text-muted-foreground mt-1">
                         <MapPin className="h-4 w-4"/>
                         <p>{shop.address}</p>
                     </div>
-                    <div className="flex items-center gap-2 mt-2 justify-center sm:justify-start">
+                    <div className="flex items-center gap-4 mt-2">
                         {reviews.length > 0 && (
                             <div className="flex items-center gap-2">
                                 <StarRating rating={averageRating} readOnly />
@@ -314,4 +331,3 @@ export default function ShopOffersPage() {
     </div>
     );
 }
-
