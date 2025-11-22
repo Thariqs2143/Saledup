@@ -228,7 +228,7 @@ export default function ShopOffersPage() {
                         <div className="w-full h-full bg-gradient-to-t from-slate-200 to-slate-300 dark:from-slate-800 dark:to-slate-700"></div>
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                    <div className="absolute -bottom-10 left-6">
+                    <div className="absolute -bottom-12 left-6">
                         <Avatar className="h-24 w-24 md:h-28 md:w-28 border-4 border-background bg-muted">
                             <AvatarImage src={shop.imageUrl} />
                             <AvatarFallback>
