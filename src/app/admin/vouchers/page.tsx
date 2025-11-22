@@ -263,7 +263,7 @@ export default function AdminVouchersPage() {
                  ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {filteredVouchers.map(voucher => (
-                            <Card key={voucher.id} className="flex flex-col border hover:shadow-lg transition-shadow">
+                            <Card key={voucher.id} className="flex flex-col border-2 border-border hover:border-primary transition-all duration-300 hover:shadow-lg">
                                 <CardHeader>
                                     <div className="flex justify-between items-start">
                                         <CardTitle className="text-lg font-bold">₹{voucher.value} Voucher</CardTitle>
