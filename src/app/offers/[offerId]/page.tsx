@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -325,7 +326,7 @@ export default function OfferDetailPage() {
             </Link>
 
             <Card className="bg-card text-card-foreground shadow-2xl overflow-hidden">
-                <div className="relative h-48 md:h-64 w-full">
+                <div className="relative aspect-video w-full">
                     {shop.coverImageUrl && (
                         <Image
                             src={shop.coverImageUrl}
