@@ -4,7 +4,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, PlusCircle, Gift, CheckCircle, Clock, Search, IndianRupee, Trash2 } from "lucide-react";
+import { Loader2, PlusCircle, Gift, CheckCircle, Clock, Search, IndianRupee, Trash2, User, Calendar } from "lucide-react";
 import Link from 'next/link';
 import { collection, onSnapshot, query, where, Timestamp, orderBy, getDocs, writeBatch } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
@@ -15,7 +15,6 @@ import { format, formatDistanceToNow } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { AnimatedCounter } from '@/components/animated-counter';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -262,45 +261,36 @@ export default function AdminVouchersPage() {
                         <p>Click "Generate Vouchers" to create your first gift voucher.</p>
                     </div>
                  ) : (
-                    <div className="rounded-lg border bg-card">
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Customer</TableHead>
-                                    <TableHead>Value</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead>Issued</TableHead>
-                                    <TableHead className="text-right">Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {filteredVouchers.map(voucher => (
-                                    <TableRow key={voucher.id}>
-                                        <TableCell className="font-medium">
-                                            <p className="font-bold">{voucher.customerName}</p>
-                                            <p className="text-xs text-muted-foreground font-mono">{voucher.id}</p>
-                                        </TableCell>
-                                        <TableCell>₹{voucher.value}</TableCell>
-                                        <TableCell>
-                                            <Badge variant={getStatusVariant(voucher.status)}>{voucher.status}</Badge>
-                                        </TableCell>
-                                        <TableCell className="text-muted-foreground">
-                                            {formatDistanceToNow(voucher.createdAt.toDate(), { addSuffix: true })}
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                             <Link href={`/admin/vouchers/${voucher.id}`} passHref>
-                                                <Button variant="outline" size="sm"><span className="font-bold">View</span></Button>
-                                             </Link>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {filteredVouchers.map(voucher => (
+                            <Card key={voucher.id} className="flex flex-col border hover:shadow-lg transition-shadow">
+                                <CardHeader>
+                                    <div className="flex justify-between items-start">
+                                        <CardTitle className="text-lg font-bold">₹{voucher.value} Voucher</CardTitle>
+                                        <Badge variant={getStatusVariant(voucher.status)}>{voucher.status}</Badge>
+                                    </div>
+                                    <CardDescription className="text-xs font-mono pt-1">{voucher.id}</CardDescription>
+                                </CardHeader>
+                                <CardContent className="flex-1 space-y-3 text-sm">
+                                    <div className="flex items-center gap-3">
+                                        <User className="h-4 w-4 text-muted-foreground" />
+                                        <span className="font-semibold">{voucher.customerName}</span>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                                        <span>Issued {formatDistanceToNow(voucher.createdAt.toDate(), { addSuffix: true })}</span>
+                                    </div>
+                                </CardContent>
+                                <CardFooter className="border-t pt-4">
+                                     <Link href={`/admin/vouchers/${voucher.id}`} passHref className="w-full">
+                                        <Button variant="outline" size="sm" className="w-full font-bold">View Details</Button>
+                                     </Link>
+                                </CardFooter>
+                            </Card>
+                        ))}
                     </div>
                  )}
             </div>
         </div>
     );
-
-    
 }
