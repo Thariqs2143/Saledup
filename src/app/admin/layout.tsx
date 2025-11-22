@@ -26,8 +26,8 @@ type ShopProfile = {
 
 const adminNavItems: NavItem[] = [
   { href: '/admin', label: 'Home', iconName: 'LayoutDashboard' },
-  { href: '/admin/offers', label: 'Offers', iconName: 'Tag' },
-  { href: '/admin/vouchers', label: 'Gift Vouchers', iconName: 'Gift' },
+  { href: '/admin/offers', label: 'Offers', iconName: 'Gift' },
+  { href: '/admin/vouchers', label: 'Gift Vouchers', iconName: 'Tag' },
   { href: '/admin/redeem', label: 'Redeem', iconName: 'ScanLine' },
   { href: '/admin/customers', label: 'Customers', iconName: 'Users' },
   { href: '/admin/analytics', label: 'Analytics', iconName: 'BarChart3' },
@@ -37,7 +37,7 @@ const adminNavItems: NavItem[] = [
 
 const mobileBottomNavItems: NavItem[] = [
   { href: '/admin', label: 'Home', iconName: 'LayoutDashboard' },
-  { href: '/admin/offers', label: 'Offers', iconName: 'Tag' },
+  { href: '/admin/offers', label: 'Offers', iconName: 'Gift' },
   { href: '/admin/redeem', label: 'Redeem', iconName: 'ScanLine' },
   { href: '/admin/qr-code', label: 'QR', iconName: 'QrCode' },
   { href: '/admin/customers', label: 'Customers', iconName: 'Users' },
