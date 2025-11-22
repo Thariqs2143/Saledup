@@ -1,8 +1,8 @@
 
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
-import { collectionGroup, getDocs, query, where, Timestamp } from 'firebase/firestore';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { collectionGroup, onSnapshot, query, where, Timestamp, collection, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -16,7 +16,6 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Checkbox } from '@/components/ui/checkbox';
 import dynamic from 'next/dynamic';
 import 'leaflet/dist/leaflet.css';
-import { collection } from 'firebase/firestore';
 import Link from 'next/link';
 import type { Offer as SingleOffer } from '@/components/offer-map';
 
@@ -25,18 +24,17 @@ const OfferMap = dynamic(() => import('@/components/offer-map'), {
     loading: () => <div className="flex justify-center items-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div>
 });
 
-// Helper function to check if an offer is currently active based on its schedule
 const isOfferCurrentlyActive = (offer: SingleOffer): boolean => {
     const now = new Date();
     
     if (offer.startDate && now < offer.startDate.toDate()) {
-        return false; // Offer hasn't started yet
+        return false; 
     }
     if (offer.endDate) {
         const endDate = offer.endDate.toDate();
         endDate.setHours(23, 59, 59, 999);
         if (now > endDate) {
-            return false; // Offer has expired
+            return false; 
         }
     }
 
@@ -51,15 +49,25 @@ const isOfferCurrentlyActive = (offer: SingleOffer): boolean => {
         endTime.setHours(endHour, endMinute, 0, 0);
 
         if (now < startTime || now > endTime) {
-            return false; // Outside of active hours
+            return false;
         }
     }
 
     return true;
 };
 
+type ShopData = {
+    shopName: string;
+    address: string;
+    businessType: string;
+    phone: string;
+    lat: number;
+    lng: number;
+}
+
 export default function FindOffersPage() {
-    const [allOffers, setAllOffers] = useState<SingleOffer[]>([]);
+    const [allOffers, setAllOffers] = useState<Record<string, SingleOffer>>({});
+    const [allShops, setAllShops] = useState<Record<string, ShopData>>({});
     const [loading, setLoading] = useState(true);
     const [view, setView] = useState<'list' | 'map'>('list');
     
@@ -70,65 +78,67 @@ export default function FindOffersPage() {
     const businessCategories = ["Retail", "Food & Beverage", "Service", "MSME", "Other"];
 
     useEffect(() => {
-        const fetchAllOffers = async () => {
-            setLoading(true);
-            try {
-                const offersQuery = query(
-                    collectionGroup(db, 'offers'),
-                    where('isActive', '==', true)
-                );
-                const offersSnapshot = await getDocs(offersQuery);
-                const offersList = offersSnapshot.docs.map(doc => {
-                    const data = doc.data();
-                    const shopId = doc.ref.parent.parent!.id;
-                    return {
-                        id: doc.id,
-                        shopId,
-                        ...data
-                    } as SingleOffer;
-                });
-                
-                const shopIds = [...new Set(offersList.map(o => o.shopId))];
-                const shopsData: Record<string, any> = {};
-                
-                const shopIdChunks: string[][] = [];
-                for (let i = 0; i < shopIds.length; i += 30) { // Firestore 'in' query limit is 30
-                    shopIdChunks.push(shopIds.slice(i, i + 30));
-                }
+        setLoading(true);
+        // Real-time listener for shops
+        const shopsQuery = query(collection(db, 'shops'));
+        const unsubscribeShops = onSnapshot(shopsQuery, (snapshot) => {
+            const shopsData: Record<string, ShopData> = {};
+            snapshot.forEach(doc => {
+                shopsData[doc.id] = doc.data() as ShopData;
+            });
+            setAllShops(shopsData);
+        });
 
-                for (const chunk of shopIdChunks) {
-                    if (chunk.length > 0) {
-                        const shopsQuery = query(collection(db, 'shops'), where('__name__', 'in', chunk));
-                        const shopSnapshots = await getDocs(shopsQuery);
-                        shopSnapshots.forEach(shopDoc => {
-                            shopsData[shopDoc.id] = shopDoc.data();
-                        });
-                    }
-                }
-                
-                const enrichedOffers = offersList.map((offer) => ({
-                    ...offer,
-                    shopName: shopsData[offer.shopId]?.shopName,
-                    shopAddress: shopsData[offer.shopId]?.address,
-                    shopBusinessType: shopsData[offer.shopId]?.businessType,
-                    shopPhone: shopsData[offer.shopId]?.phone, // Fetch phone number
-                    lat: shopsData[offer.shopId]?.lat, 
-                    lng: shopsData[offer.shopId]?.lng,
-                })).filter(o => o.lat && o.lng); // Filter out offers without location
-                
-                setAllOffers(enrichedOffers);
+        // Real-time listener for offers
+        const offersQuery = query(
+            collectionGroup(db, 'offers'),
+            where('isActive', '==', true)
+        );
+        const unsubscribeOffers = onSnapshot(offersQuery, (snapshot) => {
+             const offersData: Record<string, SingleOffer> = {};
+             snapshot.docs.forEach(doc => {
+                 const data = doc.data();
+                 const shopId = doc.ref.parent.parent!.id;
+                 offersData[doc.id] = {
+                    id: doc.id,
+                    shopId,
+                    ...data
+                 } as SingleOffer;
+             });
+             setAllOffers(offersData);
+             setLoading(false);
+        }, (error) => {
+            console.error("Error fetching offers: ", error);
+            setLoading(false);
+        });
 
-            } catch (error) {
-                console.error("Error fetching offers: ", error);
-            } finally {
-                setLoading(false);
-            }
+        return () => {
+            unsubscribeShops();
+            unsubscribeOffers();
         };
-        fetchAllOffers();
     }, []);
 
+    const enrichedOffers = useMemo(() => {
+        return Object.values(allOffers)
+            .map(offer => {
+                const shop = allShops[offer.shopId];
+                if (!shop) return null;
+                return {
+                    ...offer,
+                    shopName: shop.shopName,
+                    shopAddress: shop.address,
+                    shopBusinessType: shop.businessType,
+                    shopPhone: shop.phone,
+                    lat: shop.lat,
+                    lng: shop.lng,
+                };
+            })
+            .filter(Boolean) as SingleOffer[];
+    }, [allOffers, allShops]);
+
+
     const filteredAndSortedOffers = useMemo(() => {
-        let result = allOffers.filter(offer => {
+        let result = enrichedOffers.filter(offer => {
             if (!isOfferCurrentlyActive(offer)) {
                 return false;
             }
@@ -151,7 +161,7 @@ export default function FindOffersPage() {
         }
 
         return result;
-    }, [allOffers, searchTerm, sortBy, selectedCategories]);
+    }, [enrichedOffers, searchTerm, sortBy, selectedCategories]);
 
     const handleCategoryChange = (category: string) => {
         setSelectedCategories(prev => 
@@ -314,5 +324,3 @@ export default function FindOffersPage() {
         </div>
     );
 }
-
-    
