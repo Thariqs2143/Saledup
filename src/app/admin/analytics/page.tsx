@@ -303,7 +303,7 @@ export default function AdminAnalyticsPage() {
                              <CardContent>
                                  <div className="space-y-2 max-h-[350px] overflow-y-auto pr-2">
                                      {offers.map(offer => {
-                                        const convRate = (offer.viewCount || 0) &gt; 0 ? ((offer.claimCount || 0) / (offer.viewCount || 1)) * 100 : 0;
+                                        const convRate = (offer.viewCount || 0) > 0 ? ((offer.claimCount || 0) / (offer.viewCount || 1)) * 100 : 0;
                                          return (
                                              <div key={offer.id} className="border-b last:border-b-0 py-3 flex justify-between items-center gap-2">
                                                  <div className="flex-1">
@@ -350,5 +350,7 @@ export default function AdminAnalyticsPage() {
         </div>
     );
 }
+
+    
 
     
