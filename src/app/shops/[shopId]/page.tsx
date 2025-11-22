@@ -10,7 +10,7 @@ import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Building, Clock, Loader2, Mail, MapPin, Phone, Tag, User as UserIcon, CheckCircle, Star, MessageSquare } from 'lucide-react';
+import { Building, Clock, Loader2, Mail, MapPin, Phone, Tag, User as UserIcon, CheckCircle, Star, MessageSquare, Globe, MessageCircle as WhatsAppIcon } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
@@ -34,6 +34,11 @@ type Shop = {
     imageUrl?: string;
     coverImageUrl?: string;
     businessType?: string;
+    phone: string;
+    website?: string;
+    whatsappNumber?: string;
+    lat?: number;
+    lng?: number;
 };
 
 type Offer = {
@@ -208,8 +213,8 @@ export default function ShopOffersPage() {
     <div className="flex flex-col min-h-screen bg-muted/30">
         {/* Shop Header */}
         <header className="bg-background shadow-sm">
-            <div className="container mx-auto">
-                <div className="relative h-48 md:h-64 w-full">
+            <div className="container mx-auto max-w-5xl">
+                <div className="relative h-48 md:h-64 w-full bg-muted">
                     {shop.coverImageUrl ? (
                         <Image
                             src={shop.coverImageUrl}
@@ -219,9 +224,9 @@ export default function ShopOffersPage() {
                             className="w-full h-full"
                         />
                     ) : (
-                        <div className="w-full h-full bg-muted"></div>
+                        <div className="w-full h-full bg-gradient-to-t from-slate-200 to-slate-300 dark:from-slate-800 dark:to-slate-700"></div>
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                     <div className="absolute -bottom-12 left-6">
                         <Avatar className="h-24 w-24 md:h-32 md:w-32 border-4 border-background bg-muted">
                             <AvatarImage src={shop.imageUrl} />
@@ -237,7 +242,7 @@ export default function ShopOffersPage() {
                         <MapPin className="h-4 w-4"/>
                         <p>{shop.address}</p>
                     </div>
-                    <div className="flex items-center gap-4 mt-2">
+                    <div className="flex flex-wrap items-center gap-4 mt-2">
                         {reviews.length > 0 && (
                             <div className="flex items-center gap-2">
                                 <StarRating rating={averageRating} readOnly />
@@ -250,15 +255,21 @@ export default function ShopOffersPage() {
                             <Badge variant="outline">{shop.businessType}</Badge>
                          )}
                     </div>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                        {shop.phone && <Button asChild variant="outline"><a href={`tel:${shop.phone}`}><Phone className="mr-2 h-4 w-4"/>Call</a></Button>}
+                        {shop.whatsappNumber && <Button asChild variant="outline"><a href={`https://wa.me/91${shop.whatsappNumber}`} target="_blank"><WhatsAppIcon className="mr-2 h-4 w-4"/>WhatsApp</a></Button>}
+                        {shop.website && <Button asChild variant="outline"><a href={shop.website} target="_blank"><Globe className="mr-2 h-4 w-4"/>Website</a></Button>}
+                        {shop.lat && shop.lng && <Button asChild variant="outline"><a href={`https://www.google.com/maps/dir/?api=1&destination=${shop.lat},${shop.lng}`} target="_blank"><MapPin className="mr-2 h-4 w-4"/>Directions</a></Button>}
+                    </div>
                 </div>
             </div>
         </header>
 
         {/* Offers Grid */}
-        <main className="container mx-auto p-4 sm:p-6 lg:p-8 flex-1">
+        <main className="container mx-auto max-w-5xl p-4 sm:p-6 lg:p-8 flex-1">
             <h2 className="text-xl font-bold mb-6 text-center sm:text-left">Available Offers ({activeOffers.length})</h2>
              {activeOffers.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
                     {activeOffers.map(offer => (
                          <Link key={offer.id} href={`/offers/${offer.id}?shopId=${shopId}&from=shop`} className="block">
                             <Card className="flex flex-col bg-background transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group h-full">

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Store, Upload } from 'lucide-react';
+import { Loader2, Store, Upload, Globe, MessageCircle } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
 import { doc, setDoc } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
@@ -105,6 +105,8 @@ export default function AdminCompleteProfilePage() {
         const gstNumber = formData.get('gstNumber') as string;
         const shopPhone = formData.get('phone') as string;
         const formOwnerName = formData.get('ownerName') as string;
+        const website = formData.get('website') as string;
+        const whatsappNumber = formData.get('whatsappNumber') as string;
 
         if (!shopName || !address || !businessType || !shopPhone || !formOwnerName || !location) {
              toast({ title: "Error", description: "Please fill out all required fields, including a valid address.", variant: "destructive" });
@@ -121,6 +123,8 @@ export default function AdminCompleteProfilePage() {
             ownerImageUrl: authUser.photoURL || '',
             shopName,
             phone: shopPhone,
+            whatsappNumber,
+            website,
             address,
             businessType,
             gstNumber,
@@ -234,6 +238,14 @@ export default function AdminCompleteProfilePage() {
                         <Label htmlFor="gstNumber">GST Number (Optional)</Label>
                         <Input id="gstNumber" name="gstNumber" placeholder="e.g. 29ABCDE1234F1Z5" />
                     </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="website">Website (Optional)</Label>
+                        <Input id="website" name="website" placeholder="e.g., https://yourshop.com" />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="whatsappNumber">WhatsApp Number (Optional)</Label>
+                        <Input id="whatsappNumber" name="whatsappNumber" type="tel" placeholder="e.g. 9876543210" onChange={(e) => e.target.value = e.target.value.replace(/\D/g, '').slice(0, 10)} />
+                    </div>
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="address">Full Shop Address *</Label>
@@ -256,5 +268,3 @@ export default function AdminCompleteProfilePage() {
     </div>
   );
 }
-
-    

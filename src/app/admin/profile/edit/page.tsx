@@ -30,6 +30,8 @@ type ShopProfile = {
     gstNumber?: string;
     phone?: string;
     email?: string;
+    website?: string;
+    whatsappNumber?: string;
     lat?: number;
     lng?: number;
 };
@@ -254,6 +256,24 @@ export default function AdminEditProfilePage() {
                         id="gstNumber"
                         value={profile.gstNumber || ''}
                         onChange={(e) => handleFieldChange('gstNumber', e.target.value)}
+                        />
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="website">Website (Optional)</Label>
+                        <Input
+                        id="website"
+                        value={profile.website || ''}
+                        placeholder="https://yourshop.com"
+                        onChange={(e) => handleFieldChange('website', e.target.value)}
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="whatsappNumber">WhatsApp Number (Optional)</Label>
+                        <Input
+                        id="whatsappNumber"
+                        value={profile.whatsappNumber || ''}
+                        placeholder="10-digit number"
+                        onChange={(e) => handleFieldChange('whatsappNumber', e.target.value.replace(/\D/g, '').slice(0, 10))}
                         />
                     </div>
                 </div>
