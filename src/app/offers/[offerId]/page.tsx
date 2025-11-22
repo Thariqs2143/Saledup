@@ -488,7 +488,16 @@ export default function OfferDetailPage() {
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="customer-phone">Your Phone Number*</Label>
-                                <Input id="customer-phone" type="tel" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} required />
+                                <Input 
+                                    id="customer-phone" 
+                                    type="tel" 
+                                    value={customerPhone} 
+                                    onChange={(e) => setCustomerPhone(e.target.value.replace(/\D/g, '').slice(0, 10))} 
+                                    required 
+                                    pattern="[0-9]{10}"
+                                    title="Please enter a 10-digit mobile number"
+                                    maxLength={10}
+                                />
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="customer-email">Your Email (Optional)</Label>
