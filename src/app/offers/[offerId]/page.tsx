@@ -4,10 +4,10 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { doc, getDoc, addDoc, collection, serverTimestamp, updateDoc, increment, Timestamp, query, where, getDocs, setDoc } from 'firebase/firestore';
+import { doc, getDoc, addDoc, collection, serverTimestamp, updateDoc, increment, Timestamp, query, where, getDocs, setDoc, onSnapshot, orderBy } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
-import { Loader2, ArrowLeft, Building, Tag, Info, Phone, Mail, MapPin, User as UserIcon, CheckCircle, Clock, Calendar, Gem, Eye, Star, MessageSquare, IndianRupee } from 'lucide-react';
+import { Loader2, ArrowLeft, Building, Tag, Info, Phone, Mail, MapPin, User as UserIcon, CheckCircle, Clock, Calendar, Gem, Eye, Star, MessageSquare, IndianRupee, Download } from 'lucide-react';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
@@ -22,12 +22,13 @@ import {
 } from "@/components/ui/dialog"
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { format, formatDistanceToNow } from 'date-fns';
+import { format, formatDistanceToNow, addHours } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import jsPDF from 'jspdf';
 
 
 type Shop = {
@@ -39,6 +40,8 @@ type Shop = {
     phone: string;
     ownerEmail: string;
     businessType?: string;
+    website?: string;
+    whatsappNumber?: string;
 };
 
 type Offer = {
@@ -56,6 +59,14 @@ type Offer = {
     endDate?: Timestamp;
     startTime?: string;
     endTime?: string;
+};
+
+type Review = {
+    id: string;
+    name: string;
+    rating: number;
+    comment: string;
+    createdAt: Timestamp;
 };
 
 // Helper to check if offer is active (same as on other pages)
@@ -109,11 +120,12 @@ export default function OfferDetailPage() {
     const [offer, setOffer] = useState<Offer | null>(null);
     const [shop, setShop] = useState<Shop | null>(null);
     const [otherOffers, setOtherOffers] = useState<Offer[]>([]);
+    const [reviews, setReviews] = useState<Review[]>([]);
     const [loading, setLoading] = useState(true);
 
     const [isClaiming, setIsClaiming] = useState(false);
     const [isClaimDialogOpen, setIsClaimDialogOpen] = useState(false);
-    const [claimSuccessData, setClaimSuccessData] = useState<{qrCodeUrl: string, offerTitle: string, newPoints: number, totalPoints: number} | null>(null);
+    const [claimSuccessData, setClaimSuccessData] = useState<{claimId: string, qrCodeUrl: string, offerTitle: string, newPoints: number, totalPoints: number} | null>(null);
     const [isReviewDialogOpen, setIsReviewDialogOpen] = useState(false);
     const [isSubmittingReview, setIsSubmittingReview] = useState(false);
     const [reviewRating, setReviewRating] = useState(0);
@@ -133,12 +145,14 @@ export default function OfferDetailPage() {
             return;
         }
 
+        let unsubscribeReviews: () => void;
+        
         const fetchData = async () => {
             setLoading(true);
             try {
-                // Fetch Offer and increment view count
+                // We only need to increment the viewCount, not block for it.
                 const offerDocRef = doc(db, 'shops', shopId, 'offers', offerId);
-                await updateDoc(offerDocRef, { viewCount: increment(1) }); // Increment view count
+                updateDoc(offerDocRef, { viewCount: increment(1) }).catch(console.error);
                 
                 const offerSnap = await getDoc(offerDocRef);
                 if (!offerSnap.exists()) {
@@ -165,9 +179,14 @@ export default function OfferDetailPage() {
                     .map(doc => ({ id: doc.id, shopId, ...doc.data() } as Offer))
                     .filter(isOfferCurrentlyActive);
                 
-                // Filter out the current offer and take the first 3
                 setOtherOffers(allActiveOffers.filter(o => o.id !== offerId).slice(0, 3));
-
+                
+                // Set up listener for reviews
+                const reviewsQuery = query(collection(db, 'shops', shopId, 'reviews'), orderBy('createdAt', 'desc'));
+                unsubscribeReviews = onSnapshot(reviewsQuery, (snapshot) => {
+                    const reviewsList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Review));
+                    setReviews(reviewsList);
+                });
 
             } catch (error: any) {
                 toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -178,7 +197,104 @@ export default function OfferDetailPage() {
         };
 
         fetchData();
+        
+        return () => {
+            if (unsubscribeReviews) {
+                unsubscribeReviews();
+            }
+        }
     }, [offerId, shopId, router, toast]);
+
+    const handleDownloadSticker = async () => {
+        if (!shop || !claimSuccessData) return;
+
+        toast({ title: "Generating PDF...", description: "Your voucher is being prepared for download." });
+
+        const doc = new jsPDF({
+            orientation: 'landscape',
+            unit: 'mm',
+            format: [85.6, 53.98] // Credit card size
+        });
+        
+        // --- Image Loading ---
+        const toDataURL = (url: string): Promise<string> => {
+            return new Promise((resolve, reject) => {
+                const img = new window.Image();
+                img.crossOrigin = 'Anonymous';
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.height = img.naturalHeight;
+                    canvas.width = img.naturalWidth;
+                    ctx!.drawImage(img, 0, 0);
+                    resolve(canvas.toDataURL('image/png'));
+                };
+                img.onerror = reject;
+                img.src = url;
+            });
+        };
+
+        try {
+            const qrCodeDataUrl = await toDataURL(claimSuccessData.qrCodeUrl);
+            let shopLogoDataUrl: string | null = null;
+            if (shop.imageUrl) {
+                shopLogoDataUrl = await toDataURL(shop.imageUrl);
+            }
+
+            // --- PDF Content ---
+            // Background
+            doc.setFillColor(248, 249, 250); // A light grey
+            doc.rect(0, 0, 85.6, 53.98, 'F');
+
+            // Shop Logo
+            if (shopLogoDataUrl) {
+                doc.addImage(shopLogoDataUrl, 'PNG', 5, 5, 12, 12);
+            }
+
+            // Shop Name
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(29, 35, 42); // Dark text
+            doc.text(shop.shopName, 20, 10);
+            
+            // Offer Title
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(108, 117, 125); // Muted text
+            doc.text(offer?.title || '', 20, 15, { maxWidth: 35 });
+
+            // QR Code
+            doc.addImage(qrCodeDataUrl, 'PNG', 58, 5, 22.6, 22.6);
+
+            // Customer Details
+            doc.setDrawColor(222, 226, 230); // Border color
+            doc.line(5, 30, 80.6, 30); // Separator line
+            
+            doc.setFontSize(7);
+            doc.setTextColor(108, 117, 125);
+            doc.text("REDEEMABLE BY", 5, 35);
+            
+            doc.setFontSize(9);
+            doc.setTextColor(29, 35, 42);
+            doc.text(customerName, 5, 40);
+
+            doc.setFontSize(7);
+            doc.text("VALID UNTIL", 50, 35);
+            
+            doc.setFontSize(9);
+            const expiryDate = addHours(new Date(), 24); // QR valid for 24 hours
+            doc.text(format(expiryDate, 'PPpp'), 50, 40);
+            
+            doc.setFontSize(6);
+            doc.setTextColor(150, 150, 150);
+            doc.text(`Claim ID: ${claimSuccessData.claimId}`, 5, 50);
+
+            doc.save(`Saledup_Voucher_${shop.shopName.replace(/\s/g, '_')}.pdf`);
+        } catch (error) {
+            console.error("Error generating PDF:", error);
+            toast({ title: "PDF Generation Failed", description: "There was an error creating the voucher file.", variant: "destructive"});
+        }
+    };
     
     const handleClaimOffer = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -186,8 +302,7 @@ export default function OfferDetailPage() {
 
         setIsClaiming(true);
         try {
-            // Step 1: Create the claim document in the shop's subcollection
-            // The onClaimCreated Cloud Function will handle incrementing the offer's claim count.
+            // Step 1: Create the claim document. The `onClaimCreated` function will handle count increment.
             const claimsCollectionRef = collection(db, 'shops', shopId, 'claims');
             const claimDocRef = await addDoc(claimsCollectionRef, {
                 customerName,
@@ -198,7 +313,6 @@ export default function OfferDetailPage() {
                 claimedAt: serverTimestamp(),
                 status: 'claimed',
                 approximateValue: offer.approximateValue || 0,
-                // Add discount info for hunter logic
                 discountType: offer.discountType,
                 discountValue: offer.discountValue
             });
@@ -213,7 +327,6 @@ export default function OfferDetailPage() {
                 await updateDoc(customerDocRef, { 
                     saledupPoints: increment(POINTS_PER_CLAIM),
                     lastActivity: serverTimestamp(),
-                    // Update name if it wasn't set before
                     name: customerSnap.data().name || customerName,
                     email: customerSnap.data().email || customerEmail
                 });
@@ -234,6 +347,7 @@ export default function OfferDetailPage() {
             const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(claimId)}`;
             
             setClaimSuccessData({
+                claimId,
                 qrCodeUrl, 
                 offerTitle: offer.title,
                 newPoints: POINTS_PER_CLAIM,
@@ -468,6 +582,30 @@ export default function OfferDetailPage() {
                 </div>
             )}
 
+            {/* Reviews Section */}
+            {reviews.length > 0 && (
+                <div className="mt-12">
+                    <h2 className="text-2xl font-bold mb-4">What Customers Are Saying ({reviews.length})</h2>
+                    <div className="space-y-4">
+                        {reviews.map(review => (
+                            <Card key={review.id}>
+                                <CardContent className="pt-6">
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <p className="font-semibold">{review.name}</p>
+                                            <p className="text-xs text-muted-foreground">{formatDistanceToNow(review.createdAt.toDate(), { addSuffix: true })}</p>
+                                        </div>
+                                        <StarRating rating={review.rating} readOnly />
+                                    </div>
+                                    <p className="mt-4 text-muted-foreground text-sm">{review.comment}</p>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+
             {/* Claim Offer Dialog */}
             <Dialog open={isClaimDialogOpen} onOpenChange={setIsClaimDialogOpen}>
                 <DialogContent>
@@ -539,6 +677,10 @@ export default function OfferDetailPage() {
                                 className="rounded-lg border p-2 bg-white"
                             />
                         )}
+                        <Button variant="secondary" className="w-full" onClick={handleDownloadSticker}>
+                            <Download className="mr-2 h-4 w-4" />
+                            Download QR Sticker (PDF)
+                        </Button>
                         <Button variant="outline" className="w-full" onClick={() => setIsReviewDialogOpen(true)}>
                             <MessageSquare className="mr-2 h-4 w-4" />
                             Leave a Review
