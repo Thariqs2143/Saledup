@@ -190,13 +190,13 @@ export default function AdminAnalyticsPage() {
         }
 
         return {
-            totalClaimsAndRedemptions: filteredData.claims.length + filteredData.redeemedVouchers.length,
-            totalValueRedeemed: filteredData.redeemedVouchers.reduce((sum, v) => sum + v.value, 0) + filteredData.claims.reduce((sum, c) => sum + (c.approximateValue || 0), 0),
-            totalViews,
-            totalClaims: filteredData.claims.length,
-            imagePerformanceRatio,
-            offerTypeCounts,
-            peakActivityTime,
+            totalClaimsAndRedemptions: (filteredData.claims.length || 0) + (filteredData.redeemedVouchers.length || 0),
+            totalValueRedeemed: (filteredData.redeemedVouchers.reduce((sum, v) => sum + v.value, 0) || 0) + (filteredData.claims.reduce((sum, c) => sum + (c.approximateValue || 0), 0) || 0),
+            totalViews: totalViews || 0,
+            totalClaims: filteredData.claims.length || 0,
+            imagePerformanceRatio: imagePerformanceRatio || 0,
+            offerTypeCounts: offerTypeCounts || {},
+            peakActivityTime: peakActivityTime || 'N/A',
             overallConversionRate: totalViews > 0 ? (filteredData.claims.length / totalViews) * 100 : 0
         };
     }, [offers, claims, filteredData]);
@@ -273,14 +273,14 @@ export default function AdminAnalyticsPage() {
                          <p className="text-xs text-cyan-100 mt-1">Approx value redeemed</p>
                     </CardContent>
                 </Card>
-                <Card className="relative overflow-hidden transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br from-violet-500 to-fuchsia-600 text-white border-none">
+                <Card className="relative overflow-hidden transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br from-green-500 to-emerald-600 text-white border-none">
                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-bold text-violet-100">Total Views</CardTitle>
-                        <Eye className="h-5 w-5 text-violet-200" />
+                        <CardTitle className="text-sm font-bold text-green-100">Total Views</CardTitle>
+                        <Eye className="h-5 w-5 text-green-200" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-4xl font-bold"><AnimatedCounter to={analytics.totalViews} /></div>
-                         <p className="text-xs text-violet-100 mt-1">Offer page views</p>
+                         <p className="text-xs text-green-100 mt-1">Offer page views</p>
                     </CardContent>
                 </Card>
                 <Card className="relative overflow-hidden transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br from-rose-500 to-red-600 text-white border-none">
