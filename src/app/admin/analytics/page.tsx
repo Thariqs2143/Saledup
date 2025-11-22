@@ -129,7 +129,9 @@ export default function AdminAnalyticsPage() {
         let offersWithImageCount = 0;
         let claimsWithoutImage = 0;
         let offersWithoutImageCount = 0;
-        let totalViews = 0;
+        
+        const allFilteredOffers = offers.filter(o => o.createdAt);
+        const totalViews = allFilteredOffers.reduce((sum, offer) => sum + (offer.viewCount || 0), 0);
 
         const offerTypeCounts: { [key: string]: { claims: number, count: number } } = {
             percentage: { claims: 0, count: 0 },
@@ -138,7 +140,7 @@ export default function AdminAnalyticsPage() {
             other: { claims: 0, count: 0 },
         };
         
-        const offerMap = new Map(offers.map(o => [o.id, o]));
+        const offerMap = new Map(allFilteredOffers.map(o => [o.id, o]));
 
         filteredData.claims.forEach(claim => {
             const offer = offerMap.get(claim.offerId);
@@ -155,7 +157,7 @@ export default function AdminAnalyticsPage() {
             }
         });
         
-        filteredData.offers.forEach(offer => {
+        allFilteredOffers.forEach(offer => {
             if (offerTypeCounts[offer.discountType]) {
                 offerTypeCounts[offer.discountType].count++;
             }
@@ -164,7 +166,6 @@ export default function AdminAnalyticsPage() {
             } else {
                 offersWithoutImageCount++;
             }
-            totalViews += offer.viewCount || 0;
         });
 
         const avgClaimsWithImage = offersWithImageCount > 0 ? claimsWithImage / offersWithImageCount : 0;
@@ -192,19 +193,19 @@ export default function AdminAnalyticsPage() {
         }
 
         return {
-            totalClaimsAndRedemptions: (filteredData.claims.length || 0) + (filteredData.redeemedVouchers.length || 0),
-            totalValueRedeemed: (filteredData.redeemedVouchers.reduce((sum, v) => sum + v.value, 0) || 0) + (filteredData.claims.reduce((sum, c) => sum + (c.approximateValue || 0), 0) || 0),
-            totalViews: totalViews || 0,
-            totalClaims: filteredData.claims.length || 0,
-            imagePerformanceRatio: imagePerformanceRatio || 0,
-            offerTypeCounts: offerTypeCounts || {},
-            peakActivityTime: peakActivityTime || 'N/A',
-            overallConversionRate: totalViews > 0 ? (filteredData.claims.length / totalViews) * 100 : 0
+            totalClaimsAndRedemptions: filteredData.claims.length + filteredData.redeemedVouchers.length,
+            totalValueRedeemed: filteredData.redeemedVouchers.reduce((sum, v) => sum + v.value, 0) + filteredData.claims.reduce((sum, c) => sum + (c.approximateValue || 0), 0),
+            totalViews,
+            totalClaims: filteredData.claims.length,
+            imagePerformanceRatio: imagePerformanceRatio,
+            offerTypeCounts: offerTypeCounts,
+            peakActivityTime: peakActivityTime,
+            overallConversionRate: totalViews > 0 ? (claims.length / totalViews) * 100 : 0,
         };
-    }, [offers, claims, filteredData]);
+    }, [offers, claims, vouchers, filteredData]);
     
     // --- CHART DATA PREPARATION ---
-    const offerTypeChartData = useMemo(() => Object.entries(analytics.offerTypeCounts).map(([name, data]) => ({ name: name.charAt(0).toUpperCase() + name.slice(1), value: data.claims })), [analytics.offerTypeCounts]);
+    const offerTypeChartData = useMemo(() => Object.entries(analytics.offerTypeCounts).map(([name, data]) => ({ name: name.charAt(0).toUpperCase() + name.slice(1), value: data.claims })).filter(d => d.value > 0), [analytics.offerTypeCounts]);
     const mostPopularType = useMemo(() => offerTypeChartData.length > 0 ? offerTypeChartData.reduce((p, c) => p.value > c.value ? p : c).name : 'N/A', [offerTypeChartData]);
     const trendChartData = useMemo(() => {
          const days = Array.from({length: 7}, (_, i) => format(subDays(new Date(), 6 - i), 'EEE'));
@@ -261,7 +262,7 @@ export default function AdminAnalyticsPage() {
                         <Users className="h-5 w-5 text-indigo-200" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-4xl font-bold"><AnimatedCounter to={analytics.totalClaimsAndRedemptions || 0} /></div>
+                        <div className="text-4xl font-bold"><AnimatedCounter to={analytics.totalClaimsAndRedemptions} /></div>
                         <p className="text-xs text-indigo-100 mt-1">Total customer engagements</p>
                     </CardContent>
                 </Card>
@@ -271,7 +272,7 @@ export default function AdminAnalyticsPage() {
                         <IndianRupee className="h-5 w-5 text-cyan-200" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-4xl font-bold">₹<AnimatedCounter to={analytics.totalValueRedeemed || 0} /></div>
+                        <div className="text-4xl font-bold">₹<AnimatedCounter to={analytics.totalValueRedeemed} /></div>
                          <p className="text-xs text-cyan-100 mt-1">Approx value redeemed</p>
                     </CardContent>
                 </Card>
@@ -281,7 +282,7 @@ export default function AdminAnalyticsPage() {
                         <Eye className="h-5 w-5 text-green-200" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-4xl font-bold"><AnimatedCounter to={analytics.totalViews || 0} /></div>
+                        <div className="text-4xl font-bold"><AnimatedCounter to={analytics.totalViews} /></div>
                          <p className="text-xs text-green-100 mt-1">Offer page views</p>
                     </CardContent>
                 </Card>
@@ -291,7 +292,7 @@ export default function AdminAnalyticsPage() {
                         <Tag className="h-5 w-5 text-rose-200" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-4xl font-bold"><AnimatedCounter to={analytics.totalClaims || 0} /></div>
+                        <div className="text-4xl font-bold"><AnimatedCounter to={analytics.totalClaims} /></div>
                          <p className="text-xs text-rose-100 mt-1">Offers claimed by customers</p>
                     </CardContent>
                 </Card>
@@ -314,17 +315,45 @@ export default function AdminAnalyticsPage() {
 
                     <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
                         <Card className="lg:col-span-3">
-                            <CardHeader><CardTitle>Claims by Offer Type</CardTitle><CardDescription>Breakdown of claims for each discount type.</CardDescription></CardHeader>
+                            <CardHeader>
+                                <CardTitle>Claims by Offer Type</CardTitle>
+                                <CardDescription>Breakdown of claims for each discount type.</CardDescription>
+                            </CardHeader>
                             <CardContent>
-                                <ResponsiveContainer width="100%" height={300}>
-                                    <PieChart>
-                                        <Pie data={offerTypeChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
-                                            {offerTypeChartData.map((entry, index) => <Cell key={`cell-${index}`} fill={`hsl(var(--chart-${index + 1}))`} />)}
-                                        </Pie>
-                                        <Tooltip />
-                                        <Legend />
-                                    </PieChart>
-                                </ResponsiveContainer>
+                                {offerTypeChartData.length > 0 ? (
+                                    <ResponsiveContainer width="100%" height={300}>
+                                        <PieChart>
+                                            <Pie 
+                                                data={offerTypeChartData} 
+                                                dataKey="value" 
+                                                nameKey="name" 
+                                                cx="50%" 
+                                                cy="50%" 
+                                                outerRadius={100} 
+                                                labelLine={false}
+                                                label={({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }) => {
+                                                    const RADIAN = Math.PI / 180;
+                                                    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+                                                    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                                                    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                                                    return (
+                                                        <text x={x} y={y} fill="white" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central">
+                                                            {`${(percent * 100).toFixed(0)}%`}
+                                                        </text>
+                                                    );
+                                                }}
+                                            >
+                                                {offerTypeChartData.map((entry, index) => <Cell key={`cell-${index}`} fill={`hsl(var(--chart-${index + 1}))`} />)}
+                                            </Pie>
+                                            <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--background))', borderColor: 'hsl(var(--border))' }}/>
+                                            <Legend />
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                ) : (
+                                    <div className="flex items-center justify-center h-[300px] text-muted-foreground">
+                                        No offer claims in this period.
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
                         <Card className="lg:col-span-2">
