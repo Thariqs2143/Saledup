@@ -29,7 +29,6 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
-import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 
 type Offer = {
@@ -289,7 +288,7 @@ export default function AdminEditOfferPage() {
                     </div>
                     
                     <div className="space-y-6 border-t pt-6">
-                        <CardHeader className="p-0">
+                        <CardHeader className="-mx-6 -mt-6 mb-6">
                             <CardTitle>Scheduling (Optional)</CardTitle>
                         </CardHeader>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
