@@ -4,7 +4,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Loader2, Search, Users, Download, Mail, Tag, Calendar, Phone, CheckCircle, XCircle, Trash2, Filter, IndianRupee, Percent, User as UserIcon, Repeat, Star, Award } from "lucide-react";
+import { Loader2, Search, Users, Download, Mail, Tag, Calendar, Phone, CheckCircle, XCircle, Trash2, Filter, IndianRupee, Percent, User as UserIcon, Repeat, Star, Award, Eye } from "lucide-react";
 import { collection, query, onSnapshot, orderBy, type Timestamp, doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
 import { format, formatDistanceToNow, subDays } from 'date-fns';
@@ -353,8 +353,7 @@ export default function AdminCustomersPage() {
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {filteredClaims.map(claim => (
-                            <Link key={claim.id} href={`/admin/customers/${claim.customerPhone}`} className="block">
-                                <Card className="flex flex-col border-2 border-border hover:border-primary transition-all h-full">
+                                <Card key={claim.id} className="flex flex-col border-2 border-border hover:border-primary transition-all">
                                     <CardHeader>
                                         <div className="flex justify-between items-start">
                                             <p className="font-bold text-lg">{claim.customerName}</p>
@@ -371,18 +370,57 @@ export default function AdminCustomersPage() {
                                             <Phone className="h-4 w-4 shrink-0" />
                                             <span>{claim.customerPhone}</span>
                                         </div>
+                                         <div className="flex items-center gap-3">
+                                            <Mail className="h-4 w-4 shrink-0" />
+                                            <span className="truncate">{claim.customerEmail || 'No email'}</span>
+                                        </div>
                                         <div className="flex items-center gap-3">
                                             <Calendar className="h-4 w-4 shrink-0" />
-                                            <span>{formatDistanceToNow(claim.claimedAt.toDate(), { addSuffix: true })}</span>
+                                            <span>Last active: {formatDistanceToNow(claim.claimedAt.toDate(), { addSuffix: true })}</span>
+                                        </div>
+                                        <div className="flex items-center gap-3 font-medium">
+                                            <Users className="h-4 w-4 shrink-0" />
+                                            <span>Total claims: {customerStatsMap.get(claim.customerPhone)?.totalClaims || 0}</span>
                                         </div>
                                     </CardContent>
-                                    <CardFooter className="border-t pt-4">
-                                        <Button variant="outline" size="sm" className="w-full">
-                                            View Full Profile
+                                    <CardFooter className="border-t pt-4 flex-col gap-2">
+                                        <Button 
+                                            size="sm" 
+                                            variant={claim.status === 'claimed' ? 'default' : 'secondary'} 
+                                            onClick={() => handleStatusToggle(claim.id, claim.status)}
+                                            className="w-full"
+                                        >
+                                            {claim.status === 'claimed' ? <CheckCircle className="mr-2 h-4 w-4"/> : <XCircle className="mr-2 h-4 w-4"/> }
+                                            {claim.status === 'claimed' ? 'Mark Redeemed' : 'Mark Claimed'}
                                         </Button>
+                                         <div className="flex w-full gap-2 mt-2">
+                                            <Button variant="outline" size="sm" className="flex-1" asChild>
+                                                <Link href={`/admin/customers/${claim.customerPhone}`}>
+                                                    <Eye className="mr-2 h-4 w-4" />
+                                                    Profile
+                                                </Link>
+                                            </Button>
+                                            <AlertDialog>
+                                                <AlertDialogTrigger asChild>
+                                                    <Button size="sm" variant="destructive" className="flex-1">
+                                                        <Trash2 className="mr-2 h-4 w-4"/>
+                                                        Delete
+                                                    </Button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>Delete this claim?</AlertDialogTitle>
+                                                        <AlertDialogDescription>This will remove the claim for "{claim.offerTitle}". It cannot be undone.</AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                        <AlertDialogAction onClick={() => handleDeleteClaim(claim.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
+                                         </div>
                                     </CardFooter>
                                 </Card>
-                            </Link>
                         ))}
                     </div>
                 )}
@@ -391,3 +429,4 @@ export default function AdminCustomersPage() {
         </div>
     );
 }
+
