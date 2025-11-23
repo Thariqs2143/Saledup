@@ -374,6 +374,7 @@ export default function OfferDetailPage() {
             const reviewsCollectionRef = collection(db, 'shops', shopId!, 'reviews');
             await addDoc(reviewsCollectionRef, {
                 name: customerName, // Use the name from the claim form
+                customerPhone, // Store phone number with review
                 rating: reviewRating,
                 comment: reviewComment,
                 createdAt: serverTimestamp(),

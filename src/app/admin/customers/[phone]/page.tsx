@@ -5,7 +5,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, ArrowLeft, User as UserIcon, Calendar, CheckCircle, IndianRupee, Repeat, Star, Award, Gift, MessageSquare, Phone } from 'lucide-react';
+import { Loader2, ArrowLeft, User as UserIcon, Calendar, CheckCircle, IndianRupee, Repeat, Star, Award, Gift, MessageSquare, Phone, Trash2 } from 'lucide-react';
 import { doc, getDoc, collection, query, where, onSnapshot, orderBy, Timestamp, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
 import { onAuthStateChanged, type User as AuthUser } from 'firebase/auth';
@@ -111,11 +111,10 @@ export default function AdminCustomerDetailPage() {
                     setClaims(claimsList);
                 });
 
-                // Listen for Reviews (query by name, as phone is not stored on reviews)
-                const customerName = (customerSnap.data() as CustomerProfile).name;
+                // Listen for Reviews (query by phone)
                 const reviewsQuery = query(
                     collection(db, 'shops', authUser.uid, 'reviews'),
-                    where('name', '==', customerName),
+                    where('customerPhone', '==', phone),
                     orderBy('createdAt', 'desc')
                 );
                 const unsubscribeReviews = onSnapshot(reviewsQuery, (snapshot) => {
@@ -129,6 +128,7 @@ export default function AdminCustomerDetailPage() {
                 };
 
             } catch (error) {
+                console.error("Error loading customer data:", error);
                 toast({ title: "Error loading customer", variant: "destructive" });
                 router.push('/admin/customers');
             } finally {
