@@ -354,7 +354,7 @@ export default function OfferDetailPage() {
                 discountValue: offer.discountValue
             });
 
-            // Step 2: Create/update the customer record within the shop's subcollection
+            // Step 2: Create/update the customer record, now awarding points.
             const customerDocRef = doc(db, 'shops', shopId, 'customers', customerPhone);
             await setDoc(customerDocRef, {
                 name: customerName,
@@ -362,6 +362,7 @@ export default function OfferDetailPage() {
                 email: customerEmail,
                 lastActivity: serverTimestamp(),
                 totalClaims: increment(1),
+                saledupPoints: increment(10) // Award 10 points for every claim
             }, { merge: true });
 
             // Step 3: Increment the offer's claimCount
@@ -755,3 +756,4 @@ export default function OfferDetailPage() {
         </div>
     );
 }
+
