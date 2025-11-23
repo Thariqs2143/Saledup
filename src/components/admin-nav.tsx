@@ -13,6 +13,7 @@ import {
   BarChart3,
   Gift,
   Gem,
+  Trophy,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { NavItem } from './bottom-nav';
@@ -37,6 +38,7 @@ const iconMap: { [key: string]: any } = {
   BarChart3,
   Gift,
   Gem,
+  Trophy,
 };
 
 type ShopProfile = {
