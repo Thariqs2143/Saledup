@@ -12,6 +12,7 @@ import {
   ScanLine,
   BarChart3,
   Gift,
+  Gem,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { NavItem } from './bottom-nav';
@@ -35,6 +36,7 @@ const iconMap: { [key: string]: any } = {
   ScanLine,
   BarChart3,
   Gift,
+  Gem,
 };
 
 type ShopProfile = {
