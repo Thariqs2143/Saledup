@@ -14,31 +14,62 @@ const messaging = admin.messaging();
 
 /**
  * A Cloud Function that triggers when a new claim is created.
- * It increments the `claimCount` on the corresponding offer document.
+ * It increments the `claimCount` on the corresponding offer document
+ * and creates/updates the customer's global profile and points.
  */
 export const onClaimCreated = functions.firestore
     .document('shops/{shopId}/claims/{claimId}')
     .onCreate(async (snap, context) => {
         const claimData = snap.data();
-        const { offerId } = claimData;
+        const { offerId, customerPhone, customerName, customerEmail } = claimData;
         const { shopId } = context.params;
 
-        if (!offerId || !shopId) {
-            console.error('Missing offerId or shopId in claim document or context.');
+        if (!offerId || !shopId || !customerPhone) {
+            console.error('Missing required data in claim document or context.');
             return null;
         }
+        
+        const operations = [];
 
+        // Operation 1: Increment claimCount on the offer
         const offerDocRef = db.collection('shops').doc(shopId).collection('offers').doc(offerId);
+        operations.push(offerDocRef.update({
+            claimCount: admin.firestore.FieldValue.increment(1)
+        }));
+
+        // Operation 2: Create/Update the global customer profile and award points
+        const customerDocRef = db.collection('customers').doc(customerPhone);
+        const POINTS_PER_CLAIM = 10;
+        
+        const customerUpdatePromise = db.runTransaction(async (transaction) => {
+            const customerDoc = await transaction.get(customerDocRef);
+            if (customerDoc.exists) {
+                transaction.update(customerDocRef, {
+                    saledupPoints: admin.firestore.FieldValue.increment(POINTS_PER_CLAIM),
+                    lastActivity: Timestamp.now(),
+                    name: customerName, // Always update name and email on new claim
+                    email: customerEmail || null,
+                });
+            } else {
+                transaction.set(customerDocRef, {
+                    phone: customerPhone,
+                    name: customerName,
+                    email: customerEmail || null,
+                    saledupPoints: POINTS_PER_CLAIM,
+                    createdAt: Timestamp.now(),
+                    lastActivity: Timestamp.now()
+                });
+            }
+        });
+        operations.push(customerUpdatePromise);
 
         try {
-            // Atomically increment the claimCount field.
-            await offerDocRef.update({
-                claimCount: admin.firestore.FieldValue.increment(1)
-            });
-            console.log(`Successfully incremented claimCount for offer ${offerId} in shop ${shopId}.`);
+            await Promise.all(operations);
+            console.log(`Successfully processed claim ${context.params.claimId} for shop ${shopId}.`);
         } catch (error) {
-            console.error(`Failed to increment claimCount for offer ${offerId}. Error:`, error);
+            console.error(`Failed to process claim ${context.params.claimId}. Error:`, error);
         }
+
         return null;
     });
 

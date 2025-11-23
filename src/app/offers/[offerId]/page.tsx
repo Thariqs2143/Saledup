@@ -125,7 +125,7 @@ export default function OfferDetailPage() {
 
     const [isClaiming, setIsClaiming] = useState(false);
     const [isClaimDialogOpen, setIsClaimDialogOpen] = useState(false);
-    const [claimSuccessData, setClaimSuccessData] = useState<{claimId: string, qrCodeUrl: string, offerTitle: string, newPoints: number, totalPoints: number} | null>(null);
+    const [claimSuccessData, setClaimSuccessData] = useState<{claimId: string, qrCodeUrl: string, offerTitle: string} | null>(null);
     const [isReviewDialogOpen, setIsReviewDialogOpen] = useState(false);
     const [isSubmittingReview, setIsSubmittingReview] = useState(false);
     const [reviewRating, setReviewRating] = useState(0);
@@ -302,7 +302,8 @@ export default function OfferDetailPage() {
 
         setIsClaiming(true);
         try {
-            // Step 1: Create the claim document. The `onClaimCreated` function will handle count increment.
+            // Step 1: Create the claim document.
+            // A Cloud Function (`onClaimCreated`) will handle other tasks.
             const claimsCollectionRef = collection(db, 'shops', shopId, 'claims');
             const claimDocRef = await addDoc(claimsCollectionRef, {
                 customerName,
@@ -317,32 +318,7 @@ export default function OfferDetailPage() {
                 discountValue: offer.discountValue
             });
             
-            // Step 2: Create/Update the global customer profile and award points
-            const customerDocRef = doc(db, 'customers', customerPhone);
-            const POINTS_PER_CLAIM = 10;
-            const customerSnap = await getDoc(customerDocRef);
-            let totalPoints = POINTS_PER_CLAIM;
-
-            if (customerSnap.exists()) {
-                await updateDoc(customerDocRef, { 
-                    saledupPoints: increment(POINTS_PER_CLAIM),
-                    lastActivity: serverTimestamp(),
-                    name: customerName, // Always update name and email on new claim
-                    email: customerEmail,
-                });
-                totalPoints = (customerSnap.data().saledupPoints || 0) + POINTS_PER_CLAIM;
-            } else {
-                await setDoc(customerDocRef, {
-                    phone: customerPhone,
-                    name: customerName,
-                    email: customerEmail,
-                    saledupPoints: POINTS_PER_CLAIM,
-                    createdAt: serverTimestamp(),
-                    lastActivity: serverTimestamp()
-                });
-            }
-            
-            // Step 3: Prepare data for the success dialog
+            // Step 2: Prepare data for the success dialog
             const claimId = claimDocRef.id;
             const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(claimId)}`;
             
@@ -350,8 +326,6 @@ export default function OfferDetailPage() {
                 claimId,
                 qrCodeUrl, 
                 offerTitle: offer.title,
-                newPoints: POINTS_PER_CLAIM,
-                totalPoints: totalPoints
             });
             setIsClaimDialogOpen(false);
 
@@ -664,9 +638,8 @@ export default function OfferDetailPage() {
                         </DialogDescription>
                     </DialogHeader>
                     <div className="py-4 flex flex-col items-center gap-4 text-center">
-                        <div className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 p-3 rounded-lg text-center">
-                            <p className="font-bold">You earned {claimSuccessData?.newPoints} Saledup Points!</p>
-                            <p className="text-sm">Your new balance is <span className="font-bold">{claimSuccessData?.totalPoints}</span> points.</p>
+                         <div className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 p-3 rounded-lg text-center">
+                            <p className="font-bold">A Cloud Function is now creating your customer profile and awarding loyalty points in the background!</p>
                         </div>
                         <p className="text-sm text-muted-foreground">Show this QR code at the counter to redeem your offer.</p>
                         {claimSuccessData?.qrCodeUrl && (
