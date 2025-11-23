@@ -303,7 +303,6 @@ export default function OfferDetailPage() {
         setIsClaiming(true);
         try {
             // Step 1: Create the claim document.
-            // A Cloud Function (`onClaimCreated`) will handle other tasks.
             const claimsCollectionRef = collection(db, 'shops', shopId, 'claims');
             const claimDocRef = await addDoc(claimsCollectionRef, {
                 customerName,
@@ -568,7 +567,9 @@ export default function OfferDetailPage() {
                                     <div className="flex justify-between items-start">
                                         <div>
                                             <p className="font-semibold">{review.name}</p>
-                                            <p className="text-xs text-muted-foreground">{formatDistanceToNow(review.createdAt.toDate(), { addSuffix: true })}</p>
+                                            {review.createdAt && (
+                                                <p className="text-xs text-muted-foreground">{formatDistanceToNow(review.createdAt.toDate(), { addSuffix: true })}</p>
+                                            )}
                                         </div>
                                         <StarRating rating={review.rating} readOnly />
                                     </div>
