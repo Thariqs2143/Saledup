@@ -4,7 +4,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { doc, getDoc, addDoc, collection, serverTimestamp, Timestamp, updateDoc, increment, onSnapshot, orderBy, runTransaction, getDocs, setDoc } from 'firebase/firestore';
+import { doc, getDoc, addDoc, collection, serverTimestamp, Timestamp, updateDoc, increment, onSnapshot, orderBy, runTransaction, getDocs, setDoc, query, where, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
 import { Loader2, ArrowLeft, Building, Tag, Info, Phone, Mail, MapPin, User as UserIcon, CheckCircle, Clock, Calendar, Gem, Eye, Star, MessageSquare, IndianRupee, Download, Globe, MessageCircle as WhatsAppIcon } from 'lucide-react';
@@ -341,9 +341,27 @@ export default function OfferDetailPage() {
         setIsClaiming(true);
     
         try {
+            // Check if this phone number has already claimed this specific offer
+            const claimsRef = collection(db, 'shops', shopId, 'claims');
+            const q = query(claimsRef, 
+                where('customerPhone', '==', customerPhone),
+                where('offerId', '==', offer.id),
+                limit(1)
+            );
+            const existingClaimSnap = await getDocs(q);
+
+            if (!existingClaimSnap.empty) {
+                toast({
+                    title: "Already Claimed",
+                    description: "You have already claimed this offer.",
+                    variant: "destructive"
+                });
+                setIsClaiming(false);
+                return;
+            }
+
             // The frontend's only job is to create the claim document.
-            // The backend Cloud Function `onClaimCreated` will handle updating
-            // the customer profile, awarding points, and incrementing offer counts.
+            // The backend Cloud Function `onClaimCreated` will handle all other logic.
             const newClaimRef = await addDoc(collection(db, 'shops', shopId, 'claims'), {
                 customerName,
                 customerPhone,
