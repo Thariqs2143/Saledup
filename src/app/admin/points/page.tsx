@@ -4,8 +4,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Loader2, Search, Gem, Download, User as UserIcon, Phone, MinusCircle, PlusCircle, History, Mail } from "lucide-react";
-import { collection, query, onSnapshot, orderBy, type Timestamp, doc, updateDoc, writeBatch, collectionGroup, addDoc } from "firebase/firestore";
+import { Loader2, Search, Gem, Download, User as UserIcon, Phone, MinusCircle, PlusCircle, History, Mail, Trash2 } from "lucide-react";
+import { collection, query, onSnapshot, orderBy, type Timestamp, doc, updateDoc, writeBatch, collectionGroup, addDoc, deleteDoc } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
@@ -23,6 +23,17 @@ import {
   DialogTrigger,
   DialogClose,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -98,7 +109,7 @@ export default function AdminPointsPage() {
             unsubscribeCustomers();
             unsubscribeLogs();
         }
-    }, [authUser, toast]);
+    }, [authUser, toast, loading]);
     
     const filteredCustomers = useMemo(() => {
         return customers.filter(customer => 
@@ -143,6 +154,19 @@ export default function AdminPointsPage() {
             toast({title: "Error", description: "Failed to redeem points.", variant: "destructive"});
         } finally {
             setIsRedeeming(false);
+        }
+    };
+    
+    const handleDeleteCustomer = async (customerId: string) => {
+        if (!authUser) return;
+        
+        try {
+            const customerDocRef = doc(db, 'shops', authUser.uid, 'customers', customerId);
+            await deleteDoc(customerDocRef);
+            toast({title: "Customer Deleted", description: "The customer's points card has been removed."});
+        } catch (error) {
+            console.error("Error deleting customer:", error);
+            toast({title: "Error", description: "Could not delete the customer record.", variant: "destructive"});
         }
     };
 
@@ -213,13 +237,34 @@ export default function AdminPointsPage() {
                                                 </div>
                                             )}
                                         </CardContent>
-                                        <CardFooter className="grid grid-cols-2 gap-2">
-                                            <a href={`tel:${customer.phone}`} className="w-full">
-                                                <Button variant="outline" className="w-full"><Phone className="mr-2 h-4 w-4"/> Call</Button>
-                                            </a>
-                                            <DialogTrigger asChild>
-                                                <Button className="w-full" onClick={() => setSelectedCustomer(customer)}>Redeem</Button>
-                                            </DialogTrigger>
+                                        <CardFooter className="flex flex-col gap-2">
+                                             <div className="grid grid-cols-2 gap-2 w-full">
+                                                <DialogTrigger asChild>
+                                                    <Button className="w-full" onClick={() => setSelectedCustomer(customer)}>Redeem</Button>
+                                                </DialogTrigger>
+                                                <a href={`tel:${customer.phone}`} className="w-full">
+                                                    <Button variant="outline" className="w-full"><Phone className="mr-2 h-4 w-4"/> Call</Button>
+                                                </a>
+                                             </div>
+                                            <AlertDialog>
+                                                <AlertDialogTrigger asChild>
+                                                    <Button variant="destructive" className="w-full">
+                                                        <Trash2 className="mr-2 h-4 w-4"/> Delete Card
+                                                    </Button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                                        <AlertDialogDescription>
+                                                            This will permanently delete the points card for {customer.name}. This action cannot be undone.
+                                                        </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                        <AlertDialogAction onClick={() => handleDeleteCustomer(customer.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
                                         </CardFooter>
                                     </Card>
                                 ))}
