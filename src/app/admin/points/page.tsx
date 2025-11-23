@@ -4,7 +4,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Loader2, Search, Gem, Download, User as UserIcon, Phone, MinusCircle, PlusCircle, History } from "lucide-react";
+import { Loader2, Search, Gem, Download, User as UserIcon, Phone, MinusCircle, PlusCircle, History, Mail } from "lucide-react";
 import { collection, query, onSnapshot, orderBy, type Timestamp, doc, updateDoc, writeBatch, collectionGroup, addDoc } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
 import { format } from 'date-fns';
@@ -32,6 +32,7 @@ type Customer = {
     id: string;
     name: string;
     phone: string;
+    email?: string; // Added email field
     saledupPoints: number;
     lastActivity: Timestamp;
 };
@@ -188,22 +189,34 @@ export default function AdminPointsPage() {
                         ) : (
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                                 {filteredCustomers.map(customer => (
-                                    <Card key={customer.id} className="flex flex-col">
-                                        <CardHeader>
-                                            <CardTitle>{customer.name}</CardTitle>
-                                            <CardDescription className="flex items-center gap-2">
-                                                <Phone className="h-3 w-3"/>
-                                                {customer.phone}
-                                            </CardDescription>
+                                    <Card key={customer.id} className="flex flex-col border-border hover:border-primary transition-all shadow-sm hover:shadow-lg">
+                                        <CardHeader className="flex-row items-center gap-4 space-y-0">
+                                            <div className="p-3 bg-primary/10 rounded-full">
+                                                <UserIcon className="h-6 w-6 text-primary"/>
+                                            </div>
+                                            <div>
+                                                <CardTitle className="text-lg">{customer.name}</CardTitle>
+                                                <p className="text-sm text-muted-foreground">{customer.phone}</p>
+                                            </div>
                                         </CardHeader>
-                                        <CardContent className="flex-1 flex flex-col items-center justify-center text-center">
-                                             <Badge variant="secondary" className="text-2xl font-bold p-4">
-                                                <Gem className="mr-2 h-6 w-6 text-amber-500"/>
-                                                {customer.saledupPoints || 0}
-                                            </Badge>
-                                            <p className="text-sm text-muted-foreground mt-2">Points</p>
+                                        <CardContent className="flex-1 space-y-3">
+                                            <div className="flex items-center justify-center text-center p-4 bg-muted rounded-lg">
+                                                <p className="text-4xl font-bold flex items-center gap-2">
+                                                    <Gem className="h-7 w-7 text-amber-500"/>
+                                                    {customer.saledupPoints || 0}
+                                                </p>
+                                            </div>
+                                            {customer.email && (
+                                                <div className="flex items-center gap-2 text-sm text-muted-foreground truncate">
+                                                    <Mail className="h-4 w-4 shrink-0"/>
+                                                    <span className="truncate">{customer.email}</span>
+                                                </div>
+                                            )}
                                         </CardContent>
-                                        <CardFooter>
+                                        <CardFooter className="grid grid-cols-2 gap-2">
+                                            <a href={`tel:${customer.phone}`} className="w-full">
+                                                <Button variant="outline" className="w-full"><Phone className="mr-2 h-4 w-4"/> Call</Button>
+                                            </a>
                                             <DialogTrigger asChild>
                                                 <Button className="w-full" onClick={() => setSelectedCustomer(customer)}>Redeem</Button>
                                             </DialogTrigger>
