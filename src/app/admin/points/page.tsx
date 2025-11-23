@@ -91,10 +91,11 @@ export default function AdminPointsPage() {
         const unsubscribeCustomers = onSnapshot(customersQuery, (snapshot) => {
             const customersList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Customer));
             setCustomers(customersList);
-            if (loading) setLoading(false);
+            setLoading(false);
         }, (error) => {
             console.error("Error fetching customers:", error);
             toast({ title: "Error", description: "Could not fetch customer points data.", variant: "destructive" });
+            setLoading(false);
         });
         
         const logsQuery = query(collection(db, 'shops', authUser.uid, 'points_redemptions'), orderBy('redeemedAt', 'desc'));
@@ -109,7 +110,7 @@ export default function AdminPointsPage() {
             unsubscribeCustomers();
             unsubscribeLogs();
         }
-    }, [authUser, toast, loading]);
+    }, [authUser, toast]);
     
     const filteredCustomers = useMemo(() => {
         return customers.filter(customer => 
