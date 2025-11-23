@@ -42,9 +42,11 @@ service cloud.firestore {
       allow update: if false;
     }
     
-    // allow shop owners and employees to read from the customers collection.
+    // ✅ CORRECTED RULE: Allow a shop owner/employee to read a customer's document
+    // if a claim from that customer exists for their shop.
     match /customers/{phone} {
-        allow get: if isOwnerOrEmployee(request.query.shopId);
+        allow get: if isSignedIn() && 
+                      exists(/databases/$(database)/documents/shops/$(request.auth.uid)/claims?customerPhone=$(phone));
         allow create, update: if true;
         allow delete: if false;
     }
