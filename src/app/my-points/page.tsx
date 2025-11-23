@@ -45,6 +45,7 @@ export default function MyPointsPage() {
                 });
             }
         } catch (error) {
+            console.error(error);
             toast({
                 title: 'Error',
                 description: 'Could not fetch your points balance.',
@@ -113,5 +114,3 @@ export default function MyPointsPage() {
         </div>
     );
 }
-
-    
