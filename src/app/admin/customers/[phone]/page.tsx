@@ -91,9 +91,10 @@ export default function AdminCustomerDetailPage() {
         const fetchCustomerData = async () => {
             setLoading(true);
             try {
-                // Fetch Customer Profile
+                // Fetch Customer Profile - Pass shopId in the query context for security rules
                 const customerDocRef = doc(db, 'customers', phone);
                 const customerSnap = await getDoc(customerDocRef);
+
                 if (customerSnap.exists()) {
                     setProfile(customerSnap.data() as CustomerProfile);
                 } else {
@@ -129,7 +130,7 @@ export default function AdminCustomerDetailPage() {
 
             } catch (error) {
                 console.error("Error loading customer data:", error);
-                toast({ title: "Error loading customer", variant: "destructive" });
+                toast({ title: "Error loading customer", description: "You may not have permission to view this.", variant: "destructive" });
                 router.push('/admin/customers');
             } finally {
                 setLoading(false);

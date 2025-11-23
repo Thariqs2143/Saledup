@@ -42,9 +42,11 @@ service cloud.firestore {
       allow update: if false;
     }
     
+    // allow shop owners and employees to read from the customers collection.
     match /customers/{phone} {
-        allow get: if isSignedIn();
-        allow write: if true;
+        allow get: if isOwnerOrEmployee(request.query.shopId);
+        allow create, update: if true;
+        allow delete: if false;
     }
 
     // ----------------------
