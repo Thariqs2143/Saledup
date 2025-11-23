@@ -147,160 +147,150 @@ export default function AdminPointsPage() {
 
 
     return (
-        <div className="space-y-6">
-             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Points & Rewards</h1>
-                    <p className="text-muted-foreground hidden sm:block">Manage your customer loyalty points and view redemption history.</p>
+        <Dialog>
+            <div className="space-y-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h1 className="text-3xl font-bold tracking-tight">Points & Rewards</h1>
+                        <p className="text-muted-foreground hidden sm:block">Manage your customer loyalty points and view redemption history.</p>
+                    </div>
                 </div>
-            </div>
 
-            <Tabs defaultValue="customers">
-                <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="customers"><UserIcon className="mr-2 h-4 w-4"/> Customer Balances</TabsTrigger>
-                    <TabsTrigger value="log"><History className="mr-2 h-4 w-4"/> Redemption Log</TabsTrigger>
-                </TabsList>
-                <Dialog>
+                <Tabs defaultValue="customers">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <TabsList className="grid w-full sm:w-auto grid-cols-2">
+                            <TabsTrigger value="customers"><UserIcon className="mr-2 h-4 w-4"/> Customer Balances</TabsTrigger>
+                            <TabsTrigger value="log"><History className="mr-2 h-4 w-4"/> Redemption Log</TabsTrigger>
+                        </TabsList>
+                        <div className="relative w-full sm:max-w-xs">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                type="search"
+                                placeholder="Search by name or phone..."
+                                className="w-full rounded-lg bg-background pl-10"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+                    </div>
+                    
                     <TabsContent value="customers" className="mt-6">
+                        {loading ? (
+                            <div className="flex items-center justify-center h-64">
+                                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                            </div>
+                        ) : filteredCustomers.length === 0 ? (
+                            <Card className="text-center py-20 text-muted-foreground">
+                                <Gem className="h-16 w-16 mx-auto mb-4 opacity-50"/>
+                                <h3 className="text-xl font-semibold">No Customers with Points</h3>
+                                <p>When customers claim offers, their points will appear here.</p>
+                            </Card>
+                        ) : (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                {filteredCustomers.map(customer => (
+                                    <Card key={customer.id} className="flex flex-col">
+                                        <CardHeader>
+                                            <CardTitle>{customer.name}</CardTitle>
+                                            <CardDescription className="flex items-center gap-2">
+                                                <Phone className="h-3 w-3"/>
+                                                {customer.phone}
+                                            </CardDescription>
+                                        </CardHeader>
+                                        <CardContent className="flex-1 flex flex-col items-center justify-center text-center">
+                                             <Badge variant="secondary" className="text-2xl font-bold p-4">
+                                                <Gem className="mr-2 h-6 w-6 text-amber-500"/>
+                                                {customer.saledupPoints || 0}
+                                            </Badge>
+                                            <p className="text-sm text-muted-foreground mt-2">Points</p>
+                                        </CardContent>
+                                        <CardFooter>
+                                            <DialogTrigger asChild>
+                                                <Button className="w-full" onClick={() => setSelectedCustomer(customer)}>Redeem</Button>
+                                            </DialogTrigger>
+                                        </CardFooter>
+                                    </Card>
+                                ))}
+                            </div>
+                        )}
+                    </TabsContent>
+                    
+                    <TabsContent value="log" className="mt-6">
                         <Card>
                             <CardHeader>
-                                <CardTitle>Customer Points</CardTitle>
-                                <div className="relative pt-4 sm:max-w-xs">
-                                    <Search className="absolute left-2.5 top-6 h-4 w-4 text-muted-foreground" />
-                                    <Input
-                                        type="search"
-                                        placeholder="Search by name or phone..."
-                                        className="w-full rounded-lg bg-background pl-8"
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                    />
-                                </div>
+                                <CardTitle>Redemption History</CardTitle>
+                                <CardDescription>A log of all points redeemed at your shop.</CardDescription>
                             </CardHeader>
                             <CardContent>
-                            {loading ? (
-                                <div className="flex items-center justify-center h-64">
-                                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                                </div>
-                            ) : filteredCustomers.length === 0 ? (
-                                <div className="text-center py-20 text-muted-foreground">
-                                    <Gem className="h-16 w-16 mx-auto mb-4 opacity-50"/>
-                                    <h3 className="text-xl font-semibold">No Customers with Points</h3>
-                                    <p>When customers claim offers, their points will appear here.</p>
-                                </div>
-                            ) : (
-                                <div className="rounded-lg border">
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead>Customer</TableHead>
-                                                <TableHead className="text-center">Points</TableHead>
-                                                <TableHead className="text-right">Actions</TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {filteredCustomers.map(customer => (
-                                            <TableRow key={customer.id}>
-                                                <TableCell>
-                                                    <div className="font-medium">{customer.name}</div>
-                                                    <div className="text-sm text-muted-foreground">{customer.phone}</div>
-                                                </TableCell>
-                                                <TableCell className="text-center">
-                                                    <Badge variant="secondary" className="text-base font-bold">
-                                                        <Gem className="mr-2 h-4 w-4 text-amber-500"/>
-                                                        {customer.saledupPoints || 0}
-                                                    </Badge>
-                                                </TableCell>
-                                                <TableCell className="text-right">
-                                                   <DialogTrigger asChild>
-                                                        <Button size="sm" onClick={() => setSelectedCustomer(customer)}>Redeem</Button>
-                                                   </DialogTrigger>
-                                                </TableCell>
-                                            </TableRow>
-                                            ))}
-                                        </TableBody>
-                                    </Table>
-                                </div>
-                            )}
+                                {loading ? (
+                                    <div className="flex items-center justify-center h-64">
+                                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                                    </div>
+                                ) : redemptionLogs.length === 0 ? (
+                                    <div className="text-center py-20 text-muted-foreground">
+                                        <History className="h-16 w-16 mx-auto mb-4 opacity-50"/>
+                                        <h3 className="text-xl font-semibold">No Redemptions Yet</h3>
+                                        <p>When points are redeemed, the transactions will appear here.</p>
+                                    </div>
+                                ) : (
+                                    <div className="rounded-lg border">
+                                        <Table>
+                                            <TableHeader>
+                                                <TableRow>
+                                                    <TableHead>Customer</TableHead>
+                                                    <TableHead>Points Redeemed</TableHead>
+                                                    <TableHead>Date</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {redemptionLogs.map(log => (
+                                                    <TableRow key={log.id}>
+                                                        <TableCell>{log.customerName}</TableCell>
+                                                        <TableCell>
+                                                            <Badge variant="destructive">-{log.pointsRedeemed}</Badge>
+                                                        </TableCell>
+                                                        <TableCell>{format(log.redeemedAt.toDate(), 'PPpp')}</TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
                     </TabsContent>
-                    
-                    <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle>Redeem Points for {selectedCustomer?.name}</DialogTitle>
-                            <DialogDescription>
-                                Current Balance: <span className="font-bold text-primary">{selectedCustomer?.saledupPoints || 0}</span> points.
-                            </DialogDescription>
-                        </DialogHeader>
-                        <div className="py-4 space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="points-to-redeem">Points to Redeem</Label>
-                                <Input 
-                                    id="points-to-redeem" 
-                                    type="number" 
-                                    value={pointsToRedeem}
-                                    onChange={(e) => setPointsToRedeem(Number(e.target.value))}
-                                    max={selectedCustomer?.saledupPoints}
-                                    min={1}
-                                />
-                            </div>
+                </Tabs>
+                
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Redeem Points for {selectedCustomer?.name}</DialogTitle>
+                        <DialogDescription>
+                            Current Balance: <span className="font-bold text-primary">{selectedCustomer?.saledupPoints || 0}</span> points.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="py-4 space-y-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="points-to-redeem">Points to Redeem</Label>
+                            <Input 
+                                id="points-to-redeem" 
+                                type="number" 
+                                value={pointsToRedeem}
+                                onChange={(e) => setPointsToRedeem(Number(e.target.value))}
+                                max={selectedCustomer?.saledupPoints}
+                                min={1}
+                            />
                         </div>
-                        <DialogFooter>
-                             <DialogClose asChild>
-                                <Button variant="outline">Cancel</Button>
-                             </DialogClose>
-                            <Button onClick={handleRedeem} disabled={isRedeeming}>
-                                {isRedeeming && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
-                                Confirm Redemption
-                            </Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
-
-                <TabsContent value="log" className="mt-6">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Redemption History</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                             {loading ? (
-                                <div className="flex items-center justify-center h-64">
-                                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                                </div>
-                             ) : redemptionLogs.length === 0 ? (
-                                 <div className="text-center py-20 text-muted-foreground">
-                                    <History className="h-16 w-16 mx-auto mb-4 opacity-50"/>
-                                    <h3 className="text-xl font-semibold">No Redemptions Yet</h3>
-                                    <p>When points are redeemed, the transactions will appear here.</p>
-                                </div>
-                             ) : (
-                                <div className="rounded-lg border">
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead>Customer</TableHead>
-                                                <TableHead>Points</TableHead>
-                                                <TableHead>Date</TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {redemptionLogs.map(log => (
-                                                <TableRow key={log.id}>
-                                                    <TableCell>{log.customerName}</TableCell>
-                                                    <TableCell>
-                                                        <Badge variant="destructive">-{log.pointsRedeemed}</Badge>
-                                                    </TableCell>
-                                                    <TableCell>{format(log.redeemedAt.toDate(), 'PPpp')}</TableCell>
-                                                </TableRow>
-                                            ))}
-                                        </TableBody>
-                                    </Table>
-                                </div>
-                             )}
-                        </CardContent>
-                    </Card>
-                 </TabsContent>
-            </Tabs>
-        </div>
+                    </div>
+                    <DialogFooter>
+                            <DialogClose asChild>
+                            <Button variant="outline">Cancel</Button>
+                            </DialogClose>
+                        <Button onClick={handleRedeem} disabled={isRedeeming}>
+                            {isRedeeming && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
+                            Confirm Redemption
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </div>
+        </Dialog>
     );
 }
