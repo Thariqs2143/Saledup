@@ -30,8 +30,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
-import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 
@@ -56,13 +54,12 @@ type Claim = {
     discountValue?: string;
 };
 
-type CustomerData = {
-    phone: string;
-    name: string;
-    lastClaim: Claim;
+// This type will hold aggregated data about each customer
+type CustomerStats = {
     totalClaims: number;
     totalSpend: number;
     isCouponHunter: boolean;
+    lastClaimDate: Date;
 };
 
 const HIGH_SPENDER_THRESHOLD = 2000; // Total spend > 2000 INR
@@ -90,8 +87,6 @@ export default function AdminCustomersPage() {
     const router = useRouter();
     const { toast } = useToast();
     const [broadcastMessage, setBroadcastMessage] = useState('');
-    
-    const scrollRef = useRef<HTMLDivElement | null>(null);
 
      useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -114,7 +109,7 @@ export default function AdminCustomersPage() {
             setAllClaims(claimsList);
             setLoading(false);
         }, (error) => {
-            console.error("Error fetching customers:", error);
+            console.error("Error fetching claims:", error);
             toast({ title: "Error", description: "Could not fetch customer data.", variant: "destructive" });
             setLoading(false);
         });
@@ -122,7 +117,8 @@ export default function AdminCustomersPage() {
         return () => unsubscribe();
     }, [authUser, toast]);
     
-    const uniqueCustomers = useMemo(() => {
+    // Memoize the calculation of stats for each customer
+    const customerStatsMap = useMemo(() => {
         const customerMap = new Map<string, { claims: Claim[], totalSpend: number }>();
         allClaims.forEach(claim => {
             const existing = customerMap.get(claim.customerPhone);
@@ -139,12 +135,10 @@ export default function AdminCustomersPage() {
             }
         });
 
-        const processedCustomers: CustomerData[] = [];
+        const statsMap = new Map<string, CustomerStats>();
         customerMap.forEach((data, phone) => {
             const sortedClaims = data.claims.sort((a, b) => b.claimedAt.toMillis() - a.claimedAt.toMillis());
-            const lastClaim = sortedClaims[0];
-
-            // Coupon Hunter Logic
+            
             let highDiscountClaims = 0;
             sortedClaims.forEach(c => {
                  if(c.discountType === 'percentage' && parseFloat(c.discountValue || '0') >= COUPON_HUNTER_DISCOUNT_PERCENTAGE) {
@@ -153,66 +147,67 @@ export default function AdminCustomersPage() {
             });
             const isCouponHunter = sortedClaims.length > 2 && (highDiscountClaims / sortedClaims.length) >= COUPON_HUNTER_RATIO;
             
-            processedCustomers.push({
-                phone,
-                name: lastClaim.customerName,
-                lastClaim: lastClaim,
+            statsMap.set(phone, {
                 totalClaims: sortedClaims.length,
                 totalSpend: data.totalSpend,
                 isCouponHunter: isCouponHunter,
+                lastClaimDate: sortedClaims[0].claimedAt.toDate(),
             });
         });
 
-        return processedCustomers;
+        return statsMap;
     }, [allClaims]);
 
-    const filteredCustomers = useMemo(() => {
-        return uniqueCustomers.filter(customer => {
-            const searchMatch = customer.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                customer.lastClaim.customerEmail?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                customer.phone?.toLowerCase().includes(searchTerm.toLowerCase());
+    const filteredClaims = useMemo(() => {
+        return allClaims.filter(claim => {
+            const searchMatch = claim.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                claim.offerTitle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                claim.customerPhone?.toLowerCase().includes(searchTerm.toLowerCase());
 
-            const statusMatch = statusFilter === 'all' || customer.lastClaim.status === statusFilter;
+            const statusMatch = statusFilter === 'all' || claim.status === statusFilter;
             
+            // Get the stats for the customer who made this claim
+            const customerStats = customerStatsMap.get(claim.customerPhone);
+            if (!customerStats) return false; // Should not happen if map is built correctly
+
             const thirtyDaysAgo = subDays(new Date(), 30);
             const sevenDaysAgo = subDays(new Date(), 7);
 
             const segmentMatch = segmentFilter === 'all' ||
-                (segmentFilter === 'new' && customer.totalClaims === 1) ||
-                (segmentFilter === 'repeat' && customer.totalClaims > 1) ||
-                (segmentFilter === 'loyal' && customer.totalClaims >= 5) ||
-                (segmentFilter === 'high-spenders' && customer.totalSpend > HIGH_SPENDER_THRESHOLD) ||
-                (segmentFilter === 'coupon-hunters' && customer.isCouponHunter) ||
-                (segmentFilter === 'recent-7d' && customer.lastClaim.claimedAt.toDate() >= sevenDaysAgo) ||
-                (segmentFilter === 'inactive-30d' && customer.lastClaim.claimedAt.toDate() < thirtyDaysAgo);
+                (segmentFilter === 'new' && customerStats.totalClaims === 1) ||
+                (segmentFilter === 'repeat' && customerStats.totalClaims > 1) ||
+                (segmentFilter === 'loyal' && customerStats.totalClaims >= 5) ||
+                (segmentFilter === 'high-spenders' && customerStats.totalSpend > HIGH_SPENDER_THRESHOLD) ||
+                (segmentFilter === 'coupon-hunters' && customerStats.isCouponHunter) ||
+                (segmentFilter === 'recent-7d' && customerStats.lastClaimDate >= sevenDaysAgo) ||
+                (segmentFilter === 'inactive-30d' && customerStats.lastClaimDate < thirtyDaysAgo);
 
             return searchMatch && statusMatch && segmentMatch;
         });
-    }, [uniqueCustomers, searchTerm, statusFilter, segmentFilter]);
+    }, [allClaims, customerStatsMap, searchTerm, statusFilter, segmentFilter]);
 
 
     const handleExportPDF = () => {
-        if (filteredCustomers.length === 0) {
-            toast({ title: "No Data", description: "There are no customers to export.", variant: "destructive"});
+        if (filteredClaims.length === 0) {
+            toast({ title: "No Data", description: "There are no claims to export.", variant: "destructive"});
             return;
         }
 
         const doc = new jsPDF();
-        doc.text("Customer Report", 14, 15);
+        doc.text("Claims Report", 14, 15);
         doc.autoTable({
             startY: 20,
-            head: [['Customer Name', 'Phone', 'Last Offer Claimed', 'Last Active', 'Total Claims', 'Total Spend (₹)']],
-            body: filteredCustomers.map(c => [
-                c.lastClaim.customerName,
-                c.lastClaim.customerPhone,
-                c.lastClaim.offerTitle,
-                format(c.lastClaim.claimedAt.toDate(), 'PP'),
-                c.totalClaims,
-                c.totalSpend.toFixed(2),
+            head: [['Customer Name', 'Phone', 'Offer Claimed', 'Claimed At', 'Status']],
+            body: filteredClaims.map(c => [
+                c.customerName,
+                c.customerPhone,
+                c.offerTitle,
+                format(c.claimedAt.toDate(), 'PPpp'),
+                c.status,
             ]),
         });
-        doc.save(`customer_report.pdf`);
-        toast({ title: "Export Successful", description: "Customer data has been downloaded as a PDF." });
+        doc.save(`claims_report.pdf`);
+        toast({ title: "Export Successful", description: "Claims data has been downloaded as a PDF." });
     };
 
     const handleStatusToggle = async (claimId: string, currentStatus: 'claimed' | 'redeemed') => {
@@ -256,8 +251,8 @@ export default function AdminCustomersPage() {
         <div className="space-y-6">
              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Customers</h1>
-                    <p className="text-muted-foreground hidden sm:block">View, segment, and engage with your customer base.</p>
+                    <h1 className="text-3xl font-bold tracking-tight">Customer Claims</h1>
+                    <p className="text-muted-foreground hidden sm:block">A real-time log of all offers claimed by your customers.</p>
                 </div>
             </div>
 
@@ -268,7 +263,7 @@ export default function AdminCustomersPage() {
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                             <Input
                                 type="search"
-                                placeholder={`Search customers...`}
+                                placeholder={`Search by customer, offer, or phone...`}
                                 className="w-full rounded-lg bg-background pl-10"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -348,63 +343,42 @@ export default function AdminCustomersPage() {
                     <div className="flex items-center justify-center h-64">
                         <Loader2 className="h-8 w-8 animate-spin text-primary" />
                     </div>
-                ) : filteredCustomers.length === 0 ? (
+                ) : filteredClaims.length === 0 ? (
                     <div className="text-center py-20 text-muted-foreground rounded-lg border bg-muted/20">
                         <Users className="h-16 w-16 mx-auto mb-4 opacity-50"/>
-                        <h3 className="text-xl font-semibold">No Customers Found</h3>
-                        <p>When customers claim offers, they will appear here. Try adjusting your filters.</p>
+                        <h3 className="text-xl font-semibold">No Claims Found</h3>
+                        <p>When customers claim offers, the claims will appear here. Try adjusting your filters.</p>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {filteredCustomers.map(customer => {
-                            const isNew = customer.totalClaims === 1;
-                            const isHighSpender = customer.totalSpend > HIGH_SPENDER_THRESHOLD;
+                        {filteredClaims.map(claim => {
                             return (
-                            <Card key={customer.phone} className="flex flex-col border-2 border-border hover:border-primary transition-all">
+                            <Card key={claim.id} className="flex flex-col border-2 border-border hover:border-primary transition-all">
                                 <CardHeader>
                                     <div className="flex justify-between items-start">
-                                        <p className="font-bold text-lg">{customer.name}</p>
-                                        <div className="flex gap-1.5">
-                                            <Badge variant={isNew ? 'outline' : 'default'} className="whitespace-nowrap">
-                                                {isNew ? 'New' : 'Repeat'}
-                                            </Badge>
-                                            {customer.isCouponHunter && (
-                                                <Badge variant="secondary" className="whitespace-nowrap">
-                                                    <Tag className="mr-1 h-3 w-3"/> Hunter
-                                                </Badge>
-                                            )}
-                                        </div>
+                                        <p className="font-bold text-lg">{claim.customerName}</p>
+                                         <Badge variant={claim.status === 'claimed' ? 'default' : 'secondary'} className="whitespace-nowrap">
+                                            {claim.status}
+                                        </Badge>
                                     </div>
                                     <CardDescription className="text-sm">
-                                        Last claimed "{customer.lastClaim.offerTitle}"
+                                        Claimed "{claim.offerTitle}"
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-3 text-sm text-muted-foreground flex-1">
                                     <div className="flex items-center gap-3">
                                         <Phone className="h-4 w-4 shrink-0" />
-                                        <span>{customer.phone}</span>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <Mail className="h-4 w-4 shrink-0" />
-                                        <span className="truncate">{customer.lastClaim.customerEmail || 'No email'}</span>
+                                        <span>{claim.customerPhone}</span>
                                     </div>
                                     <div className="flex items-center gap-3">
                                         <Calendar className="h-4 w-4 shrink-0" />
-                                        <span>Last active: {formatDistanceToNow(customer.lastClaim.claimedAt.toDate(), { addSuffix: true })}</span>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <Users className="h-4 w-4 shrink-0" />
-                                        <span>Total claims: {customer.totalClaims}</span>
-                                    </div>
-                                    <div className="flex items-center gap-3 font-medium">
-                                        <IndianRupee className="h-4 w-4 shrink-0" />
-                                        <span className={isHighSpender ? 'text-primary' : ''}>Total spend: ₹{customer.totalSpend.toFixed(2)}</span>
+                                        <span>{formatDistanceToNow(claim.claimedAt.toDate(), { addSuffix: true })}</span>
                                     </div>
                                 </CardContent>
                                 <CardFooter className="border-t pt-4 flex justify-end gap-2">
-                                    <Button size="sm" variant={customer.lastClaim.status === 'claimed' ? 'default' : 'secondary'} onClick={() => handleStatusToggle(customer.lastClaim.id, customer.lastClaim.status)}>
-                                        {customer.lastClaim.status === 'claimed' ? <CheckCircle className="mr-2 h-4 w-4"/> : <XCircle className="mr-2 h-4 w-4"/> }
-                                        {customer.lastClaim.status === 'claimed' ? 'Mark Redeemed' : 'Mark Claimed'}
+                                    <Button size="sm" variant={claim.status === 'claimed' ? 'default' : 'secondary'} onClick={() => handleStatusToggle(claim.id, claim.status)}>
+                                        {claim.status === 'claimed' ? <CheckCircle className="mr-2 h-4 w-4"/> : <XCircle className="mr-2 h-4 w-4"/> }
+                                        {claim.status === 'claimed' ? 'Mark Redeemed' : 'Mark Claimed'}
                                     </Button>
                                     <AlertDialog>
                                         <AlertDialogTrigger asChild>
@@ -416,12 +390,12 @@ export default function AdminCustomersPage() {
                                             <AlertDialogHeader>
                                                 <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                                                 <AlertDialogDescription>
-                                                    This will permanently delete the latest claim for {customer.name}. This cannot be undone. To delete all data for this customer, contact support.
+                                                    This will permanently delete this claim for {claim.customerName}. This action cannot be undone.
                                                 </AlertDialogDescription>
                                             </AlertDialogHeader>
                                             <AlertDialogFooter>
                                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                <AlertDialogAction onClick={() => handleDeleteClaim(customer.lastClaim.id)} className="bg-destructive hover:bg-destructive/90">Delete Claim</AlertDialogAction>
+                                                <AlertDialogAction onClick={() => handleDeleteClaim(claim.id)} className="bg-destructive hover:bg-destructive/90">Delete Claim</AlertDialogAction>
                                             </AlertDialogFooter>
                                         </AlertDialogContent>
                                     </AlertDialog>
