@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Loader2, Search, Users, Download, Mail, Tag, Calendar, Phone, CheckCircle, XCircle, Trash2, Filter, IndianRupee, Percent, User as UserIcon, Repeat, Star, Award } from "lucide-react";
@@ -15,6 +15,7 @@ import { useRouter } from 'next/navigation';
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { Badge } from '@/components/ui/badge';
+import Link from 'next/link';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -351,57 +352,38 @@ export default function AdminCustomersPage() {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {filteredClaims.map(claim => {
-                            return (
-                            <Card key={claim.id} className="flex flex-col border-2 border-border hover:border-primary transition-all">
-                                <CardHeader>
-                                    <div className="flex justify-between items-start">
-                                        <p className="font-bold text-lg">{claim.customerName}</p>
-                                         <Badge variant={claim.status === 'claimed' ? 'default' : 'secondary'} className="whitespace-nowrap">
-                                            {claim.status}
-                                        </Badge>
-                                    </div>
-                                    <CardDescription className="text-sm">
-                                        Claimed "{claim.offerTitle}"
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-3 text-sm text-muted-foreground flex-1">
-                                    <div className="flex items-center gap-3">
-                                        <Phone className="h-4 w-4 shrink-0" />
-                                        <span>{claim.customerPhone}</span>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <Calendar className="h-4 w-4 shrink-0" />
-                                        <span>{formatDistanceToNow(claim.claimedAt.toDate(), { addSuffix: true })}</span>
-                                    </div>
-                                </CardContent>
-                                <CardFooter className="border-t pt-4 flex justify-end gap-2">
-                                    <Button size="sm" variant={claim.status === 'claimed' ? 'default' : 'secondary'} onClick={() => handleStatusToggle(claim.id, claim.status)}>
-                                        {claim.status === 'claimed' ? <CheckCircle className="mr-2 h-4 w-4"/> : <XCircle className="mr-2 h-4 w-4"/> }
-                                        {claim.status === 'claimed' ? 'Mark Redeemed' : 'Mark Claimed'}
-                                    </Button>
-                                    <AlertDialog>
-                                        <AlertDialogTrigger asChild>
-                                            <Button size="sm" variant="destructive" className="h-9 w-9 p-0">
-                                                <Trash2 className="h-4 w-4"/>
-                                            </Button>
-                                        </AlertDialogTrigger>
-                                        <AlertDialogContent>
-                                            <AlertDialogHeader>
-                                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                                <AlertDialogDescription>
-                                                    This will permanently delete this claim for {claim.customerName}. This action cannot be undone.
-                                                </AlertDialogDescription>
-                                            </AlertDialogHeader>
-                                            <AlertDialogFooter>
-                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                <AlertDialogAction onClick={() => handleDeleteClaim(claim.id)} className="bg-destructive hover:bg-destructive/90">Delete Claim</AlertDialogAction>
-                                            </AlertDialogFooter>
-                                        </AlertDialogContent>
-                                    </AlertDialog>
-                                </CardFooter>
-                            </Card>
-                        )})}
+                        {filteredClaims.map(claim => (
+                            <Link key={claim.id} href={`/admin/customers/${claim.customerPhone}`} className="block">
+                                <Card className="flex flex-col border-2 border-border hover:border-primary transition-all h-full">
+                                    <CardHeader>
+                                        <div className="flex justify-between items-start">
+                                            <p className="font-bold text-lg">{claim.customerName}</p>
+                                            <Badge variant={claim.status === 'claimed' ? 'default' : 'secondary'} className="whitespace-nowrap">
+                                                {claim.status}
+                                            </Badge>
+                                        </div>
+                                        <CardDescription className="text-sm">
+                                            Claimed "{claim.offerTitle}"
+                                        </CardDescription>
+                                    </CardHeader>
+                                    <CardContent className="space-y-3 text-sm text-muted-foreground flex-1">
+                                        <div className="flex items-center gap-3">
+                                            <Phone className="h-4 w-4 shrink-0" />
+                                            <span>{claim.customerPhone}</span>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <Calendar className="h-4 w-4 shrink-0" />
+                                            <span>{formatDistanceToNow(claim.claimedAt.toDate(), { addSuffix: true })}</span>
+                                        </div>
+                                    </CardContent>
+                                    <CardFooter className="border-t pt-4">
+                                        <Button variant="outline" size="sm" className="w-full">
+                                            View Full Profile
+                                        </Button>
+                                    </CardFooter>
+                                </Card>
+                            </Link>
+                        ))}
                     </div>
                 )}
                 </div>
