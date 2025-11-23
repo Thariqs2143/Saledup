@@ -393,32 +393,24 @@ export default function AdminCustomersPage() {
                                             {claim.status === 'claimed' ? <CheckCircle className="mr-2 h-4 w-4"/> : <XCircle className="mr-2 h-4 w-4"/> }
                                             {claim.status === 'claimed' ? 'Mark Redeemed' : 'Mark Claimed'}
                                         </Button>
-                                         <div className="flex w-full gap-2 mt-2">
-                                            <Button variant="outline" size="sm" className="flex-1" asChild>
-                                                <Link href={`/admin/customers/${claim.customerPhone}`}>
-                                                    <Eye className="mr-2 h-4 w-4" />
-                                                    Profile
-                                                </Link>
-                                            </Button>
-                                            <AlertDialog>
-                                                <AlertDialogTrigger asChild>
-                                                    <Button size="sm" variant="destructive" className="flex-1">
-                                                        <Trash2 className="mr-2 h-4 w-4"/>
-                                                        Delete
-                                                    </Button>
-                                                </AlertDialogTrigger>
-                                                <AlertDialogContent>
-                                                    <AlertDialogHeader>
-                                                        <AlertDialogTitle>Delete this claim?</AlertDialogTitle>
-                                                        <AlertDialogDescription>This will remove the claim for "{claim.offerTitle}". It cannot be undone.</AlertDialogDescription>
-                                                    </AlertDialogHeader>
-                                                    <AlertDialogFooter>
-                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                        <AlertDialogAction onClick={() => handleDeleteClaim(claim.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
-                                                    </AlertDialogFooter>
-                                                </AlertDialogContent>
-                                            </AlertDialog>
-                                         </div>
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <Button size="sm" variant="destructive" className="w-full">
+                                                    <Trash2 className="mr-2 h-4 w-4"/>
+                                                    Delete
+                                                </Button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>Delete this claim?</AlertDialogTitle>
+                                                    <AlertDialogDescription>This will remove the claim for "{claim.offerTitle}". It cannot be undone.</AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                    <AlertDialogAction onClick={() => handleDeleteClaim(claim.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
                                     </CardFooter>
                                 </Card>
                         ))}
