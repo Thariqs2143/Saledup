@@ -91,7 +91,7 @@ export default function AdminCustomerDetailPage() {
         const fetchCustomerData = async () => {
             setLoading(true);
             try {
-                // Fetch Customer Profile - Pass shopId in the query context for security rules
+                // Fetch Customer Profile
                 const customerDocRef = doc(db, 'customers', phone);
                 const customerSnap = await getDoc(customerDocRef);
 

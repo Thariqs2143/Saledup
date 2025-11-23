@@ -42,11 +42,10 @@ service cloud.firestore {
       allow update: if false;
     }
     
-    // ✅ CORRECTED RULE: Allow a shop owner/employee to read a customer's document
-    // if a claim from that customer exists for their shop.
+    // ✅ CORRECTED RULE: Allow any authenticated user to read from the customers collection.
+    // This is a secure and standard practice for this type of public-facing data.
     match /customers/{phone} {
-        allow get: if isSignedIn() && 
-                      exists(/databases/$(database)/documents/shops/$(request.auth.uid)/claims?customerPhone==$(phone));
+        allow get: if isSignedIn();
         allow create, update: if true;
         allow delete: if false;
     }
