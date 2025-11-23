@@ -87,7 +87,12 @@ service cloud.firestore {
       // Customers Subcollection (for shop-specific customer data)
       match /customers/{customerId} {
         // Staff can manage and view customer data for their own shop.
-        allow create, update, read, list: if isOwnerOrEmployee(shopId);
+        allow read, list: if isOwnerOrEmployee(shopId);
+        // Allow staff to create a customer record if it doesn't exist
+        allow create: if isOwnerOrEmployee(shopId);
+        // Allow staff to update points, but not other fields directly
+        allow update: if isOwnerOrEmployee(shopId) && 
+                       request.resource.data.diff(resource.data).affectedKeys().hasOnly(['saledupPoints']);
         // Only the owner can delete customer history.
         allow delete: if isShopOwner(shopId);
       }

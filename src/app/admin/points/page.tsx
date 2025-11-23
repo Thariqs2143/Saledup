@@ -4,8 +4,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Loader2, Search, Gem, Download, User as UserIcon, Phone, MinusCircle, PlusCircle, History, Mail, Trash2 } from "lucide-react";
-import { collection, query, onSnapshot, orderBy, type Timestamp, doc, updateDoc, writeBatch, collectionGroup, addDoc, deleteDoc } from "firebase/firestore";
+import { Loader2, Search, Gem, Download, User as UserIcon, Phone, MinusCircle, PlusCircle, History, Mail, Trash2, Edit } from "lucide-react";
+import { collection, query, onSnapshot, orderBy, type Timestamp, doc, updateDoc, writeBatch, collectionGroup, addDoc, deleteDoc, increment } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
@@ -37,13 +37,14 @@ import {
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Textarea } from '@/components/ui/textarea';
 
 
 type Customer = {
     id: string;
     name: string;
     phone: string;
-    email?: string; // Added email field
+    email?: string;
     saledupPoints: number;
     lastActivity: Timestamp;
 };
@@ -53,8 +54,10 @@ type RedemptionLog = {
     customerName: string;
     customerPhone: string;
     pointsRedeemed: number;
+    pointsAdjusted?: number;
+    reason?: string;
     redeemedAt: Timestamp;
-    redeemedBy: string; // Staff member UID
+    redeemedBy: string; 
 };
 
 export default function AdminPointsPage() {
@@ -66,10 +69,14 @@ export default function AdminPointsPage() {
     const router = useRouter();
     const { toast } = useToast();
     
-    // Redeem dialog state
+    // Dialog state
     const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
     const [pointsToRedeem, setPointsToRedeem] = useState<number>(0);
     const [isRedeeming, setIsRedeeming] = useState(false);
+    
+    const [pointsToAdjust, setPointsToAdjust] = useState<number>(0);
+    const [adjustmentReason, setAdjustmentReason] = useState('');
+    const [isAdjusting, setIsAdjusting] = useState(false);
 
 
     useEffect(() => {
@@ -129,12 +136,9 @@ export default function AdminPointsPage() {
         setIsRedeeming(true);
         try {
             const batch = writeBatch(db);
-
-            // 1. Update the customer's points balance in the shop's subcollection
             const shopCustomerRef = doc(db, 'shops', authUser.uid, 'customers', selectedCustomer.phone);
-            batch.update(shopCustomerRef, { saledupPoints: selectedCustomer.saledupPoints - pointsToRedeem });
+            batch.update(shopCustomerRef, { saledupPoints: increment(-pointsToRedeem) });
 
-            // 2. Create a redemption log entry
             const logRef = doc(collection(db, 'shops', authUser.uid, 'points_redemptions'));
             batch.set(logRef, {
                 customerName: selectedCustomer.name,
@@ -155,6 +159,47 @@ export default function AdminPointsPage() {
             toast({title: "Error", description: "Failed to redeem points.", variant: "destructive"});
         } finally {
             setIsRedeeming(false);
+        }
+    };
+    
+    const handleAdjustPoints = async () => {
+        if (!selectedCustomer || !authUser) return;
+        if (pointsToAdjust === 0) {
+            toast({title: "No Change", description: "Please enter a non-zero value to adjust points.", variant: "destructive"});
+            return;
+        }
+        if ((selectedCustomer.saledupPoints + pointsToAdjust) < 0) {
+             toast({title: "Invalid Adjustment", description: "Customer points cannot go below zero.", variant: "destructive"});
+            return;
+        }
+
+        setIsAdjusting(true);
+        try {
+            const batch = writeBatch(db);
+            const shopCustomerRef = doc(db, 'shops', authUser.uid, 'customers', selectedCustomer.phone);
+            batch.update(shopCustomerRef, { saledupPoints: increment(pointsToAdjust) });
+
+            const logRef = doc(collection(db, 'shops', authUser.uid, 'points_redemptions'));
+            batch.set(logRef, {
+                customerName: selectedCustomer.name,
+                customerPhone: selectedCustomer.phone,
+                pointsAdjusted: pointsToAdjust,
+                reason: adjustmentReason || 'Manual adjustment',
+                redeemedAt: new Date(),
+                redeemedBy: authUser.uid,
+            });
+
+            await batch.commit();
+            toast({title: "Points Adjusted!", description: `${selectedCustomer.name}'s balance has been updated.`});
+            setSelectedCustomer(null);
+            setPointsToAdjust(0);
+            setAdjustmentReason('');
+
+        } catch (error) {
+            console.error(error);
+            toast({title: "Error", description: "Failed to adjust points.", variant: "destructive"});
+        } finally {
+            setIsAdjusting(false);
         }
     };
     
@@ -186,7 +231,7 @@ export default function AdminPointsPage() {
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <TabsList className="grid w-full sm:w-auto grid-cols-2">
                             <TabsTrigger value="customers"><UserIcon className="mr-2 h-4 w-4"/> Customer Balances</TabsTrigger>
-                            <TabsTrigger value="log"><History className="mr-2 h-4 w-4"/> Redemption Log</TabsTrigger>
+                            <TabsTrigger value="log"><History className="mr-2 h-4 w-4"/> Activity Log</TabsTrigger>
                         </TabsList>
                         <div className="relative w-full sm:max-w-xs">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -240,32 +285,37 @@ export default function AdminPointsPage() {
                                         </CardContent>
                                         <CardFooter className="flex flex-col gap-2">
                                              <div className="grid grid-cols-2 gap-2 w-full">
+                                                 <DialogTrigger asChild>
+                                                    <Button variant="secondary" className="w-full" onClick={() => setSelectedCustomer(customer)}>Adjust</Button>
+                                                </DialogTrigger>
                                                 <DialogTrigger asChild>
                                                     <Button className="w-full" onClick={() => setSelectedCustomer(customer)}>Redeem</Button>
                                                 </DialogTrigger>
+                                             </div>
+                                             <div className="grid grid-cols-2 gap-2 w-full">
                                                 <a href={`tel:${customer.phone}`} className="w-full">
                                                     <Button variant="outline" className="w-full"><Phone className="mr-2 h-4 w-4"/> Call</Button>
                                                 </a>
+                                                <AlertDialog>
+                                                    <AlertDialogTrigger asChild>
+                                                        <Button variant="ghost" className="w-full text-destructive hover:text-destructive hover:bg-destructive/10">
+                                                            <Trash2 className="mr-2 h-4 w-4"/> Delete
+                                                        </Button>
+                                                    </AlertDialogTrigger>
+                                                    <AlertDialogContent>
+                                                        <AlertDialogHeader>
+                                                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                                            <AlertDialogDescription>
+                                                                This will permanently delete the points card for {customer.name}. This action cannot be undone.
+                                                            </AlertDialogDescription>
+                                                        </AlertDialogHeader>
+                                                        <AlertDialogFooter>
+                                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                            <AlertDialogAction onClick={() => handleDeleteCustomer(customer.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                                                        </AlertDialogFooter>
+                                                    </AlertDialogContent>
+                                                </AlertDialog>
                                              </div>
-                                            <AlertDialog>
-                                                <AlertDialogTrigger asChild>
-                                                    <Button variant="destructive" className="w-full">
-                                                        <Trash2 className="mr-2 h-4 w-4"/> Delete Card
-                                                    </Button>
-                                                </AlertDialogTrigger>
-                                                <AlertDialogContent>
-                                                    <AlertDialogHeader>
-                                                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                                        <AlertDialogDescription>
-                                                            This will permanently delete the points card for {customer.name}. This action cannot be undone.
-                                                        </AlertDialogDescription>
-                                                    </AlertDialogHeader>
-                                                    <AlertDialogFooter>
-                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                        <AlertDialogAction onClick={() => handleDeleteCustomer(customer.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
-                                                    </AlertDialogFooter>
-                                                </AlertDialogContent>
-                                            </AlertDialog>
                                         </CardFooter>
                                     </Card>
                                 ))}
@@ -276,8 +326,8 @@ export default function AdminPointsPage() {
                     <TabsContent value="log" className="mt-6">
                         <Card>
                             <CardHeader>
-                                <CardTitle>Redemption History</CardTitle>
-                                <CardDescription>A log of all points redeemed at your shop.</CardDescription>
+                                <CardTitle>Points Activity Log</CardTitle>
+                                <CardDescription>A log of all point redemptions and manual adjustments.</CardDescription>
                             </CardHeader>
                             <CardContent>
                                 {loading ? (
@@ -287,8 +337,8 @@ export default function AdminPointsPage() {
                                 ) : redemptionLogs.length === 0 ? (
                                     <div className="text-center py-20 text-muted-foreground">
                                         <History className="h-16 w-16 mx-auto mb-4 opacity-50"/>
-                                        <h3 className="text-xl font-semibold">No Redemptions Yet</h3>
-                                        <p>When points are redeemed, the transactions will appear here.</p>
+                                        <h3 className="text-xl font-semibold">No Activity Yet</h3>
+                                        <p>When points are redeemed or adjusted, the transactions will appear here.</p>
                                     </div>
                                 ) : (
                                     <div className="rounded-lg border">
@@ -296,8 +346,9 @@ export default function AdminPointsPage() {
                                             <TableHeader>
                                                 <TableRow>
                                                     <TableHead>Customer</TableHead>
-                                                    <TableHead>Points Redeemed</TableHead>
+                                                    <TableHead>Activity</TableHead>
                                                     <TableHead>Date</TableHead>
+                                                    <TableHead>Reason / Redeemed By</TableHead>
                                                 </TableRow>
                                             </TableHeader>
                                             <TableBody>
@@ -305,9 +356,16 @@ export default function AdminPointsPage() {
                                                     <TableRow key={log.id}>
                                                         <TableCell>{log.customerName}</TableCell>
                                                         <TableCell>
-                                                            <Badge variant="destructive">-{log.pointsRedeemed}</Badge>
+                                                            {log.pointsRedeemed ? (
+                                                                <Badge variant="destructive">-{log.pointsRedeemed} pts</Badge>
+                                                            ) : (
+                                                                <Badge variant={log.pointsAdjusted! > 0 ? "secondary" : "destructive"}>
+                                                                    {log.pointsAdjusted! > 0 ? `+${log.pointsAdjusted}` : log.pointsAdjusted} pts
+                                                                </Badge>
+                                                            )}
                                                         </TableCell>
-                                                        <TableCell>{format(log.redeemedAt.toDate(), 'PPpp')}</TableCell>
+                                                        <TableCell>{format(log.redeemedAt.toDate(), 'PPp')}</TableCell>
+                                                        <TableCell>{log.reason || `Staff ID: ${log.redeemedBy.slice(0,5)}...`}</TableCell>
                                                     </TableRow>
                                                 ))}
                                             </TableBody>
@@ -320,34 +378,75 @@ export default function AdminPointsPage() {
                 </Tabs>
                 
                 <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Redeem Points for {selectedCustomer?.name}</DialogTitle>
-                        <DialogDescription>
-                            Current Balance: <span className="font-bold text-primary">{selectedCustomer?.saledupPoints || 0}</span> points.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="py-4 space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="points-to-redeem">Points to Redeem</Label>
-                            <Input 
-                                id="points-to-redeem" 
-                                type="number" 
-                                value={pointsToRedeem}
-                                onChange={(e) => setPointsToRedeem(Number(e.target.value))}
-                                max={selectedCustomer?.saledupPoints}
-                                min={1}
-                            />
-                        </div>
-                    </div>
-                    <DialogFooter>
+                    {selectedCustomer && (
+                    <>
+                        <DialogHeader>
+                            <DialogTitle>Adjust or Redeem Points</DialogTitle>
+                            <DialogDescription>
+                                For {selectedCustomer.name} (Current Balance: <span className="font-bold text-primary">{selectedCustomer.saledupPoints || 0}</span> points)
+                            </DialogDescription>
+                        </DialogHeader>
+                        <Tabs defaultValue="redeem" className="w-full">
+                            <TabsList className="grid w-full grid-cols-2">
+                                <TabsTrigger value="redeem">Redeem Points</TabsTrigger>
+                                <TabsTrigger value="adjust">Adjust Points</TabsTrigger>
+                            </TabsList>
+                            <TabsContent value="redeem" className="pt-4">
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="points-to-redeem">Points to Redeem</Label>
+                                        <Input 
+                                            id="points-to-redeem" 
+                                            type="number" 
+                                            value={pointsToRedeem > 0 ? pointsToRedeem : ''}
+                                            onChange={(e) => setPointsToRedeem(Number(e.target.value))}
+                                            max={selectedCustomer.saledupPoints}
+                                            min={1}
+                                            placeholder="e.g., 50"
+                                        />
+                                    </div>
+                                    <Button onClick={handleRedeem} disabled={isRedeeming} className="w-full">
+                                        {isRedeeming && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
+                                        Confirm Redemption
+                                    </Button>
+                                </div>
+                            </TabsContent>
+                             <TabsContent value="adjust" className="pt-4">
+                                 <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="points-to-adjust">Points to Add/Subtract</Label>
+                                        <Input 
+                                            id="points-to-adjust" 
+                                            type="number" 
+                                            value={pointsToAdjust !== 0 ? pointsToAdjust : ''}
+                                            onChange={(e) => setPointsToAdjust(Number(e.target.value))}
+                                            placeholder="e.g., 50 or -20"
+                                        />
+                                        <p className="text-xs text-muted-foreground">Use a negative number to subtract points.</p>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="adjustment-reason">Reason (Optional)</Label>
+                                        <Textarea
+                                            id="adjustment-reason"
+                                            value={adjustmentReason}
+                                            onChange={(e) => setAdjustmentReason(e.target.value)}
+                                            placeholder="e.g., Bonus for large purchase"
+                                        />
+                                    </div>
+                                    <Button onClick={handleAdjustPoints} disabled={isAdjusting} className="w-full">
+                                        {isAdjusting && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
+                                        Confirm Adjustment
+                                    </Button>
+                                </div>
+                            </TabsContent>
+                        </Tabs>
+                        <DialogFooter>
                             <DialogClose asChild>
-                            <Button variant="outline">Cancel</Button>
+                                <Button variant="outline" onClick={() => setSelectedCustomer(null)}>Close</Button>
                             </DialogClose>
-                        <Button onClick={handleRedeem} disabled={isRedeeming}>
-                            {isRedeeming && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
-                            Confirm Redemption
-                        </Button>
-                    </DialogFooter>
+                        </DialogFooter>
+                    </>
+                    )}
                 </DialogContent>
             </div>
         </Dialog>
