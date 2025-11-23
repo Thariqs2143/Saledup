@@ -5,7 +5,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Loader2, Search, Gem, Download, User as UserIcon, Phone, MinusCircle, PlusCircle, History } from "lucide-react";
-import { collection, query, onSnapshot, orderBy, type Timestamp, doc, updateDoc, writeBatch } from "firebase/firestore";
+import { collection, query, onSnapshot, orderBy, type Timestamp, doc, updateDoc, writeBatch, collectionGroup, addDoc } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
@@ -121,18 +121,14 @@ export default function AdminPointsPage() {
             const shopCustomerRef = doc(db, 'shops', authUser.uid, 'customers', selectedCustomer.phone);
             batch.update(shopCustomerRef, { saledupPoints: selectedCustomer.saledupPoints - pointsToRedeem });
 
-            // 2. Update the master customer record
-            const masterCustomerRef = doc(db, 'customers', selectedCustomer.phone);
-            batch.update(masterCustomerRef, { saledupPoints: selectedCustomer.saledupPoints - pointsToRedeem });
-
-            // 3. Create a redemption log entry
+            // 2. Create a redemption log entry
             const logRef = doc(collection(db, 'shops', authUser.uid, 'points_redemptions'));
             batch.set(logRef, {
                 customerName: selectedCustomer.name,
                 customerPhone: selectedCustomer.phone,
                 pointsRedeemed: pointsToRedeem,
                 redeemedAt: new Date(),
-                redeemedBy: authUser.uid, // Could be staff member's ID in future
+                redeemedBy: authUser.uid, 
             });
 
             await batch.commit();
@@ -164,70 +160,104 @@ export default function AdminPointsPage() {
                     <TabsTrigger value="customers"><UserIcon className="mr-2 h-4 w-4"/> Customer Balances</TabsTrigger>
                     <TabsTrigger value="log"><History className="mr-2 h-4 w-4"/> Redemption Log</TabsTrigger>
                 </TabsList>
-                <TabsContent value="customers" className="mt-6">
-                     <Card>
-                        <CardHeader>
-                            <CardTitle>Customer Points</CardTitle>
-                             <div className="relative pt-4 sm:max-w-xs">
-                                <Search className="absolute left-2.5 top-6 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                    type="search"
-                                    placeholder="Search by name or phone..."
-                                    className="w-full rounded-lg bg-background pl-8"
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
+                <Dialog>
+                    <TabsContent value="customers" className="mt-6">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Customer Points</CardTitle>
+                                <div className="relative pt-4 sm:max-w-xs">
+                                    <Search className="absolute left-2.5 top-6 h-4 w-4 text-muted-foreground" />
+                                    <Input
+                                        type="search"
+                                        placeholder="Search by name or phone..."
+                                        className="w-full rounded-lg bg-background pl-8"
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                    />
+                                </div>
+                            </CardHeader>
+                            <CardContent>
+                            {loading ? (
+                                <div className="flex items-center justify-center h-64">
+                                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                                </div>
+                            ) : filteredCustomers.length === 0 ? (
+                                <div className="text-center py-20 text-muted-foreground">
+                                    <Gem className="h-16 w-16 mx-auto mb-4 opacity-50"/>
+                                    <h3 className="text-xl font-semibold">No Customers with Points</h3>
+                                    <p>When customers claim offers, their points will appear here.</p>
+                                </div>
+                            ) : (
+                                <div className="rounded-lg border">
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>Customer</TableHead>
+                                                <TableHead className="text-center">Points</TableHead>
+                                                <TableHead className="text-right">Actions</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {filteredCustomers.map(customer => (
+                                            <TableRow key={customer.id}>
+                                                <TableCell>
+                                                    <div className="font-medium">{customer.name}</div>
+                                                    <div className="text-sm text-muted-foreground">{customer.phone}</div>
+                                                </TableCell>
+                                                <TableCell className="text-center">
+                                                    <Badge variant="secondary" className="text-base font-bold">
+                                                        <Gem className="mr-2 h-4 w-4 text-amber-500"/>
+                                                        {customer.saledupPoints || 0}
+                                                    </Badge>
+                                                </TableCell>
+                                                <TableCell className="text-right">
+                                                   <DialogTrigger asChild>
+                                                        <Button size="sm" onClick={() => setSelectedCustomer(customer)}>Redeem</Button>
+                                                   </DialogTrigger>
+                                                </TableCell>
+                                            </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </div>
+                            )}
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+                    
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Redeem Points for {selectedCustomer?.name}</DialogTitle>
+                            <DialogDescription>
+                                Current Balance: <span className="font-bold text-primary">{selectedCustomer?.saledupPoints || 0}</span> points.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="py-4 space-y-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="points-to-redeem">Points to Redeem</Label>
+                                <Input 
+                                    id="points-to-redeem" 
+                                    type="number" 
+                                    value={pointsToRedeem}
+                                    onChange={(e) => setPointsToRedeem(Number(e.target.value))}
+                                    max={selectedCustomer?.saledupPoints}
+                                    min={1}
                                 />
                             </div>
-                        </CardHeader>
-                        <CardContent>
-                        {loading ? (
-                            <div className="flex items-center justify-center h-64">
-                                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                            </div>
-                        ) : filteredCustomers.length === 0 ? (
-                            <div className="text-center py-20 text-muted-foreground">
-                                <Gem className="h-16 w-16 mx-auto mb-4 opacity-50"/>
-                                <h3 className="text-xl font-semibold">No Customers with Points</h3>
-                                <p>When customers claim offers, their points will appear here.</p>
-                            </div>
-                        ) : (
-                            <div className="rounded-lg border">
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Customer</TableHead>
-                                            <TableHead className="text-center">Points</TableHead>
-                                            <TableHead className="text-right">Actions</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {filteredCustomers.map(customer => (
-                                        <TableRow key={customer.id}>
-                                            <TableCell>
-                                                <div className="font-medium">{customer.name}</div>
-                                                <div className="text-sm text-muted-foreground">{customer.phone}</div>
-                                            </TableCell>
-                                            <TableCell className="text-center">
-                                                <Badge variant="secondary" className="text-base font-bold">
-                                                    <Gem className="mr-2 h-4 w-4 text-amber-500"/>
-                                                    {customer.saledupPoints || 0}
-                                                </Badge>
-                                            </TableCell>
-                                            <TableCell className="text-right">
-                                               <DialogTrigger asChild>
-                                                    <Button size="sm" onClick={() => setSelectedCustomer(customer)}>Redeem</Button>
-                                               </DialogTrigger>
-                                            </TableCell>
-                                        </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </div>
-                        )}
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-                 <TabsContent value="log" className="mt-6">
+                        </div>
+                        <DialogFooter>
+                             <DialogClose asChild>
+                                <Button variant="outline">Cancel</Button>
+                             </DialogClose>
+                            <Button onClick={handleRedeem} disabled={isRedeeming}>
+                                {isRedeeming && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
+                                Confirm Redemption
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+
+                <TabsContent value="log" className="mt-6">
                     <Card>
                         <CardHeader>
                             <CardTitle>Redemption History</CardTitle>
@@ -271,41 +301,6 @@ export default function AdminPointsPage() {
                     </Card>
                  </TabsContent>
             </Tabs>
-
-            <Dialog open={!!selectedCustomer} onOpenChange={(open) => !open && setSelectedCustomer(null)}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Redeem Points for {selectedCustomer?.name}</DialogTitle>
-                        <DialogDescription>
-                            Current Balance: <span className="font-bold text-primary">{selectedCustomer?.saledupPoints || 0}</span> points.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="py-4 space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="points-to-redeem">Points to Redeem</Label>
-                            <Input 
-                                id="points-to-redeem" 
-                                type="number" 
-                                value={pointsToRedeem}
-                                onChange={(e) => setPointsToRedeem(Number(e.target.value))}
-                                max={selectedCustomer?.saledupPoints}
-                                min={1}
-                            />
-                        </div>
-                    </div>
-                    <DialogFooter>
-                         <DialogClose asChild>
-                            <Button variant="outline">Cancel</Button>
-                         </DialogClose>
-                        <Button onClick={handleRedeem} disabled={isRedeeming}>
-                            {isRedeeming && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
-                            Confirm Redemption
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
         </div>
     );
 }
-
-    
