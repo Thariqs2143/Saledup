@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 
 type Customer = {
@@ -306,3 +307,5 @@ export default function AdminPointsPage() {
         </div>
     );
 }
+
+    
