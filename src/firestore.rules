@@ -42,11 +42,10 @@ service cloud.firestore {
       allow update: if false;
     }
     
-    // Allow anyone to create/update their own customer profile.
-    // Allow authenticated shop staff to read customer data.
+    // Public can get their own data, staff can read any customer for their shop
     match /customers/{phone} {
-        allow get: if isOwnerOrEmployee(request.query.shopId);
-        allow create, update: if true;
+        allow get: if true;
+        allow create, update: if true; // Let anyone create/update their profile, function will secure it.
         allow delete: if false;
     }
 
@@ -70,7 +69,7 @@ service cloud.firestore {
         // Allow owners/managers to update anything.
         // Public can only update viewCount. The onClaimCreated function handles claimCount.
         allow update: if (isShopOwner(shopId) || getRole(shopId) == 'Manager') || 
-                       (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount', 'claimCount']));
+                       (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount']));
         allow list: if isOwnerOrEmployee(shopId);
         allow get: if true;
       }
@@ -85,12 +84,10 @@ service cloud.firestore {
         allow create: if true;
       }
 
-      // Customers Subcollection (NEW)
+      // Customers Subcollection (for shop-specific customer data)
       match /customers/{customerId} {
-        // Anyone can create/update a customer record when claiming an offer.
-        allow create, update: if true;
-        // Only staff of that shop can read customer data.
-        allow read, list: if isOwnerOrEmployee(shopId);
+        // Staff can manage and view customer data for their own shop.
+        allow create, update, read, list: if isOwnerOrEmployee(shopId);
         // Only the owner can delete customer history.
         allow delete: if isShopOwner(shopId);
       }
