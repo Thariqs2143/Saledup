@@ -4,7 +4,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { doc, getDoc, addDoc, collection, serverTimestamp, updateDoc, increment, Timestamp, query, where, getDocs, setDoc, onSnapshot, orderBy } from 'firebase/firestore';
+import { doc, getDoc, addDoc, collection, serverTimestamp, updateDoc, increment, Timestamp, query, where, getDocs, setDoc, onSnapshot, orderBy, runTransaction } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
 import { Loader2, ArrowLeft, Building, Tag, Info, Phone, Mail, MapPin, User as UserIcon, CheckCircle, Clock, Calendar, Gem, Eye, Star, MessageSquare, IndianRupee, Download } from 'lucide-react';
@@ -336,40 +336,58 @@ export default function OfferDetailPage() {
     const handleClaimOffer = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!offer || !shopId) return;
-
         setIsClaiming(true);
+    
         try {
-            // Step 1: Create the claim document.
-            const claimsCollectionRef = collection(db, 'shops', shopId, 'claims');
-            const claimDocRef = await addDoc(claimsCollectionRef, {
-                customerName,
-                customerPhone,
-                customerEmail,
-                offerId: offer.id,
-                offerTitle: offer.title,
-                claimedAt: serverTimestamp(),
-                status: 'claimed',
-                approximateValue: offer.approximateValue || 0,
-                discountType: offer.discountType,
-                discountValue: offer.discountValue
+            const claimDocRef = await runTransaction(db, async (transaction) => {
+                // 1. Create the claim document first to get an ID
+                const newClaimRef = doc(collection(db, 'shops', shopId, 'claims'));
+                transaction.set(newClaimRef, {
+                    customerName,
+                    customerPhone,
+                    customerEmail,
+                    offerId: offer.id,
+                    offerTitle: offer.title,
+                    claimedAt: serverTimestamp(),
+                    status: 'claimed',
+                    approximateValue: offer.approximateValue || 0,
+                    discountType: offer.discountType,
+                    discountValue: offer.discountValue
+                });
+    
+                // 2. Safely create or update the customer and their points
+                const customerDocRef = doc(db, 'shops', shopId, 'customers', customerPhone);
+                const customerSnap = await transaction.get(customerDocRef);
+    
+                if (customerSnap.exists()) {
+                    // Customer exists, update their data and increment points
+                    transaction.update(customerDocRef, {
+                        name: customerName,
+                        email: customerEmail,
+                        lastActivity: serverTimestamp(),
+                        totalClaims: increment(1),
+                        saledupPoints: increment(10)
+                    });
+                } else {
+                    // New customer, create their profile with initial points
+                    transaction.set(customerDocRef, {
+                        name: customerName,
+                        phone: customerPhone,
+                        email: customerEmail,
+                        lastActivity: serverTimestamp(),
+                        totalClaims: 1,
+                        saledupPoints: 10 // Start with 10 points
+                    });
+                }
+    
+                // 3. Increment the offer's claimCount
+                const offerDocRef = doc(db, 'shops', shopId, 'offers', offer.id);
+                transaction.update(offerDocRef, { claimCount: increment(1) });
+    
+                return newClaimRef; // Return the reference to the new claim
             });
-
-            // Step 2: Create/update the customer record, now awarding points.
-            const customerDocRef = doc(db, 'shops', shopId, 'customers', customerPhone);
-            await setDoc(customerDocRef, {
-                name: customerName,
-                phone: customerPhone,
-                email: customerEmail,
-                lastActivity: serverTimestamp(),
-                totalClaims: increment(1),
-                saledupPoints: increment(10) // Award 10 points for every claim
-            }, { merge: true });
-
-            // Step 3: Increment the offer's claimCount
-            const offerDocRef = doc(db, 'shops', shopId, 'offers', offer.id);
-            await updateDoc(offerDocRef, { claimCount: increment(1) });
-            
-            // Step 4: Prepare data for the success dialog
+    
+            // 4. Prepare data for the success dialog outside the transaction
             const claimId = claimDocRef.id;
             const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(claimId)}`;
             
@@ -379,7 +397,7 @@ export default function OfferDetailPage() {
                 offerTitle: offer.title,
             });
             setIsClaimDialogOpen(false);
-
+    
         } catch (error) {
             console.error("Error claiming offer:", error);
             toast({ title: "Claim Failed", description: "Something went wrong. Please try again.", variant: "destructive" });
@@ -756,4 +774,3 @@ export default function OfferDetailPage() {
         </div>
     );
 }
-
