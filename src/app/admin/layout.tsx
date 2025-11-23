@@ -31,7 +31,6 @@ const adminNavItems: NavItem[] = [
   { href: '/admin/redeem', label: 'Redeem', iconName: 'ScanLine' },
   { href: '/admin/customers', label: 'Customers', iconName: 'Users' },
   { href: '/admin/points', label: 'Points', iconName: 'Gem' },
-  { href: '/admin/contests', label: 'Contests', iconName: 'Trophy' },
   { href: '/admin/analytics', label: 'Analytics', iconName: 'BarChart3' },
   { href: '/admin/employees', label: 'Employees', iconName: 'Users' },
   { href: '/admin/profile', label: 'Profile', iconName: 'User' },

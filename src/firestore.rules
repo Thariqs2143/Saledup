@@ -42,7 +42,7 @@ service cloud.firestore {
       allow update: if false;
     }
     
-    // Anyone can create/update their own customer profile.
+    // Allow anyone to create/update their own customer profile.
     // Allow authenticated shop staff to read customer data.
     match /customers/{phone} {
         allow get: if isOwnerOrEmployee(request.query.shopId);
@@ -110,12 +110,6 @@ service cloud.firestore {
         allow read, list, create, update, delete: if isOwnerOrEmployee(shopId);
         // Public can read a single voucher for the verification page
         allow get: if true;
-      }
-
-      // Contests Subcollection
-      match /contests/{contestId} {
-        // Owner and staff can manage and view their own shop's contests
-        allow read, list, create, update, delete: if isOwnerOrEmployee(shopId);
       }
 
       match /config/{docId} {
