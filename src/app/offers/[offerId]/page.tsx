@@ -205,16 +205,20 @@ export default function OfferDetailPage() {
     }, [offerId, shopId, router, toast]);
 
     const handleDownloadSticker = async () => {
-        if (!shop || !claimSuccessData) return;
+        if (!shop || !offer || !claimSuccessData) return;
 
-        toast({ title: "Generating PDF...", description: "Your voucher is being prepared for download." });
+        toast({ title: "Generating PDF...", description: "Your coupon is being prepared." });
 
         const doc = new jsPDF({
             orientation: 'landscape',
             unit: 'mm',
-            format: [85.6, 53.98] // Credit card size
+            format: [100, 210] // A common ticket size
         });
-        
+
+        const primaryColor = "#FF4136"; // Saledup Red
+        const width = 210;
+        const height = 100;
+
         // --- Image Loading ---
         const toDataURL = (url: string): Promise<string> => {
             return new Promise((resolve, reject) => {
@@ -223,9 +227,13 @@ export default function OfferDetailPage() {
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
+                    if (!ctx) {
+                        reject(new Error("Canvas context not available"));
+                        return;
+                    }
                     canvas.height = img.naturalHeight;
                     canvas.width = img.naturalWidth;
-                    ctx!.drawImage(img, 0, 0);
+                    ctx.drawImage(img, 0, 0);
                     resolve(canvas.toDataURL('image/png'));
                 };
                 img.onerror = reject;
@@ -237,61 +245,90 @@ export default function OfferDetailPage() {
             const qrCodeDataUrl = await toDataURL(claimSuccessData.qrCodeUrl);
             let shopLogoDataUrl: string | null = null;
             if (shop.imageUrl) {
-                shopLogoDataUrl = await toDataURL(shop.imageUrl);
+                try {
+                    shopLogoDataUrl = await toDataURL(shop.imageUrl);
+                } catch (e) { console.error("Could not load shop logo"); }
             }
 
             // --- PDF Content ---
-            // Background
-            doc.setFillColor(248, 249, 250); // A light grey
-            doc.rect(0, 0, 85.6, 53.98, 'F');
+            // Main Body
+            doc.setFillColor(255, 255, 255);
+            doc.setDrawColor(224, 224, 224); // Light grey border
+            doc.roundedRect(5, 5, width - 10, height - 10, 5, 5, 'FD');
 
-            // Shop Logo
+            // Left Side (Details)
+            const leftSectionX = 15;
+            const leftSectionWidth = 120;
+            
+            // Shop Logo and Name
             if (shopLogoDataUrl) {
-                doc.addImage(shopLogoDataUrl, 'PNG', 5, 5, 12, 12);
+                doc.addImage(shopLogoDataUrl, 'PNG', leftSectionX, 12, 12, 12);
             }
+            doc.setFontSize(16);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(20, 20, 20);
+            doc.text(shop.shopName, shopLogoDataUrl ? leftSectionX + 15 : leftSectionX, 20);
 
-            // Shop Name
+            // Offer Title
             doc.setFontSize(10);
             doc.setFont('helvetica', 'bold');
-            doc.setTextColor(29, 35, 42); // Dark text
-            doc.text(shop.shopName, 20, 10);
+            doc.setTextColor(primaryColor);
+            doc.text("SPECIAL OFFER", leftSectionX, 35);
             
-            // Offer Title
-            doc.setFontSize(8);
+            doc.setFontSize(12);
             doc.setFont('helvetica', 'normal');
-            doc.setTextColor(108, 117, 125); // Muted text
-            doc.text(offer?.title || '', 20, 15, { maxWidth: 35 });
+            doc.setTextColor(50, 50, 50);
+            doc.text(offer.title, leftSectionX, 42, { maxWidth: leftSectionWidth - 10 });
+            
+            // Horizontal Separator
+            doc.setDrawColor(224, 224, 224);
+            doc.line(leftSectionX, 60, leftSectionX + leftSectionWidth, 60);
+
+            // Customer and Validity
+            doc.setFontSize(8);
+            doc.setTextColor(150, 150, 150);
+            doc.text("REDEEMABLE BY", leftSectionX, 68);
+            doc.text("VALID UNTIL", leftSectionX + 60, 68);
+            
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(20, 20, 20);
+            doc.text(customerName, leftSectionX, 75);
+            
+            const expiryDate = addHours(new Date(), 24);
+            doc.text(format(expiryDate, 'PPp'), leftSectionX + 60, 75);
+
+            // Claim ID
+            doc.setFontSize(7);
+            doc.setTextColor(180, 180, 180);
+            doc.text(`Claim ID: ${claimSuccessData.claimId}`, leftSectionX, 90);
+
+            // Right Side (QR Code Stub)
+            const rightSectionX = 145;
+
+            // Perforated line effect
+            doc.setLineDashPattern([2, 1], 0);
+            doc.line(rightSectionX, 5, rightSectionX, height - 5);
+            doc.setLineDashPattern([], 0);
 
             // QR Code
-            doc.addImage(qrCodeDataUrl, 'PNG', 58, 5, 22.6, 22.6);
+            doc.addImage(qrCodeDataUrl, 'PNG', rightSectionX + 10, 25, 50, 50);
+            
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(100, 100, 100);
+            doc.text("Scan to Redeem", rightSectionX + 22, 80);
 
-            // Customer Details
-            doc.setDrawColor(222, 226, 230); // Border color
-            doc.line(5, 30, 80.6, 30); // Separator line
-            
-            doc.setFontSize(7);
-            doc.setTextColor(108, 117, 125);
-            doc.text("REDEEMABLE BY", 5, 35);
-            
-            doc.setFontSize(9);
-            doc.setTextColor(29, 35, 42);
-            doc.text(customerName, 5, 40);
-
-            doc.setFontSize(7);
-            doc.text("VALID UNTIL", 50, 35);
-            
-            doc.setFontSize(9);
-            const expiryDate = addHours(new Date(), 24); // QR valid for 24 hours
-            doc.text(format(expiryDate, 'PPpp'), 50, 40);
-            
-            doc.setFontSize(6);
-            doc.setTextColor(150, 150, 150);
-            doc.text(`Claim ID: ${claimSuccessData.claimId}`, 5, 50);
+            // Ticket notches
+            doc.setFillColor(242, 243, 245); // Background color
+            doc.circle(rightSectionX, 5, 3, 'F');
+            doc.circle(rightSectionX, height - 5, 3, 'F');
 
             doc.save(`Saledup_Voucher_${shop.shopName.replace(/\s/g, '_')}.pdf`);
+
         } catch (error) {
             console.error("Error generating PDF:", error);
-            toast({ title: "PDF Generation Failed", description: "There was an error creating the voucher file.", variant: "destructive"});
+            toast({ title: "PDF Generation Failed", description: "There was an error creating the voucher file.", variant: "destructive" });
         }
     };
     
@@ -650,7 +687,7 @@ export default function OfferDetailPage() {
                         )}
                         <Button variant="secondary" className="w-full" onClick={handleDownloadSticker}>
                             <Download className="mr-2 h-4 w-4" />
-                            Download QR Sticker (PDF)
+                            Download Coupon (PDF)
                         </Button>
                         <Button variant="outline" className="w-full" onClick={() => setIsReviewDialogOpen(true)}>
                             <MessageSquare className="mr-2 h-4 w-4" />
@@ -703,5 +740,7 @@ export default function OfferDetailPage() {
         </div>
     );
 }
+
+    
 
     
