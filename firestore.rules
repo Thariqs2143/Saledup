@@ -87,7 +87,7 @@ service cloud.firestore {
       
       match /reviews/{reviewId} {
         allow create: if true;
-        allow read, list: if true;
+        allow read, list: if isOwnerOrEmployee(shopId);
         allow delete: if isShopOwner(shopId);
         allow update: if false;
       }
