@@ -42,10 +42,11 @@ service cloud.firestore {
       allow update: if false;
     }
     
-    // ✅ CORRECTED RULE: Allow any authenticated user to read from the customers collection.
-    // This is a secure and standard practice for this type of public-facing data.
+    // ✅ CORRECTED RULE: Allow public read access to the customers collection.
+    // This allows anyone to check their points balance using their phone number.
+    // Writes are still open so the claim function can create/update profiles.
     match /customers/{phone} {
-        allow get: if isSignedIn();
+        allow get: if true;
         allow create, update: if true;
         allow delete: if false;
     }
@@ -68,16 +69,20 @@ service cloud.firestore {
       match /offers/{offerId} {
         allow create, delete: if isShopOwner(shopId) || getRole(shopId) == 'Manager';
         // Allow owners/managers to update anything.
-        // Allow anyone (public) to only update viewCount and claimCount.
+        // Public can only update viewCount. The onClaimCreated function handles claimCount.
         allow update: if (isShopOwner(shopId) || getRole(shopId) == 'Manager') || 
-                       (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount', 'claimCount']));
+                       (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount']));
         allow list: if isOwnerOrEmployee(shopId);
         allow get: if true;
       }
       
+      // ✅ CORRECTED RULE: This is the only rule block needed for claims.
       match /claims/{claimId} {
+        // Staff can read/list claims for verification.
         allow read, list, update: if isOwnerOrEmployee(shopId);
+        // Only owner can delete claim history.
         allow delete: if isShopOwner(shopId);
+        // Anyone can create a claim. This is essential for the public-facing offer page.
         allow create: if true;
       }
       
@@ -108,6 +113,7 @@ service cloud.firestore {
     
     // --- Collection Group Queries ---
     
+    // Allow public listing of all active offers.
     match /{path=**}/offers/{offerId} {
       allow list: if true;
     }
