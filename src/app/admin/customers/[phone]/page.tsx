@@ -29,9 +29,9 @@ import {
 type CustomerProfile = {
     name: string;
     phone: string;
-    saledupPoints?: number;
     email?: string;
-    createdAt: Timestamp;
+    totalClaims?: number;
+    lastActivity: Timestamp;
 };
 
 type Claim = {
@@ -94,33 +94,14 @@ export default function AdminCustomerDetailPage() {
 
         const fetchCustomerData = async () => {
             try {
-                // Fetch Customer Profile from global collection
-                const customerDocRef = doc(db, 'customers', phone);
+                // Fetch Customer Profile from the shop's subcollection
+                const customerDocRef = doc(db, 'shops', authUser.uid, 'customers', phone);
                 const customerSnap = await getDoc(customerDocRef);
 
                 if (customerSnap.exists()) {
                     setProfile(customerSnap.data() as CustomerProfile);
                 } else {
-                    // Fallback: create a temporary profile from claims if global one doesn't exist
-                    const claimsQuery = query(
-                        collection(db, 'shops', authUser.uid, 'claims'), 
-                        where('customerPhone', '==', phone),
-                        orderBy('claimedAt', 'asc'),
-                        limit(1)
-                    );
-                    const claimsSnap = await getDocs(claimsQuery);
-                    if (!claimsSnap.empty) {
-                        const firstClaim = claimsSnap.docs[0].data();
-                        setProfile({
-                            name: firstClaim.customerName,
-                            phone: firstClaim.customerPhone,
-                            email: firstClaim.customerEmail,
-                            saledupPoints: 0,
-                            createdAt: firstClaim.claimedAt,
-                        });
-                    } else {
-                        throw new Error("Customer not found");
-                    }
+                     throw new Error("Customer not found in your records.");
                 }
 
                 // Listen for Claims
@@ -138,7 +119,7 @@ export default function AdminCustomerDetailPage() {
                 });
                 unsubscribers.push(unsubscribeClaims);
 
-                // Listen for Reviews
+                // Listen for Reviews from this customer for this shop
                 const reviewsQuery = query(
                     collection(db, 'shops', authUser.uid, 'reviews'),
                     where('customerPhone', '==', phone),
@@ -244,8 +225,8 @@ export default function AdminCustomerDetailPage() {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <Card><CardHeader><CardTitle>Total Claims</CardTitle></CardHeader><CardContent><p className="text-3xl font-bold">{stats.totalClaims}</p></CardContent></Card>
                 <Card><CardHeader><CardTitle>Total Spend</CardTitle></CardHeader><CardContent><p className="text-3xl font-bold">₹{stats.totalSpend.toFixed(2)}</p></CardContent></Card>
-                <Card><CardHeader><CardTitle>Loyalty Points</CardTitle></CardHeader><CardContent><p className="text-3xl font-bold">{profile.saledupPoints || 0}</p></CardContent></Card>
-                <Card><CardHeader><CardTitle>First Visit</CardTitle></CardHeader><CardContent><p className="text-3xl font-bold">{format(stats.firstClaimDate, 'PP')}</p></CardContent></Card>
+                <Card><CardHeader><CardTitle>Contact</CardTitle></CardHeader><CardContent><p className="text-xl font-bold">{profile.phone}</p></CardContent></Card>
+                <Card><CardHeader><CardTitle>First Visit</CardTitle></CardHeader><CardContent><p className="text-xl font-bold">{format(stats.firstClaimDate, 'PP')}</p></CardContent></Card>
             </div>
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

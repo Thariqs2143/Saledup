@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -352,8 +353,22 @@ export default function OfferDetailPage() {
                 discountType: offer.discountType,
                 discountValue: offer.discountValue
             });
+
+            // Step 2: Create/update the customer record within the shop's subcollection
+            const customerDocRef = doc(db, 'shops', shopId, 'customers', customerPhone);
+            await setDoc(customerDocRef, {
+                name: customerName,
+                phone: customerPhone,
+                email: customerEmail,
+                lastActivity: serverTimestamp(),
+                totalClaims: increment(1),
+            }, { merge: true });
+
+            // Step 3: Increment the offer's claimCount
+            const offerDocRef = doc(db, 'shops', shopId, 'offers', offer.id);
+            await updateDoc(offerDocRef, { claimCount: increment(1) });
             
-            // Step 2: Prepare data for the success dialog
+            // Step 4: Prepare data for the success dialog
             const claimId = claimDocRef.id;
             const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(claimId)}`;
             
@@ -502,7 +517,7 @@ export default function OfferDetailPage() {
                                 <Clock className="h-5 w-5"/>
                                 <div>
                                     <p className="font-medium text-foreground">Posted</p>
-                                    <p>{formatDistanceToNow(new Date(offer.createdAt.seconds * 1000), { addSuffix: true })}</p>
+                                    {offer.createdAt && <p>{formatDistanceToNow(new Date(offer.createdAt.seconds * 1000), { addSuffix: true })}</p>}
                                 </div>
                              </div>
                              {getValidityText() && (
@@ -740,7 +755,3 @@ export default function OfferDetailPage() {
         </div>
     );
 }
-
-    
-
-    

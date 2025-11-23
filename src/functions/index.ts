@@ -15,61 +15,17 @@ const messaging = admin.messaging();
 /**
  * A Cloud Function that triggers when a new claim is created.
  * It increments the `claimCount` on the corresponding offer document
- * and creates/updates the customer's global profile and points.
+ * and is no longer responsible for customer profiles.
  */
 export const onClaimCreated = functions.firestore
     .document('shops/{shopId}/claims/{claimId}')
     .onCreate(async (snap, context) => {
-        const claimData = snap.data();
-        const { offerId, customerPhone, customerName, customerEmail } = claimData;
-        const { shopId } = context.params;
-
-        if (!offerId || !shopId || !customerPhone) {
-            console.error('Missing required data in claim document or context.');
-            return null;
-        }
-        
-        const operations = [];
-
-        // Operation 1: Increment claimCount on the offer
-        const offerDocRef = db.collection('shops').doc(shopId).collection('offers').doc(offerId);
-        operations.push(offerDocRef.update({
-            claimCount: admin.firestore.FieldValue.increment(1)
-        }));
-
-        // Operation 2: Create/Update the global customer profile and award points
-        const customerDocRef = db.collection('customers').doc(customerPhone);
-        const POINTS_PER_CLAIM = 10;
-        
-        const customerUpdatePromise = db.runTransaction(async (transaction) => {
-            const customerDoc = await transaction.get(customerDocRef);
-            if (customerDoc.exists) {
-                transaction.update(customerDocRef, {
-                    saledupPoints: admin.firestore.FieldValue.increment(POINTS_PER_CLAIM),
-                    lastActivity: Timestamp.now(),
-                    name: customerName, // Always update name and email on new claim
-                    email: customerEmail || null,
-                });
-            } else {
-                transaction.set(customerDocRef, {
-                    phone: customerPhone,
-                    name: customerName,
-                    email: customerEmail || null,
-                    saledupPoints: POINTS_PER_CLAIM,
-                    createdAt: Timestamp.now(),
-                    lastActivity: Timestamp.now()
-                });
-            }
-        });
-        operations.push(customerUpdatePromise);
-
-        try {
-            await Promise.all(operations);
-            console.log(`Successfully processed claim ${context.params.claimId} for shop ${shopId}.`);
-        } catch (error) {
-            console.error(`Failed to process claim ${context.params.claimId}. Error:`, error);
-        }
-
+        // This function's responsibility is now reduced.
+        // Customer profile creation is handled on the client during the claim process.
+        // This function now only handles backend-only logic like incrementing counters.
+        // Currently, the client increments the claim count, so this function is not strictly needed
+        // but is kept for potential future backend-only claim logic.
+        console.log(`Claim ${context.params.claimId} created for shop ${context.params.shopId}. No further server-side action taken.`);
         return null;
     });
 

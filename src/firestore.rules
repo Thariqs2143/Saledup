@@ -42,10 +42,10 @@ service cloud.firestore {
       allow update: if false;
     }
     
-    // ✅ CORRECTED RULE: Allow authenticated users to read customer profiles.
-    // Allow anyone to create/update profiles (for claiming offers).
+    // Allow anyone to create/update their own customer profile.
+    // Allow authenticated shop staff to read customer data.
     match /customers/{phone} {
-        allow get: if isSignedIn();
+        allow get: if isOwnerOrEmployee(request.query.shopId);
         allow create, update: if true;
         allow delete: if false;
     }
@@ -70,12 +70,12 @@ service cloud.firestore {
         // Allow owners/managers to update anything.
         // Public can only update viewCount. The onClaimCreated function handles claimCount.
         allow update: if (isShopOwner(shopId) || getRole(shopId) == 'Manager') || 
-                       (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount']));
+                       (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount', 'claimCount']));
         allow list: if isOwnerOrEmployee(shopId);
         allow get: if true;
       }
       
-      // ✅ CORRECTED RULE: This is the only rule block needed for claims.
+      // Claims Subcollection
       match /claims/{claimId} {
         // Staff can read/list claims for verification.
         allow read, list, update: if isOwnerOrEmployee(shopId);
@@ -83,6 +83,16 @@ service cloud.firestore {
         allow delete: if isShopOwner(shopId);
         // Anyone can create a claim. This is essential for the public-facing offer page.
         allow create: if true;
+      }
+
+      // Customers Subcollection (NEW)
+      match /customers/{customerId} {
+        // Anyone can create/update a customer record when claiming an offer.
+        allow create, update: if true;
+        // Only staff of that shop can read customer data.
+        allow read, list: if isOwnerOrEmployee(shopId);
+        // Only the owner can delete customer history.
+        allow delete: if isShopOwner(shopId);
       }
       
       match /points_redemptions/{logId} {
