@@ -1,0 +1,115 @@
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ----------------------
+    // Helper Functions
+    // ----------------------
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isShopOwner(shopId) {
+      return request.auth != null && request.auth.uid == shopId;
+    }
+
+    function isEmployee(shopId) {
+        return request.auth != null && exists(/databases/$(database)/documents/shops/$(shopId)/employees/$(request.auth.uid));
+    }
+    
+    function isOwnerOrEmployee(shopId) {
+      return isShopOwner(shopId) || isEmployee(shopId);
+    }
+    
+    function getRole(shopId) {
+        let employeeDoc = /databases/$(database)/documents/shops/$(shopId)/employees/$(request.auth.uid);
+        if (exists(employeeDoc)) {
+            return get(employeeDoc).data.role;
+        }
+        return 'none';
+    }
+
+    // ----------------------
+    // Global Collections
+    // ----------------------
+    
+    match /employee_phone_to_shop_lookup/{phone} {
+      allow read: if true;
+      allow create: if isShopOwner(request.resource.data.shopId);
+      allow delete: if isShopOwner(resource.data.shopId);
+      allow update: if false;
+    }
+    
+    // ✅ CORRECTED RULE: Allow any authenticated user to read from the customers collection.
+    // This is a secure and standard practice for this type of public-facing data.
+    match /customers/{phone} {
+        allow get: if isSignedIn();
+        allow create, update: if true;
+        allow delete: if false;
+    }
+
+    // ----------------------
+    // Shop-specific data
+    // ----------------------
+    match /shops/{shopId} {
+      allow create: if isShopOwner(shopId);
+      allow update, delete: if isShopOwner(shopId);
+      allow read: if true; 
+
+      // --- Subcollections ---
+      
+      match /employees/{employeeId} {
+        allow create, update, delete: if isShopOwner(shopId);
+        allow read, list: if isOwnerOrEmployee(shopId);
+      }
+      
+      match /offers/{offerId} {
+        allow create, delete: if isShopOwner(shopId) || getRole(shopId) == 'Manager';
+        // Allow owners/managers to update anything.
+        // Allow anyone (public) to only update viewCount and claimCount.
+        allow update: if (isShopOwner(shopId) || getRole(shopId) == 'Manager') || 
+                       (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount', 'claimCount']));
+        allow list: if isOwnerOrEmployee(shopId);
+        allow get: if true;
+      }
+      
+      match /claims/{claimId} {
+        allow read, list, update: if isOwnerOrEmployee(shopId);
+        allow delete: if isShopOwner(shopId);
+        allow create: if true;
+      }
+      
+      match /points_redemptions/{logId} {
+          allow create: if isOwnerOrEmployee(shopId);
+          allow read, list: if isShopOwner(shopId);
+      }
+      
+      match /reviews/{reviewId} {
+        allow create: if true;
+        allow read, list: if true;
+        allow delete: if isShopOwner(shopId);
+        allow update: if false;
+      }
+      
+      // Gift Vouchers Subcollection
+      match /vouchers/{voucherId} {
+        // Owner and staff can manage and view their own shop's vouchers
+        allow read, list, create, update, delete: if isOwnerOrEmployee(shopId);
+        // Public can read a single voucher for the verification page
+        allow get: if true;
+      }
+
+      match /config/{docId} {
+        allow read, write: if isShopOwner(shopId);
+      }
+    }
+    
+    // --- Collection Group Queries ---
+    
+    match /{path=**}/offers/{offerId} {
+      allow list: if true;
+    }
+  }
+}

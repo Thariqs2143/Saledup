@@ -327,8 +327,8 @@ export default function OfferDetailPage() {
                 await updateDoc(customerDocRef, { 
                     saledupPoints: increment(POINTS_PER_CLAIM),
                     lastActivity: serverTimestamp(),
-                    name: customerSnap.data().name || customerName,
-                    email: customerSnap.data().email || customerEmail
+                    name: customerName, // Always update name and email on new claim
+                    email: customerEmail,
                 });
                 totalPoints = (customerSnap.data().saledupPoints || 0) + POINTS_PER_CLAIM;
             } else {
@@ -558,7 +558,7 @@ export default function OfferDetailPage() {
                     <h2 className="text-2xl font-bold mb-4">More from {shop.shopName}</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         {otherOffers.map(otherOffer => (
-                            <Link key={otherOffer.id} href={`/offers/${otherOffer.id}?shopId=${otherOffer.shopId}&from=shop`} className="block">
+                            <Link key={otherOffer.id} href={`/offers/${otherOffer.id}?shopId=${shopId}&from=shop`} className="block">
                                 <Card className="flex flex-col bg-card transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group h-full">
                                     <CardHeader className="p-0 relative">
                                         <Image
@@ -733,4 +733,3 @@ export default function OfferDetailPage() {
         </div>
     );
 }
-
