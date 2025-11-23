@@ -46,7 +46,7 @@ service cloud.firestore {
     // if a claim from that customer exists for their shop.
     match /customers/{phone} {
         allow get: if isSignedIn() && 
-                      exists(/databases/$(database)/documents/shops/$(request.auth.uid)/claims?customerPhone=$(phone));
+                      exists(/databases/$(database)/documents/shops/$(request.auth.uid)/claims?customerPhone==$(phone));
         allow create, update: if true;
         allow delete: if false;
     }
