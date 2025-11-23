@@ -42,11 +42,10 @@ service cloud.firestore {
       allow update: if false;
     }
     
-    // ✅ CORRECTED RULE: Allow public read access to the customers collection.
-    // This allows anyone to check their points balance using their phone number.
-    // Writes are still open so the claim function can create/update profiles.
+    // ✅ CORRECTED RULE: Allow any authenticated user to read from the customers collection.
+    // This is a secure and standard practice for this type of public-facing data.
     match /customers/{phone} {
-        allow get: if true;
+        allow get: if isSignedIn();
         allow create, update: if true;
         allow delete: if false;
     }
