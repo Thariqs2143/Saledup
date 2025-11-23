@@ -45,6 +45,7 @@ type Claim = {
 
 type Review = {
     id: string;
+    name: string;
     rating: number;
     comment: string;
     createdAt: Timestamp;
@@ -88,17 +89,38 @@ export default function AdminCustomerDetailPage() {
     useEffect(() => {
         if (!authUser || !phone) return;
 
+        setLoading(true);
+        const unsubscribers: (() => void)[] = [];
+
         const fetchCustomerData = async () => {
-            setLoading(true);
             try {
-                // Fetch Customer Profile
+                // Fetch Customer Profile from global collection
                 const customerDocRef = doc(db, 'customers', phone);
                 const customerSnap = await getDoc(customerDocRef);
 
                 if (customerSnap.exists()) {
                     setProfile(customerSnap.data() as CustomerProfile);
                 } else {
-                    throw new Error("Customer not found");
+                    // Fallback: create a temporary profile from claims if global one doesn't exist
+                    const claimsQuery = query(
+                        collection(db, 'shops', authUser.uid, 'claims'), 
+                        where('customerPhone', '==', phone),
+                        orderBy('claimedAt', 'asc'),
+                        limit(1)
+                    );
+                    const claimsSnap = await getDocs(claimsQuery);
+                    if (!claimsSnap.empty) {
+                        const firstClaim = claimsSnap.docs[0].data();
+                        setProfile({
+                            name: firstClaim.customerName,
+                            phone: firstClaim.customerPhone,
+                            email: firstClaim.customerEmail,
+                            saledupPoints: 0,
+                            createdAt: firstClaim.claimedAt,
+                        });
+                    } else {
+                        throw new Error("Customer not found");
+                    }
                 }
 
                 // Listen for Claims
@@ -110,9 +132,13 @@ export default function AdminCustomerDetailPage() {
                 const unsubscribeClaims = onSnapshot(claimsQuery, (snapshot) => {
                     const claimsList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Claim));
                     setClaims(claimsList);
+                }, (error) => {
+                    console.error("Error fetching claims:", error);
+                    toast({ title: "Error", description: "Could not load customer claims.", variant: "destructive" });
                 });
+                unsubscribers.push(unsubscribeClaims);
 
-                // Listen for Reviews (query by phone)
+                // Listen for Reviews
                 const reviewsQuery = query(
                     collection(db, 'shops', authUser.uid, 'reviews'),
                     where('customerPhone', '==', phone),
@@ -121,25 +147,25 @@ export default function AdminCustomerDetailPage() {
                 const unsubscribeReviews = onSnapshot(reviewsQuery, (snapshot) => {
                     const reviewsList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Review));
                     setReviews(reviewsList);
+                }, (error) => {
+                    console.error("Error fetching reviews:", error);
+                    toast({ title: "Error", description: "Could not load customer reviews.", variant: "destructive" });
                 });
-
-                return () => {
-                    unsubscribeClaims();
-                    unsubscribeReviews();
-                };
+                unsubscribers.push(unsubscribeReviews);
 
             } catch (error) {
                 console.error("Error loading customer data:", error);
-                toast({ title: "Error loading customer", description: "You may not have permission to view this.", variant: "destructive" });
+                toast({ title: "Error loading customer", description: (error as Error).message, variant: "destructive" });
                 router.push('/admin/customers');
             } finally {
                 setLoading(false);
             }
         };
 
-        const unsubscribePromise = fetchCustomerData();
+        fetchCustomerData();
+
         return () => {
-            unsubscribePromise.then(unsub => unsub && unsub());
+            unsubscribers.forEach(unsub => unsub());
         }
 
     }, [authUser, phone, router, toast]);
@@ -273,7 +299,7 @@ export default function AdminCustomerDetailPage() {
 
                  <Card>
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2"><MessageSquare className="h-5 w-5"/> Reviews</CardTitle>
+                        <CardTitle className="flex items-center gap-2"><MessageSquare className="h-5 w-5"/> Reviews ({reviews.length})</CardTitle>
                     </CardHeader>
                     <CardContent>
                         {reviews.length === 0 ? (
@@ -284,7 +310,9 @@ export default function AdminCustomerDetailPage() {
                                     <div key={review.id} className="border-b last:border-b-0 pb-4">
                                         <div className="flex justify-between items-center">
                                             <StarRating rating={review.rating} />
-                                            <p className="text-xs text-muted-foreground">{formatDistanceToNow(review.createdAt.toDate(), { addSuffix: true })}</p>
+                                            {review.createdAt && (
+                                                <p className="text-xs text-muted-foreground">{formatDistanceToNow(review.createdAt.toDate(), { addSuffix: true })}</p>
+                                            )}
                                         </div>
                                         <p className="mt-2 text-sm text-muted-foreground">{review.comment}</p>
                                     </div>
