@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -639,9 +638,6 @@ export default function OfferDetailPage() {
                         </DialogDescription>
                     </DialogHeader>
                     <div className="py-4 flex flex-col items-center gap-4 text-center">
-                         <div className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 p-3 rounded-lg text-center">
-                            <p className="font-bold">A Cloud Function is now creating your customer profile and awarding loyalty points in the background!</p>
-                        </div>
                         <p className="text-sm text-muted-foreground">Show this QR code at the counter to redeem your offer.</p>
                         {claimSuccessData?.qrCodeUrl && (
                             <Image
@@ -707,3 +703,5 @@ export default function OfferDetailPage() {
         </div>
     );
 }
+
+    
