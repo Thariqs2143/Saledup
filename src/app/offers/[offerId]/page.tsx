@@ -339,16 +339,16 @@ export default function OfferDetailPage() {
         e.preventDefault();
         if (!offer || !shopId) return;
         setIsClaiming(true);
-    
+
         try {
-            // Check if this phone number has already claimed this specific offer
-            const claimsRef = collection(db, 'shops', shopId, 'claims');
-            const q = query(claimsRef, 
+            // Check for existing claim
+            const claimsQuery = query(
+                collection(db, 'shops', shopId, 'claims'),
                 where('customerPhone', '==', customerPhone),
                 where('offerId', '==', offer.id),
                 limit(1)
             );
-            const existingClaimSnap = await getDocs(q);
+            const existingClaimSnap = await getDocs(claimsQuery);
 
             if (!existingClaimSnap.empty) {
                 toast({
@@ -360,19 +360,51 @@ export default function OfferDetailPage() {
                 return;
             }
 
-            // The frontend's only job is to create the claim document.
-            // The backend Cloud Function `onClaimCreated` will handle all other logic.
-            const newClaimRef = await addDoc(collection(db, 'shops', shopId, 'claims'), {
-                customerName,
-                customerPhone,
-                customerEmail,
-                offerId: offer.id,
-                offerTitle: offer.title,
-                claimedAt: serverTimestamp(),
-                status: 'claimed',
-                approximateValue: offer.approximateValue || 0,
-                discountType: offer.discountType,
-                discountValue: offer.discountValue,
+            // Create claim and update customer in a transaction
+            const newClaimRef = doc(collection(db, 'shops', shopId, 'claims'));
+            const customerRef = doc(db, 'shops', shopId, 'customers', customerPhone);
+
+            await runTransaction(db, async (transaction) => {
+                const customerSnap = await transaction.get(customerRef);
+
+                if (customerSnap.exists()) {
+                    // Customer exists, update them
+                    transaction.update(customerRef, {
+                        name: customerName,
+                        email: customerEmail || null,
+                        lastActivity: serverTimestamp(),
+                        totalClaims: increment(1),
+                        saledupPoints: increment(10) // Award 10 points
+                    });
+                } else {
+                    // New customer, create their profile
+                    transaction.set(customerRef, {
+                        name: customerName,
+                        phone: customerPhone,
+                        email: customerEmail || null,
+                        lastActivity: serverTimestamp(),
+                        totalClaims: 1,
+                        saledupPoints: 10, // Starting points
+                    });
+                }
+                
+                // Create the new claim document
+                transaction.set(newClaimRef, {
+                    customerName,
+                    customerPhone,
+                    customerEmail,
+                    offerId: offer.id,
+                    offerTitle: offer.title,
+                    claimedAt: serverTimestamp(),
+                    status: 'claimed',
+                    approximateValue: offer.approximateValue || 0,
+                    discountType: offer.discountType,
+                    discountValue: offer.discountValue,
+                });
+                
+                // Increment offer claim count
+                const offerRef = doc(db, 'shops', shopId, 'offers', offer.id);
+                transaction.update(offerRef, { claimCount: increment(1) });
             });
 
             // Prepare data for the success dialog

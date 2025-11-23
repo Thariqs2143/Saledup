@@ -69,7 +69,7 @@ service cloud.firestore {
         // Allow owners/managers to update anything.
         // Public can only update viewCount. The onClaimCreated function handles claimCount.
         allow update: if (isShopOwner(shopId) || getRole(shopId) == 'Manager') || 
-                       (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount']));
+                       (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount', 'claimCount']));
         allow list: if isOwnerOrEmployee(shopId);
         allow get: if true;
       }

@@ -13,61 +13,6 @@ const db = admin.firestore();
 const messaging = admin.messaging();
 
 /**
- * A Cloud Function that triggers when a new claim is created.
- * It handles all backend logic associated with a claim:
- * 1. Increments the `claimCount` on the corresponding offer.
- * 2. Creates or updates the customer's profile in the shop's subcollection.
- * 3. Awards loyalty points to the customer.
- */
-export const onClaimCreated = functions.firestore
-    .document('shops/{shopId}/claims/{claimId}')
-    .onCreate(async (snap, context) => {
-        const claimData = snap.data();
-        const { shopId, claimId } = context.params;
-        const { offerId, customerPhone, customerName, customerEmail } = claimData;
-
-        if (!offerId || !customerPhone || !customerName) {
-            console.error(`Claim ${claimId} is missing required data.`);
-            return null;
-        }
-
-        const batch = db.batch();
-
-        // 1. Increment claimCount on the offer
-        const offerRef = db.doc(`shops/${shopId}/offers/${offerId}`);
-        batch.update(offerRef, { claimCount: admin.firestore.FieldValue.increment(1) });
-
-        // 2. Create or update the customer record and award points
-        const customerRef = db.doc(`shops/${shopId}/customers/${customerPhone}`);
-        const customerSnap = await customerRef.get();
-
-        if (customerSnap.exists) {
-            // Customer exists, update them
-            batch.update(customerRef, {
-                name: customerName,
-                email: customerEmail || null,
-                lastActivity: Timestamp.now(),
-                totalClaims: admin.firestore.FieldValue.increment(1),
-                saledupPoints: admin.firestore.FieldValue.increment(10)
-            });
-        } else {
-            // New customer, create their profile
-            batch.set(customerRef, {
-                name: customerName,
-                phone: customerPhone,
-                email: customerEmail || null,
-                lastActivity: Timestamp.now(),
-                totalClaims: 1,
-                saledupPoints: 10, // Starting points
-            });
-        }
-        
-        console.log(`Processing claim ${claimId} for customer ${customerPhone} at shop ${shopId}.`);
-        return batch.commit();
-    });
-
-
-/**
  * A scheduled function that runs every 15 minutes to send shift start reminders.
  */
 export const scheduledShiftReminder = functions.pubsub.schedule('every 15 minutes').onRun(async (context) => {
