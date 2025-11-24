@@ -4,10 +4,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Loader2, Search, Gem, Download, User as UserIcon, Phone, MinusCircle, PlusCircle, History, Mail, Trash2, Edit } from "lucide-react";
+import { Loader2, Search, Gem, Download, User as UserIcon, Phone, MinusCircle, PlusCircle, History, Mail, Trash2, Edit, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { collection, query, onSnapshot, orderBy, type Timestamp, doc, updateDoc, writeBatch, collectionGroup, addDoc, deleteDoc, increment } from "firebase/firestore";
 import { db, auth } from '@/lib/firebase';
-import { format } from 'date-fns';
+import { format, formatDistanceToNow } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { onAuthStateChanged, type User as AuthUser } from 'firebase/auth';
@@ -53,7 +53,7 @@ type RedemptionLog = {
     id: string;
     customerName: string;
     customerPhone: string;
-    pointsRedeemed: number;
+    pointsRedeemed?: number;
     pointsAdjusted?: number;
     reason?: string;
     redeemedAt: Timestamp;
@@ -311,7 +311,7 @@ export default function AdminPointsPage() {
                     
                     <TabsContent value="log" className="mt-6">
                         <Card>
-                            <CardHeader>
+                             <CardHeader>
                                 <CardTitle>Points Activity Log</CardTitle>
                                 <CardDescription>A log of all point redemptions and manual adjustments.</CardDescription>
                             </CardHeader>
@@ -327,35 +327,43 @@ export default function AdminPointsPage() {
                                         <p>When points are redeemed or adjusted, the transactions will appear here.</p>
                                     </div>
                                 ) : (
-                                    <div className="rounded-lg border">
-                                        <Table>
-                                            <TableHeader>
-                                                <TableRow>
-                                                    <TableHead>Customer</TableHead>
-                                                    <TableHead>Activity</TableHead>
-                                                    <TableHead>Date</TableHead>
-                                                    <TableHead>Reason / Redeemed By</TableHead>
-                                                </TableRow>
-                                            </TableHeader>
-                                            <TableBody>
-                                                {redemptionLogs.map(log => (
-                                                    <TableRow key={log.id}>
-                                                        <TableCell>{log.customerName}</TableCell>
-                                                        <TableCell>
-                                                            {log.pointsRedeemed ? (
-                                                                <Badge variant="destructive">-{log.pointsRedeemed} pts</Badge>
-                                                            ) : (
-                                                                <Badge variant={log.pointsAdjusted! > 0 ? "secondary" : "destructive"}>
-                                                                    {log.pointsAdjusted! > 0 ? `+${log.pointsAdjusted}` : log.pointsAdjusted} pts
-                                                                </Badge>
-                                                            )}
-                                                        </TableCell>
-                                                        <TableCell>{format(log.redeemedAt.toDate(), 'PPp')}</TableCell>
-                                                        <TableCell>{log.reason || `Staff ID: ${log.redeemedBy.slice(0,5)}...`}</TableCell>
-                                                    </TableRow>
-                                                ))}
-                                            </TableBody>
-                                        </Table>
+                                    <div className="space-y-4">
+                                        {redemptionLogs.map(log => {
+                                            const isRedemption = !!log.pointsRedeemed;
+                                            const isPositiveAdjustment = log.pointsAdjusted && log.pointsAdjusted > 0;
+                                            const isNegativeAdjustment = log.pointsAdjusted && log.pointsAdjusted < 0;
+                                            const points = log.pointsRedeemed || log.pointsAdjusted || 0;
+
+                                            return (
+                                                <Card key={log.id} className="p-4 flex items-center gap-4">
+                                                    <div className="p-3 rounded-full bg-muted">
+                                                        {isRedemption || isNegativeAdjustment ? (
+                                                            <ArrowDownRight className="h-6 w-6 text-destructive" />
+                                                        ) : (
+                                                            <ArrowUpRight className="h-6 w-6 text-green-500" />
+                                                        )}
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <p className="font-semibold">{log.customerName}</p>
+                                                        <p className="text-sm text-muted-foreground">
+                                                            {isRedemption 
+                                                                ? 'Redeemed points' 
+                                                                : `Manual adjustment ${isPositiveAdjustment ? '(Credit)' : '(Debit)'}`
+                                                            }
+                                                        </p>
+                                                        <p className="text-xs text-muted-foreground/80 mt-1">
+                                                            {formatDistanceToNow(log.redeemedAt.toDate(), { addSuffix: true })}
+                                                        </p>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <p className={`font-bold text-lg ${isRedemption || isNegativeAdjustment ? 'text-destructive' : 'text-green-500'}`}>
+                                                            {isRedemption || isNegativeAdjustment ? '-' : '+'}{Math.abs(points)}
+                                                        </p>
+                                                        <p className="text-xs text-muted-foreground">Points</p>
+                                                    </div>
+                                                </Card>
+                                            );
+                                        })}
                                     </div>
                                 )}
                             </CardContent>
