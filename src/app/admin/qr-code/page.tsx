@@ -151,7 +151,7 @@ export default function GenerateQrPage() {
 
 
             // Shop Logo and Name
-            const shopSectionY = 45;
+            const shopSectionY = 60;
             const shopNameFontSize = 30;
             pdf.setFontSize(shopNameFontSize);
             pdf.setFont('helvetica', 'bold');
@@ -173,7 +173,7 @@ export default function GenerateQrPage() {
             // QR Code
             const qrSize = 100;
             const qrX = (pageWidth - qrSize) / 2;
-            const qrY = 70; // Adjusted Y position to reduce the gap
+            const qrY = 90; // Adjusted Y position to reduce the gap
             pdf.addImage(qrCodeDataUrl, 'PNG', qrX, qrY, qrSize, qrSize);
 
             // Red border around QR
