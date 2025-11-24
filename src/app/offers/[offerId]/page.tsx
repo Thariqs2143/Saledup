@@ -7,7 +7,7 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { doc, getDoc, addDoc, collection, serverTimestamp, Timestamp, updateDoc, increment, onSnapshot, orderBy, runTransaction, getDocs, setDoc, query, where, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
-import { Loader2, ArrowLeft, Building, Tag, Info, Phone, Mail, MapPin, User as UserIcon, CheckCircle, Clock, Calendar, Gem, Eye, Star, MessageSquare, Download, Globe, MessageCircle as WhatsAppIcon } from 'lucide-react';
+import { Loader2, ArrowLeft, Building, Tag, Info, Phone, Mail, MapPin, User as UserIcon, CheckCircle, Clock, Calendar, Gem, Eye, Star, MessageSquare, Download, Globe, MessageCircle as WhatsAppIcon, IndianRupee } from 'lucide-react';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
@@ -341,9 +341,8 @@ export default function OfferDetailPage() {
         setIsClaiming(true);
 
         try {
-            const newClaimRef = doc(collection(db, 'shops', shopId, 'claims'));
-            
             await runTransaction(db, async (transaction) => {
+                // All reads must happen before writes.
                 const claimsQuery = query(
                     collection(db, 'shops', shopId, 'claims'),
                     where('customerPhone', '==', customerPhone),
@@ -351,17 +350,17 @@ export default function OfferDetailPage() {
                     limit(1)
                 );
                 const existingClaimSnap = await getDocs(claimsQuery);
-
+                
                 if (!existingClaimSnap.empty) {
                     throw new Error("Already Claimed");
                 }
                 
-                // All reads must happen before writes.
+                const shopCustomerRef = doc(db, 'shops', shopId, 'customers', customerPhone);
                 const globalCustomerRef = doc(db, 'customers', customerPhone);
-                const globalCustomerSnap = await transaction.get(globalCustomerRef);
-
+                
                 // --- ALL WRITES HAPPEN AFTER THIS POINT ---
-
+                const newClaimRef = doc(collection(db, 'shops', shopId, 'claims'));
+                
                 // 1. Create the new claim document
                 transaction.set(newClaimRef, {
                     customerName,
@@ -380,31 +379,39 @@ export default function OfferDetailPage() {
                 const offerRef = doc(db, 'shops', shopId, 'offers', offer.id);
                 transaction.update(offerRef, { claimCount: increment(1) });
                 
-                // 3. Update the global customer record for points lookup
-                if (globalCustomerSnap.exists()) {
-                    transaction.update(globalCustomerRef, {
-                        name: customerName,
-                        email: customerEmail || null,
-                        lastActivity: serverTimestamp(),
-                        saledupPoints: increment(10)
-                    });
-                } else {
-                    transaction.set(globalCustomerRef, {
-                        name: customerName,
-                        phone: customerPhone,
-                        email: customerEmail || null,
-                        lastActivity: serverTimestamp(),
-                        saledupPoints: 10,
-                    });
-                }
+                // 3. Create or update the shop-specific customer record
+                transaction.set(shopCustomerRef, { 
+                    name: customerName,
+                    phone: customerPhone,
+                    email: customerEmail || null,
+                    saledupPoints: increment(10), // Award 10 points per claim
+                    lastActivity: serverTimestamp(),
+                }, { merge: true });
+
+                // 4. Create or update the global customer record for points lookup
+                transaction.set(globalCustomerRef, {
+                    name: customerName,
+                    phone: customerPhone,
+                    email: customerEmail || null,
+                    lastActivity: serverTimestamp(),
+                    saledupPoints: increment(10)
+                }, { merge: true });
+
+                 // Return the ID for the success dialog
+                return newClaimRef.id;
             });
 
+            // If transaction is successful, get the new ID and show success
+            // This part runs outside the transaction block
+            const claimsQuery = query(collection(db, 'shops', shopId, 'claims'), where('customerPhone', '==', customerPhone), where('offerId', '==', offer.id), limit(1));
+            const newClaimSnap = await getDocs(claimsQuery);
+            if (newClaimSnap.empty) throw new Error("Could not retrieve new claim.");
 
-            // Prepare data for the success dialog
-            const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(newClaimRef.id)}`;
+            const newClaimId = newClaimSnap.docs[0].id;
+            const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(newClaimId)}`;
             
             setClaimSuccessData({
-                claimId: newClaimRef.id,
+                claimId: newClaimId,
                 qrCodeUrl, 
                 offerTitle: offer.title,
             });

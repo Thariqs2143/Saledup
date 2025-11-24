@@ -42,9 +42,8 @@ service cloud.firestore {
       allow update: if false;
     }
     
-    // ✅ CORRECTED RULE: Allow public read access to the customers collection.
-    // This allows anyone to check their points balance using their phone number.
-    // Writes are also open so the claim function can create/update profiles.
+    // Allow anyone to create/update their own customer profile.
+    // Allow anyone to read customer data for the My Points page.
     match /customers/{phone} {
         allow get: if true;
         allow create, update: if true;
@@ -76,7 +75,7 @@ service cloud.firestore {
         allow get: if true;
       }
       
-      // ✅ CORRECTED RULE: This is the only rule block needed for claims.
+      // Claims Subcollection
       match /claims/{claimId} {
         // Staff can read/list claims for verification.
         allow read, list, update: if isOwnerOrEmployee(shopId);
@@ -84,6 +83,12 @@ service cloud.firestore {
         allow delete: if isShopOwner(shopId);
         // Anyone can create a claim. This is essential for the public-facing offer page.
         allow create: if true;
+      }
+      
+      // Shop-specific customer data (for internal use)
+       match /customers/{customerId} {
+        allow create, update, read, list: if isOwnerOrEmployee(shopId);
+        allow delete: if isShopOwner(shopId);
       }
       
       match /points_redemptions/{logId} {
