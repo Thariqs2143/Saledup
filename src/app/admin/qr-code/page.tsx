@@ -26,7 +26,7 @@ type Claim = {
 export default function GenerateQrPage() {
     const { toast } = useToast();
     const [authUser, setAuthUser] = useState<AuthUser | null>(null);
-    const [shopData, setShopData] = useState<{ shopName?: string, id?: string }>({});
+    const [shopData, setShopData] = useState<{ shopName?: string, id?: string, imageUrl?: string }>({});
     const [qrUrl, setQrUrl] = useState('');
     const [publicUrl, setPublicUrl] = useState('');
     const [loading, setLoading] = useState(true);
@@ -42,7 +42,7 @@ export default function GenerateQrPage() {
                     const shopSnap = await getDoc(shopDocRef);
                     if (shopSnap.exists()) {
                         const data = shopSnap.data();
-                        setShopData({ shopName: data.shopName, id: shopSnap.id });
+                        setShopData({ shopName: data.shopName, id: shopSnap.id, imageUrl: data.imageUrl });
                         
                         const shopPublicUrl = `${window.location.origin}/shops/${shopSnap.id}`;
                         setPublicUrl(shopPublicUrl);
@@ -103,12 +103,11 @@ export default function GenerateQrPage() {
         const pdf = new jsPDF('p', 'mm', 'a4'); // A4 paper size
         const pageWidth = pdf.internal.pageSize.getWidth();
         const pageHeight = pdf.internal.pageSize.getHeight();
-        const margin = 15;
-        const contentWidth = pageWidth - (margin * 2);
 
-        // --- Load QR Image as a data URL ---
+        // --- Load Images as data URLs ---
         const toDataURL = (url: string): Promise<string> => {
             return new Promise((resolve, reject) => {
+                // Use window.Image to avoid conflict with Next.js Image component
                 const img = new window.Image();
                 img.crossOrigin = 'Anonymous';
                 img.onload = () => {
@@ -127,6 +126,14 @@ export default function GenerateQrPage() {
         
         try {
             const qrCodeDataUrl = await toDataURL(qrUrl);
+            let shopLogoDataUrl: string | null = null;
+            if (shopData.imageUrl && !shopData.imageUrl.includes('placehold.co')) {
+                try {
+                    shopLogoDataUrl = await toDataURL(shopData.imageUrl);
+                } catch (e) {
+                    console.error("Could not load shop logo, proceeding without it.");
+                }
+            }
             
             // --- DRAWING THE PDF ---
 
@@ -136,11 +143,33 @@ export default function GenerateQrPage() {
             pdf.setFillColor(70, 130, 180); // SteelBlue
             pdf.triangle(pageWidth, pageHeight, 0, pageHeight, pageWidth, pageHeight - 80, 'F');
 
-            // Shop Name (as logo)
+            // --- Header Section ---
+            // Saledup Logo Text
+            pdf.setFontSize(28);
             pdf.setFont('helvetica', 'bold');
-            pdf.setFontSize(40);
-            pdf.setTextColor(40, 40, 40);
-            pdf.text(shopData.shopName, pageWidth / 2, 70, { align: 'center' });
+            pdf.setTextColor(255, 255, 255);
+            pdf.text("Saledup", pageWidth / 2, 25, { align: 'center' });
+            
+            pdf.setFontSize(10);
+             pdf.setFont('helvetica', 'normal');
+            pdf.text("POWERED BY", pageWidth / 2, 16, { align: 'center' });
+
+
+            // Shop Logo and Name
+            const shopSectionY = 45;
+            if (shopLogoDataUrl) {
+                const logoSize = 20;
+                pdf.addImage(shopLogoDataUrl, 'PNG', 20, shopSectionY - (logoSize/2), logoSize, logoSize);
+                pdf.setFontSize(30);
+                pdf.setFont('helvetica', 'bold');
+                pdf.setTextColor(40, 40, 40);
+                pdf.text(shopData.shopName, 20 + logoSize + 5, shopSectionY + 5);
+            } else {
+                 pdf.setFontSize(40);
+                pdf.setFont('helvetica', 'bold');
+                pdf.setTextColor(40, 40, 40);
+                pdf.text(shopData.shopName, pageWidth / 2, shopSectionY + 8, { align: 'center' });
+            }
 
             // QR Code
             const qrSize = 100;
@@ -268,5 +297,7 @@ export default function GenerateQrPage() {
         </div>
     );
 }
+
+    
 
     
