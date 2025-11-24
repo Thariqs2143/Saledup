@@ -348,54 +348,44 @@ export default function OfferDetailPage() {
         const newClaimRef = doc(db, 'shops', shopId, 'claims', claimId);
 
         try {
-            // Use a transaction to safely create the claim and update counts
-            await runTransaction(db, async (transaction) => {
-                const claimDoc = await transaction.get(newClaimRef);
+            // The logic is now handled by the Firestore security rule.
+            // We just attempt to create the document. If it exists, the rule will deny it.
+            const claimData = {
+                customerName,
+                customerPhone,
+                customerEmail,
+                offerId: offer.id,
+                offerTitle: offer.title,
+                claimedAt: serverTimestamp(),
+                status: 'claimed' as const,
+                approximateValue: offer.approximateValue || 0,
+                discountType: offer.discountType,
+                discountValue: offer.discountValue,
+            };
+            
+            await setDoc(newClaimRef, claimData);
 
-                if (claimDoc.exists()) {
-                    // This will cause the transaction to fail, and we'll catch it below.
-                    throw new Error("AlreadyClaimed");
-                }
+            // If creation succeeds, increment the counts and update customer profiles
+            await updateDoc(doc(db, 'shops', shopId, 'offers', offer.id), { claimCount: increment(1) });
+            
+            const shopCustomerRef = doc(db, 'shops', shopId, 'customers', customerPhone);
+            await setDoc(shopCustomerRef, { 
+                name: customerName,
+                phone: customerPhone,
+                email: customerEmail || null,
+                saledupPoints: increment(10),
+                lastActivity: serverTimestamp(),
+            }, { merge: true });
 
-                const offerRef = doc(db, 'shops', shopId, 'offers', offer.id);
-                const shopCustomerRef = doc(db, 'shops', shopId, 'customers', customerPhone);
-                const globalCustomerRef = doc(db, 'customers', customerPhone);
-
-                // 1. Create the new claim document with the unique ID.
-                transaction.set(newClaimRef, {
-                    customerName,
-                    customerPhone,
-                    customerEmail,
-                    offerId: offer.id,
-                    offerTitle: offer.title,
-                    claimedAt: serverTimestamp(),
-                    status: 'claimed',
-                    approximateValue: offer.approximateValue || 0,
-                    discountType: offer.discountType,
-                    discountValue: offer.discountValue,
-                });
-                
-                // 2. Increment the offer's claim count.
-                transaction.update(offerRef, { claimCount: increment(1) });
-                
-                // 3. Create or update the shop-specific customer record to award points.
-                transaction.set(shopCustomerRef, { 
-                    name: customerName,
-                    phone: customerPhone,
-                    email: customerEmail || null,
-                    saledupPoints: increment(10), // Award 10 points
-                    lastActivity: serverTimestamp(),
-                }, { merge: true });
-
-                // 4. Create or update the global customer record for the "My Points" page.
-                transaction.set(globalCustomerRef, {
-                    name: customerName,
-                    phone: customerPhone,
-                    email: customerEmail || null,
-                    lastActivity: serverTimestamp(),
-                    saledupPoints: increment(10)
-                }, { merge: true });
-            });
+            const globalCustomerRef = doc(db, 'customers', customerPhone);
+            await setDoc(globalCustomerRef, {
+                name: customerName,
+                phone: customerPhone,
+                email: customerEmail || null,
+                lastActivity: serverTimestamp(),
+                saledupPoints: increment(10)
+            }, { merge: true });
+            
 
             // If transaction is successful, show success dialog
             const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(claimId)}`;
@@ -407,9 +397,8 @@ export default function OfferDetailPage() {
             setIsClaimDialogOpen(false);
 
         } catch (error: any) {
-            if (error.message === "AlreadyClaimed") {
-                // This is our custom error for a duplicate claim
-                setAlreadyClaimed(true); // Show the alert in the claim dialog
+             if (error.code === 'permission-denied') {
+                setAlreadyClaimed(true);
             } else {
                 console.error("Error claiming offer:", error);
                 toast({ title: "Claim Failed", description: "An unexpected error occurred. Please try again.", variant: "destructive" });

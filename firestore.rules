@@ -249,8 +249,8 @@ service cloud.firestore {
         allow list, update: if isOwnerOrEmployee(shopId);
         // Only owner can delete claim history.
         allow delete: if isShopOwner(shopId);
-        // Anyone can create a claim. This is essential for the public-facing offer page.
-        allow create: if true;
+        // Prevent duplicate claims by checking if the document already exists.
+        allow create: if true && !exists(/databases/$(database)/documents/shops/$(shopId)/claims/$(claimId)); 
       }
       
       // Point Redemption Logs Subcollection
