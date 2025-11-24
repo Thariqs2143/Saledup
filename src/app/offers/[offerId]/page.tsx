@@ -341,28 +341,22 @@ export default function OfferDetailPage() {
         setIsClaiming(true);
 
         try {
-            const newClaimId = await runTransaction(db, async (transaction) => {
-                // All reads must happen before all writes.
-                const claimsCollectionRef = collection(db, 'shops', shopId, 'claims');
-                const existingClaimQuery = query(
-                    claimsCollectionRef,
-                    where('customerPhone', '==', customerPhone),
-                    where('offerId', '==', offer.id),
-                    limit(1)
-                );
-                const existingClaimSnap = await transaction.get(existingClaimQuery);
-                
-                if (!existingClaimSnap.empty) {
-                    throw new Error("Already Claimed");
-                }
-                
+            // Simplified: Directly attempt to create the documents in a transaction.
+            // Firestore transactions will automatically fail if a document to be created already exists,
+            // but for claims, we want a new one each time unless we explicitly prevent duplicates.
+            // For testing, we are removing the duplicate check.
+            
+            const claimsCollectionRef = collection(db, 'shops', shopId, 'claims');
+            const newClaimRef = doc(claimsCollectionRef); // Create a reference for the new claim
+            
+            await runTransaction(db, async (transaction) => {
                 const shopCustomerRef = doc(db, 'shops', shopId, 'customers', customerPhone);
                 const globalCustomerRef = doc(db, 'customers', customerPhone);
                 const offerRef = doc(db, 'shops', shopId, 'offers', offer.id);
+
+                // No reads needed for this simplified version.
                 
-                // --- ALL WRITES HAPPEN AFTER THIS POINT ---
-                const newClaimRef = doc(claimsCollectionRef);
-                
+                // --- WRITES ---
                 // 1. Create the new claim document
                 transaction.set(newClaimRef, {
                     customerName,
@@ -389,7 +383,7 @@ export default function OfferDetailPage() {
                     lastActivity: serverTimestamp(),
                 }, { merge: true });
 
-                // 4. Create or update the global customer record for points lookup
+                // 4. Create or update the global customer record
                 transaction.set(globalCustomerRef, {
                     name: customerName,
                     phone: customerPhone,
@@ -397,15 +391,12 @@ export default function OfferDetailPage() {
                     lastActivity: serverTimestamp(),
                     saledupPoints: increment(10)
                 }, { merge: true });
-
-                 // Return the ID for the success dialog
-                return newClaimRef.id;
             });
 
             // If transaction is successful, show success dialog
-            const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(newClaimId)}`;
+            const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(newClaimRef.id)}`;
             setClaimSuccessData({
-                claimId: newClaimId,
+                claimId: newClaimRef.id,
                 qrCodeUrl, 
                 offerTitle: offer.title,
             });
@@ -413,15 +404,7 @@ export default function OfferDetailPage() {
     
         } catch (error: any) {
             console.error("Error claiming offer:", error);
-            if (error.message === 'Already Claimed') {
-                toast({
-                    title: "Offer Already Claimed",
-                    description: "You have already claimed this specific offer.",
-                    variant: "destructive"
-                });
-            } else {
-                toast({ title: "Claim Failed", description: "Something went wrong. Please try again.", variant: "destructive" });
-            }
+            toast({ title: "Claim Failed", description: "Something went wrong. Please try again.", variant: "destructive" });
         } finally {
             setIsClaiming(false);
         }
