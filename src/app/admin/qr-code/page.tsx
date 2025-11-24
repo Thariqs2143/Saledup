@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { onAuthStateChanged, type User as AuthUser } from 'firebase/auth';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { formatDistanceToNow } from 'date-fns';
+import jsPDF from 'jspdf';
 
 type Claim = {
     id:string;
@@ -91,19 +92,90 @@ export default function GenerateQrPage() {
         return () => unsubscribe();
     }, [toast]);
 
-    const handleDownload = () => {
-        if (!qrUrl) return;
-        fetch(qrUrl).then(response => response.blob()).then(blob => {
-            const blobUrl = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = blobUrl;
-            link.download = `saledup_qr_${shopData.shopName?.replace(/\s+/g, '_')}.png`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(blobUrl);
-        }).catch(console.error);
+    const handleDownload = async () => {
+        if (!qrUrl || !shopData.shopName) {
+             toast({ title: "Error", description: "QR code data not ready.", variant: "destructive" });
+            return;
+        }
+
+        toast({ title: "Generating PDF...", description: "Your QR poster is being created." });
+
+        const pdf = new jsPDF('p', 'mm', 'a4'); // A4 paper size
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        const margin = 15;
+        const contentWidth = pageWidth - (margin * 2);
+
+        // --- Load QR Image as a data URL ---
+        const toDataURL = (url: string): Promise<string> => {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = 'Anonymous';
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    if (!ctx) return reject();
+                    canvas.height = img.naturalHeight;
+                    canvas.width = img.naturalWidth;
+                    ctx.drawImage(img, 0, 0);
+                    resolve(canvas.toDataURL('image/png'));
+                };
+                img.onerror = reject;
+                img.src = url;
+            });
+        };
+        
+        try {
+            const qrCodeDataUrl = await toDataURL(qrUrl);
+            
+            // --- DRAWING THE PDF ---
+
+            // Background colors
+            pdf.setFillColor(255, 65, 54); // Red
+            pdf.triangle(0, 0, pageWidth, 0, 0, 80, 'F');
+            pdf.setFillColor(70, 130, 180); // SteelBlue
+            pdf.triangle(pageWidth, pageHeight, 0, pageHeight, pageWidth, pageHeight - 80, 'F');
+
+            // Shop Name (as logo)
+            pdf.setFont('helvetica', 'bold');
+            pdf.setFontSize(40);
+            pdf.setTextColor(40, 40, 40);
+            pdf.text(shopData.shopName, pageWidth / 2, 70, { align: 'center' });
+
+            // QR Code
+            const qrSize = 100;
+            const qrX = (pageWidth - qrSize) / 2;
+            const qrY = 90;
+            pdf.addImage(qrCodeDataUrl, 'PNG', qrX, qrY, qrSize, qrSize);
+
+            // Red border around QR
+            pdf.setDrawColor(255, 65, 54); // Red
+            pdf.setLineWidth(2);
+            pdf.rect(qrX - 5, qrY - 5, qrSize + 10, qrSize + 10, 'S');
+
+            // SCAN ME box
+            const scanMeY = qrY + qrSize + 15;
+            pdf.setFillColor(255, 65, 54); // Red
+            pdf.roundedRect((pageWidth - 80) / 2, scanMeY - 8, 80, 16, 5, 5, 'F');
+            pdf.setFontSize(28);
+            pdf.setFont('helvetica', 'bold');
+            pdf.setTextColor(255, 255, 255);
+            pdf.text("SCAN ME", pageWidth / 2, scanMeY + 3, { align: 'center' });
+
+            // Instructional Text
+            pdf.setFontSize(14);
+            pdf.setFont('helvetica', 'normal');
+            pdf.setTextColor(100, 100, 100);
+            pdf.text("Scan this code to see our latest offers and deals!", pageWidth / 2, scanMeY + 25, { align: 'center' });
+            
+            pdf.save(`Saledup_QR_Poster_${shopData.shopName.replace(/\s+/g, '_')}.pdf`);
+        
+        } catch (error) {
+             console.error("Error generating PDF:", error);
+             toast({ title: "PDF Generation Failed", description: "There was an issue creating the poster.", variant: "destructive" });
+        }
     };
+
 
     const handleCopyLink = () => {
         navigator.clipboard.writeText(publicUrl);
@@ -138,7 +210,7 @@ export default function GenerateQrPage() {
                     </CardContent>
                     <CardFooter className="flex-col gap-4 pt-6">
                         <Button onClick={handleDownload} className="w-full" disabled={loading || !qrUrl}>
-                            <Download className="mr-2 h-4 w-4"/>Download for Print
+                            <Download className="mr-2 h-4 w-4"/>Download Poster (PDF)
                         </Button>
                         <div className="w-full flex items-center space-x-2">
                             <div className="grid flex-1 gap-2">
