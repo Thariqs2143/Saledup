@@ -243,8 +243,10 @@ service cloud.firestore {
       
       // ✅ CORRECTED RULE: This is the only rule block needed for claims.
       match /claims/{claimId} {
+        // The public can 'get' a specific claim to check if it exists.
+        allow get: if true;
         // Staff can read/list claims for verification.
-        allow read, list, update: if isOwnerOrEmployee(shopId);
+        allow list, update: if isOwnerOrEmployee(shopId);
         // Only owner can delete claim history.
         allow delete: if isShopOwner(shopId);
         // Anyone can create a claim. This is essential for the public-facing offer page.
