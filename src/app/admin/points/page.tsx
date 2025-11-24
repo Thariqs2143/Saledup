@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -70,6 +71,7 @@ export default function AdminPointsPage() {
     const { toast } = useToast();
     
     // Dialog state
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
     const [pointsToRedeem, setPointsToRedeem] = useState<number>(0);
     const [isRedeeming, setIsRedeeming] = useState(false);
@@ -151,7 +153,7 @@ export default function AdminPointsPage() {
             await batch.commit();
             
             toast({title: "Success!", description: `${pointsToRedeem} points redeemed for ${selectedCustomer.name}.`});
-            setSelectedCustomer(null);
+            setIsDialogOpen(false);
             setPointsToRedeem(0);
 
         } catch (error) {
@@ -191,7 +193,7 @@ export default function AdminPointsPage() {
 
             await batch.commit();
             toast({title: "Points Adjusted!", description: `${selectedCustomer.name}'s balance has been updated.`});
-            setSelectedCustomer(null);
+            setIsDialogOpen(false);
             setPointsToAdjust(0);
             setAdjustmentReason('');
 
@@ -215,10 +217,15 @@ export default function AdminPointsPage() {
             toast({title: "Error", description: "Could not delete the customer record.", variant: "destructive"});
         }
     };
+    
+    const openDialogFor = (customer: Customer) => {
+        setSelectedCustomer(customer);
+        setIsDialogOpen(true);
+    }
 
 
     return (
-        <Dialog>
+        <>
             <div className="space-y-6">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
@@ -274,12 +281,8 @@ export default function AdminPointsPage() {
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <DialogTrigger asChild>
-                                                <Button size="sm" variant="outline" className="w-full" onClick={() => setSelectedCustomer(customer)}>Adjust</Button>
-                                            </DialogTrigger>
-                                            <DialogTrigger asChild>
-                                                <Button size="sm" className="w-full" onClick={() => setSelectedCustomer(customer)}>Redeem</Button>
-                                            </DialogTrigger>
+                                            <Button size="sm" variant="outline" className="w-full" onClick={() => openDialogFor(customer)}>Adjust</Button>
+                                            <Button size="sm" className="w-full" onClick={() => openDialogFor(customer)}>Redeem</Button>
                                             <a href={`tel:${customer.phone}`} className="w-full">
                                                 <Button size="sm" variant="outline" className="w-full"><Phone className="h-4 w-4"/></Button>
                                             </a>
@@ -335,7 +338,7 @@ export default function AdminPointsPage() {
                                             const points = log.pointsRedeemed || log.pointsAdjusted || 0;
 
                                             return (
-                                                <div key={log.id} className="p-4 flex items-center gap-4 border-b last:border-b-0">
+                                                <div key={log.id} className="p-4 flex items-center gap-4 border-b last:border-b-0 bg-background hover:bg-muted/50 rounded-lg">
                                                     <div className="p-3 rounded-full bg-muted">
                                                         {isRedemption || isNegativeAdjustment ? (
                                                             <ArrowDownRight className="h-5 w-5 text-destructive" />
@@ -371,78 +374,81 @@ export default function AdminPointsPage() {
                     </TabsContent>
                 </Tabs>
                 
-                <DialogContent>
-                    {selectedCustomer && (
-                    <>
-                        <DialogHeader>
-                            <DialogTitle>Adjust or Redeem Points</DialogTitle>
-                            <DialogDescription>
-                                For {selectedCustomer.name} (Current Balance: <span className="font-bold text-primary">{selectedCustomer.saledupPoints || 0}</span> points)
-                            </DialogDescription>
-                        </DialogHeader>
-                        <Tabs defaultValue="redeem" className="w-full">
-                            <TabsList className="grid w-full grid-cols-2">
-                                <TabsTrigger value="redeem">Redeem Points</TabsTrigger>
-                                <TabsTrigger value="adjust">Adjust Points</TabsTrigger>
-                            </TabsList>
-                            <TabsContent value="redeem" className="pt-4">
-                                <div className="space-y-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="points-to-redeem">Points to Redeem</Label>
-                                        <Input 
-                                            id="points-to-redeem" 
-                                            type="number" 
-                                            value={pointsToRedeem > 0 ? pointsToRedeem : ''}
-                                            onChange={(e) => setPointsToRedeem(Number(e.target.value))}
-                                            max={selectedCustomer.saledupPoints}
-                                            min={1}
-                                            placeholder="e.g., 50"
-                                        />
+                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                    <DialogContent>
+                        {selectedCustomer && (
+                        <>
+                            <DialogHeader>
+                                <DialogTitle>Adjust or Redeem Points</DialogTitle>
+                                <DialogDescription>
+                                    For {selectedCustomer.name} (Current Balance: <span className="font-bold text-primary">{selectedCustomer.saledupPoints || 0}</span> points)
+                                </DialogDescription>
+                            </DialogHeader>
+                            <Tabs defaultValue="redeem" className="w-full">
+                                <TabsList className="grid w-full grid-cols-2">
+                                    <TabsTrigger value="redeem">Redeem Points</TabsTrigger>
+                                    <TabsTrigger value="adjust">Adjust Points</TabsTrigger>
+                                </TabsList>
+                                <TabsContent value="redeem" className="pt-4">
+                                    <div className="space-y-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="points-to-redeem">Points to Redeem</Label>
+                                            <Input 
+                                                id="points-to-redeem" 
+                                                type="number" 
+                                                value={pointsToRedeem > 0 ? pointsToRedeem : ''}
+                                                onChange={(e) => setPointsToRedeem(Number(e.target.value))}
+                                                max={selectedCustomer.saledupPoints}
+                                                min={1}
+                                                placeholder="e.g., 50"
+                                            />
+                                        </div>
+                                        <Button onClick={handleRedeem} disabled={isRedeeming} className="w-full">
+                                            {isRedeeming && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
+                                            Confirm Redemption
+                                        </Button>
                                     </div>
-                                    <Button onClick={handleRedeem} disabled={isRedeeming} className="w-full">
-                                        {isRedeeming && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
-                                        Confirm Redemption
-                                    </Button>
-                                </div>
-                            </TabsContent>
-                             <TabsContent value="adjust" className="pt-4">
-                                 <div className="space-y-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="points-to-adjust">Points to Add/Subtract</Label>
-                                        <Input 
-                                            id="points-to-adjust" 
-                                            type="number" 
-                                            value={pointsToAdjust !== 0 ? pointsToAdjust : ''}
-                                            onChange={(e) => setPointsToAdjust(Number(e.target.value))}
-                                            placeholder="e.g., 50 or -20"
-                                        />
-                                        <p className="text-xs text-muted-foreground">Use a negative number to subtract points.</p>
+                                </TabsContent>
+                                <TabsContent value="adjust" className="pt-4">
+                                    <div className="space-y-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="points-to-adjust">Points to Add/Subtract</Label>
+                                            <Input 
+                                                id="points-to-adjust" 
+                                                type="number" 
+                                                value={pointsToAdjust !== 0 ? pointsToAdjust : ''}
+                                                onChange={(e) => setPointsToAdjust(Number(e.target.value))}
+                                                placeholder="e.g., 50 or -20"
+                                            />
+                                            <p className="text-xs text-muted-foreground">Use a negative number to subtract points.</p>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="adjustment-reason">Reason (Optional)</Label>
+                                            <Textarea
+                                                id="adjustment-reason"
+                                                value={adjustmentReason}
+                                                onChange={(e) => setAdjustmentReason(e.target.value)}
+                                                placeholder="e.g., Bonus for large purchase"
+                                            />
+                                        </div>
+                                        <Button onClick={handleAdjustPoints} disabled={isAdjusting} className="w-full">
+                                            {isAdjusting && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
+                                            Confirm Adjustment
+                                        </Button>
                                     </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="adjustment-reason">Reason (Optional)</Label>
-                                        <Textarea
-                                            id="adjustment-reason"
-                                            value={adjustmentReason}
-                                            onChange={(e) => setAdjustmentReason(e.target.value)}
-                                            placeholder="e.g., Bonus for large purchase"
-                                        />
-                                    </div>
-                                    <Button onClick={handleAdjustPoints} disabled={isAdjusting} className="w-full">
-                                        {isAdjusting && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
-                                        Confirm Adjustment
-                                    </Button>
-                                </div>
-                            </TabsContent>
-                        </Tabs>
-                        <DialogFooter>
-                            <DialogClose asChild>
-                                <Button variant="outline" onClick={() => setSelectedCustomer(null)}>Close</Button>
-                            </DialogClose>
-                        </DialogFooter>
-                    </>
-                    )}
-                </DialogContent>
+                                </TabsContent>
+                            </Tabs>
+                            <DialogFooter>
+                                <DialogClose asChild>
+                                    <Button variant="outline">Close</Button>
+                                </DialogClose>
+                            </DialogFooter>
+                        </>
+                        )}
+                    </DialogContent>
+                </Dialog>
             </div>
-        </Dialog>
+        </>
     );
 }
+
