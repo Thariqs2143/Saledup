@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Input } from "@/components/ui/input";
 import { Loader2, Search, Gem, Download, User as UserIcon, Phone, MinusCircle, PlusCircle, History, Mail, Trash2, Edit } from "lucide-react";
 import { collection, query, onSnapshot, orderBy, type Timestamp, doc, updateDoc, writeBatch, collectionGroup, addDoc, deleteDoc, increment } from "firebase/firestore";
-import { db, auth } from "@/lib/firebase";
+import { db, auth } from '@/lib/firebase';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -257,66 +257,52 @@ export default function AdminPointsPage() {
                                 <p>When customers claim offers, their points will appear here.</p>
                             </Card>
                         ) : (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                                 {filteredCustomers.map(customer => (
-                                    <Card key={customer.id} className="flex flex-col border-border hover:border-primary transition-all shadow-sm hover:shadow-lg">
-                                        <CardHeader className="flex-row items-center gap-4 space-y-0">
-                                            <div className="p-3 bg-primary/10 rounded-full">
-                                                <UserIcon className="h-6 w-6 text-primary"/>
-                                            </div>
+                                    <Card key={customer.id} className="p-4 flex flex-col gap-4 border-border hover:border-primary transition-all shadow-sm hover:shadow-md">
+                                        <div className="flex items-start justify-between">
                                             <div>
-                                                <CardTitle className="text-lg">{customer.name}</CardTitle>
-                                                <p className="text-sm text-muted-foreground">{customer.phone}</p>
+                                                <p className="font-bold text-base">{customer.name}</p>
+                                                <p className="text-xs text-muted-foreground">{customer.phone}</p>
+                                                {customer.email && <p className="text-xs text-muted-foreground truncate">{customer.email}</p>}
                                             </div>
-                                        </CardHeader>
-                                        <CardContent className="flex-1 space-y-3">
-                                            <div className="flex items-center justify-center text-center p-4 bg-muted rounded-lg">
-                                                <p className="text-4xl font-bold flex items-center gap-2">
-                                                    <Gem className="h-7 w-7 text-amber-500"/>
-                                                    {customer.saledupPoints || 0}
+                                             <div className="text-right shrink-0">
+                                                <p className="font-bold text-2xl flex items-center gap-1.5 text-amber-500">
+                                                    <Gem className="h-5 w-5"/>{customer.saledupPoints || 0}
                                                 </p>
+                                                <p className="text-xs text-muted-foreground">Points</p>
                                             </div>
-                                            {customer.email && (
-                                                <div className="flex items-center gap-2 text-sm text-muted-foreground truncate">
-                                                    <Mail className="h-4 w-4 shrink-0"/>
-                                                    <span className="truncate">{customer.email}</span>
-                                                </div>
-                                            )}
-                                        </CardContent>
-                                        <CardFooter className="flex flex-col gap-2">
-                                             <div className="grid grid-cols-2 gap-2 w-full">
-                                                 <DialogTrigger asChild>
-                                                    <Button variant="secondary" className="w-full" onClick={() => setSelectedCustomer(customer)}>Adjust</Button>
-                                                </DialogTrigger>
-                                                <DialogTrigger asChild>
-                                                    <Button className="w-full" onClick={() => setSelectedCustomer(customer)}>Redeem</Button>
-                                                </DialogTrigger>
-                                             </div>
-                                             <div className="grid grid-cols-2 gap-2 w-full">
-                                                <a href={`tel:${customer.phone}`} className="w-full">
-                                                    <Button variant="outline" className="w-full"><Phone className="mr-2 h-4 w-4"/> Call</Button>
-                                                </a>
-                                                <AlertDialog>
-                                                    <AlertDialogTrigger asChild>
-                                                        <Button variant="ghost" className="w-full text-destructive hover:text-destructive hover:bg-destructive/10">
-                                                            <Trash2 className="mr-2 h-4 w-4"/> Delete
-                                                        </Button>
-                                                    </AlertDialogTrigger>
-                                                    <AlertDialogContent>
-                                                        <AlertDialogHeader>
-                                                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                                            <AlertDialogDescription>
-                                                                This will permanently delete the points card for {customer.name}. This action cannot be undone.
-                                                            </AlertDialogDescription>
-                                                        </AlertDialogHeader>
-                                                        <AlertDialogFooter>
-                                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                            <AlertDialogAction onClick={() => handleDeleteCustomer(customer.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
-                                                        </AlertDialogFooter>
-                                                    </AlertDialogContent>
-                                                </AlertDialog>
-                                             </div>
-                                        </CardFooter>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <DialogTrigger asChild>
+                                                <Button size="sm" variant="outline" className="w-full" onClick={() => setSelectedCustomer(customer)}>Adjust</Button>
+                                            </DialogTrigger>
+                                            <DialogTrigger asChild>
+                                                <Button size="sm" className="w-full" onClick={() => setSelectedCustomer(customer)}>Redeem</Button>
+                                            </DialogTrigger>
+                                            <a href={`tel:${customer.phone}`} className="w-full">
+                                                <Button size="sm" variant="outline" className="w-full"><Phone className="h-4 w-4"/></Button>
+                                            </a>
+                                            <AlertDialog>
+                                                <AlertDialogTrigger asChild>
+                                                    <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                                                        <Trash2 className="h-4 w-4"/>
+                                                    </Button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                                        <AlertDialogDescription>
+                                                            This will permanently delete the points card for {customer.name}. This action cannot be undone.
+                                                        </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                        <AlertDialogAction onClick={() => handleDeleteCustomer(customer.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
+                                        </div>
                                     </Card>
                                 ))}
                             </div>
