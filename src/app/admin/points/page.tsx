@@ -230,7 +230,7 @@ export default function AdminPointsPage() {
                 <Tabs defaultValue="customers">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <TabsList className="grid w-full sm:w-auto grid-cols-2">
-                            <TabsTrigger value="customers"><UserIcon className="mr-2 h-4 w-4"/> Customer Balances</TabsTrigger>
+                            <TabsTrigger value="customers"><UserIcon className="mr-2 h-4 w-4"/> Points Balances</TabsTrigger>
                             <TabsTrigger value="log"><History className="mr-2 h-4 w-4"/> Activity Log</TabsTrigger>
                         </TabsList>
                         <div className="relative w-full sm:max-w-xs">
