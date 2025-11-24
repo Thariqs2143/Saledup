@@ -327,7 +327,7 @@ export default function AdminPointsPage() {
                                         <p>When points are redeemed or adjusted, the transactions will appear here.</p>
                                     </div>
                                 ) : (
-                                    <div className="space-y-4">
+                                    <div className="space-y-2">
                                         {redemptionLogs.map(log => {
                                             const isRedemption = !!log.pointsRedeemed;
                                             const isPositiveAdjustment = log.pointsAdjusted && log.pointsAdjusted > 0;
@@ -335,12 +335,12 @@ export default function AdminPointsPage() {
                                             const points = log.pointsRedeemed || log.pointsAdjusted || 0;
 
                                             return (
-                                                <Card key={log.id} className="p-4 flex items-center gap-4">
+                                                <div key={log.id} className="p-4 flex items-center gap-4 border-b last:border-b-0">
                                                     <div className="p-3 rounded-full bg-muted">
                                                         {isRedemption || isNegativeAdjustment ? (
-                                                            <ArrowDownRight className="h-6 w-6 text-destructive" />
+                                                            <ArrowDownRight className="h-5 w-5 text-destructive" />
                                                         ) : (
-                                                            <ArrowUpRight className="h-6 w-6 text-green-500" />
+                                                            <ArrowUpRight className="h-5 w-5 text-green-500" />
                                                         )}
                                                     </div>
                                                     <div className="flex-1">
@@ -361,7 +361,7 @@ export default function AdminPointsPage() {
                                                         </p>
                                                         <p className="text-xs text-muted-foreground">Points</p>
                                                     </div>
-                                                </Card>
+                                                </div>
                                             );
                                         })}
                                     </div>
