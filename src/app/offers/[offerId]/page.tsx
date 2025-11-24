@@ -7,7 +7,7 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { doc, getDoc, addDoc, collection, serverTimestamp, Timestamp, updateDoc, increment, onSnapshot, orderBy, runTransaction, getDocs, setDoc, query, where, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
-import { Loader2, ArrowLeft, Building, Tag, Info, Phone, Mail, MapPin, User as UserIcon, CheckCircle, Clock, Calendar, Gem, Eye, Star, MessageSquare, IndianRupee, Download, Globe, MessageCircle as WhatsAppIcon } from 'lucide-react';
+import { Loader2, ArrowLeft, Building, Tag, Info, Phone, Mail, MapPin, User as UserIcon, CheckCircle, Clock, Calendar, Gem, Eye, Star, MessageSquare, Download, Globe, MessageCircle as WhatsAppIcon } from 'lucide-react';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
@@ -341,53 +341,28 @@ export default function OfferDetailPage() {
         setIsClaiming(true);
 
         try {
-            // Check for existing claim
-            const claimsQuery = query(
-                collection(db, 'shops', shopId, 'claims'),
-                where('customerPhone', '==', customerPhone),
-                where('offerId', '==', offer.id),
-                limit(1)
-            );
-            const existingClaimSnap = await getDocs(claimsQuery);
-
-            if (!existingClaimSnap.empty) {
-                toast({
-                    title: "Already Claimed",
-                    description: "You have already claimed this offer.",
-                    variant: "destructive"
-                });
-                setIsClaiming(false);
-                return;
-            }
-
-            // Create claim and update customer in a transaction
+            const newClaimRef = doc(collection(db, 'shops', shopId, 'claims'));
+            
             await runTransaction(db, async (transaction) => {
-                const newClaimRef = doc(collection(db, 'shops', shopId, 'claims'));
-                
-                // 1. Update the shop-specific customer record
-                const shopCustomerRef = doc(db, 'shops', shopId, 'customers', customerPhone);
-                const shopCustomerSnap = await transaction.get(shopCustomerRef);
+                const claimsQuery = query(
+                    collection(db, 'shops', shopId, 'claims'),
+                    where('customerPhone', '==', customerPhone),
+                    where('offerId', '==', offer.id),
+                    limit(1)
+                );
+                const existingClaimSnap = await getDocs(claimsQuery);
 
-                if (shopCustomerSnap.exists()) {
-                    transaction.update(shopCustomerRef, {
-                        name: customerName,
-                        email: customerEmail || null,
-                        lastActivity: serverTimestamp(),
-                        totalClaims: increment(1),
-                        saledupPoints: increment(10)
-                    });
-                } else {
-                    transaction.set(shopCustomerRef, {
-                        name: customerName,
-                        phone: customerPhone,
-                        email: customerEmail || null,
-                        lastActivity: serverTimestamp(),
-                        totalClaims: 1,
-                        saledupPoints: 10,
-                    });
+                if (!existingClaimSnap.empty) {
+                    throw new Error("Already Claimed");
                 }
+                
+                // All reads must happen before writes.
+                const globalCustomerRef = doc(db, 'customers', customerPhone);
+                const globalCustomerSnap = await transaction.get(globalCustomerRef);
 
-                // 2. Create the new claim document
+                // --- ALL WRITES HAPPEN AFTER THIS POINT ---
+
+                // 1. Create the new claim document
                 transaction.set(newClaimRef, {
                     customerName,
                     customerPhone,
@@ -401,26 +376,51 @@ export default function OfferDetailPage() {
                     discountValue: offer.discountValue,
                 });
                 
-                // 3. Increment offer claim count
+                // 2. Increment offer claim count
                 const offerRef = doc(db, 'shops', shopId, 'offers', offer.id);
                 transaction.update(offerRef, { claimCount: increment(1) });
+                
+                // 3. Update the global customer record for points lookup
+                if (globalCustomerSnap.exists()) {
+                    transaction.update(globalCustomerRef, {
+                        name: customerName,
+                        email: customerEmail || null,
+                        lastActivity: serverTimestamp(),
+                        saledupPoints: increment(10)
+                    });
+                } else {
+                    transaction.set(globalCustomerRef, {
+                        name: customerName,
+                        phone: customerPhone,
+                        email: customerEmail || null,
+                        lastActivity: serverTimestamp(),
+                        saledupPoints: 10,
+                    });
+                }
             });
 
 
             // Prepare data for the success dialog
-            const claimId = (await getDocs(claimsQuery)).docs[0].id;
-            const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(claimId)}`;
+            const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(newClaimRef.id)}`;
             
             setClaimSuccessData({
-                claimId,
+                claimId: newClaimRef.id,
                 qrCodeUrl, 
                 offerTitle: offer.title,
             });
             setIsClaimDialogOpen(false);
     
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error claiming offer:", error);
-            toast({ title: "Claim Failed", description: "Something went wrong. Please try again.", variant: "destructive" });
+            if (error.message === 'Already Claimed') {
+                toast({
+                    title: "Offer Already Claimed",
+                    description: "You have already claimed this specific offer.",
+                    variant: "destructive"
+                });
+            } else {
+                toast({ title: "Claim Failed", description: "Something went wrong. Please try again.", variant: "destructive" });
+            }
         } finally {
             setIsClaiming(false);
         }
