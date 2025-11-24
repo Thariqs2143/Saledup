@@ -7,7 +7,7 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { doc, getDoc, addDoc, collection, serverTimestamp, Timestamp, updateDoc, increment, onSnapshot, orderBy, runTransaction, getDocs, setDoc, query, where, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
-import { Loader2, ArrowLeft, Building, Tag, Info, Phone, Mail, MapPin, User as UserIcon, CheckCircle, Clock, Calendar, Gem, Eye, Star, MessageSquare, Download, Globe, MessageCircle as WhatsAppIcon, IndianRupee } from 'lucide-react';
+import { Loader2, ArrowLeft, Building, Tag, Info, Phone, Mail, MapPin, User as UserIcon, CheckCircle, Clock, Calendar, Gem, Eye, Star, MessageSquare, Download, Globe, MessageCircle as WhatsAppIcon, IndianRupee, AlertTriangle } from 'lucide-react';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
@@ -29,6 +29,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import jsPDF from 'jspdf';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 
 type Shop = {
@@ -127,6 +128,7 @@ export default function OfferDetailPage() {
 
     const [isClaiming, setIsClaiming] = useState(false);
     const [isClaimDialogOpen, setIsClaimDialogOpen] = useState(false);
+    const [alreadyClaimed, setAlreadyClaimed] = useState(false);
     const [claimSuccessData, setClaimSuccessData] = useState<{claimId: string, qrCodeUrl: string, offerTitle: string} | null>(null);
     const [isReviewDialogOpen, setIsReviewDialogOpen] = useState(false);
     const [isSubmittingReview, setIsSubmittingReview] = useState(false);
@@ -335,26 +337,31 @@ export default function OfferDetailPage() {
         }
     };
     
-    const handleClaimOffer = async (e: React.FormEvent) => {
+   const handleClaimOffer = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!offer || !shopId) return;
+        if (!offer || !shopId || !customerPhone) return;
         setIsClaiming(true);
+        setAlreadyClaimed(false);
+
+        // Create a unique, predictable ID for the claim
+        const claimId = `${offer.id}_${customerPhone}`;
+        const newClaimRef = doc(db, 'shops', shopId, 'claims', claimId);
 
         try {
-            // This is the correct, transactional way to handle the claim.
-            const newClaimRef = doc(collection(db, 'shops', shopId, 'claims'));
-            
+            // Use a transaction to safely create the claim and update counts
             await runTransaction(db, async (transaction) => {
-                // All READS must happen before any WRITES.
+                const claimDoc = await transaction.get(newClaimRef);
+
+                if (claimDoc.exists()) {
+                    // This will cause the transaction to fail, and we'll catch it below.
+                    throw new Error("AlreadyClaimed");
+                }
+
                 const offerRef = doc(db, 'shops', shopId, 'offers', offer.id);
                 const shopCustomerRef = doc(db, 'shops', shopId, 'customers', customerPhone);
                 const globalCustomerRef = doc(db, 'customers', customerPhone);
 
-                // Although we are not reading from them first in this simplified logic,
-                // we define all references upfront.
-
-                // All WRITES happen now.
-                // 1. Create the new claim document.
+                // 1. Create the new claim document with the unique ID.
                 transaction.set(newClaimRef, {
                     customerName,
                     customerPhone,
@@ -390,18 +397,23 @@ export default function OfferDetailPage() {
                 }, { merge: true });
             });
 
-            // If the transaction is successful, show the success dialog.
-            const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(newClaimRef.id)}`;
+            // If transaction is successful, show success dialog
+            const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(claimId)}`;
             setClaimSuccessData({
-                claimId: newClaimRef.id,
+                claimId,
                 qrCodeUrl, 
                 offerTitle: offer.title,
             });
             setIsClaimDialogOpen(false);
-    
+
         } catch (error: any) {
-            console.error("Error claiming offer:", error);
-            toast({ title: "Claim Failed", description: "Something went wrong. Please try again.", variant: "destructive" });
+            if (error.message === "AlreadyClaimed") {
+                // This is our custom error for a duplicate claim
+                setAlreadyClaimed(true); // Show the alert in the claim dialog
+            } else {
+                console.error("Error claiming offer:", error);
+                toast({ title: "Claim Failed", description: "An unexpected error occurred. Please try again.", variant: "destructive" });
+            }
         } finally {
             setIsClaiming(false);
         }
@@ -441,6 +453,7 @@ export default function OfferDetailPage() {
         setCustomerName('');
         setCustomerPhone('');
         setCustomerEmail('');
+        setAlreadyClaimed(false);
     }
 
     if (loading) {
@@ -662,6 +675,15 @@ export default function OfferDetailPage() {
                             Enter your details to get a unique QR code to redeem this offer in-store.
                         </DialogDescription>
                     </DialogHeader>
+                    {alreadyClaimed && (
+                        <Alert variant="destructive">
+                            <AlertTriangle className="h-4 w-4" />
+                            <AlertTitle>Offer Already Claimed</AlertTitle>
+                            <AlertDescription>
+                                You have already claimed this offer with this phone number.
+                            </AlertDescription>
+                        </Alert>
+                    )}
                     <form onSubmit={handleClaimOffer}>
                         <div className="space-y-4 py-4">
                             <div className="space-y-2">
@@ -674,7 +696,10 @@ export default function OfferDetailPage() {
                                     id="customer-phone" 
                                     type="tel" 
                                     value={customerPhone} 
-                                    onChange={(e) => setCustomerPhone(e.target.value.replace(/\D/g, '').slice(0, 10))} 
+                                    onChange={(e) => {
+                                        setCustomerPhone(e.target.value.replace(/\D/g, '').slice(0, 10));
+                                        setAlreadyClaimed(false); // Reset on change
+                                    }} 
                                     required 
                                     pattern="[0-9]{10}"
                                     title="Please enter a 10-digit mobile number"
@@ -687,7 +712,7 @@ export default function OfferDetailPage() {
                             </div>
                         </div>
                         <DialogFooter className="gap-2 sm:justify-between">
-                            <Button type="button" variant="outline" onClick={() => setIsClaimDialogOpen(false)}>Cancel</Button>
+                            <Button type="button" variant="outline" onClick={() => { setIsClaimDialogOpen(false); setAlreadyClaimed(false); }}>Cancel</Button>
                             <Button type="submit" disabled={isClaiming}>
                                 {isClaiming && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
                                 Get My QR Code
