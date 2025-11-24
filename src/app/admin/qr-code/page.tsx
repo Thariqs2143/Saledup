@@ -173,7 +173,7 @@ export default function GenerateQrPage() {
             // QR Code
             const qrSize = 100;
             const qrX = (pageWidth - qrSize) / 2;
-            const qrY = 90;
+            const qrY = 70; // Adjusted Y position to reduce the gap
             pdf.addImage(qrCodeDataUrl, 'PNG', qrX, qrY, qrSize, qrSize);
 
             // Red border around QR
