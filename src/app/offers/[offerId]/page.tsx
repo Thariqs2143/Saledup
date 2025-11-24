@@ -341,15 +341,16 @@ export default function OfferDetailPage() {
         setIsClaiming(true);
 
         try {
-            await runTransaction(db, async (transaction) => {
-                // All reads must happen before writes.
-                const claimsQuery = query(
-                    collection(db, 'shops', shopId, 'claims'),
+            const newClaimId = await runTransaction(db, async (transaction) => {
+                // All reads must happen before all writes.
+                const claimsCollectionRef = collection(db, 'shops', shopId, 'claims');
+                const existingClaimQuery = query(
+                    claimsCollectionRef,
                     where('customerPhone', '==', customerPhone),
                     where('offerId', '==', offer.id),
                     limit(1)
                 );
-                const existingClaimSnap = await getDocs(claimsQuery);
+                const existingClaimSnap = await transaction.get(existingClaimQuery);
                 
                 if (!existingClaimSnap.empty) {
                     throw new Error("Already Claimed");
@@ -357,9 +358,10 @@ export default function OfferDetailPage() {
                 
                 const shopCustomerRef = doc(db, 'shops', shopId, 'customers', customerPhone);
                 const globalCustomerRef = doc(db, 'customers', customerPhone);
+                const offerRef = doc(db, 'shops', shopId, 'offers', offer.id);
                 
                 // --- ALL WRITES HAPPEN AFTER THIS POINT ---
-                const newClaimRef = doc(collection(db, 'shops', shopId, 'claims'));
+                const newClaimRef = doc(claimsCollectionRef);
                 
                 // 1. Create the new claim document
                 transaction.set(newClaimRef, {
@@ -376,7 +378,6 @@ export default function OfferDetailPage() {
                 });
                 
                 // 2. Increment offer claim count
-                const offerRef = doc(db, 'shops', shopId, 'offers', offer.id);
                 transaction.update(offerRef, { claimCount: increment(1) });
                 
                 // 3. Create or update the shop-specific customer record
@@ -401,15 +402,8 @@ export default function OfferDetailPage() {
                 return newClaimRef.id;
             });
 
-            // If transaction is successful, get the new ID and show success
-            // This part runs outside the transaction block
-            const claimsQuery = query(collection(db, 'shops', shopId, 'claims'), where('customerPhone', '==', customerPhone), where('offerId', '==', offer.id), limit(1));
-            const newClaimSnap = await getDocs(claimsQuery);
-            if (newClaimSnap.empty) throw new Error("Could not retrieve new claim.");
-
-            const newClaimId = newClaimSnap.docs[0].id;
+            // If transaction is successful, show success dialog
             const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(newClaimId)}`;
-            
             setClaimSuccessData({
                 claimId: newClaimId,
                 qrCodeUrl, 
