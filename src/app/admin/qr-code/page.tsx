@@ -107,7 +107,6 @@ export default function GenerateQrPage() {
         // --- Load Images as data URLs ---
         const toDataURL = (url: string): Promise<string> => {
             return new Promise((resolve, reject) => {
-                // Use window.Image to avoid conflict with Next.js Image component
                 const img = new window.Image();
                 img.crossOrigin = 'Anonymous';
                 img.onload = () => {
@@ -153,17 +152,21 @@ export default function GenerateQrPage() {
 
             // Shop Logo and Name
             const shopSectionY = 45;
+            const shopNameFontSize = 30;
+            pdf.setFontSize(shopNameFontSize);
+            pdf.setFont('helvetica', 'bold');
+            pdf.setTextColor(40, 40, 40);
+
             if (shopLogoDataUrl) {
                 const logoSize = 20;
-                pdf.addImage(shopLogoDataUrl, 'PNG', 20, shopSectionY - (logoSize/2), logoSize, logoSize);
-                pdf.setFontSize(30);
-                pdf.setFont('helvetica', 'bold'); // Assuming Poppins is not standard, using Helvetica
-                pdf.setTextColor(40, 40, 40);
-                pdf.text(shopData.shopName, 20 + logoSize + 5, shopSectionY + 5);
+                const gap = 5;
+                const textWidth = pdf.getStringUnitWidth(shopData.shopName) * shopNameFontSize / pdf.internal.scaleFactor;
+                const totalWidth = logoSize + gap + textWidth;
+                const startX = (pageWidth - totalWidth) / 2;
+
+                pdf.addImage(shopLogoDataUrl, 'PNG', startX, shopSectionY - (logoSize/2), logoSize, logoSize);
+                pdf.text(shopData.shopName, startX + logoSize + gap, shopSectionY + 5);
             } else {
-                 pdf.setFontSize(40);
-                pdf.setFont('helvetica', 'bold'); // Assuming Poppins is not standard, using Helvetica
-                pdf.setTextColor(40, 40, 40);
                 pdf.text(shopData.shopName, pageWidth / 2, shopSectionY + 8, { align: 'center' });
             }
 
