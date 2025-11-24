@@ -28,6 +28,7 @@ const adminNavItems: NavItem[] = [
   { href: '/admin', label: 'Home', iconName: 'LayoutDashboard' },
   { href: '/admin/offers', label: 'Offers', iconName: 'Gift' },
   { href: '/admin/vouchers', label: 'Gift Vouchers', iconName: 'Tag' },
+  { href: '/admin/qr-code', label: 'QR Code', iconName: 'QrCode' },
   { href: '/admin/redeem', label: 'Redeem', iconName: 'ScanLine' },
   { href: '/admin/customers', label: 'Customers', iconName: 'Users' },
   { href: '/admin/points', label: 'Points', iconName: 'Gem' },
@@ -39,8 +40,8 @@ const adminNavItems: NavItem[] = [
 const mobileBottomNavItems: NavItem[] = [
   { href: '/admin', label: 'Home', iconName: 'LayoutDashboard' },
   { href: '/admin/offers', label: 'Offers', iconName: 'Gift' },
+  { href: '/admin/qr-code', label: 'QR', iconName: 'QrCode' },
   { href: '/admin/redeem', label: 'Redeem', iconName: 'ScanLine' },
-  { href: '/admin/points', label: 'Points', iconName: 'Gem' },
   { href: '/admin/customers', label: 'Customers', iconName: 'Users' },
   { href: '/admin/profile', label: 'Profile', iconName: 'User' },
 ];
