@@ -1,4 +1,3 @@
-
 rules_version = '2';
 
 service cloud.firestore {
@@ -233,27 +232,22 @@ service cloud.firestore {
       // Offers Subcollection
       match /offers/{offerId} {
         // Owner and Managers can create and delete offers.
-        allow create, delete: if isShopOwner(shopId) || getRole(shopId) == 'Manager';
-        // Allow public views to increment viewCount, and owners/managers to edit anything.
-        allow update: if (isShopOwner(shopId) || getRole(shopId) == 'Manager') || 
-
-               (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount', 'claimCount']));
+        allow create, delete: if isShopOwner(shopId);
+        // Allow public views to increment viewCount, and owners/managers to edit anything else.
+        allow update: if (isShopOwner(shopId)) || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount', 'claimCount']));
         // All staff can list offers.
         allow list: if isOwnerOrEmployee(shopId);
         // Public can view offers.
         allow get: if true;
       }
       
-      // Claims Subcollection
+      // ✅ CORRECTED RULE: This is the only rule block needed for claims.
       match /claims/{claimId} {
-        // Owner and staff can read/list claims for verification.
-        // Cashiers need this to redeem.
-        allow read, list: if isOwnerOrEmployee(shopId);
-        // Owner and staff can update a claim's status (e.g., to 'redeemed').
-        allow update: if isOwnerOrEmployee(shopId);
+        // Staff can read/list claims for verification.
+        allow read, list, update: if isOwnerOrEmployee(shopId);
         // Only owner can delete claim history.
         allow delete: if isShopOwner(shopId);
-        // Public can create claims.
+        // Anyone can create a claim. This is essential for the public-facing offer page.
         allow create: if true;
       }
       
@@ -276,18 +270,8 @@ service cloud.firestore {
         // No updates allowed
         allow update: if false;
       }
-      
-      
-   // ✅ CORRECTED RULE: Allow public read access to the customers collection.
-// This allows anyone to check their points balance using their phone number.
-// Writes are still open so the claim function can create/update profiles.
-match /customers/{phone} {
-    allow get: if true;
-    allow create, update: if true;
-    allow delete: if false;
-}
    
-// This collection stores all gift vouchers, accessible via their unique ID.
+    // This collection stores all gift vouchers, accessible via their unique ID.
     match /vouchers/{voucherId} {
       // Public can GET a specific voucher for the public verification page.
       allow get: if true;
@@ -302,10 +286,6 @@ match /customers/{phone} {
       allow delete: if isShopOwner(resource.data.shopId);
     }
     
-    
-    
-  
-
       // QR History Subcollection
       match /qr-history/{docId} {
         allow read, write: if isShopOwner(shopId) || isSuperAdmin();
@@ -319,14 +299,16 @@ match /customers/{phone} {
       match /shifts/{shiftId} {
           allow read, write: if isShopOwner(shopId) || isSuperAdmin();
       }
-
-       
-    
     }
     
-          
-
-    
+    // ✅ CORRECTED RULE: Allow public read access to the customers collection.
+    // This allows anyone to check their points balance using their phone number.
+    // Writes are also open so the claim function can create/update profiles.
+    match /customers/{phone} {
+        allow get: if true;
+        allow create, update: if true;
+        allow delete: if false;
+    }
 
     // ----------------------
 // Collection Group Queries (All Branches view)

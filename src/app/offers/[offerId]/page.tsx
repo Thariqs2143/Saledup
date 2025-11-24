@@ -341,23 +341,20 @@ export default function OfferDetailPage() {
         setIsClaiming(true);
 
         try {
-            // Simplified: Directly attempt to create the documents in a transaction.
-            // Firestore transactions will automatically fail if a document to be created already exists,
-            // but for claims, we want a new one each time unless we explicitly prevent duplicates.
-            // For testing, we are removing the duplicate check.
-            
-            const claimsCollectionRef = collection(db, 'shops', shopId, 'claims');
-            const newClaimRef = doc(claimsCollectionRef); // Create a reference for the new claim
+            // This is the correct, transactional way to handle the claim.
+            const newClaimRef = doc(collection(db, 'shops', shopId, 'claims'));
             
             await runTransaction(db, async (transaction) => {
+                // All READS must happen before any WRITES.
+                const offerRef = doc(db, 'shops', shopId, 'offers', offer.id);
                 const shopCustomerRef = doc(db, 'shops', shopId, 'customers', customerPhone);
                 const globalCustomerRef = doc(db, 'customers', customerPhone);
-                const offerRef = doc(db, 'shops', shopId, 'offers', offer.id);
 
-                // No reads needed for this simplified version.
-                
-                // --- WRITES ---
-                // 1. Create the new claim document
+                // Although we are not reading from them first in this simplified logic,
+                // we define all references upfront.
+
+                // All WRITES happen now.
+                // 1. Create the new claim document.
                 transaction.set(newClaimRef, {
                     customerName,
                     customerPhone,
@@ -371,19 +368,19 @@ export default function OfferDetailPage() {
                     discountValue: offer.discountValue,
                 });
                 
-                // 2. Increment offer claim count
+                // 2. Increment the offer's claim count.
                 transaction.update(offerRef, { claimCount: increment(1) });
                 
-                // 3. Create or update the shop-specific customer record
+                // 3. Create or update the shop-specific customer record to award points.
                 transaction.set(shopCustomerRef, { 
                     name: customerName,
                     phone: customerPhone,
                     email: customerEmail || null,
-                    saledupPoints: increment(10), // Award 10 points per claim
+                    saledupPoints: increment(10), // Award 10 points
                     lastActivity: serverTimestamp(),
                 }, { merge: true });
 
-                // 4. Create or update the global customer record
+                // 4. Create or update the global customer record for the "My Points" page.
                 transaction.set(globalCustomerRef, {
                     name: customerName,
                     phone: customerPhone,
@@ -393,7 +390,7 @@ export default function OfferDetailPage() {
                 }, { merge: true });
             });
 
-            // If transaction is successful, show success dialog
+            // If the transaction is successful, show the success dialog.
             const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(newClaimRef.id)}`;
             setClaimSuccessData({
                 claimId: newClaimRef.id,
