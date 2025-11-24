@@ -62,6 +62,7 @@ type Offer = {
     endDate?: Timestamp;
     startTime?: string;
     endTime?: string;
+    isFeatured?: boolean;
 };
 
 type Review = {
@@ -518,7 +519,12 @@ export default function OfferDetailPage() {
                 
                 <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-8">
                     <div className="md:col-span-2 space-y-6">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
+                             {offer.isFeatured && (
+                                <Badge className="text-base py-1 px-3 bg-amber-400 text-amber-900 hover:bg-amber-400">
+                                    <Star className="mr-2 h-4 w-4" /> Featured Deal
+                                </Badge>
+                            )}
                             {offer.discountValue && (
                                 <Badge variant='secondary' className="text-base py-1 px-3">
                                     {offer.discountValue}{offer.discountType === 'percentage' ? '%' : ''} OFF

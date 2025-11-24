@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -8,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Tag, Upload, ArrowLeft, Save, Trash2, Calendar as CalendarIcon, Clock, IndianRupee } from 'lucide-react';
+import { Loader2, Tag, Upload, ArrowLeft, Save, Trash2, Calendar as CalendarIcon, Clock, IndianRupee, Star } from 'lucide-react';
 import { doc, getDoc, updateDoc, deleteDoc, serverTimestamp, type Timestamp } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
 import { onAuthStateChanged, type User as AuthUser } from 'firebase/auth';
@@ -40,6 +41,7 @@ type Offer = {
     approximateValue?: number;
     terms?: string;
     imageUrl?: string;
+    isFeatured?: boolean;
     // New scheduling fields
     startDate?: Timestamp;
     endDate?: Timestamp;
@@ -106,7 +108,7 @@ export default function AdminEditOfferPage() {
 
     }, [authUser, offerId, router, toast]);
 
-    const handleFieldChange = (field: keyof Offer, value: string | number) => {
+    const handleFieldChange = (field: keyof Offer, value: string | number | boolean) => {
         setOffer(prev => prev ? { ...prev, [field]: value } : null);
     };
 

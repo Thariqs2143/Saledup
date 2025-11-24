@@ -55,6 +55,7 @@ type Offer = {
     endDate?: Timestamp;
     startTime?: string;
     endTime?: string;
+    isFeatured?: boolean;
 };
 
 type Review = {
@@ -180,8 +181,11 @@ export default function ShopOffersPage() {
         return () => unsubscribeReviews();
     }, [shopId, router, toast]);
 
-    const activeOffers = useMemo(() => {
-        return allOffers.filter(isOfferCurrentlyActive);
+    const { featuredOffer, activeOffers } = useMemo(() => {
+        const currentlyActive = allOffers.filter(isOfferCurrentlyActive);
+        const featured = currentlyActive.find(o => o.isFeatured);
+        const others = currentlyActive.filter(o => !o.isFeatured);
+        return { featuredOffer: featured, activeOffers: others };
     }, [allOffers]);
 
     const averageRating = useMemo(() => {
@@ -268,7 +272,35 @@ export default function ShopOffersPage() {
 
         {/* Offers Grid */}
         <main className="container mx-auto max-w-5xl p-4 sm:p-6 lg:p-8 flex-1">
-            <h2 className="text-xl font-bold mb-6 text-center sm:text-left">Available Offers ({activeOffers.length})</h2>
+            {featuredOffer && (
+                <div className="mb-12">
+                    <h2 className="text-xl font-bold mb-4">Featured Deal</h2>
+                    <Link href={`/offers/${featuredOffer.id}?shopId=${shopId}&from=shop`} className="block">
+                         <Card className="flex flex-col md:flex-row bg-background transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group border-2 border-primary shadow-primary/20">
+                            <div className="md:w-1/2 relative aspect-video md:aspect-auto">
+                                <Image 
+                                    src={featuredOffer.imageUrl || `https://placehold.co/600x400?text=${featuredOffer.title.replace(/\s/g, '+')}`}
+                                    alt={featuredOffer.title}
+                                    layout="fill"
+                                    objectFit="cover"
+                                    className="rounded-t-lg md:rounded-l-lg md:rounded-r-none"
+                                />
+                            </div>
+                            <div className="md:w-1/2 flex flex-col">
+                                <CardContent className="p-6 flex-1 space-y-3">
+                                    <h3 className="font-bold text-xl md:text-2xl leading-snug group-hover:text-primary">{featuredOffer.title}</h3>
+                                    <p className="text-muted-foreground line-clamp-3">{featuredOffer.description}</p>
+                                </CardContent>
+                                <CardFooter className="p-6 border-t">
+                                    <Button size="lg" className="w-full">View Featured Deal</Button>
+                                </CardFooter>
+                            </div>
+                        </Card>
+                    </Link>
+                </div>
+            )}
+            
+            <h2 className="text-xl font-bold mb-6 text-center sm:text-left">All Offers ({activeOffers.length})</h2>
              {activeOffers.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
                     {activeOffers.map(offer => (
@@ -303,13 +335,13 @@ export default function ShopOffersPage() {
                         </Link>
                     ))}
                 </div>
-            ) : (
+            ) : !featuredOffer ? (
                  <div className="text-center py-20 text-muted-foreground bg-background rounded-lg border">
                     <Tag className="h-16 w-16 mx-auto mb-4 opacity-50" />
                     <h3 className="text-xl font-semibold">No Active Offers</h3>
                     <p>This shop doesn't have any offers right now. Check back soon!</p>
                 </div>
-            )}
+            ) : null}
             
             {/* Reviews Section */}
             <div className="mt-12">

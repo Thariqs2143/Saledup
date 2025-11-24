@@ -144,14 +144,14 @@ export default function GenerateQrPage() {
 
             // --- Header Section ---
             // Saledup Logo Text
-            pdf.setFontSize(32);
+            pdf.setFontSize(50);
             pdf.setFont('helvetica', 'bold');
             pdf.setTextColor(255, 255, 255);
             pdf.text("Saledup", pageWidth / 2, 25, { align: 'center' });
 
 
             // Shop Logo and Name
-            const shopSectionY = 60;
+            const shopSectionY = 75;
             const shopNameFontSize = 30;
             pdf.setFontSize(shopNameFontSize);
             pdf.setFont('helvetica', 'bold');
@@ -173,7 +173,7 @@ export default function GenerateQrPage() {
             // QR Code
             const qrSize = 100;
             const qrX = (pageWidth - qrSize) / 2;
-            const qrY = 90; // Adjusted Y position to reduce the gap
+            const qrY = 100; // Adjusted Y position to reduce the gap
             pdf.addImage(qrCodeDataUrl, 'PNG', qrX, qrY, qrSize, qrSize);
 
             // Red border around QR

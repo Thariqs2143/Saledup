@@ -4,9 +4,9 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, PlusCircle, Tag, Check, X, Users, Eye, Edit, BarChart3 } from "lucide-react";
+import { Loader2, PlusCircle, Tag, Check, X, Users, Eye, Edit, BarChart3, Star } from "lucide-react";
 import Link from 'next/link';
-import { collection, onSnapshot, query, orderBy, doc, updateDoc, type Timestamp } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, doc, updateDoc, type Timestamp, writeBatch, getDocs, where } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { onAuthStateChanged, type User as AuthUser } from 'firebase/auth';
@@ -18,12 +18,14 @@ import { formatDistanceToNow } from 'date-fns';
 import { Label } from "@/components/ui/label";
 import { errorEmitter } from '@/lib/error-emitter';
 import { FirestorePermissionError } from '@/lib/errors';
+import { cn } from '@/lib/utils';
 
 type Offer = {
     id: string;
     title: string;
     imageUrl?: string;
     isActive: boolean;
+    isFeatured?: boolean;
     claimCount: number;
     viewCount?: number;
     createdAt: Timestamp;
@@ -90,6 +92,44 @@ export default function AdminOffersPage() {
             toast({ title: "Update Failed", description: "You don't have permission to change the status.", variant: "destructive" });
         }
     };
+    
+    const handleFeatureToggle = async (offerToFeature: Offer) => {
+        if (!authUser) return;
+
+        const batch = writeBatch(db);
+        const offersCollectionRef = collection(db, 'shops', authUser.uid, 'offers');
+
+        // If the clicked offer is already featured, un-feature it.
+        if (offerToFeature.isFeatured) {
+            const offerRef = doc(offersCollectionRef, offerToFeature.id);
+            batch.update(offerRef, { isFeatured: false });
+            
+            await batch.commit();
+            toast({ title: "Offer Un-featured", description: `${offerToFeature.title} is no longer the featured deal.` });
+            return;
+        }
+
+        // Find any other currently featured offer
+        const featuredQuery = query(offersCollectionRef, where("isFeatured", "==", true));
+        const featuredSnapshot = await getDocs(featuredQuery);
+
+        // Un-feature the current featured offer, if one exists
+        featuredSnapshot.forEach(doc => {
+            batch.update(doc.ref, { isFeatured: false });
+        });
+
+        // Feature the new offer
+        const newFeaturedRef = doc(offersCollectionRef, offerToFeature.id);
+        batch.update(newFeaturedRef, { isFeatured: true });
+
+        try {
+            await batch.commit();
+            toast({ title: "Offer Featured!", description: `${offerToFeature.title} is now your main deal.` });
+        } catch (error) {
+             toast({ title: "Update Failed", description: "Could not feature the offer.", variant: "destructive" });
+             console.error("Error toggling featured offer:", error);
+        }
+    };
 
     return (
         <div className="space-y-6">
@@ -136,8 +176,13 @@ export default function AdminOffersPage() {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {offers.map(offer => (
-                        <Card key={offer.id} className="flex flex-col">
+                        <Card key={offer.id} className={cn("flex flex-col", offer.isFeatured && "border-2 border-primary shadow-lg shadow-primary/20")}>
                             <CardHeader className="relative p-0">
+                                {offer.isFeatured && (
+                                    <Badge className="absolute top-2 left-2 z-10 bg-primary text-primary-foreground">
+                                        <Star className="mr-1 h-3 w-3" /> Featured
+                                    </Badge>
+                                )}
                                 <Badge className="absolute top-2 right-2 z-10" variant={offer.isActive ? 'secondary' : 'destructive'}>
                                     {offer.isActive ? <><Check className="mr-1 h-3 w-3"/> Active</> : <><X className="mr-1 h-3 w-3"/> Inactive</>}
                                 </Badge>
@@ -176,11 +221,16 @@ export default function AdminOffersPage() {
                                         {offer.isActive ? 'Active' : 'Inactive'}
                                     </Label>
                                 </div>
-                                <Button asChild variant="outline" size="sm">
-                                    <Link href={`/admin/offers/${offer.id}`}>
-                                        <Edit className="h-3 w-3 mr-1.5"/> Edit
-                                    </Link>
-                                </Button>
+                                <div className="flex items-center gap-2">
+                                     <Button variant={offer.isFeatured ? "default" : "ghost"} size="icon" className="h-8 w-8" onClick={() => handleFeatureToggle(offer)}>
+                                        <Star className={cn("h-4 w-4", offer.isFeatured && "fill-current")} />
+                                    </Button>
+                                    <Button asChild variant="outline" size="sm">
+                                        <Link href={`/admin/offers/${offer.id}`}>
+                                            <Edit className="h-3 w-3 mr-1.5"/> Edit
+                                        </Link>
+                                    </Button>
+                                </div>
                             </CardFooter>
                         </Card>
                     ))}
