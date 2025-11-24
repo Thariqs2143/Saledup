@@ -140,19 +140,15 @@ export default function GenerateQrPage() {
             // Background colors
             pdf.setFillColor(255, 65, 54); // Red
             pdf.triangle(0, 0, pageWidth, 0, 0, 80, 'F');
-            pdf.setFillColor(70, 130, 180); // SteelBlue
+            pdf.setFillColor(0, 0, 0); // Black
             pdf.triangle(pageWidth, pageHeight, 0, pageHeight, pageWidth, pageHeight - 80, 'F');
 
             // --- Header Section ---
             // Saledup Logo Text
-            pdf.setFontSize(28);
+            pdf.setFontSize(32);
             pdf.setFont('helvetica', 'bold');
             pdf.setTextColor(255, 255, 255);
             pdf.text("Saledup", pageWidth / 2, 25, { align: 'center' });
-            
-            pdf.setFontSize(10);
-             pdf.setFont('helvetica', 'normal');
-            pdf.text("POWERED BY", pageWidth / 2, 16, { align: 'center' });
 
 
             // Shop Logo and Name
@@ -161,12 +157,12 @@ export default function GenerateQrPage() {
                 const logoSize = 20;
                 pdf.addImage(shopLogoDataUrl, 'PNG', 20, shopSectionY - (logoSize/2), logoSize, logoSize);
                 pdf.setFontSize(30);
-                pdf.setFont('helvetica', 'bold');
+                pdf.setFont('helvetica', 'bold'); // Assuming Poppins is not standard, using Helvetica
                 pdf.setTextColor(40, 40, 40);
                 pdf.text(shopData.shopName, 20 + logoSize + 5, shopSectionY + 5);
             } else {
                  pdf.setFontSize(40);
-                pdf.setFont('helvetica', 'bold');
+                pdf.setFont('helvetica', 'bold'); // Assuming Poppins is not standard, using Helvetica
                 pdf.setTextColor(40, 40, 40);
                 pdf.text(shopData.shopName, pageWidth / 2, shopSectionY + 8, { align: 'center' });
             }
@@ -192,8 +188,8 @@ export default function GenerateQrPage() {
             pdf.text("SCAN ME", pageWidth / 2, scanMeY + 3, { align: 'center' });
 
             // Instructional Text
-            pdf.setFontSize(14);
-            pdf.setFont('helvetica', 'normal');
+            pdf.setFontSize(18);
+            pdf.setFont('helvetica', 'bold');
             pdf.setTextColor(100, 100, 100);
             pdf.text("Scan this code to see our latest offers and deals!", pageWidth / 2, scanMeY + 25, { align: 'center' });
             
