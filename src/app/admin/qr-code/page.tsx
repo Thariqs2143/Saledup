@@ -297,7 +297,3 @@ export default function GenerateQrPage() {
         </div>
     );
 }
-
-    
-
-    
