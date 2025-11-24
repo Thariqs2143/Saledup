@@ -1,14 +1,15 @@
 
+
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Users, QrCode, Loader2, BarChart3, LogOut, Activity, Sparkles, Tag, Eye, CheckCircle, XCircle } from "lucide-react";
+import { Users, QrCode, Loader2, BarChart3, LogOut, Activity, Sparkles, Tag, Eye, CheckCircle, XCircle, Trophy, Star } from "lucide-react";
 import Link from 'next/link';
 import { AnimatedCounter } from "@/components/animated-counter";
 import { useEffect, useState, useMemo } from "react";
-import { collection, onSnapshot, query, where, Timestamp, orderBy, limit, doc, getDoc } from 'firebase/firestore';
+import { collection, onSnapshot, query, where, Timestamp, orderBy, limit, doc, getDoc, getDocs } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
 import { format, formatDistanceToNow, startOfToday, endOfToday, subDays, startOfDay, endOfDay, subMonths, startOfMonth, endOfMonth, subYears, startOfYear, endOfYear } from 'date-fns';
 import { onAuthStateChanged, type User as AuthUser } from 'firebase/auth';
@@ -17,6 +18,7 @@ import { useRouter } from "next/navigation";
 import Image from 'next/image';
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
 
 
 // Types specific to Saledup
@@ -25,21 +27,34 @@ type Offer = {
     title: string;
     description: string;
     imageUrl?: string;
-    discountType: 'percentage' | 'fixed' | 'freebie';
-    discountValue?: number;
+    discountType: 'percentage' | 'fixed' | 'freebie' | 'other';
+    discountValue?: number | string;
     isActive: boolean;
     createdAt: Timestamp;
+    claimCount: number;
+    viewCount?: number;
+    startDate?: Timestamp;
+    endDate?: Timestamp;
+    startTime?: string;
+    endTime?: string;
 };
 
 type Claim = {
     id:string;
     customerName: string;
     customerEmail: string;
+    customerPhone: string;
     offerId: string;
     offerTitle: string;
     claimedAt: Timestamp;
     status: 'claimed' | 'redeemed';
 };
+
+type Review = {
+    id: string;
+    rating: number;
+};
+
 
 export default function AdminDashboard() {
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
@@ -47,6 +62,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [offers, setOffers] = useState<Offer[]>([]);
   const [claims, setClaims] = useState<Claim[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const { toast } = useToast();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('today');
@@ -98,10 +114,15 @@ export default function AdminDashboard() {
     const unsubscribeClaims = onSnapshot(claimsQuery, (snapshot) => {
         const claimsList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Claim));
         setClaims(claimsList);
-        setLoading(false);
     }, (error) => {
         console.error("Error fetching claims: ", error);
         toast({ title: "Error", description: "Could not fetch customer claims.", variant: "destructive"});
+    });
+
+    const reviewsQuery = query(collection(db, 'shops', authUser.uid, 'reviews'));
+    const unsubscribeReviews = onSnapshot(reviewsQuery, (snapshot) => {
+        const reviewsList = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}) as Review);
+        setReviews(reviewsList);
         setLoading(false);
     });
 
@@ -110,6 +131,7 @@ export default function AdminDashboard() {
         unsubscribeShop();
         unsubscribeOffers();
         unsubscribeClaims();
+        unsubscribeReviews();
     };
   }, [authUser, toast]); 
 
@@ -154,6 +176,39 @@ export default function AdminDashboard() {
     };
 }, [activeTab, offers, claims]);
 
+ const innovationScore = useMemo(() => {
+    let score = 0;
+    // Offer Activity (max 20)
+    if (offers.length > 0) score += 5;
+    if (offers.length > 2) score += 10;
+    if (offers.length > 5) score += 5;
+
+    // Offer Richness (max 20)
+    const hasImage = offers.some(o => o.imageUrl && !o.imageUrl.includes('placehold.co'));
+    if (hasImage) score += 10;
+    const discountTypes = new Set(offers.map(o => o.discountType));
+    if (discountTypes.size > 1) score += 5;
+    if (discountTypes.size > 2) score += 5;
+
+    // Customer Engagement (max 30)
+    const totalViews = offers.reduce((sum, o) => sum + (o.viewCount || 0), 0);
+    const totalClaims = offers.reduce((sum, o) => sum + (o.claimCount || 0), 0);
+    const conversionRate = totalViews > 0 ? (totalClaims / totalViews) * 100 : 0;
+    if (conversionRate > 1) score += 5;
+    if (conversionRate > 5) score += 10;
+    if (conversionRate > 10) score += 15;
+    
+    // Advanced Features (max 15)
+    const hasScheduledOffer = offers.some(o => o.startDate || o.startTime);
+    if(hasScheduledOffer) score += 15;
+
+    // Customer Feedback (max 15)
+    if (reviews.length > 0) score += 5;
+    if (reviews.length > 5) score += 5;
+    if (reviews.length > 10) score += 5;
+
+    return Math.min(100, score);
+  }, [offers, reviews]);
 
   const totalClaims = useMemo(() => filteredData.claims.length, [filteredData.claims]);
   const totalOffers = useMemo(() => filteredData.offers.length, [filteredData.offers]);
@@ -161,6 +216,31 @@ export default function AdminDashboard() {
   const expiredOffers = useMemo(() => offers.filter(o => !o.isActive).length, [offers]);
   const recentOffers = useMemo(() => offers.slice(0, 3), [offers]);
   const recentClaims = useMemo(() => claims.slice(0, 20), [claims]);
+  
+  const achievementBadges = useMemo(() => {
+    const badges = [];
+    const totalClaimsCount = claims.length;
+
+    if (totalClaimsCount >= 10) {
+        badges.push({ name: "First 10 Claims", icon: Trophy });
+    }
+    if (totalClaimsCount >= 100) {
+        badges.push({ name: "Century Club", icon: Star });
+    }
+
+    const topOffer = offers.reduce((prev, current) => (prev.claimCount > current.claimCount) ? prev : current, offers[0]);
+    if(topOffer && topOffer.claimCount > 10){
+        badges.push({ name: "Top Promoter", icon: Sparkles });
+    }
+    
+    const customerPhones = new Set(claims.map(c => c.customerPhone));
+    const repeatCustomers = claims.length - customerPhones.size;
+    if(repeatCustomers > 5){
+         badges.push({ name: "Loyalty Leader", icon: Users });
+    }
+
+    return badges;
+  }, [claims, offers]);
 
 
   if (loading) {
@@ -256,6 +336,25 @@ export default function AdminDashboard() {
                 </Button>
             </CardContent>
         </Card>
+
+        {achievementBadges.length > 0 && (
+            <div className="space-y-4">
+                 <div>
+                    <h2 className="text-2xl font-bold tracking-tight">Achievements</h2>
+                    <p className="text-muted-foreground font-bold">Milestones you've unlocked!</p>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {achievementBadges.map(badge => (
+                        <Card key={badge.name} className="p-4 flex flex-col items-center justify-center gap-2 text-center bg-amber-50 dark:bg-amber-900/30 border-amber-300 dark:border-amber-800">
+                           <div className="p-3 rounded-full bg-amber-100 dark:bg-amber-900">
+                             <badge.icon className="h-6 w-6 text-amber-600 dark:text-amber-400"/>
+                           </div>
+                           <p className="font-bold text-sm">{badge.name}</p>
+                        </Card>
+                    ))}
+                </div>
+            </div>
+        )}
         
         {recentOffers.length > 0 && (
             <div className="space-y-4">
@@ -362,37 +461,29 @@ export default function AdminDashboard() {
        </Card>
        <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground dark:border-foreground hover:border-primary">
             <CardHeader>
-                <div className="flex items-center gap-3">
-                   <Sparkles className="h-6 w-6 text-primary"/>
-                   <CardTitle className="font-bold">Quick Actions</CardTitle>
+                <div className="flex items-center justify-between">
+                    <CardTitle className="font-bold">Innovation Score</CardTitle>
+                    <div className="text-2xl font-bold text-primary">{innovationScore}/100</div>
                 </div>
-                <CardDescription className="font-bold">Get started with these common tasks.</CardDescription>
+                <CardDescription className="font-bold">How well you're using Saledup features.</CardDescription>
             </CardHeader>
-            <CardContent className="grid grid-cols-2 gap-4">
-                <Link href="/admin/offers/add">
-                    <Card className="h-full flex flex-col items-center justify-center p-4 gap-2 transition-all hover:shadow-md hover:border-primary border-2 border-foreground">
-                        <Tag className="h-6 w-6 text-primary"/>
-                        <span className="text-center text-sm font-bold">Create Offer</span>
-                    </Card>
-                </Link>
-                 <Link href="/admin/qr-code">
-                    <Card className="h-full flex flex-col items-center justify-center p-4 gap-2 transition-all hover:shadow-md hover:border-primary border-2 border-foreground">
-                        <QrCode className="h-6 w-6 text-primary"/>
-                        <span className="text-center text-sm font-bold">Get Shop QR</span>
-                    </Card>
-                </Link>
-                 <Link href="/admin/offers">
-                     <Card className="h-full flex flex-col items-center justify-center p-4 gap-2 transition-all hover:shadow-md hover:border-primary border-2 border-foreground">
-                        <Users className="h-6 w-6 text-primary"/>
-                        <span className="text-center text-sm font-bold">Manage Offers</span>
-                    </Card>
-                </Link>
-                 <Link href="/admin/customers">
-                     <Card className="h-full flex flex-col items-center justify-center p-4 gap-2 transition-all hover:shadow-md hover:border-primary border-2 border-foreground">
-                        <BarChart3 className="h-6 w-6 text-primary"/>
-                        <span className="text-center text-sm font-bold">View Customers</span>
-                    </Card>
-                </Link>
+            <CardContent className="space-y-4">
+                <Progress value={innovationScore} className="h-3" />
+                <p className="text-xs text-muted-foreground">Your score is based on offer variety, images, scheduling, and customer engagement. Keep exploring features to boost it!</p>
+                <div className="grid grid-cols-2 gap-4 pt-4">
+                    <Link href="/admin/offers/add">
+                        <Card className="h-full flex flex-col items-center justify-center p-4 gap-2 transition-all hover:shadow-md hover:border-primary border-2 border-foreground">
+                            <Tag className="h-6 w-6 text-primary"/>
+                            <span className="text-center text-sm font-bold">Create Offer</span>
+                        </Card>
+                    </Link>
+                    <Link href="/admin/qr-code">
+                        <Card className="h-full flex flex-col items-center justify-center p-4 gap-2 transition-all hover:shadow-md hover:border-primary border-2 border-foreground">
+                            <QrCode className="h-6 w-6 text-primary"/>
+                            <span className="text-center text-sm font-bold">Get Shop QR</span>
+                        </Card>
+                    </Link>
+                </div>
             </CardContent>
         </Card>
       </div>

@@ -7,7 +7,7 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { doc, getDoc, addDoc, collection, serverTimestamp, Timestamp, updateDoc, increment, onSnapshot, orderBy, runTransaction, getDocs, setDoc, query, where, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
-import { Loader2, ArrowLeft, Building, Tag, Info, Phone, Mail, MapPin, User as UserIcon, CheckCircle, Clock, Calendar, Gem, Eye, Star, MessageSquare, Download, Globe, MessageCircle as WhatsAppIcon, IndianRupee, AlertTriangle } from 'lucide-react';
+import { Loader2, ArrowLeft, Building, Tag, Info, Phone, Mail, MapPin, User as UserIcon, CheckCircle, Clock, Calendar, Gem, Eye, Star, MessageSquare, Download, Globe, MessageCircle as WhatsAppIcon, IndianRupee, AlertTriangle, Copy } from 'lucide-react';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
@@ -445,6 +445,24 @@ export default function OfferDetailPage() {
         setCustomerEmail('');
         setAlreadyClaimed(false);
     }
+    
+    const handleWhatsAppShare = () => {
+        if (!offer || !shop) return;
+        const offerUrl = window.location.href;
+        const text = `Hey! Check out this awesome deal at ${shop.shopName}: "${offer.title}". You can view it here: ${offerUrl}`;
+        const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
+        window.open(whatsappUrl, '_blank');
+    };
+
+    const handleCopyLink = () => {
+        const offerUrl = window.location.href;
+        navigator.clipboard.writeText(offerUrl).then(() => {
+            toast({ title: "Link Copied!", description: "You can now share this offer." });
+        }).catch(err => {
+            toast({ title: "Error", description: "Could not copy link.", variant: "destructive" });
+        });
+    };
+
 
     if (loading) {
         return (
@@ -740,19 +758,26 @@ export default function OfferDetailPage() {
                                 className="rounded-lg border p-2 bg-white"
                             />
                         )}
-                        <Button variant="secondary" className="w-full" onClick={handleDownloadSticker}>
-                            <Download className="mr-2 h-4 w-4" />
-                            Download Coupon (PDF)
-                        </Button>
-                        <Button variant="outline" className="w-full" onClick={() => setIsReviewDialogOpen(true)}>
-                            <MessageSquare className="mr-2 h-4 w-4" />
-                            Leave a Review
-                        </Button>
-                         <Link href="/my-points" className="w-full">
-                            <Button variant="outline" className="w-full">
-                                <Gem className="mr-2 h-4 w-4"/>Check My Points Balance
+                        <div className="w-full space-y-2">
+                            <div className="flex gap-2">
+                                <Button variant="secondary" className="flex-1" onClick={handleWhatsAppShare}>
+                                    <WhatsAppIcon className="mr-2 h-4 w-4" />
+                                    Share
+                                </Button>
+                                <Button variant="secondary" className="flex-1" onClick={handleCopyLink}>
+                                    <Copy className="mr-2 h-4 w-4" />
+                                    Copy Link
+                                </Button>
+                            </div>
+                             <Button variant="secondary" className="w-full" onClick={handleDownloadSticker}>
+                                <Download className="mr-2 h-4 w-4" />
+                                Download Coupon
                             </Button>
-                        </Link>
+                            <Button variant="outline" className="w-full" onClick={() => setIsReviewDialogOpen(true)}>
+                                <MessageSquare className="mr-2 h-4 w-4" />
+                                Leave a Review
+                            </Button>
+                        </div>
                     </div>
                     <DialogFooter>
                         <DialogClose asChild>
