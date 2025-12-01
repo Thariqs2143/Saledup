@@ -6,8 +6,10 @@ import type { PropsWithChildren } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { BottomNav, type NavItem } from '@/components/bottom-nav';
 import Link from 'next/link';
-import { Gem, Loader2 } from 'lucide-react';
+import { Gem, Loader2, PanelLeft } from 'lucide-react';
 import { SuperAdminNav } from '@/components/super-admin-nav';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
 
 const fullSuperAdminNavItems: NavItem[] = [
   { href: '/super-admin', label: 'Home', iconName: 'LayoutDashboard' },
@@ -34,17 +36,13 @@ export default function SuperAdminLayout({ children }: PropsWithChildren) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    // This effect runs only on the client
     setHydrated(true);
     const authStatus = localStorage.getItem('superAdminAuthenticated') === 'true';
     setIsAuthenticated(authStatus);
   }, []);
 
   useEffect(() => {
-    if (!hydrated) {
-      return; // Don't do anything until the component is hydrated
-    }
-    if (pathname !== '/super-admin/login' && !isAuthenticated) {
+    if (hydrated && pathname !== '/super-admin/login' && !isAuthenticated) {
       router.replace('/super-admin/login');
     }
   }, [pathname, router, hydrated, isAuthenticated]);
@@ -54,7 +52,6 @@ export default function SuperAdminLayout({ children }: PropsWithChildren) {
     return <>{children}</>;
   }
 
-  // Show a loader until hydration is complete to avoid flashes of content
   if (!hydrated) {
       return (
         <div className="flex items-center justify-center h-screen">
@@ -63,22 +60,33 @@ export default function SuperAdminLayout({ children }: PropsWithChildren) {
     );
   }
 
-  // If hydrated but not authenticated, render nothing to avoid showing the layout before redirect
   if (!isAuthenticated) {
     return null;
   }
 
   return (
-    <div className="grid min-h-screen w-full md:grid-cols-[240px_1fr]">
-      <SuperAdminNav navItems={fullSuperAdminNavItems} />
-      <div className="flex flex-col">
+    <div className="flex min-h-screen w-full">
+      <SuperAdminNav navItems={fullSuperAdminNavItems} isDesktop={true} />
+
+      <div className="flex flex-col flex-1 md:ml-60">
         <header className="flex h-14 items-center gap-4 border-b bg-background px-4 md:hidden sticky top-0 z-40">
-          <Link href="/super-admin">
-            <Gem className="h-8 w-8 text-primary" />
-            <span className="sr-only">Super Admin</span>
+          <Sheet>
+            <SheetTrigger asChild>
+                <Button size="icon" variant="outline" className="sm:hidden">
+                    <PanelLeft className="h-5 w-5" />
+                    <span className="sr-only">Toggle Menu</span>
+                </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="sm:max-w-xs p-0">
+                <SuperAdminNav navItems={fullSuperAdminNavItems} isDesktop={false} />
+            </SheetContent>
+          </Sheet>
+          <Link href="/super-admin" className="flex items-center gap-2">
+            <Gem className="h-6 w-6 text-primary" />
+            <span className="font-bold text-lg">Super Admin</span>
           </Link>
-          <h1 className="font-semibold text-lg">Super Admin Panel</h1>
         </header>
+
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 pb-20 md:pb-6">
           {children}
         </main>
