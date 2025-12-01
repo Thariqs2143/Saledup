@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Loader2, Search, Store, Users, Mail, HardDrive, Eye } from "lucide-react";
+import { Loader2, Search, Store, Users, Mail, HardDrive, Eye, User } from "lucide-react";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Badge } from '@/components/ui/badge';
