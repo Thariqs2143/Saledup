@@ -8,7 +8,7 @@ import { BottomNav, type NavItem } from '@/components/bottom-nav';
 import Link from 'next/link';
 import { Gem, Loader2, PanelLeft } from 'lucide-react';
 import { SuperAdminNav } from '@/components/super-admin-nav';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 
 const fullSuperAdminNavItems: NavItem[] = [
@@ -78,6 +78,7 @@ export default function SuperAdminLayout({ children }: PropsWithChildren) {
                 </Button>
             </SheetTrigger>
             <SheetContent side="left" className="sm:max-w-xs p-0">
+                <SheetTitle className="sr-only">Super Admin Menu</SheetTitle>
                 <SuperAdminNav navItems={fullSuperAdminNavItems} isDesktop={false} />
             </SheetContent>
           </Sheet>
