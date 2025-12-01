@@ -30,7 +30,7 @@ export default function SuperAdminLoginPage() {
     const recaptchaContainerRef = useRef<HTMLDivElement>(null);
     
     // Hardcoded credentials for the special Super Admin account
-    const SUPER_ADMIN_PHONE = "9790296771"; 
+    const SUPER_ADMIN_PHONE = "9363200237"; 
 
     useEffect(() => {
         if (!window.recaptchaVerifier && recaptchaContainerRef.current) {
