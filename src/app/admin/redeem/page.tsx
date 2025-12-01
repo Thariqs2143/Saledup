@@ -106,7 +106,7 @@ export default function RedeemOfferPage() {
             animationFrameId = requestAnimationFrame(tick);
         };
 
-        if(hasCameraPermission && !isDialogOpen){
+        if(hasCameraPermission && !isDialogOpen && videoRef.current){
             animationFrameId = requestAnimationFrame(tick);
         }
 
