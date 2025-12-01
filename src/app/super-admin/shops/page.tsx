@@ -18,6 +18,7 @@ type Shop = {
     ownerName: string;
     email?: string;
     employeeCount: number;
+    status: 'active' | 'disabled';
 };
 
 export default function SuperAdminShopsPage() {
@@ -62,100 +63,64 @@ export default function SuperAdminShopsPage() {
                 <h1 className="text-3xl font-bold tracking-tight">Shop Management</h1>
                 <p className="text-muted-foreground">View and manage all registered shops on the platform.</p>
             </div>
-            <Card>
-                <CardHeader>
-                    <CardTitle>All Shops ({filteredShops.length})</CardTitle>
-                    <CardDescription>A list of all shops in the Attendry system.</CardDescription>
-                     <div className="relative pt-4 sm:max-w-xs">
-                        <Search className="absolute left-2.5 top-6 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            type="search"
-                            placeholder="Search by shop, owner, or email..."
-                            className="w-full rounded-lg bg-background pl-8"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </div>
-                </CardHeader>
-                <CardContent>
-                    {loading ? (
-                        <div className="flex items-center justify-center h-48">
-                            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                        </div>
-                    ) : filteredShops.length === 0 ? (
-                        <div className="text-center py-12 text-muted-foreground">
-                            <p>No shops found.</p>
-                        </div>
-                    ) : (
-                        <>
-                            {/* Mobile View */}
-                            <div className="grid gap-4 md:hidden">
-                                {filteredShops.map(shop => (
-                                    <Card key={shop.id} className="p-4 space-y-3">
-                                        <div className="flex justify-between items-start">
-                                            <p className="font-bold">{shop.shopName}</p>
-                                            <Badge>
-                                                <Users className="mr-1 h-3 w-3" />
-                                                {shop.employeeCount}
-                                            </Badge>
-                                        </div>
-                                        <div className="space-y-2 text-sm text-muted-foreground">
-                                            <p>Owner: {shop.ownerName}</p>
-                                            <div className="flex items-center gap-2">
-                                                <Mail className="h-3 w-3 shrink-0" />
-                                                <span className="break-all">{shop.email || 'No email'}</span>
-                                            </div>
-                                        </div>
-                                         <div className="flex gap-2 w-full pt-2">
-                                            <Button variant="outline" className="w-full" onClick={() => router.push(`/super-admin/shops/${shop.id}`)}>
-                                                <Eye className="mr-2"/> View
-                                            </Button>
-                                            <Button variant="secondary" className="w-full" onClick={() => router.push(`/super-admin/shops/${shop.id}/backup`)}>
-                                                <HardDrive className="mr-2"/> Backup
-                                            </Button>
-                                        </div>
-                                    </Card>
-                                ))}
+            
+            <div className="relative w-full sm:max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                    type="search"
+                    placeholder="Search by shop, owner, or email..."
+                    className="w-full rounded-lg bg-background pl-10 h-12"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
+            </div>
+            
+            {loading ? (
+                <div className="flex items-center justify-center h-64">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+            ) : filteredShops.length === 0 ? (
+                 <div className="text-center py-20 text-muted-foreground rounded-lg border-2 border-dashed bg-muted/50">
+                    <Store className="h-16 w-16 mx-auto mb-4 opacity-50"/>
+                    <h3 className="text-xl font-semibold">No Shops Found</h3>
+                    <p>No shops match your current search criteria.</p>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredShops.map(shop => (
+                        <div key={shop.id} className="bg-card text-card-foreground rounded-xl shadow-sm border border-border/50 hover:border-primary hover:shadow-lg transition-all duration-300 flex flex-col">
+                            <div className="p-4 space-y-3 flex-1">
+                                <div className="flex justify-between items-start">
+                                    <p className="font-bold text-lg">{shop.shopName}</p>
+                                    <Badge variant={shop.status === 'active' ? 'secondary' : 'destructive'}>{shop.status}</Badge>
+                                </div>
+                                <div className="text-sm text-muted-foreground space-y-2">
+                                     <div className="flex items-center gap-2">
+                                        <User className="h-4 w-4 shrink-0"/>
+                                        <span>{shop.ownerName}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Mail className="h-4 w-4 shrink-0"/>
+                                        <span className="truncate">{shop.email || 'No email'}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Users className="h-4 w-4 shrink-0"/>
+                                        <span>{shop.employeeCount} Employees</span>
+                                    </div>
+                                </div>
                             </div>
-
-                            {/* Desktop View */}
-                            <div className="hidden md:block rounded-lg border">
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Shop Name</TableHead>
-                                            <TableHead>Owner Name</TableHead>
-                                            <TableHead>Contact Email</TableHead>
-                                            <TableHead className="text-center">Employees</TableHead>
-                                            <TableHead className="text-right">Actions</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {filteredShops.map(shop => (
-                                            <TableRow key={shop.id}>
-                                                <TableCell className="font-medium">{shop.shopName}</TableCell>
-                                                <TableCell>{shop.ownerName}</TableCell>
-                                                <TableCell>{shop.email || 'N/A'}</TableCell>
-                                                <TableCell className="text-center">{shop.employeeCount}</TableCell>
-                                                <TableCell className="text-right space-x-2">
-                                                     <Button variant="outline" size="sm" onClick={() => router.push(`/super-admin/shops/${shop.id}`)}>
-                                                        <Eye className="mr-2 h-4 w-4"/>
-                                                        View
-                                                    </Button>
-                                                    <Button variant="secondary" size="sm" onClick={() => router.push(`/super-admin/shops/${shop.id}/backup`)}>
-                                                        <HardDrive className="mr-2 h-4 w-4"/>
-                                                        Backup
-                                                    </Button>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
+                            <div className="p-4 border-t flex gap-2">
+                                <Button variant="outline" size="sm" className="w-full" onClick={() => router.push(`/super-admin/shops/${shop.id}`)}>
+                                    <Eye className="mr-2 h-4 w-4"/> View
+                                </Button>
+                                <Button variant="secondary" size="sm" className="w-full" onClick={() => router.push(`/super-admin/shops/${shop.id}/backup`)}>
+                                    <HardDrive className="mr-2 h-4 w-4"/> Backup
+                                </Button>
                             </div>
-                        </>
-                    )}
-                </CardContent>
-            </Card>
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 }

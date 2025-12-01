@@ -3,7 +3,6 @@
 
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Loader2, Search, User, Store, Download } from "lucide-react";
 import { collection, getDocs } from "firebase/firestore";
@@ -131,97 +130,57 @@ export default function SuperAdminEmployeesPage() {
 
     return (
         <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight">Employee Management</h1>
-                <p className="text-muted-foreground">View all employees across all shops in the system.</p>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight">Employee Management</h1>
+                    <p className="text-muted-foreground">View all employees across all shops in the system.</p>
+                </div>
+                 <div className="flex gap-2 w-full sm:w-auto">
+                    <Button onClick={handleExportCSV} variant="outline"><Download className="mr-2 h-4 w-4"/>CSV</Button>
+                    <Button onClick={handleExportPDF} variant="outline"><Download className="mr-2 h-4 w-4"/>PDF</Button>
+                </div>
             </div>
-            <Card>
-                <CardHeader>
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                        <div>
-                            <CardTitle>All Employees ({filteredEmployees.length})</CardTitle>
-                            <CardDescription>A global list of every employee on the platform.</CardDescription>
-                        </div>
-                        <div className="flex gap-2 w-full sm:w-auto">
-                            <Button onClick={handleExportCSV} variant="outline"><Download className="mr-2"/>CSV</Button>
-                            <Button onClick={handleExportPDF} variant="outline"><Download className="mr-2"/>PDF</Button>
-                        </div>
-                    </div>
-                    <div className="relative pt-4 sm:max-w-xs">
-                        <Search className="absolute left-2.5 top-6 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            type="search"
-                            placeholder="Search by name, shop, or role..."
-                            className="w-full rounded-lg bg-background pl-8"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </div>
-                </CardHeader>
-                <CardContent>
-                    {loading ? (
-                        <div className="flex items-center justify-center h-48">
-                            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                        </div>
-                    ) : filteredEmployees.length === 0 ? (
-                        <div className="text-center py-12 text-muted-foreground">
-                            <p>No employees found.</p>
-                        </div>
-                    ) : (
-                         <>
-                            {/* Mobile View */}
-                            <div className="grid gap-4 md:hidden">
-                                {filteredEmployees.map(emp => (
-                                    <Card key={emp.id} className="p-4 space-y-3">
-                                        <div className="flex justify-between items-start">
-                                            <p className="font-bold">{emp.name}</p>
-                                            <Badge variant={getStatusVariant(emp.status)}>{emp.status}</Badge>
-                                        </div>
-                                        <div className="space-y-2 text-sm text-muted-foreground">
-                                            <div className="flex items-center gap-2">
-                                                <Store className="h-3 w-3 shrink-0" />
-                                                <span>{emp.shopName}</span>
-                                            </div>
-                                             <div className="flex items-center gap-2">
-                                                <User className="h-3 w-3 shrink-0" />
-                                                <span>{emp.role}</span>
-                                            </div>
-                                        </div>
-                                    </Card>
-                                ))}
-                            </div>
 
-                            {/* Desktop View */}
-                            <div className="hidden md:block rounded-lg border">
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Employee Name</TableHead>
-                                            <TableHead>Shop</TableHead>
-                                            <TableHead>Role</TableHead>
-                                            <TableHead>Status</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {filteredEmployees.map(emp => (
-                                            <TableRow key={emp.id}>
-                                                <TableCell className="font-medium">{emp.name}</TableCell>
-                                                <TableCell>{emp.shopName}</TableCell>
-                                                <TableCell>{emp.role}</TableCell>
-                                                <TableCell>
-                                                    <Badge variant={getStatusVariant(emp.status)}>
-                                                        {emp.status}
-                                                    </Badge>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
+            <div className="relative w-full sm:max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                    type="search"
+                    placeholder="Search by name, shop, or role..."
+                    className="w-full rounded-lg bg-background pl-10 h-12"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
+            </div>
+
+            {loading ? (
+                <div className="flex items-center justify-center h-64">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+            ) : filteredEmployees.length === 0 ? (
+                <div className="text-center py-20 text-muted-foreground rounded-lg border-2 border-dashed bg-muted/50">
+                    <User className="h-16 w-16 mx-auto mb-4 opacity-50"/>
+                    <h3 className="text-xl font-semibold">No Employees Found</h3>
+                    <p>No employees match your current search criteria.</p>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    {filteredEmployees.map(emp => (
+                        <div key={emp.id} className="bg-card text-card-foreground rounded-xl p-4 flex flex-col gap-4 shadow-sm border border-border/50 hover:border-primary hover:shadow-lg transition-all duration-300">
+                             <div className="flex justify-between items-start">
+                                <div>
+                                    <p className="font-bold text-base">{emp.name}</p>
+                                    <p className="text-xs text-muted-foreground">{emp.role}</p>
+                                </div>
+                                <Badge variant={getStatusVariant(emp.status)}>{emp.status}</Badge>
                             </div>
-                        </>
-                    )}
-                </CardContent>
-            </Card>
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground border-t pt-3">
+                                <Store className="h-4 w-4 shrink-0"/>
+                                <span className="truncate">{emp.shopName}</span>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 }

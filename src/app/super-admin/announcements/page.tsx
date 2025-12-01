@@ -142,97 +142,87 @@ export default function SuperAdminAnnouncementsPage() {
                 <p className="text-muted-foreground">Communicate with all users of the platform.</p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <Card className="lg:col-span-1">
-                    <CardHeader>
-                        <CardTitle>Create New Announcement</CardTitle>
-                        <CardDescription>This will be shown to all users.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <form onSubmit={handleSaveAnnouncement} className="space-y-6">
-                            <div className="space-y-2">
-                                <Label htmlFor="title">Title</Label>
-                                <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g., Scheduled Maintenance" required />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                <div className="lg:col-span-1 bg-card rounded-xl border p-6">
+                    <h2 className="text-xl font-bold">Create New</h2>
+                    <p className="text-sm text-muted-foreground mb-6">This will be shown to all users.</p>
+                    <form onSubmit={handleSaveAnnouncement} className="space-y-6">
+                        <div className="space-y-2">
+                            <Label htmlFor="title">Title</Label>
+                            <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g., Scheduled Maintenance" required />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="message">Message</Label>
+                            <Textarea id="message" value={message} onChange={(e) => setMessage(e.target.value)} placeholder="e.g., We will be undergoing scheduled maintenance..." required />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Type</Label>
+                            <div className="flex gap-2">
+                                <Button size="sm" type="button" variant={type === 'info' ? 'default' : 'outline'} onClick={() => setType('info')}>Info</Button>
+                                <Button size="sm" type="button" variant={type === 'success' ? 'secondary' : 'outline'} onClick={() => setType('success')}>Success</Button>
+                                <Button size="sm" type="button" variant={type === 'warning' ? 'destructive' : 'outline'} onClick={() => setType('warning')}>Warning</Button>
                             </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="message">Message</Label>
-                                <Textarea id="message" value={message} onChange={(e) => setMessage(e.target.value)} placeholder="e.g., We will be undergoing scheduled maintenance..." required />
-                            </div>
-                            <div className="space-y-2">
-                                <Label>Type</Label>
-                                <div className="flex gap-4">
-                                    <Button type="button" variant={type === 'info' ? 'default' : 'outline'} onClick={() => setType('info')}>Info</Button>
-                                    <Button type="button" variant={type === 'success' ? 'secondary' : 'outline'} onClick={() => setType('success')}>Success</Button>
-                                    <Button type="button" variant={type === 'warning' ? 'destructive' : 'outline'} onClick={() => setType('warning')}>Warning</Button>
-                                </div>
-                            </div>
-                            <Button type="submit" className="w-full" disabled={saving}>
-                                {saving ? <Loader2 className="animate-spin mr-2" /> : <Megaphone className="mr-2"/>}
-                                Publish Announcement
-                            </Button>
-                        </form>
-                    </CardContent>
-                </Card>
+                        </div>
+                        <Button type="submit" className="w-full" disabled={saving}>
+                            {saving ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <Megaphone className="mr-2 h-4 w-4"/>}
+                            Publish Announcement
+                        </Button>
+                    </form>
+                </div>
 
-                <Card className="lg:col-span-2">
-                    <CardHeader>
-                        <CardTitle>History</CardTitle>
-                        <CardDescription>A log of all past and active announcements.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                         {loading ? (
-                            <div className="flex items-center justify-center h-48">
-                                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                            </div>
-                        ) : announcements.length === 0 ? (
-                            <div className="text-center py-12 text-muted-foreground">
-                                <p>No announcements have been created yet.</p>
-                            </div>
-                        ) : (
-                            <div className="space-y-4">
-                                {announcements.map(ann => (
-                                    <div key={ann.id} className="border p-4 rounded-lg flex items-start gap-4">
-                                        <AnnouncementIcon type={ann.type} className="mt-1" />
-                                        <div className="flex-1">
-                                            <div className="flex justify-between items-center">
-                                                <p className="font-bold">{ann.title}</p>
-                                                <Badge variant={ann.isActive ? 'secondary' : 'outline'}>{ann.isActive ? 'Active' : 'Inactive'}</Badge>
-                                            </div>
-                                            <p className="text-sm text-muted-foreground mt-1">{ann.message}</p>
-                                            <p className="text-xs text-muted-foreground/70 mt-2">
-                                                {formatDistanceToNow(ann.createdAt, { addSuffix: true })}
-                                            </p>
+                <div className="lg:col-span-2">
+                    <h2 className="text-xl font-bold mb-2">History</h2>
+                     {loading ? (
+                        <div className="flex items-center justify-center h-48">
+                            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                        </div>
+                    ) : announcements.length === 0 ? (
+                        <div className="text-center py-16 text-muted-foreground bg-muted/30 rounded-lg border-2 border-dashed">
+                            <p>No announcements have been created yet.</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {announcements.map(ann => (
+                                <div key={ann.id} className="border bg-card p-4 rounded-lg flex items-start gap-4 shadow-sm">
+                                    <AnnouncementIcon type={ann.type} className="mt-1" />
+                                    <div className="flex-1">
+                                        <div className="flex justify-between items-center">
+                                            <p className="font-bold">{ann.title}</p>
+                                            <Badge variant={ann.isActive ? 'secondary' : 'outline'}>{ann.isActive ? 'Active' : 'Inactive'}</Badge>
                                         </div>
-                                        <div className="flex flex-col gap-2">
-                                            <Switch checked={ann.isActive} onCheckedChange={() => handleToggleActive(ann)} />
-                                            <AlertDialog>
-                                                <AlertDialogTrigger asChild>
-                                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive">
-                                                        <Trash2 className="h-4 w-4"/>
-                                                    </Button>
-                                                </AlertDialogTrigger>
-                                                <AlertDialogContent>
-                                                    <AlertDialogHeader>
-                                                        <AlertDialogTitle>Delete Announcement?</AlertDialogTitle>
-                                                        <AlertDialogDescription>
-                                                            This will permanently delete the announcement titled "{ann.title}". This action cannot be undone.
-                                                        </AlertDialogDescription>
-                                                    </AlertDialogHeader>
-                                                    <AlertDialogFooter>
-                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                        <AlertDialogAction onClick={() => handleDelete(ann.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
-                                                    </AlertDialogFooter>
-                                                </AlertDialogContent>
-                                            </AlertDialog>
-                                        </div>
+                                        <p className="text-sm text-muted-foreground mt-1">{ann.message}</p>
+                                        <p className="text-xs text-muted-foreground/70 mt-2">
+                                            {formatDistanceToNow(ann.createdAt, { addSuffix: true })}
+                                        </p>
                                     </div>
-                                ))}
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
+                                    <div className="flex flex-col gap-2 items-center">
+                                        <Switch checked={ann.isActive} onCheckedChange={() => handleToggleActive(ann)} />
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:bg-destructive/10 hover:text-destructive">
+                                                    <Trash2 className="h-4 w-4"/>
+                                                </Button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>Delete Announcement?</AlertDialogTitle>
+                                                    <AlertDialogDescription>
+                                                        This will permanently delete the announcement titled "{ann.title}". This action cannot be undone.
+                                                    </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                    <AlertDialogAction onClick={() => handleDelete(ann.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );
 }
-

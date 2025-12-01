@@ -2,12 +2,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Loader2, Search, Edit, Trash2, Shield, Gem } from "lucide-react";
 import { formatDistanceToNow } from 'date-fns';
-import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 type AuditLog = {
@@ -49,10 +46,10 @@ export default function SuperAdminAuditLogPage() {
 
     const getActionIcon = (action: AuditLog['action']) => {
         switch(action) {
-            case 'Shop Status Changed': return <Shield className="h-4 w-4 text-amber-500" />;
-            case 'Shop Profile Edited': return <Edit className="h-4 w-4 text-blue-500" />;
-            case 'Shop Deleted': return <Trash2 className="h-4 w-4 text-destructive" />;
-            case 'Subscription Plan Updated': return <Gem className="h-4 w-4 text-purple-500" />;
+            case 'Shop Status Changed': return <Shield className="h-5 w-5 text-amber-500" />;
+            case 'Shop Profile Edited': return <Edit className="h-5 w-5 text-blue-500" />;
+            case 'Shop Deleted': return <Trash2 className="h-5 w-5 text-destructive" />;
+            case 'Subscription Plan Updated': return <Gem className="h-5 w-5 text-purple-500" />;
             default: return null;
         }
     };
@@ -63,77 +60,63 @@ export default function SuperAdminAuditLogPage() {
                 <h1 className="text-3xl font-bold tracking-tight">Security Audit Log</h1>
                 <p className="text-muted-foreground">Track important administrative actions across the platform.</p>
             </div>
-            <Card>
-                <CardHeader>
-                    <CardTitle>Recent Activities ({filteredLogs.length})</CardTitle>
-                    <CardDescription>A log of all major changes made by super administrators.</CardDescription>
-                    <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                        <div className="relative sm:max-w-xs w-full">
-                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                            <Input
-                                type="search"
-                                placeholder="Search by target or admin..."
-                                className="w-full rounded-lg bg-background pl-8"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                            />
+            
+            <div className="flex flex-col sm:flex-row gap-4">
+                <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <Input
+                        type="search"
+                        placeholder="Search by target or admin..."
+                        className="w-full rounded-lg bg-background pl-10 h-12"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
+                <Select onValueChange={setFilterAction} value={filterAction}>
+                    <SelectTrigger className="w-full sm:w-[220px] h-12">
+                        <SelectValue placeholder="Filter by action" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All Actions</SelectItem>
+                        <SelectItem value="Shop Status Changed">Shop Status Changed</SelectItem>
+                        <SelectItem value="Shop Profile Edited">Shop Profile Edited</SelectItem>
+                        <SelectItem value="Shop Deleted">Shop Deleted</SelectItem>
+                        <SelectItem value="Subscription Plan Updated">Subscription Plan Updated</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
+
+            {loading ? (
+                <div className="flex items-center justify-center h-64">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+            ) : filteredLogs.length === 0 ? (
+                <div className="text-center py-20 text-muted-foreground rounded-lg border-2 border-dashed bg-muted/50">
+                    <Search className="h-16 w-16 mx-auto mb-4 opacity-50"/>
+                    <h3 className="text-xl font-semibold">No Logs Found</h3>
+                    <p>No audit logs match your current search criteria.</p>
+                </div>
+            ) : (
+                <div className="space-y-4">
+                    {filteredLogs.map(log => (
+                        <div key={log.id} className="p-4 flex items-center gap-4 border-b last:border-b-0 bg-card/50 rounded-lg hover:bg-muted/50 transition-colors">
+                            <div className="p-3 rounded-full bg-muted/80">
+                                {getActionIcon(log.action)}
+                            </div>
+                            <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-2 items-center">
+                                <div>
+                                    <p className="font-semibold">{log.action}</p>
+                                    <p className="text-sm text-muted-foreground font-mono">{log.target}</p>
+                                </div>
+                                <div className="text-sm text-muted-foreground">by {log.adminEmail}</div>
+                                <div className="text-sm text-muted-foreground text-left sm:text-right">
+                                    {formatDistanceToNow(log.timestamp, { addSuffix: true })}
+                                </div>
+                            </div>
                         </div>
-                        <Select onValueChange={setFilterAction} value={filterAction}>
-                            <SelectTrigger className="w-full sm:w-[180px]">
-                                <SelectValue placeholder="Filter by action" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All Actions</SelectItem>
-                                <SelectItem value="Shop Status Changed">Shop Status Changed</SelectItem>
-                                <SelectItem value="Shop Profile Edited">Shop Profile Edited</SelectItem>
-                                <SelectItem value="Shop Deleted">Shop Deleted</SelectItem>
-                                <SelectItem value="Subscription Plan Updated">Subscription Plan Updated</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-                </CardHeader>
-                <CardContent>
-                    {loading ? (
-                        <div className="flex items-center justify-center h-48">
-                            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                        </div>
-                    ) : filteredLogs.length === 0 ? (
-                        <div className="text-center py-12 text-muted-foreground">
-                            <p>No audit logs found matching your criteria.</p>
-                        </div>
-                    ) : (
-                         <div className="rounded-lg border">
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead className="w-[250px]">Action</TableHead>
-                                        <TableHead>Target</TableHead>
-                                        <TableHead>Admin</TableHead>
-                                        <TableHead className="text-right">Timestamp</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {filteredLogs.map(log => (
-                                        <TableRow key={log.id}>
-                                            <TableCell className="font-medium">
-                                                <div className="flex items-center gap-2">
-                                                    {getActionIcon(log.action)}
-                                                    <span>{log.action}</span>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell><Badge variant="secondary">{log.target}</Badge></TableCell>
-                                            <TableCell>{log.adminEmail}</TableCell>
-                                            <TableCell className="text-right text-muted-foreground text-xs">
-                                                {formatDistanceToNow(log.timestamp, { addSuffix: true })}
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </div>
-                    )}
-                </CardContent>
-            </Card>
+                    ))}
+                </div>
+            )}
         </div>
     );
 }
