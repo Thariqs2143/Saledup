@@ -2,10 +2,10 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Users, Store, Gem, Loader2, BarChart3, Briefcase, Megaphone, BookLock } from "lucide-react";
+import { Users, Store, Gem, Loader2, BarChart3, Briefcase, Megaphone, BookLock, Gift, Tag } from "lucide-react";
 import { AnimatedCounter } from "@/components/animated-counter";
 import { useEffect, useState } from "react";
-import { collection, getDocs, Timestamp, query, where } from "firebase/firestore";
+import { collection, getDocs, Timestamp, query, where, collectionGroup } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import { AttendanceChart, type ChartData } from '@/components/attendance-chart';
@@ -20,7 +20,8 @@ export default function SuperAdminDashboard() {
     const [stats, setStats] = useState({
         totalShops: 0,
         totalEmployees: 0,
-        totalSubscriptions: 0,
+        totalOffers: 0,
+        totalClaims: 0,
     });
     const [loading, setLoading] = useState(true);
     const [chartData, setChartData] = useState<ChartData[]>([]);
@@ -43,40 +44,26 @@ export default function SuperAdminDashboard() {
                 const totalShops = shopsSnapshot.size;
 
                 let totalEmployees = 0;
-                let newEmployeeCountsByDate: { [key: string]: number } = {};
-                const sevenDaysAgo = startOfDay(subDays(new Date(), 6));
-
                 for (const shopDoc of shopsSnapshot.docs) {
                     const employeesSnapshot = await getDocs(collection(db, 'shops', shopDoc.id, 'employees'));
                     totalEmployees += employeesSnapshot.size;
-
-                    // Aggregate new employees for the chart
-                    employeesSnapshot.forEach(empDoc => {
-                        const empData = empDoc.data();
-                        if (empData.joinDate) {
-                            try {
-                                const joinDate = new Date(empData.joinDate);
-                                if (joinDate >= sevenDaysAgo) {
-                                    const dateStr = format(joinDate, 'MMM d');
-                                    newEmployeeCountsByDate[dateStr] = (newEmployeeCountsByDate[dateStr] || 0) + 1;
-                                }
-                            } catch (e) {
-                                console.error("Invalid employee joinDate format:", empData.joinDate);
-                            }
-                        }
-                    });
                 }
                 
-                // For now, we assume one subscription per shop
-                const totalSubscriptions = totalShops;
+                const offersSnapshot = await getDocs(collectionGroup(db, 'offers'));
+                const totalOffers = offersSnapshot.size;
+                
+                const claimsSnapshot = await getDocs(collectionGroup(db, 'claims'));
+                const totalClaims = claimsSnapshot.size;
 
                 setStats({
                     totalShops,
                     totalEmployees,
-                    totalSubscriptions
+                    totalOffers,
+                    totalClaims,
                 });
                 
-                // --- Fetch Chart Data ---
+                // --- Fetch Chart Data (Remains unchanged for now) ---
+                const sevenDaysAgo = startOfDay(subDays(new Date(), 6));
                 const newShopsQuery = query(collection(db, 'shops'), where('createdAt', '>=', Timestamp.fromDate(sevenDaysAgo)));
                 const newShopsSnapshot = await getDocs(newShopsQuery);
 
@@ -87,7 +74,6 @@ export default function SuperAdminDashboard() {
                     data[dayStr] = { 'New Shops': 0, 'New Employees': 0 };
                 }
 
-                // Populate new shops data
                 newShopsSnapshot.forEach(doc => {
                     const shopData = doc.data();
                     if (shopData.createdAt) {
@@ -103,12 +89,26 @@ export default function SuperAdminDashboard() {
                     }
                 });
 
-                // Populate new employees data from our aggregated map
-                Object.keys(newEmployeeCountsByDate).forEach(dateStr => {
-                    if (data[dateStr]) {
-                        data[dateStr]['New Employees'] = newEmployeeCountsByDate[dateStr];
-                    }
-                });
+                // This part for employee chart data can be optimized in future if needed
+                for (const shopDoc of shopsSnapshot.docs) {
+                    const employeesSnapshot = await getDocs(collection(db, 'shops', shopDoc.id, 'employees'));
+                    employeesSnapshot.forEach(empDoc => {
+                        const empData = empDoc.data();
+                        if (empData.joinDate) {
+                            try {
+                                const joinDate = new Date(empData.joinDate);
+                                if (joinDate >= sevenDaysAgo) {
+                                    const dateStr = format(joinDate, 'MMM d');
+                                    if(data[dateStr]){
+                                        data[dateStr]['New Employees'] = (data[dateStr]['New Employees'] || 0) + 1;
+                                    }
+                                }
+                            } catch (e) {
+                                console.error("Invalid employee joinDate format:", empData.joinDate);
+                            }
+                        }
+                    });
+                }
 
                 const formattedChartData = Object.keys(data).map(date => ({ 
                     date, 
@@ -145,8 +145,8 @@ export default function SuperAdminDashboard() {
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Super Admin Dashboard</h1>
         <p className="text-muted-foreground">Global overview of the Saledup ecosystem.</p>
        </div>
-       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-        <Card className="relative overflow-hidden transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br from-indigo-500 to-purple-600 text-white border-none col-span-2 sm:col-span-1">
+       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+        <Card className="relative overflow-hidden transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br from-indigo-500 to-purple-600 text-white border-none">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-bold text-indigo-100">Total Shops</CardTitle>
             <Store className="h-5 w-5 text-indigo-200" />
@@ -155,12 +155,12 @@ export default function SuperAdminDashboard() {
             <div className="text-4xl font-bold flex items-center gap-2">
               <AnimatedCounter from={0} to={stats.totalShops} />
             </div>
-            <p className="text-xs text-indigo-100 mt-1 flex items-center gap-1">
+            <p className="text-xs text-indigo-100 mt-1">
               Registered businesses
             </p>
           </CardContent>
         </Card>
-        <Card className="relative overflow-hidden transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br from-sky-500 to-cyan-600 text-white border-none col-span-2 sm:col-span-1">
+        <Card className="relative overflow-hidden transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br from-sky-500 to-cyan-600 text-white border-none">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-bold text-sky-100">Total Employees</CardTitle>
             <Users className="h-5 w-5 text-sky-200" />
@@ -174,26 +174,26 @@ export default function SuperAdminDashboard() {
         </Card>
         <Card className="relative overflow-hidden transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br from-teal-500 to-emerald-600 text-white border-none">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-bold text-teal-100">Active Subscriptions</CardTitle>
-            <Gem className="h-5 w-5 text-teal-200" />
+            <CardTitle className="text-sm font-bold text-teal-100">Total Offers</CardTitle>
+            <Gift className="h-5 w-5 text-teal-200" />
           </CardHeader>
           <CardContent>
             <div className="text-4xl font-bold">
-                <AnimatedCounter from={0} to={stats.totalSubscriptions} />
+                <AnimatedCounter from={0} to={stats.totalOffers} />
             </div>
-             <p className="text-xs text-teal-100 mt-1">Currently active plans.</p>
+             <p className="text-xs text-teal-100 mt-1">Active & inactive offers.</p>
           </CardContent>
         </Card>
          <Card className="relative overflow-hidden transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br from-rose-500 to-red-600 text-white border-none">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-bold text-rose-100">Total Revenue</CardTitle>
-            <Briefcase className="h-5 w-5 text-rose-200" />
+            <CardTitle className="text-sm font-bold text-rose-100">Total Claims</CardTitle>
+            <Tag className="h-5 w-5 text-rose-200" />
           </CardHeader>
           <CardContent>
             <div className="text-4xl font-bold">
-                ₹<AnimatedCounter from={0} to={0} />
+                <AnimatedCounter from={0} to={stats.totalClaims} />
             </div>
-             <p className="text-xs text-rose-100 mt-1">Monthly recurring revenue.</p>
+             <p className="text-xs text-rose-100 mt-1">Offers claimed by customers.</p>
           </CardContent>
         </Card>
       </div>
