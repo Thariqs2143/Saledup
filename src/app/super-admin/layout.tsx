@@ -9,13 +9,21 @@ import Link from 'next/link';
 import { Gem, Loader2 } from 'lucide-react';
 import { SuperAdminNav } from '@/components/super-admin-nav';
 
-const superAdminNavItems: NavItem[] = [
+const fullSuperAdminNavItems: NavItem[] = [
   { href: '/super-admin', label: 'Home', iconName: 'LayoutDashboard' },
   { href: '/super-admin/shops', label: 'Shops', iconName: 'Store' },
   { href: '/super-admin/employees', label: 'Staffs', iconName: 'Users' },
   { href: '/super-admin/subscriptions', label: 'Pricing', iconName: 'Gem' },
   { href: '/super-admin/announcements', label: 'Broadcast', iconName: 'Megaphone' },
   { href: '/super-admin/audit-log', label: 'Security', iconName: 'BookLock' },
+  { href: '/super-admin/profile', label: 'Profile', iconName: 'User' },
+];
+
+const mobileBottomNavItems: NavItem[] = [
+  { href: '/super-admin', label: 'Home', iconName: 'LayoutDashboard' },
+  { href: '/super-admin/shops', label: 'Shops', iconName: 'Store' },
+  { href: '/super-admin/subscriptions', label: 'Pricing', iconName: 'Gem' },
+  { href: '/super-admin/employees', label: 'Staffs', iconName: 'Users' },
   { href: '/super-admin/profile', label: 'Profile', iconName: 'User' },
 ];
 
@@ -62,7 +70,7 @@ export default function SuperAdminLayout({ children }: PropsWithChildren) {
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[240px_1fr]">
-      <SuperAdminNav navItems={superAdminNavItems} />
+      <SuperAdminNav navItems={fullSuperAdminNavItems} />
       <div className="flex flex-col">
         <header className="flex h-14 items-center gap-4 border-b bg-background px-4 md:hidden sticky top-0 z-40">
           <Link href="/super-admin">
@@ -75,7 +83,7 @@ export default function SuperAdminLayout({ children }: PropsWithChildren) {
           {children}
         </main>
       </div>
-      <BottomNav navItems={superAdminNavItems} />
+      <BottomNav navItems={mobileBottomNavItems} />
     </div>
   );
 }
