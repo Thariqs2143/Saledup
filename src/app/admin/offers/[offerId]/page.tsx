@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Tag, Upload, ArrowLeft, Save, Trash2, Calendar as CalendarIcon, Clock, IndianRupee, Star } from 'lucide-react';
+import { Loader2, Tag, Upload, ArrowLeft, Save, Trash2, Calendar as CalendarIcon, Clock, IndianRupee, Star, Globe } from 'lucide-react';
 import { doc, getDoc, updateDoc, deleteDoc, serverTimestamp, type Timestamp } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
 import { onAuthStateChanged, type User as AuthUser } from 'firebase/auth';
@@ -33,6 +33,8 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Calendar } from '@/components/ui/calendar';
 
+type RedemptionType = 'qr_code' | 'online_coupon';
+
 type Offer = {
     title: string;
     description: string;
@@ -42,6 +44,10 @@ type Offer = {
     terms?: string;
     imageUrl?: string;
     isFeatured?: boolean;
+    // New redemption fields
+    redemptionType?: RedemptionType;
+    couponCode?: string;
+    websiteUrl?: string;
     // New scheduling fields
     startDate?: Timestamp;
     endDate?: Timestamp;
@@ -63,6 +69,9 @@ export default function AdminEditOfferPage() {
     const [imageUrl, setImageUrl] = useState<string>('');
     const [uploading, setUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // New state for redemption type
+    const [redemptionType, setRedemptionType] = useState<RedemptionType>('qr_code');
 
     // New state for scheduling
     const [startDate, setStartDate] = useState<Date | undefined>();
@@ -90,6 +99,7 @@ export default function AdminEditOfferPage() {
                 const data = docSnap.data() as Offer;
                 setOffer(data);
                 setImageUrl(data.imageUrl || '');
+                setRedemptionType(data.redemptionType || 'qr_code');
                 // Populate scheduling states
                 if (data.startDate) setStartDate(data.startDate.toDate());
                 if (data.endDate) setEndDate(data.endDate.toDate());
@@ -150,15 +160,22 @@ export default function AdminEditOfferPage() {
         
         const offerDocRef = doc(db, "shops", authUser.uid, "offers", offerId);
         try {
-            const dataToUpdate = {
+            const dataToUpdate: Partial<Offer> = {
                 ...offer,
                 imageUrl,
+                redemptionType,
                 updatedAt: serverTimestamp(),
                 startDate: startDate || null,
                 endDate: endDate || null,
                 startTime: startTime || null,
                 endTime: endTime || null,
             };
+
+            if (redemptionType === 'qr_code') {
+                dataToUpdate.couponCode = null;
+                dataToUpdate.websiteUrl = null;
+            }
+
             await updateDoc(offerDocRef, dataToUpdate);
             toast({ title: "Offer Updated", description: "Your changes have been saved."});
             router.push('/admin/offers');
@@ -289,6 +306,42 @@ export default function AdminEditOfferPage() {
                             <Textarea id="terms" name="terms" value={offer.terms || ''} onChange={e => handleFieldChange('terms', e.target.value)} />
                         </div>
                     </div>
+                </CardContent>
+
+                <CardHeader>
+                    <CardTitle>Redemption Method</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                    <div className="space-y-2">
+                        <Label htmlFor="redemptionType">Redemption Type *</Label>
+                        <Select name="redemptionType" value={redemptionType} onValueChange={(value: RedemptionType) => setRedemptionType(value)} required>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select redemption type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="qr_code">In-Store QR Code</SelectItem>
+                                <SelectItem value="online_coupon">Online Coupon Code</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    {redemptionType === 'online_coupon' && (
+                        <div className="space-y-4 pt-4 border-t animate-in fade-in-50">
+                            <div className="space-y-2">
+                                <Label htmlFor="couponCode">Online Coupon Code *</Label>
+                                <Input id="couponCode" name="couponCode" value={offer.couponCode || ''} onChange={(e) => handleFieldChange('couponCode', e.target.value)} placeholder="e.g., SALE20" required />
+                                <p className="text-xs text-muted-foreground">This is the code customers will use on your website.</p>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="websiteUrl">Your Website URL (Optional)</Label>
+                                 <div className="relative">
+                                    <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                    <Input id="websiteUrl" name="websiteUrl" value={offer.websiteUrl || ''} onChange={(e) => handleFieldChange('websiteUrl', e.target.value)} placeholder="https://yourshop.com" className="pl-10" />
+                                </div>
+                                <p className="text-xs text-muted-foreground">The website where customers can use the code.</p>
+                            </div>
+                        </div>
+                    )}
                 </CardContent>
 
                 <CardHeader>

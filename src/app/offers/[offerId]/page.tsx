@@ -7,7 +7,7 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { doc, getDoc, addDoc, collection, serverTimestamp, Timestamp, updateDoc, increment, onSnapshot, orderBy, runTransaction, getDocs, setDoc, query, where, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
-import { Loader2, ArrowLeft, Building, Tag, Info, Phone, Mail, MapPin, User as UserIcon, CheckCircle, Clock, Calendar, Gem, Eye, Star, MessageSquare, Download, Globe, MessageCircle as WhatsAppIcon, IndianRupee, AlertTriangle, Copy } from 'lucide-react';
+import { Loader2, ArrowLeft, Building, Tag, Info, Phone, Mail, MapPin, User as UserIcon, CheckCircle, Clock, Calendar, Gem, Eye, Star, MessageSquare, Download, Globe, MessageCircle as WhatsAppIcon, IndianRupee, AlertTriangle, Copy, Scissors } from 'lucide-react';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
@@ -63,6 +63,9 @@ type Offer = {
     startTime?: string;
     endTime?: string;
     isFeatured?: boolean;
+    redemptionType?: 'qr_code' | 'online_coupon';
+    couponCode?: string;
+    websiteUrl?: string;
 };
 
 type Review = {
@@ -130,7 +133,7 @@ export default function OfferDetailPage() {
     const [isClaiming, setIsClaiming] = useState(false);
     const [isClaimDialogOpen, setIsClaimDialogOpen] = useState(false);
     const [alreadyClaimed, setAlreadyClaimed] = useState(false);
-    const [claimSuccessData, setClaimSuccessData] = useState<{claimId: string, qrCodeUrl: string, offerTitle: string} | null>(null);
+    const [claimSuccessData, setClaimSuccessData] = useState<{claimId: string, qrCodeUrl?: string, couponCode?: string, websiteUrl?: string, offerTitle: string, redemptionType: string} | null>(null);
     const [isReviewDialogOpen, setIsReviewDialogOpen] = useState(false);
     const [isSubmittingReview, setIsSubmittingReview] = useState(false);
     const [reviewRating, setReviewRating] = useState(0);
@@ -248,7 +251,7 @@ export default function OfferDetailPage() {
         };
 
         try {
-            const qrCodeDataUrl = await toDataURL(claimSuccessData.qrCodeUrl);
+            const qrCodeDataUrl = claimSuccessData.qrCodeUrl ? await toDataURL(claimSuccessData.qrCodeUrl) : null;
             let shopLogoDataUrl: string | null = null;
             if (shop.imageUrl) {
                 try {
@@ -257,78 +260,64 @@ export default function OfferDetailPage() {
             }
 
             // --- PDF Content ---
-            // Main Body
             doc.setFillColor(255, 255, 255);
-            doc.setDrawColor(224, 224, 224); // Light grey border
+            doc.setDrawColor(224, 224, 224);
             doc.roundedRect(5, 5, width - 10, height - 10, 5, 5, 'FD');
 
-            // Left Side (Details)
-            const leftSectionX = 15;
-            const leftSectionWidth = 120;
+            doc.setFillColor(primaryColor);
+            doc.rect(5, 5, 10, height - 10, 'F');
             
-            // Shop Logo and Name
-            if (shopLogoDataUrl) {
-                doc.addImage(shopLogoDataUrl, 'PNG', leftSectionX, 12, 12, 12);
-            }
+            const contentX = 20;
+
+            if (shopLogoDataUrl) doc.addImage(shopLogoDataUrl, 'PNG', contentX, 12, 12, 12);
             doc.setFontSize(16);
             doc.setFont('helvetica', 'bold');
             doc.setTextColor(20, 20, 20);
-            doc.text(shop.shopName, shopLogoDataUrl ? leftSectionX + 15 : leftSectionX, 20);
+            doc.text(shop.shopName, shopLogoDataUrl ? contentX + 15 : contentX, 20);
 
-            // Offer Title
             doc.setFontSize(10);
             doc.setFont('helvetica', 'bold');
             doc.setTextColor(primaryColor);
-            doc.text("SPECIAL OFFER", leftSectionX, 35);
+            doc.text("SPECIAL OFFER", contentX, 35);
             
             doc.setFontSize(12);
             doc.setFont('helvetica', 'normal');
             doc.setTextColor(50, 50, 50);
-            doc.text(offer.title, leftSectionX, 42, { maxWidth: leftSectionWidth - 10 });
+            doc.text(offer.title, contentX, 42, { maxWidth: 120 });
             
-            // Horizontal Separator
             doc.setDrawColor(224, 224, 224);
-            doc.line(leftSectionX, 60, leftSectionX + leftSectionWidth, 60);
+            doc.line(contentX, 60, width - 15, 60);
 
-            // Customer and Validity
             doc.setFontSize(8);
             doc.setTextColor(150, 150, 150);
-            doc.text("REDEEMABLE BY", leftSectionX, 68);
-            doc.text("VALID UNTIL", leftSectionX + 60, 68);
+            doc.text("REDEEMABLE BY", contentX, 68);
             
             doc.setFontSize(12);
             doc.setFont('helvetica', 'bold');
             doc.setTextColor(20, 20, 20);
-            doc.text(customerName, leftSectionX, 75);
+            doc.text(customerName, contentX, 75);
             
-            const expiryDate = addHours(new Date(), 24);
-            doc.text(format(expiryDate, 'PPp'), leftSectionX + 60, 75);
+            if (claimSuccessData.redemptionType === 'online_coupon' && claimSuccessData.couponCode) {
+                 doc.text("COUPON CODE:", 90, 68);
+                 doc.setFontSize(16);
+                 doc.text(claimSuccessData.couponCode, 90, 75);
+            } else {
+                doc.text("VALID UNTIL", 90, 68);
+                const expiryDate = addHours(new Date(), 24);
+                doc.text(format(expiryDate, 'PPp'), 90, 75);
+            }
 
-            // Claim ID
             doc.setFontSize(7);
             doc.setTextColor(180, 180, 180);
-            doc.text(`Claim ID: ${claimSuccessData.claimId}`, leftSectionX, 90);
+            doc.text(`Claim ID: ${claimSuccessData.claimId}`, contentX, 90);
 
-            // Right Side (QR Code Stub)
-            const rightSectionX = 145;
-
-            // Perforated line effect
-            doc.setLineDashPattern([2, 1], 0);
-            doc.line(rightSectionX, 5, rightSectionX, height - 5);
-            doc.setLineDashPattern([], 0);
-
-            // QR Code
-            doc.addImage(qrCodeDataUrl, 'PNG', rightSectionX + 10, 25, 50, 50);
-            
-            doc.setFontSize(8);
-            doc.setFont('helvetica', 'bold');
-            doc.setTextColor(100, 100, 100);
-            doc.text("Scan to Redeem", rightSectionX + 22, 80);
-
-            // Ticket notches
-            doc.setFillColor(242, 243, 245); // Background color
-            doc.circle(rightSectionX, 5, 3, 'F');
-            doc.circle(rightSectionX, height - 5, 3, 'F');
+            if (qrCodeDataUrl) {
+                doc.addImage(qrCodeDataUrl, 'PNG', 155, 30, 40, 40);
+                doc.setFontSize(8);
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(100, 100, 100);
+                doc.text("Scan to Redeem", 163, 75);
+            }
 
             doc.save(`Saledup_Voucher_${shop.shopName.replace(/\s/g, '_')}.pdf`);
 
@@ -344,13 +333,11 @@ export default function OfferDetailPage() {
         setIsClaiming(true);
         setAlreadyClaimed(false);
 
-        // Create a unique, predictable ID for the claim
         const claimId = `${offer.id}_${customerPhone}`;
         const newClaimRef = doc(db, 'shops', shopId, 'claims', claimId);
 
         try {
-            // The logic is now handled by the Firestore security rule.
-            // We just attempt to create the document. If it exists, the rule will deny it.
+            const redemptionType = offer.redemptionType || 'qr_code';
             const claimData = {
                 customerName,
                 customerPhone,
@@ -362,11 +349,12 @@ export default function OfferDetailPage() {
                 approximateValue: offer.approximateValue || 0,
                 discountType: offer.discountType,
                 discountValue: offer.discountValue,
+                redemptionType: redemptionType,
+                couponCode: offer.couponCode || null,
             };
             
             await setDoc(newClaimRef, claimData);
 
-            // If creation succeeds, increment the counts and update customer profiles
             await updateDoc(doc(db, 'shops', shopId, 'offers', offer.id), { claimCount: increment(1) });
             
             const shopCustomerRef = doc(db, 'shops', shopId, 'customers', customerPhone);
@@ -387,14 +375,20 @@ export default function OfferDetailPage() {
                 saledupPoints: increment(10)
             }, { merge: true });
             
-
-            // If transaction is successful, show success dialog
-            const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(claimId)}`;
-            setClaimSuccessData({
+            const successPayload: any = {
                 claimId,
-                qrCodeUrl, 
                 offerTitle: offer.title,
-            });
+                redemptionType,
+            };
+
+            if (redemptionType === 'qr_code') {
+                successPayload.qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(claimId)}`;
+            } else {
+                successPayload.couponCode = offer.couponCode;
+                successPayload.websiteUrl = offer.websiteUrl;
+            }
+
+            setClaimSuccessData(successPayload);
             setIsClaimDialogOpen(false);
 
         } catch (error: any) {
@@ -419,15 +413,15 @@ export default function OfferDetailPage() {
         try {
             const reviewsCollectionRef = collection(db, 'shops', shopId!, 'reviews');
             await addDoc(reviewsCollectionRef, {
-                name: customerName, // Use the name from the claim form
-                customerPhone, // Store phone number with review
+                name: customerName,
+                customerPhone,
                 rating: reviewRating,
                 comment: reviewComment,
                 createdAt: serverTimestamp(),
             });
 
             toast({ title: "Review Submitted!", description: "Thank you for your feedback." });
-            setIsReviewDialogOpen(false); // Close review dialog
+            setIsReviewDialogOpen(false);
             setReviewRating(0);
             setReviewComment('');
         } catch (error) {
@@ -461,6 +455,14 @@ export default function OfferDetailPage() {
         }).catch(err => {
             toast({ title: "Error", description: "Could not copy link.", variant: "destructive" });
         });
+    };
+
+    const handleCopyCoupon = () => {
+        if (claimSuccessData?.couponCode) {
+            navigator.clipboard.writeText(claimSuccessData.couponCode).then(() => {
+                toast({ title: "Coupon Code Copied!"});
+            });
+        }
     };
 
 
@@ -728,7 +730,7 @@ export default function OfferDetailPage() {
                             <Button type="button" variant="outline" onClick={() => { setIsClaimDialogOpen(false); setAlreadyClaimed(false); }}>Cancel</Button>
                             <Button type="submit" disabled={isClaiming}>
                                 {isClaiming && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
-                                Get My QR Code
+                                Get My Coupon
                             </Button>
                         </DialogFooter>
                     </form>
@@ -747,37 +749,55 @@ export default function OfferDetailPage() {
                             You have claimed: "{claimSuccessData?.offerTitle}".
                         </DialogDescription>
                     </DialogHeader>
-                    <div className="py-4 flex flex-col items-center gap-4 text-center">
-                        <p className="text-sm text-muted-foreground">Show this QR code at the counter to redeem your offer.</p>
-                        {claimSuccessData?.qrCodeUrl && (
-                            <Image
-                                src={claimSuccessData.qrCodeUrl}
-                                alt="Your unique claim QR code"
-                                width={200}
-                                height={200}
-                                className="rounded-lg border p-2 bg-white"
-                            />
-                        )}
-                        <div className="w-full space-y-2">
-                            <div className="flex gap-2">
-                                <Button variant="secondary" className="flex-1" onClick={handleWhatsAppShare}>
-                                    <WhatsAppIcon className="mr-2 h-4 w-4" />
-                                    Share
-                                </Button>
-                                <Button variant="secondary" className="flex-1" onClick={handleCopyLink}>
-                                    <Copy className="mr-2 h-4 w-4" />
-                                    Copy Link
-                                </Button>
+                    {claimSuccessData?.redemptionType === 'online_coupon' ? (
+                        <div className="py-4 flex flex-col items-center gap-4 text-center">
+                            <p className="text-sm text-muted-foreground">Use this code at checkout on the shop's website.</p>
+                            <div className="w-full p-4 border-2 border-dashed rounded-lg flex items-center justify-center gap-4">
+                                <Scissors className="h-6 w-6 text-muted-foreground" />
+                                <span className="text-2xl font-bold tracking-widest">{claimSuccessData.couponCode}</span>
                             </div>
-                             <Button variant="secondary" className="w-full" onClick={handleDownloadSticker}>
-                                <Download className="mr-2 h-4 w-4" />
-                                Download Coupon
+                             <div className="w-full flex gap-2">
+                                <Button onClick={handleCopyCoupon} className="flex-1">
+                                    <Copy className="mr-2 h-4 w-4" /> Copy Code
+                                </Button>
+                                {claimSuccessData.websiteUrl && (
+                                     <a href={claimSuccessData.websiteUrl} target="_blank" rel="noopener noreferrer" className="flex-1">
+                                        <Button variant="secondary" className="w-full">
+                                            <Globe className="mr-2 h-4 w-4" /> Go to Website
+                                        </Button>
+                                    </a>
+                                )}
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="py-4 flex flex-col items-center gap-4 text-center">
+                            <p className="text-sm text-muted-foreground">Show this QR code at the counter to redeem your offer.</p>
+                            {claimSuccessData?.qrCodeUrl && (
+                                <Image
+                                    src={claimSuccessData.qrCodeUrl}
+                                    alt="Your unique claim QR code"
+                                    width={200}
+                                    height={200}
+                                    className="rounded-lg border p-2 bg-white"
+                                />
+                            )}
+                        </div>
+                    )}
+                    <div className="w-full space-y-2 pt-4 border-t">
+                        <div className="flex gap-2">
+                            <Button variant="secondary" className="flex-1" onClick={handleWhatsAppShare}>
+                                <WhatsAppIcon className="mr-2 h-4 w-4" />
+                                Share
                             </Button>
-                            <Button variant="outline" className="w-full" onClick={() => setIsReviewDialogOpen(true)}>
-                                <MessageSquare className="mr-2 h-4 w-4" />
-                                Leave a Review
+                            <Button variant="secondary" className="flex-1" onClick={handleDownloadSticker}>
+                                <Download className="mr-2 h-4 w-4" />
+                                Download
                             </Button>
                         </div>
+                        <Button variant="outline" className="w-full" onClick={() => setIsReviewDialogOpen(true)}>
+                            <MessageSquare className="mr-2 h-4 w-4" />
+                            Leave a Review
+                        </Button>
                     </div>
                     <DialogFooter>
                         <DialogClose asChild>

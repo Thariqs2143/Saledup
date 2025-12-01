@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Sparkles, Tag, Upload, ArrowLeft, Calendar as CalendarIcon, Clock, IndianRupee } from 'lucide-react';
+import { Loader2, Sparkles, Tag, Upload, ArrowLeft, Calendar as CalendarIcon, Clock, IndianRupee, Globe } from 'lucide-react';
 import { addDoc, collection, doc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
 import { onAuthStateChanged, type User as AuthUser } from 'firebase/auth';
@@ -23,6 +23,8 @@ import { format } from 'date-fns';
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 
+type RedemptionType = 'qr_code' | 'online_coupon';
+
 export default function AdminAddOfferPage() {
     const router = useRouter();
     const { toast } = useToast();
@@ -32,6 +34,9 @@ export default function AdminAddOfferPage() {
     const [uploading, setUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     
+    // New state for redemption type
+    const [redemptionType, setRedemptionType] = useState<RedemptionType>('qr_code');
+
     // New state for scheduling
     const [startDate, setStartDate] = useState<Date | undefined>();
     const [endDate, setEndDate] = useState<Date | undefined>();
@@ -100,6 +105,10 @@ export default function AdminAddOfferPage() {
             claimCount: 0,
             viewCount: 0,
             createdAt: serverTimestamp(),
+            // New redemption fields
+            redemptionType: redemptionType,
+            couponCode: redemptionType === 'online_coupon' ? (formData.get('couponCode') as string) : null,
+            websiteUrl: redemptionType === 'online_coupon' ? (formData.get('websiteUrl') as string) : null,
             // New scheduling fields
             startDate: startDate || null,
             endDate: endDate || null,
@@ -221,6 +230,42 @@ export default function AdminAddOfferPage() {
                         <Textarea id="terms" name="terms" placeholder="e.g., Valid on weekdays only. Cannot be combined with other offers." />
                     </div>
 
+                </CardContent>
+
+                <CardHeader>
+                    <CardTitle>Redemption Method</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                    <div className="space-y-2">
+                        <Label htmlFor="redemptionType">Redemption Type *</Label>
+                        <Select name="redemptionType" value={redemptionType} onValueChange={(value: RedemptionType) => setRedemptionType(value)} required>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select redemption type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="qr_code">In-Store QR Code</SelectItem>
+                                <SelectItem value="online_coupon">Online Coupon Code</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    {redemptionType === 'online_coupon' && (
+                        <div className="space-y-4 pt-4 border-t animate-in fade-in-50">
+                            <div className="space-y-2">
+                                <Label htmlFor="couponCode">Online Coupon Code *</Label>
+                                <Input id="couponCode" name="couponCode" placeholder="e.g., SALE20" required />
+                                <p className="text-xs text-muted-foreground">This is the code customers will use on your website.</p>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="websiteUrl">Your Website URL (Optional)</Label>
+                                 <div className="relative">
+                                    <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                    <Input id="websiteUrl" name="websiteUrl" placeholder="https://yourshop.com" className="pl-10" />
+                                </div>
+                                <p className="text-xs text-muted-foreground">The website where customers can use the code.</p>
+                            </div>
+                        </div>
+                    )}
                 </CardContent>
                 
                  <CardHeader>
