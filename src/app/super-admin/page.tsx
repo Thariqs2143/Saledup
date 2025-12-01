@@ -12,9 +12,11 @@ import { AttendanceChart, type ChartData } from '@/components/attendance-chart';
 import { subDays, startOfDay, format } from 'date-fns';
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function SuperAdminDashboard() {
     const { toast } = useToast();
+    const router = useRouter();
     const [stats, setStats] = useState({
         totalShops: 0,
         totalEmployees: 0,
@@ -25,6 +27,13 @@ export default function SuperAdminDashboard() {
     const [loadingChart, setLoadingChart] = useState(true);
 
     useEffect(() => {
+        // This check ensures we only run this logic on the client-side
+        const isAuthenticated = localStorage.getItem('superAdminAuthenticated');
+        if (isAuthenticated !== 'true') {
+            router.replace('/super-admin/login');
+            return;
+        }
+
         const fetchAllData = async () => {
             setLoading(true);
             setLoadingChart(true);
@@ -68,14 +77,8 @@ export default function SuperAdminDashboard() {
                 });
                 
                 // --- Fetch Chart Data ---
-                
-                // Query for new shops (users collection where role is Admin)
-                const usersQuery = query(
-                    collection(db, 'users'), 
-                    where('joinDate', '>=', format(sevenDaysAgo, 'yyyy-MM-dd')),
-                    where('role', '==', 'Admin')
-                );
-                const usersSnapshot = await getDocs(usersQuery);
+                const newShopsQuery = query(collection(db, 'shops'), where('createdAt', '>=', Timestamp.fromDate(sevenDaysAgo)));
+                const newShopsSnapshot = await getDocs(newShopsQuery);
 
                 const data: { [key: string]: { 'New Shops': number; 'New Employees': number } } = {};
                 for (let i = 6; i >= 0; i--) {
@@ -85,17 +88,17 @@ export default function SuperAdminDashboard() {
                 }
 
                 // Populate new shops data
-                usersSnapshot.forEach(doc => {
-                    const userData = doc.data();
-                    if (userData.joinDate) {
+                newShopsSnapshot.forEach(doc => {
+                    const shopData = doc.data();
+                    if (shopData.createdAt) {
                          try {
-                            const joinDate = new Date(userData.joinDate);
+                            const joinDate = shopData.createdAt.toDate();
                             const dateStr = format(joinDate, 'MMM d');
                             if(data[dateStr]) {
                                 data[dateStr]['New Shops']++;
                             }
                         } catch(e) {
-                             console.error("Invalid user joinDate format:", userData.joinDate);
+                             console.error("Invalid shop createdAt format:", shopData.createdAt);
                         }
                     }
                 });
@@ -126,18 +129,26 @@ export default function SuperAdminDashboard() {
         };
 
         fetchAllData();
-    }, [toast]);
+    }, [toast, router]);
     
+     if (loading) {
+        return (
+            <div className="flex items-center justify-center h-full">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+        )
+    }
+
     return (
     <div className="flex flex-col gap-6 lg:gap-8">
        <div>
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Super Admin Dashboard</h1>
-        <p className="text-muted-foreground">Global overview of the Attendry ecosystem.</p>
+        <p className="text-muted-foreground">Global overview of the Saledup ecosystem.</p>
        </div>
        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
         <Card className="relative overflow-hidden transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br from-indigo-500 to-purple-600 text-white border-none col-span-2 sm:col-span-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-bold text-indigo-100">Total Shop Owners</CardTitle>
+            <CardTitle className="text-sm font-bold text-indigo-100">Total Shops</CardTitle>
             <Store className="h-5 w-5 text-indigo-200" />
           </CardHeader>
           <CardContent>
@@ -230,4 +241,3 @@ export default function SuperAdminDashboard() {
     </div>
   );
 }
-

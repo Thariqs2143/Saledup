@@ -23,32 +23,41 @@ export default function SuperAdminLayout({ children }: PropsWithChildren) {
   const pathname = usePathname();
   const router = useRouter();
   const [hydrated, setHydrated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
+    // This effect runs only on the client
     setHydrated(true);
+    const authStatus = localStorage.getItem('superAdminAuthenticated') === 'true';
+    setIsAuthenticated(authStatus);
   }, []);
 
   useEffect(() => {
     if (!hydrated) {
-      return;
+      return; // Don't do anything until the component is hydrated
     }
-    const isAuthenticated = localStorage.getItem('superAdminAuthenticated');
-    if (pathname !== '/super-admin/login' && isAuthenticated !== 'true') {
+    if (pathname !== '/super-admin/login' && !isAuthenticated) {
       router.replace('/super-admin/login');
     }
-  }, [pathname, router, hydrated]);
+  }, [pathname, router, hydrated, isAuthenticated]);
 
 
   if (pathname === '/super-admin/login') {
     return <>{children}</>;
   }
 
+  // Show a loader until hydration is complete to avoid flashes of content
   if (!hydrated) {
       return (
         <div className="flex items-center justify-center h-screen">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
     );
+  }
+
+  // If hydrated but not authenticated, render nothing to avoid showing the layout before redirect
+  if (!isAuthenticated) {
+    return null;
   }
 
   return (
