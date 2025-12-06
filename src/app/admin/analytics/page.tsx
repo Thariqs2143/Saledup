@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, BarChart3, Image as ImageIcon, Percent, Tag, FileText, Eye, Clock, TrendingUp, IndianRupee, Gift, Users, CheckCircle } from "lucide-react";
+import { Loader2, BarChart3, Image as ImageIcon, Percent, Tag, FileText, Eye, Clock, TrendingUp, IndianRupee, Gift, Users, CheckCircle, Sparkles } from "lucide-react";
 import { collection, query, onSnapshot, orderBy, type Timestamp } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
 import { useToast } from '@/hooks/use-toast';
@@ -41,6 +41,15 @@ type Voucher = {
     createdAt: Timestamp;
     redeemedAt?: Timestamp;
 };
+
+type Suggestion = {
+    icon: React.ElementType;
+    title: string;
+    description: string;
+    ctaLink?: string;
+    ctaText?: string;
+};
+
 
 // --- HELPER MAPPING FOR DISPLAY ---
 const offerTypeDisplayMap: { [key: string]: string } = {
@@ -80,15 +89,18 @@ export default function AdminAnalyticsPage() {
         const dataPromises = [
             new Promise<void>((resolve, reject) => {
                 const q = query(collection(db, 'shops', authUser.uid, 'offers'), orderBy('createdAt', 'desc'));
-                onSnapshot(q, (snap) => { setOffers(snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Offer))); resolve(); }, reject);
+                const unsubscribe = onSnapshot(q, (snap) => { setOffers(snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Offer))); resolve(); }, (err) => reject(err));
+                return unsubscribe;
             }),
             new Promise<void>((resolve, reject) => {
                 const q = query(collection(db, 'shops', authUser.uid, 'claims'));
-                onSnapshot(q, (snap) => { setClaims(snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Claim))); resolve(); }, reject);
+                 const unsubscribe = onSnapshot(q, (snap) => { setClaims(snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Claim))); resolve(); }, (err) => reject(err));
+                 return unsubscribe;
             }),
             new Promise<void>((resolve, reject) => {
                 const q = query(collection(db, 'shops', authUser.uid, 'vouchers'));
-                onSnapshot(q, (snap) => { setVouchers(snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Voucher))); resolve(); }, reject);
+                 const unsubscribe = onSnapshot(q, (snap) => { setVouchers(snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Voucher))); resolve(); }, (err) => reject(err));
+                 return unsubscribe;
             }),
         ];
 
@@ -103,6 +115,14 @@ export default function AdminAnalyticsPage() {
 
     // --- DATA FILTERING & MEMOIZATION ---
     const filteredData = useMemo(() => {
+        if (timeFilter === 'overall') {
+            return {
+                offers: offers,
+                claims: claims,
+                redeemedVouchers: vouchers.filter(v => v.status === 'redeemed'),
+            };
+        }
+
         const now = new Date();
         let start, end;
         switch (timeFilter) {
@@ -132,86 +152,66 @@ export default function AdminAnalyticsPage() {
         };
     }, [offers, claims, vouchers, timeFilter]);
     
-    // --- ANALYTICS CALCULATIONS ---
-    const analytics = useMemo(() => {
-        // Offer-specific calculations
-        let claimsWithImage = 0;
-        let offersWithImageCount = 0;
-        let claimsWithoutImage = 0;
-        let offersWithoutImageCount = 0;
+    // --- ANALYTICS CALCULATIONS & SUGGESTIONS ---
+    const { analytics, suggestions } = useMemo(() => {
+        // --- Calculations ---
+        const totalViews = offers.reduce((sum, offer) => sum + (offer.viewCount || 0), 0);
         
-        const allFilteredOffers = offers.filter(o => o.createdAt);
-        const totalViews = allFilteredOffers.reduce((sum, offer) => sum + (offer.viewCount || 0), 0);
-
         const offerTypeCounts: { [key: string]: { claims: number, count: number } } = {
             percentage: { claims: 0, count: 0 },
             fixed: { claims: 0, count: 0 },
             freebie: { claims: 0, count: 0 },
             other: { claims: 0, count: 0 },
         };
-        
-        const offerMap = new Map(allFilteredOffers.map(o => [o.id, o]));
+        const offerMap = new Map(offers.map(o => [o.id, o]));
 
         filteredData.claims.forEach(claim => {
             const offer = offerMap.get(claim.offerId);
-            if (!offer) return;
-
-            if (offer.imageUrl && offer.imageUrl.includes('cloudinary')) {
-                claimsWithImage++;
-            } else {
-                claimsWithoutImage++;
-            }
-
-            if (offerTypeCounts[offer.discountType]) {
+            if (offer && offerTypeCounts[offer.discountType]) {
                 offerTypeCounts[offer.discountType].claims++;
             }
         });
-        
-        allFilteredOffers.forEach(offer => {
+
+        offers.forEach(offer => {
             if (offerTypeCounts[offer.discountType]) {
                 offerTypeCounts[offer.discountType].count++;
             }
-            if (offer.imageUrl && offer.imageUrl.includes('cloudinary')) {
-                offersWithImageCount++;
-            } else {
-                offersWithoutImageCount++;
-            }
+        });
+        
+        let claimsWithImage = 0;
+        let offersWithImageCount = 0;
+        let claimsWithoutImage = 0;
+        let offersWithoutImageCount = 0;
+
+        claims.forEach(claim => {
+            const offer = offerMap.get(claim.offerId);
+            if (!offer) return;
+            if (offer.imageUrl && offer.imageUrl.includes('cloudinary')) claimsWithImage++;
+            else claimsWithoutImage++;
+        });
+        offers.forEach(offer => {
+            if (offer.imageUrl && offer.imageUrl.includes('cloudinary')) offersWithImageCount++;
+            else offersWithoutImageCount++;
         });
 
         const avgClaimsWithImage = offersWithImageCount > 0 ? claimsWithImage / offersWithImageCount : 0;
         const avgClaimsWithoutImage = offersWithoutImageCount > 0 ? claimsWithoutImage / offersWithoutImageCount : 0;
         const imagePerformanceRatio = avgClaimsWithoutImage > 0 ? ((avgClaimsWithImage - avgClaimsWithoutImage) / avgClaimsWithoutImage) * 100 : (avgClaimsWithImage > 0 ? 100 : 0);
 
-        // Peak time calculation
         const allActivity = [...filteredData.claims.map(c => c.claimedAt), ...filteredData.redeemedVouchers.map(v => v.redeemedAt!)];
         let peakActivityTime = 'N/A';
         if (allActivity.length > 0) {
             const hourCounts: Record<number, number> = Array.from({ length: 24 }, () => 0);
-            allActivity.forEach(item => {
-                if (item) {
-                    const hour = item.toDate().getHours();
-                    hourCounts[hour]++;
-                }
-            });
-
+            allActivity.forEach(item => { if (item) hourCounts[item.toDate().getHours()]++; });
             const maxActivity = Math.max(...Object.values(hourCounts));
             if (maxActivity > 0) {
                 const peakHour = Object.keys(hourCounts).map(Number).find(h => hourCounts[h] === maxActivity) || 0;
-                
-                const formatHour = (h: number) => {
-                    const hour12 = h % 12 === 0 ? 12 : h % 12;
-                    const ampm = h >= 12 ? 'PM' : 'AM';
-                    return `${hour12}${ampm}`;
-                };
-
-                const startHour = peakHour;
-                const endHour = (peakHour + 2);
-                
-                peakActivityTime = `${formatHour(startHour)} - ${formatHour(endHour % 24)}`;
+                const formatHour = (h: number) => h % 12 === 0 ? 12 : h % 12;
+                peakActivityTime = `${formatHour(peakHour)}${peakHour >= 12 ? 'PM' : 'AM'} - ${formatHour((peakHour + 1) % 24)}${(peakHour + 1) >= 12 ? 'PM' : 'AM'}`;
             }
         }
-        
-        return {
+
+        const analyticsResults = {
             totalClaimsAndRedemptions: (filteredData.claims?.length || 0) + (filteredData.redeemedVouchers?.length || 0),
             totalValueRedeemed: (filteredData.redeemedVouchers?.reduce((sum, v) => sum + v.value, 0) || 0) + (filteredData.claims?.reduce((sum, c) => sum + (c.approximateValue || 0), 0) || 0),
             totalViews: totalViews || 0,
@@ -219,8 +219,46 @@ export default function AdminAnalyticsPage() {
             imagePerformanceRatio: imagePerformanceRatio || 0,
             offerTypeCounts: offerTypeCounts,
             peakActivityTime: peakActivityTime,
-            overallConversionRate: totalViews > 0 ? (filteredData.claims.length / totalViews) * 100 : 0,
+            overallConversionRate: totalViews > 0 ? (claims.length / totalViews) * 100 : 0,
         };
+
+        // --- Suggestion Generation ---
+        const generatedSuggestions: Suggestion[] = [];
+        const topType = Object.entries(analyticsResults.offerTypeCounts).reduce((prev, curr) => (curr[1].claims > prev[1].claims ? curr : prev), ['none', {claims: 0, count: 0}])[0];
+        const underperformingOffer = offers.find(o => (o.viewCount || 0) > 20 && o.claimCount === 0);
+
+        if (analyticsResults.imagePerformanceRatio > 10) {
+            generatedSuggestions.push({
+                icon: ImageIcon,
+                title: 'Images Boost Claims!',
+                description: `Your offers with images get ${analyticsResults.imagePerformanceRatio.toFixed(0)}% more claims. Add images to all your offers to maximize engagement.`,
+                ctaLink: "/admin/offers",
+                ctaText: "Update Offers"
+            });
+        }
+        
+        if (topType !== 'none' && analyticsResults.offerTypeCounts[topType].claims > 0) {
+             generatedSuggestions.push({
+                icon: TrendingUp,
+                title: 'Double Down on What Works',
+                description: `Your '${topType.charAt(0).toUpperCase() + topType.slice(1)}' offers are the most popular. Consider creating more deals like this to attract customers.`,
+                ctaLink: "/admin/offers/add",
+                ctaText: "Create Similar Offer"
+            });
+        }
+
+        if (underperformingOffer) {
+             generatedSuggestions.push({
+                icon: Percent,
+                title: 'Review Underperforming Offer',
+                description: `Your offer "${underperformingOffer.title}" has views but no claims. Try making the deal more attractive or adding a compelling image.`,
+                ctaLink: `/admin/offers/${underperformingOffer.id}`,
+                ctaText: "Edit Offer"
+            });
+        }
+
+        return { analytics: analyticsResults, suggestions: generatedSuggestions };
+        
     }, [offers, claims, vouchers, filteredData]);
     
     // --- CHART DATA PREPARATION ---
@@ -266,10 +304,11 @@ export default function AdminAnalyticsPage() {
                         <h1 className="text-3xl font-bold tracking-tight">Shop Analytics</h1>
                         <p className="text-muted-foreground">Discover what works best for your customers.</p>
                     </div>
-                    <TabsList className="grid w-full sm:w-auto grid-cols-3">
+                    <TabsList className="grid w-full sm:w-auto grid-cols-4">
                         <TabsTrigger value="today">Today</TabsTrigger>
                         <TabsTrigger value="weekly">This Week</TabsTrigger>
                         <TabsTrigger value="monthly">This Month</TabsTrigger>
+                        <TabsTrigger value="overall">Overall</TabsTrigger>
                     </TabsList>
                 </div>
             </Tabs>
@@ -302,7 +341,7 @@ export default function AdminAnalyticsPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="text-4xl font-bold"><AnimatedCounter to={analytics.totalViews} /></div>
-                         <p className="text-xs text-green-100 mt-1">Offer page views</p>
+                         <p className="text-xs text-green-100 mt-1">Total offer page views</p>
                     </CardContent>
                 </Card>
                 <Card className="relative overflow-hidden transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br from-rose-500 to-red-600 text-white border-none">
@@ -312,11 +351,38 @@ export default function AdminAnalyticsPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="text-4xl font-bold"><AnimatedCounter to={analytics.totalClaims} /></div>
-                         <p className="text-xs text-rose-100 mt-1">Offers claimed by customers</p>
+                         <p className="text-xs text-rose-100 mt-1">Total offers claimed</p>
                     </CardContent>
                 </Card>
             </div>
             
+            {suggestions.length > 0 && (
+                <Card className="bg-primary/5 border-primary/20">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><Sparkles className="text-primary"/> Smart Suggestions</CardTitle>
+                        <CardDescription>Actionable insights to help you grow your business.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {suggestions.map((suggestion, index) => (
+                            <div key={index} className="bg-background/80 p-4 rounded-lg border flex flex-col">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-primary/10 rounded-full">
+                                        <suggestion.icon className="h-5 w-5 text-primary" />
+                                    </div>
+                                    <h3 className="font-bold">{suggestion.title}</h3>
+                                </div>
+                                <p className="text-sm text-muted-foreground mt-3 flex-1">{suggestion.description}</p>
+                                {suggestion.ctaLink && (
+                                    <Button asChild size="sm" className="mt-4 w-full">
+                                        <Link href={suggestion.ctaLink}>{suggestion.ctaText}</Link>
+                                    </Button>
+                                )}
+                            </div>
+                        ))}
+                    </CardContent>
+                </Card>
+            )}
+
             <Tabs defaultValue="offers" className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="offers"><Gift className="mr-2 h-4 w-4"/> Offers</TabsTrigger>
@@ -329,14 +395,14 @@ export default function AdminAnalyticsPage() {
                         <Card><CardHeader><CardTitle>Image Impact</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-blue-500">{analytics.imagePerformanceRatio >= 0 ? '+' : ''}{analytics.imagePerformanceRatio.toFixed(0)}%</p><p className="text-xs text-muted-foreground">Claim rate for offers with images.</p></CardContent></Card>
                         <Card><CardHeader><CardTitle>Most Popular</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-green-500">{offerTypeDisplayMap[mostPopularType]}</p><p className="text-xs text-muted-foreground">This offer type gets the most claims.</p></CardContent></Card>
                         <Card><CardHeader><CardTitle>Conversion Rate</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-purple-500">{analytics.overallConversionRate.toFixed(1)}%</p><p className="text-xs text-muted-foreground">Views that turned into claims.</p></CardContent></Card>
-                        <Card><CardHeader><CardTitle>Peak Activity</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-orange-500">{analytics.peakActivityTime}</p><p className="text-xs text-muted-foreground">Hour in peak actions</p></CardContent></Card>
+                        <Card><CardHeader><CardTitle>Peak Activity</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-orange-500">{analytics.peakActivityTime}</p><p className="text-xs text-muted-foreground">Hour for peak actions</p></CardContent></Card>
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
                         <Card className="lg:col-span-3">
                             <CardHeader>
                                 <CardTitle>Claims by Offer Type</CardTitle>
-                                <CardDescription>Breakdown of claims for each discount type.</CardDescription>
+                                <CardDescription>Breakdown of claims for each discount type this period.</CardDescription>
                             </CardHeader>
                             <CardContent>
                                 {offerTypeChartData.length > 0 ? (
