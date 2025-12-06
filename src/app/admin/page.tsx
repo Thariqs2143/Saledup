@@ -176,41 +176,7 @@ export default function AdminDashboard() {
     };
 }, [activeTab, offers, claims]);
 
- const innovationScore = useMemo(() => {
-    let score = 0;
-    // Offer Activity (max 20)
-    if (offers.length > 0) score += 5;
-    if (offers.length > 2) score += 10;
-    if (offers.length > 5) score += 5;
-
-    // Offer Richness (max 20)
-    const hasImage = offers.some(o => o.imageUrl && !o.imageUrl.includes('placehold.co'));
-    if (hasImage) score += 10;
-    const discountTypes = new Set(offers.map(o => o.discountType));
-    if (discountTypes.size > 1) score += 5;
-    if (discountTypes.size > 2) score += 5;
-
-    // Customer Engagement (max 30)
-    const totalViews = offers.reduce((sum, o) => sum + (o.viewCount || 0), 0);
-    const totalClaims = offers.reduce((sum, o) => sum + (o.claimCount || 0), 0);
-    const conversionRate = totalViews > 0 ? (totalClaims / totalViews) * 100 : 0;
-    if (conversionRate > 1) score += 5;
-    if (conversionRate > 5) score += 10;
-    if (conversionRate > 10) score += 15;
-    
-    // Advanced Features (max 15)
-    const hasScheduledOffer = offers.some(o => o.startDate || o.startTime);
-    if(hasScheduledOffer) score += 15;
-
-    // Customer Feedback (max 15)
-    if (reviews.length > 0) score += 5;
-    if (reviews.length > 5) score += 5;
-    if (reviews.length > 10) score += 5;
-
-    return Math.min(100, score);
-  }, [offers, reviews]);
-
-  const totalClaims = useMemo(() => filteredData.claims.length, [filteredData.claims]);
+ const totalClaims = useMemo(() => filteredData.claims.length, [filteredData.claims]);
   const totalOffers = useMemo(() => filteredData.offers.length, [filteredData.offers]);
   const activeOffers = useMemo(() => offers.filter(o => o.isActive).length, [offers]);
   const expiredOffers = useMemo(() => offers.filter(o => !o.isActive).length, [offers]);
@@ -461,29 +427,22 @@ export default function AdminDashboard() {
        </Card>
        <Card className="transform-gpu transition-all duration-300 ease-out hover:shadow-lg border-2 border-foreground dark:border-foreground hover:border-primary">
             <CardHeader>
-                <div className="flex items-center justify-between">
-                    <CardTitle className="font-bold">Innovation Score</CardTitle>
-                    <div className="text-2xl font-bold text-primary">{innovationScore}/100</div>
-                </div>
-                <CardDescription className="font-bold">How well you're using Saledup features.</CardDescription>
+                <CardTitle className="font-bold">Quick Actions</CardTitle>
+                <CardDescription className="font-bold">Get things done faster.</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-                <Progress value={innovationScore} className="h-3" />
-                <p className="text-xs text-muted-foreground">Your score is based on offer variety, images, scheduling, and customer engagement. Keep exploring features to boost it!</p>
-                <div className="grid grid-cols-2 gap-4 pt-4">
-                    <Link href="/admin/offers/add">
-                        <Card className="h-full flex flex-col items-center justify-center p-4 gap-2 transition-all hover:shadow-md hover:border-primary border-2 border-foreground">
-                            <Tag className="h-6 w-6 text-primary"/>
-                            <span className="text-center text-sm font-bold">Create Offer</span>
-                        </Card>
-                    </Link>
-                    <Link href="/admin/qr-code">
-                        <Card className="h-full flex flex-col items-center justify-center p-4 gap-2 transition-all hover:shadow-md hover:border-primary border-2 border-foreground">
-                            <QrCode className="h-6 w-6 text-primary"/>
-                            <span className="text-center text-sm font-bold">Get Shop QR</span>
-                        </Card>
-                    </Link>
-                </div>
+            <CardContent className="grid grid-cols-2 gap-4">
+                <Link href="/admin/offers/add">
+                    <Card className="h-full flex flex-col items-center justify-center p-4 gap-2 transition-all hover:shadow-md hover:border-primary border-2 border-foreground">
+                        <Tag className="h-6 w-6 text-primary"/>
+                        <span className="text-center text-sm font-bold">Create Offer</span>
+                    </Card>
+                </Link>
+                <Link href="/admin/qr-code">
+                    <Card className="h-full flex flex-col items-center justify-center p-4 gap-2 transition-all hover:shadow-md hover:border-primary border-2 border-foreground">
+                        <QrCode className="h-6 w-6 text-primary"/>
+                        <span className="text-center text-sm font-bold">Get Shop QR</span>
+                    </Card>
+                </Link>
             </CardContent>
         </Card>
       </div>
