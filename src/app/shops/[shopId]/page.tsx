@@ -302,7 +302,7 @@ export default function ShopOffersPage() {
                                 </div>
                             )}
                             <div className="flex items-start gap-4">
-                                <MapPin className="h-5 w-5 mt-1 text-muted-foreground"/>
+                                <MapPin className="h-5 w-5 mt-1 text-muted-foreground shrink-0"/>
                                 <span className="font-medium">{shop.address}</span>
                             </div>
                         </CardContent>
