@@ -197,7 +197,7 @@ export default function ShopOffersPage() {
 
     return (
     <div className="flex flex-col min-h-screen bg-muted/30">
-        <div className="relative w-full h-48 bg-muted">
+        <div className="relative w-full aspect-video max-h-96 bg-muted">
             {shop.coverImageUrl && (
                 <Image
                     src={shop.coverImageUrl}
@@ -313,4 +313,3 @@ export default function ShopOffersPage() {
     </div>
     );
 }
-
