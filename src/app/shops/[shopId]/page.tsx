@@ -7,7 +7,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { doc, getDoc, collection, query, where, getDocs, onSnapshot, orderBy, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Building, Clock, Loader2, Mail, MapPin, Phone, Share2, Star, Tag, MessageCircle as WhatsAppIcon } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
