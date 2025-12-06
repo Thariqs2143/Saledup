@@ -154,7 +154,11 @@ export default function ShopOffersPage() {
         return () => unsubscribeReviews();
     }, [shopId, router, toast]);
 
-    const activeOffers = useMemo(() => allOffers.filter(isOfferCurrentlyActive), [allOffers]);
+    const activeOffers = useMemo(() => {
+        return allOffers
+            .filter(isOfferCurrentlyActive)
+            .sort((a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0));
+    }, [allOffers]);
 
     const averageRating = useMemo(() => {
         if (reviews.length === 0) return 0;
