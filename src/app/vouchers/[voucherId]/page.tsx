@@ -8,9 +8,7 @@ import { db } from '@/lib/firebase';
 import { Loader2, CheckCircle, XCircle, Clock, Building, User, Calendar, Gift } from 'lucide-react';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { LandingFooter } from '@/components/landing-footer';
-import { LandingHeader } from '@/components/landing-header';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 
@@ -204,13 +202,9 @@ export default function PublicVoucherViewPage() {
 
     return (
         <div className="flex flex-col min-h-screen bg-muted/30">
-            <LandingHeader />
             <main className="flex-1 flex items-center justify-center py-12 px-4">
                 <MainContent />
             </main>
-            <LandingFooter />
         </div>
     )
 }
-
-    
