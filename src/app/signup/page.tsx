@@ -246,6 +246,7 @@ export default function SignupPage() {
                             {loading && <Loader2 className="mr-2 animate-spin" />}
                         Sign Up
                         </Button>
+                        {/*
                         <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={loading || googleLoading}>
                         {googleLoading ? (
                             <Loader2 className="mr-2 animate-spin" />
@@ -259,6 +260,7 @@ export default function SignupPage() {
                         )}
                         Sign up with Google
                         </Button>
+                        */}
                     </form>
                     <div className="mt-4 text-center text-sm">
                         Already have an account?{' '}
@@ -366,6 +368,7 @@ export default function SignupPage() {
                                 {loading && <Loader2 className="mr-2 animate-spin" />}
                             Sign Up
                             </Button>
+                            {/*
                             <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={loading || googleLoading}>
                             {googleLoading ? (
                                 <Loader2 className="mr-2 animate-spin" />
@@ -379,6 +382,7 @@ export default function SignupPage() {
                             )}
                             Sign up with Google
                             </Button>
+                            */}
                         </form>
                         <div className="mt-4 text-center text-sm">
                             Already have an account?{' '}

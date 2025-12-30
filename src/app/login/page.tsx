@@ -176,6 +176,7 @@ export default function LoginPage() {
                       {loading && <Loader2 className="mr-2 animate-spin" />}
                       Login
                       </Button>
+                      {/* 
                       <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={loading || googleLoading}>
                       {googleLoading ? (
                           <Loader2 className="mr-2 animate-spin" />
@@ -189,6 +190,7 @@ export default function LoginPage() {
                       )}
                       Login with Google
                       </Button>
+                      */}
                   </form>
                   <div className="mt-4 text-center text-sm">
                       Don&apos;t have an account?{' '}
@@ -276,6 +278,7 @@ export default function LoginPage() {
                         {loading && <Loader2 className="mr-2 animate-spin" />}
                         Login
                         </Button>
+                        {/*
                         <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={loading || googleLoading}>
                         {googleLoading ? (
                             <Loader2 className="mr-2 animate-spin" />
@@ -289,6 +292,7 @@ export default function LoginPage() {
                         )}
                         Login with Google
                         </Button>
+                        */}
                     </form>
                     <div className="mt-4 text-center text-sm">
                         Don&apos;t have an account?{' '}
