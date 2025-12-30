@@ -1,8 +1,8 @@
 
 {
-    "name": "Attendry: Effortless Attendance",
-    "short_name": "Attendry",
-    "description": "The smart and simple way to track staff attendance.",
+    "name": "Saledup: The Future of Local Commerce",
+    "short_name": "Saledup",
+    "description": "Supercharge your business with easy integrations, powerful dashboards, and more.",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#ffffff",
